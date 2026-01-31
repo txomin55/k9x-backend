@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: k9x-backend
+  banner:
+    location: classpath:banner.txt
+  profiles:
+    active: '@spring.profiles.active@'
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration
+      - org.springframework.boot.mongodb.autoconfigure.MongoReactiveAutoConfiguration
+      - org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration
+      - org.springframework.boot.data.mongodb.autoconfigure.DataMongoReactiveAutoConfiguration
+      - org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration
+      - org.springframework.boot.data.mongodb.autoconfigure.DataMongoReactiveRepositoriesAutoConfiguration
+
+server:
+  servlet:
+    context-path: /
+  port: 4000
+
+k9x-backend:
+  timeoutValue: 5000
+  threadPool: 10
+  info:
+    app:
+      name: '@project.artifactId@'
+      version: '@project.version@'
+  deploy:
+    tech: in-memory
+  auth:
+    mocked: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

@@ -1,0 +1,8 @@
+spring:
+  mongodb:
+    authentication-database: admin
+    password: k9x-backend-password
+    username: k9x-backend-user
+    host: 18.194.82.207
+    port: 27017
+    database: k9x-backend

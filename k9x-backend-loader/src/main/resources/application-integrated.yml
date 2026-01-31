@@ -1,0 +1,5 @@
+spring:
+  mongodb:
+    host: localhost
+    port: 27017
+    database: k9x-backend

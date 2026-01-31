@@ -1,0 +1,11 @@
+${AnsiColor.DEFAULT}________________________________
+|  Version: ${k9x-backend.info.app.version}               |
+|  Spring Boot Version: ${AnsiColor.RED}${spring-boot.version}${AnsiColor.DEFAULT}   |
+|  App Name: ${k9x-backend.info.app.name} |
+|  Profile: ${AnsiColor.YELLOW} ${spring.profiles.active} ${AnsiColor.DEFAULT}           |
+--------------------------------
+            ^__^
+            (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||

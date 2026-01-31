@@ -1,0 +1,9 @@
+spring:
+  mongodb:
+    host: localhost
+    port: 27017
+    database: k9x-backend
+
+k9x-backend:
+  auth:
+    mocked: true
