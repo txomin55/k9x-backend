@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.net.ConnectException;
-import java.util.Date;
 import java.util.Locale;
 
 @ControllerAdvice
@@ -32,8 +31,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     final ResponseEntity<CustomError> handleCustomException(DomainException ex, Locale locale) {
 
-        CustomError error = new CustomError(ex.getId(),
-                messageSource.getMessage(ex.getId(), ex.getArgs(), locale), ex.getDate(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+        CustomError error = new CustomError(
+                messageSource.getMessage(ex.getId(), ex.getArgs(), locale), HttpStatus.INTERNAL_SERVER_ERROR.value());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -41,8 +40,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     final ResponseEntity<CustomError> handleUnauthorizedResourceException(UnauthorizedResourceException ex, Locale locale) {
 
-        CustomError error = new CustomError(ex.getId(),
-                messageSource.getMessage(ex.getId(), ex.getArgs(), locale), ex.getDate(), HttpStatus.UNAUTHORIZED.value());
+        CustomError error = new CustomError(
+                messageSource.getMessage(ex.getId(), ex.getArgs(), locale), HttpStatus.UNAUTHORIZED.value());
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
@@ -51,8 +50,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     final ResponseEntity<CustomError> handleUnauthorizedResourceStateTransitionException(
             UnauthorizedResourceStateTransitionException ex, Locale locale) {
 
-        CustomError error = new CustomError(ex.getId(),
-                messageSource.getMessage(ex.getId(), ex.getArgs(), locale), ex.getDate(), HttpStatus.UNAUTHORIZED.value());
+        CustomError error = new CustomError(
+                messageSource.getMessage(ex.getId(), ex.getArgs(), locale), HttpStatus.UNAUTHORIZED.value());
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
@@ -60,8 +59,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     final ResponseEntity<CustomError> handleInterruptedException(Locale locale) {
 
-        CustomError error = new CustomError(String.valueOf(HttpStatus.REQUEST_TIMEOUT.value()),
-                messageSource.getMessage("error.request_timeout", new String[]{timeoutValue}, locale), new Date().getTime(), HttpStatus.REQUEST_TIMEOUT.value());
+        CustomError error = new CustomError(
+                messageSource.getMessage("error.request_timeout", new String[]{timeoutValue}, locale), HttpStatus.REQUEST_TIMEOUT.value());
         return new ResponseEntity<>(error, HttpStatus.REQUEST_TIMEOUT);
     }
 
@@ -69,9 +68,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     final ResponseEntity<CustomError> handleConnectException(Locale locale) {
 
-        CustomError error = new CustomError(String.valueOf(HttpStatus.NO_CONTENT.value()),
+        CustomError error = new CustomError(
                 messageSource.getMessage("error.module_not_available", null, locale),
-                new Date().getTime(), HttpStatus.NO_CONTENT.value());
+                HttpStatus.NO_CONTENT.value());
         return new ResponseEntity<>(error, HttpStatus.NO_CONTENT);
     }
 }

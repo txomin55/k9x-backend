@@ -5,9 +5,7 @@ import com.k9x.application.dog.dto.DogDTO;
 import com.k9x.application.dog.port.GetDogPersistencePort;
 import com.k9x.domain.commons.exception.UnauthorizedResourceException;
 import com.k9x.domain.dog.model.Dog;
-import org.springframework.stereotype.Service;
 
-@Service
 public class GetDogServiceCase {
 
     private final GetDogPersistencePort getDogPersistencePort;

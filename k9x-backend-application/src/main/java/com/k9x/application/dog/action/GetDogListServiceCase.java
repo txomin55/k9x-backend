@@ -3,11 +3,9 @@ package com.k9x.application.dog.action;
 import com.k9x.application.dog.dto.DogListDTO;
 import com.k9x.application.dog.port.GetDogListPersistencePort;
 import com.k9x.domain.dog.model.Dog;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public class GetDogListServiceCase {
 
     private final GetDogListPersistencePort getDogListPersistencePort;

@@ -7,10 +7,9 @@ import com.k9x.application.authentication.port.JwtTokenCacheManagerPort;
 import com.k9x.application.authentication.port.ValidateIdTokenPort;
 import com.k9x.domain.commons.exception.UnauthorizedResourceException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +20,6 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.Date;
 
-@Service
 public class LoginServiceCase {
 
     private static final String ISSUER = "k9x-backend";
@@ -34,10 +32,10 @@ public class LoginServiceCase {
     public LoginServiceCase(
             ValidateIdTokenPort validateIdTokenPort,
             JwtTokenCacheManagerPort jwtTokenCacheManagerPort,
-            @Value("${k9x-backend.security.jwt-secret}") String jwtSecret,
-            @Value("${k9x-backend.security.jwt-public-jwk-n}") String jwtPublicJwkN,
-            @Value("${k9x-backend.security.jwt-public-jwk-e}") String jwtPublicJwkE,
-            @Value("${k9x-backend.security.jwt-cache-ttl-minutes}") long ttlMinutes
+            String jwtSecret,
+            String jwtPublicJwkN,
+            String jwtPublicJwkE,
+            long ttlMinutes
     ) {
         this.validateIdTokenPort = validateIdTokenPort;
         this.jwtTokenCacheManagerPort = jwtTokenCacheManagerPort;
@@ -52,7 +50,12 @@ public class LoginServiceCase {
             throw new UnauthorizedResourceException();
         }
 
-        Claims tokenClaims = parseGoogleIdToken(command.idToken());
+        Claims tokenClaims;
+        try {
+            tokenClaims = parseGoogleIdToken(command.idToken());
+        } catch (ExpiredJwtException ex) {
+            throw new UnauthorizedResourceException();
+        }
         String userEmail = tokenClaims.get("email").toString();
 
         AuthTokenDTO cachedData = jwtTokenCacheManagerPort.retrieveEntry(userEmail);
@@ -92,7 +95,7 @@ public class LoginServiceCase {
             );
             return KeyFactory.getInstance("RSA").generatePublic(spec);
         } catch (Exception ex) {
-            throw new IllegalArgumentException("Invalid RSA JWK format.", ex);
+            throw new UnauthorizedResourceException();
         }
     }
 
