@@ -3,22 +3,21 @@ package com.k9x.infrastructure.out.cache.authentication;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.k9x.application.authentication.dto.AuthTokenDTO;
 import com.k9x.application.authentication.port.JwtTokenCacheManagerPort;
-import com.k9x.infrastructure.in.rest.configuration.session.jwt.JwtAuthorizationExtractor;
-import org.springframework.beans.factory.annotation.Value;
+import com.k9x.infrastructure.in.rest.configuration.session.AuthorizationExtractor;
 import org.springframework.stereotype.Service;
 
 @Service
 public class JwtTokenCacheManagerAdapter implements JwtTokenCacheManagerPort {
 
     private final Cache<String, String> authTokenCache;
-    private final JwtAuthorizationExtractor authorizationExtractor;
+    private final AuthorizationExtractor authorizationExtractor;
 
     public JwtTokenCacheManagerAdapter(
             Cache<String, String> authTokenCache,
-            @Value("${k9x-backend.security.jwt-secret}") String jwtSecret
+            AuthorizationExtractor authorizationExtractor
     ) {
         this.authTokenCache = authTokenCache;
-        this.authorizationExtractor = new JwtAuthorizationExtractor(jwtSecret);
+        this.authorizationExtractor = authorizationExtractor;
     }
 
     @Override
