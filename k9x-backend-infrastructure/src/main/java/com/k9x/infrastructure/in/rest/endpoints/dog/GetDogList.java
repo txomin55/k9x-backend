@@ -2,7 +2,7 @@ package com.k9x.infrastructure.in.rest.endpoints.dog;
 
 import com.k9x.application.authentication.dto.AuthTokenDTO;
 import com.k9x.application.dog.action.GetDogListServiceCase;
-import com.k9x.application.dog.dto.DogListDTO;
+import com.k9x.application.dog.dto.DogDTO;
 import com.k9x.oas.stub.api.GetDogsApiDelegate;
 import com.k9x.oas.stub.model.GetDogListWeb;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ public class GetDogList implements GetDogsApiDelegate {
 
     @Override
     public ResponseEntity<List<GetDogListWeb>> getDogs() {
-        List<DogListDTO> dogs = getDogListService.getDogs(userDetails.getSubject());
+        List<DogDTO> dogs = getDogListService.getDogs(userDetails.getSubject());
 
         List<GetDogListWeb> mappedDogs = dogs.stream()
                 .map(dog -> new GetDogListWeb(dog.id(), dog.name(), dog.image()))

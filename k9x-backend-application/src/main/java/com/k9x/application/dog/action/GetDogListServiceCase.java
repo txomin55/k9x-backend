@@ -1,6 +1,6 @@
 package com.k9x.application.dog.action;
 
-import com.k9x.application.dog.dto.DogListDTO;
+import com.k9x.application.dog.dto.DogDTO;
 import com.k9x.application.dog.port.GetDogListPersistencePort;
 import com.k9x.domain.dog.model.Dog;
 
@@ -14,10 +14,10 @@ public class GetDogListServiceCase {
         this.getDogListPersistencePort = getDogListPersistencePort;
     }
 
-    public List<DogListDTO> getDogs(String owner) {
+    public List<DogDTO> getDogs(String owner) {
         List<Dog> dogs = getDogListPersistencePort.getDogs(owner);
 
-        return dogs.stream().map(dog -> new DogListDTO(dog.getId(), dog.getName(), dog.getImage(), dog.getOwner()))
+        return dogs.stream().map(dog -> new DogDTO(dog.getId(), dog.getName(), dog.getImage(), dog.getOwner()))
                 .toList();
     }
 }
