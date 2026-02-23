@@ -19,7 +19,7 @@ import java.util.Optional;
 public class MongoClient extends AbstractMongoClientConfiguration {
 
     @Value("${spring.mongodb.authentication-database}")
-    private Optional<String> authenticationDatabase;
+    private String authenticationDatabase;
 
     @Value("${spring.mongodb.host}")
     private String mongoHost;
@@ -31,24 +31,20 @@ public class MongoClient extends AbstractMongoClientConfiguration {
     private String mongoDatabaseName;
 
     @Value("${spring.mongodb.username}")
-    private Optional<String> username;
+    private String username;
 
     @Value("${spring.mongodb.password}")
-    private Optional<String> password;
+    private String password;
 
     @Override
     public com.mongodb.client.MongoClient mongoClient() {
-        String user = username.orElseThrow(() ->
-                new IllegalStateException("Mongo username is required when authenticationDatabase is set"));
-        String pass = password.orElseThrow(() ->
-                new IllegalStateException("Mongo password is required when authenticationDatabase is set"));
         return MongoClients.create(
                 MongoClientSettings.builder()
                         .applicationName(mongoDatabaseName)
                         .credential(MongoCredential.createCredential(
-                                user,
-                                authenticationDatabase.get(),
-                                pass.toCharArray()
+                                username,
+                                authenticationDatabase,
+                                password.toCharArray()
                         ))
                         .applyToClusterSettings(builder ->
                                 builder.hosts(Collections.singletonList(new ServerAddress(mongoHost, mongoPort))))
