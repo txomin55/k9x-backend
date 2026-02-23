@@ -1,6 +1,5 @@
 dependencies {
     implementation(project(":k9x-backend-domain"))
-    implementation("io.jsonwebtoken:jjwt-api:0.13.0")
 
     compileOnly("org.springframework:spring-context")
 

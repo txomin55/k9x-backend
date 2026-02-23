@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,12 +44,15 @@ public class GoogleValidateIdTokenAdapter implements ValidateIdTokenPort {
     }
 
     @Override
-    public boolean isValid(String idToken) {
+    public Optional<String> getEmailIfValid(String idToken) {
         try {
             GoogleIdToken token = verifier.verify(idToken);
-            return token != null;
+            if (token == null || token.getPayload() == null) {
+                return Optional.empty();
+            }
+            return Optional.ofNullable(token.getPayload().getEmail());
         } catch (GeneralSecurityException | IOException ex) {
-            return false;
+            return Optional.empty();
         }
     }
 }
