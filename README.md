@@ -43,9 +43,40 @@ appropriate locale. It is one more layer of validation, since the frontend also 
 
 TODO
 
-## To take into account with OAUTH2
+## Authentication (Google + JWT)
 
-TODO
+The login flow uses a Google ID token (OIDC) and then issues a backend JWT:
+
+- The client sends a Google `id_token` to `/login`.
+- `GoogleValidateIdTokenAdapter` verifies the token against the configured Google
+  client IDs (`k9x-backend.security.google-client-ids`) and extracts the email.
+- The backend generates its own JWT with `JwtTokenGeneratorAdapter` using
+  `k9x-backend.security.jwt-secret`. The JWT includes `sub` (email), `iss` (`k9x-backend`),
+  `aud` (`k9x-backend`), `iat`, `exp`, and a custom `version` claim.
+
+## Security filter (JWT token validation)
+
+The `Auth` filter protects all `/api/**` routes and expects a `Bearer` token in
+the `Authorization` header:
+
+- The filter parses the JWT using the `AuthorizationExtractor`.
+- It validates the token against the Caffeine cache:
+  - The cache stores the latest JWT per user email.
+  - If the cached token does not exist, or the token data (subject, issuer,
+    audience) does not match, the request is rejected.
+  - The `version` claim must match the cached token `version`.
+  - The `iat` timestamp is checked against `k9x-backend.security.jwt-cache-ttl-minutes`.
+
+## JWT cache and versioning (Caffeine)
+
+The JWT cache is a Caffeine in-memory cache configured in
+`AuthTokenCacheConfiguration`:
+
+- On login, the system checks the cached token by email. If a token exists, the
+  `version` is incremented and a new JWT is generated; if none exists, `version`
+  starts at `0`.
+- The new JWT replaces the cached entry. This makes old tokens invalid because
+  the filter enforces that the cached token `version` matches the token `version`.
 
 ## CORS
 
