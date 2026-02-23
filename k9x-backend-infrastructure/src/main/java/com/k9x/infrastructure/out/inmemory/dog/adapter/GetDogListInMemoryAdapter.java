@@ -1,8 +1,8 @@
 package com.k9x.infrastructure.out.inmemory.dog.adapter;
 
+import com.k9x.application.dog.port.GetDogListPersistencePort;
 import com.k9x.domain.commons.entitystatemachine.EntityStateMachine;
 import com.k9x.domain.dog.model.Dog;
-import com.k9x.domain.dog.port.GetDogListPersistencePort;
 import com.k9x.infrastructure.out.inmemory.dog.entity.DogEntity;
 
 import java.util.List;

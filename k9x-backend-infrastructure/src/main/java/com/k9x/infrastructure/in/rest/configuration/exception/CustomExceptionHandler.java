@@ -1,6 +1,8 @@
 package com.k9x.infrastructure.in.rest.configuration.exception;
 
 import com.k9x.domain.commons.exception.DomainException;
+import com.k9x.domain.commons.exception.UnauthorizedResourceException;
+import com.k9x.domain.commons.exception.UnauthorizedResourceStateTransitionException;
 import com.k9x.infrastructure.in.rest.configuration.exception.error.CustomError;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -33,6 +35,25 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         CustomError error = new CustomError(ex.getId(),
                 messageSource.getMessage(ex.getId(), ex.getArgs(), locale), ex.getDate(), HttpStatus.INTERNAL_SERVER_ERROR.value());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(UnauthorizedResourceException.class)
+    @ResponseBody
+    final ResponseEntity<CustomError> handleUnauthorizedResourceException(UnauthorizedResourceException ex, Locale locale) {
+
+        CustomError error = new CustomError(ex.getId(),
+                messageSource.getMessage(ex.getId(), ex.getArgs(), locale), ex.getDate(), HttpStatus.UNAUTHORIZED.value());
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UnauthorizedResourceStateTransitionException.class)
+    @ResponseBody
+    final ResponseEntity<CustomError> handleUnauthorizedResourceStateTransitionException(
+            UnauthorizedResourceStateTransitionException ex, Locale locale) {
+
+        CustomError error = new CustomError(ex.getId(),
+                messageSource.getMessage(ex.getId(), ex.getArgs(), locale), ex.getDate(), HttpStatus.UNAUTHORIZED.value());
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(InterruptedException.class)

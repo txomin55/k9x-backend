@@ -1,4 +1,4 @@
-package com.k9x.infrastructure.in.rest.configuration.cors;
+package com.k9x.infrastructure.in.rest.configuration.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,11 +12,11 @@ import java.util.Set;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class CorsFilter implements Filter {
+public class Cors implements Filter {
 
     private static final Set<String> ALLOWED_ORIGINS = Set.of(
-        "http://localhost:4000",
-        "http://localhost:3000"
+            "http://localhost:4000",
+            "http://localhost:3000"
     );
 
     @Override

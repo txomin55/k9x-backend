@@ -1,4 +1,4 @@
-package com.k9x.domain.dog.port;
+package com.k9x.application.dog.port;
 
 import com.k9x.domain.dog.model.Dog;
 

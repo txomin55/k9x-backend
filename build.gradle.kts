@@ -1,6 +1,3 @@
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-
 plugins {
     id("org.springframework.boot") version "4.1.0-M1" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false

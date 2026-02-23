@@ -1,8 +1,8 @@
-package com.k9x.application.dog.port;
+package com.k9x.application.dog.action;
 
 import com.k9x.application.dog.dto.DogListDTO;
+import com.k9x.application.dog.port.GetDogListPersistencePort;
 import com.k9x.domain.dog.model.Dog;
-import com.k9x.domain.dog.port.GetDogListPersistencePort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

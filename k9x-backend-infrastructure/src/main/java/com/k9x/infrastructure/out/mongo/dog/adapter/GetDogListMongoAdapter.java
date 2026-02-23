@@ -1,8 +1,8 @@
 package com.k9x.infrastructure.out.mongo.dog.adapter;
 
+import com.k9x.application.dog.port.GetDogListPersistencePort;
 import com.k9x.domain.commons.entitystatemachine.EntityStateMachine;
 import com.k9x.domain.dog.model.Dog;
-import com.k9x.domain.dog.port.GetDogListPersistencePort;
 import com.k9x.infrastructure.out.mongo.dog.entity.MongoDogEntity;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;

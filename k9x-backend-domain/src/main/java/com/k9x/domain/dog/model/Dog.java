@@ -1,8 +1,7 @@
 package com.k9x.domain.dog.model;
 
 import com.k9x.domain.commons.entitystatemachine.EntityStateMachine;
-import com.k9x.domain.commons.exception.DomainException;
-import com.k9x.domain.commons.exception.error.ErrorEnum;
+import com.k9x.domain.commons.exception.UnauthorizedResourceStateTransitionException;
 
 public record Dog(
         String id,
@@ -25,7 +24,7 @@ public record Dog(
             return new Dog(this.id, this.name, this.image, this.owner, EntityStateMachine.ACTIVE, this.lastUpdate);
         }
 
-        throw new DomainException(ErrorEnum.UNAUTHORIZED_RESOURCE_STATE_TRANSITION_ERROR);
+        throw new UnauthorizedResourceStateTransitionException();
     }
 
     public boolean belongsToSameOwner(String owner) {

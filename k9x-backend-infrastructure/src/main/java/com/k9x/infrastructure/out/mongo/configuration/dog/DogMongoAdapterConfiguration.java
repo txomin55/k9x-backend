@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.out.mongo.configuration.dog;
 
-import com.k9x.domain.dog.port.GetDogListPersistencePort;
-import com.k9x.domain.dog.port.GetDogPersistencePort;
+import com.k9x.application.dog.port.GetDogListPersistencePort;
+import com.k9x.application.dog.port.GetDogPersistencePort;
 import com.k9x.infrastructure.out.mongo.dog.adapter.GetDogListMongoAdapter;
 import com.k9x.infrastructure.out.mongo.dog.adapter.GetDogMongoAdapter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

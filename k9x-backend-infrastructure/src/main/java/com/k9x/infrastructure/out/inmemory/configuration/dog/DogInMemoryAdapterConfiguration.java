@@ -1,16 +1,17 @@
 package com.k9x.infrastructure.out.inmemory.configuration.dog;
 
+import com.k9x.application.dog.port.GetDogListPersistencePort;
+import com.k9x.application.dog.port.GetDogPersistencePort;
 import com.k9x.domain.commons.entitystatemachine.EntityStateMachine;
-import com.k9x.domain.dog.port.GetDogListPersistencePort;
-import com.k9x.domain.dog.port.GetDogPersistencePort;
 import com.k9x.infrastructure.out.inmemory.dog.adapter.GetDogInMemoryAdapter;
 import com.k9x.infrastructure.out.inmemory.dog.adapter.GetDogListInMemoryAdapter;
 import com.k9x.infrastructure.out.inmemory.dog.entity.DogEntity;
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @ConditionalOnProperty(value = "k9x-backend.deploy.tech", havingValue = "in-memory")

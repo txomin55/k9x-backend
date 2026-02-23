@@ -10,6 +10,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+    implementation("com.github.ben-manes.caffeine:caffeine")
 
     compileOnly("org.springframework:spring-context")
 

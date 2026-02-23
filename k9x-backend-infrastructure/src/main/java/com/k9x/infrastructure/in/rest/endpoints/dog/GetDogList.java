@@ -1,11 +1,10 @@
 package com.k9x.infrastructure.in.rest.endpoints.dog;
 
+import com.k9x.application.authentication.dto.AuthTokenDTO;
+import com.k9x.application.dog.action.GetDogListServiceCase;
 import com.k9x.application.dog.dto.DogListDTO;
-import com.k9x.application.dog.port.GetDogListServiceCase;
 import com.k9x.oas.stub.api.GetDogsApiDelegate;
 import com.k9x.oas.stub.model.GetDogListWeb;
-import com.k9x.infrastructure.in.rest.configuration.session.user.AuthorizationExtractor;
-import com.k9x.infrastructure.in.rest.configuration.session.user.dto.RequestUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -15,18 +14,16 @@ import java.util.List;
 public class GetDogList implements GetDogsApiDelegate {
 
     private final GetDogListServiceCase getDogListService;
-    private final AuthorizationExtractor tokenExtractor;
+    private final AuthTokenDTO userDetails;
 
-    public GetDogList(GetDogListServiceCase getDogListService, AuthorizationExtractor tokenExtractor) {
+    public GetDogList(GetDogListServiceCase getDogListService, AuthTokenDTO userDetails) {
         this.getDogListService = getDogListService;
-        this.tokenExtractor = tokenExtractor;
+        this.userDetails = userDetails;
     }
 
     @Override
-    public ResponseEntity<List<GetDogListWeb>> getDogs(String authorization) {
-        RequestUserDetails user = tokenExtractor.getDataFromToken(authorization);
-
-        List<DogListDTO> dogs = getDogListService.getDogs(user.getId());
+    public ResponseEntity<List<GetDogListWeb>> getDogs() {
+        List<DogListDTO> dogs = getDogListService.getDogs(userDetails.getSubject());
 
         List<GetDogListWeb> mappedDogs = dogs.stream()
                 .map(dog -> new GetDogListWeb(dog.id(), dog.name(), dog.image()))

@@ -4,33 +4,36 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClients;
-import java.util.Collections;
-import java.util.Optional;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 
+import java.util.Collections;
+import java.util.Optional;
+
+@NullMarked
 @Configuration
 @ConditionalOnProperty(value = "k9x-backend.deploy.tech", havingValue = "mongo")
 public class MongoClient extends AbstractMongoClientConfiguration {
 
-    @Value("${spring.data.mongodb.authentication-database:#{null}}")
+    @Value("${spring.mongodb.authentication-database:#{null}}")
     private Optional<String> authenticationDatabase;
 
-    @Value("${spring.data.mongodb.host}")
+    @Value("${spring.mongodb.host}")
     private String mongoHost;
 
-    @Value("${spring.data.mongodb.port}")
+    @Value("${spring.mongodb.port}")
     private Integer mongoPort;
 
-    @Value("${spring.data.mongodb.database}")
+    @Value("${spring.mongodb.database}")
     private String mongoDatabaseName;
 
-    @Value("${spring.data.mongodb.username:#{null}}")
+    @Value("${spring.mongodb.username:#{null}}")
     private Optional<String> username;
 
-    @Value("${spring.data.mongodb.password:#{null}}")
+    @Value("${spring.mongodb.password:#{null}}")
     private Optional<String> password;
 
     @Override
