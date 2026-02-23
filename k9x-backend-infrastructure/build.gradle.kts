@@ -11,6 +11,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
     implementation("com.github.ben-manes.caffeine:caffeine")
+    implementation("com.google.api-client:google-api-client:2.7.2")
+    implementation("com.google.http-client:google-http-client-gson:1.44.2")
 
     compileOnly("org.springframework:spring-context")
 

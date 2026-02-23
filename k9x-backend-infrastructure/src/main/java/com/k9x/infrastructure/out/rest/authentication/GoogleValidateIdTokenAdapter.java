@@ -1,28 +1,53 @@
 package com.k9x.infrastructure.out.rest.authentication;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.k9x.application.authentication.port.ValidateIdTokenPort;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GoogleValidateIdTokenAdapter implements ValidateIdTokenPort {
 
-    private static final String GOOGLE_TOKEN_INFO_URL = "https://oauth2.googleapis.com/tokeninfo";
+    private final GoogleIdTokenVerifier verifier;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    public GoogleValidateIdTokenAdapter(
+            @Value("${k9x-backend.security.google-client-ids}") String googleClientIds
+    ) {
+        String clientIdsValue = googleClientIds == null ? "" : googleClientIds;
+        List<String> audiences = Arrays.stream(clientIdsValue.split(","))
+                .map(String::trim)
+                .filter(value -> !value.isEmpty())
+                .collect(Collectors.toList());
+
+        try {
+
+            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+            this.verifier = new GoogleIdTokenVerifier.Builder(
+                    GoogleNetHttpTransport.newTrustedTransport(),
+                    jsonFactory
+            ).setAudience(audiences).build();
+
+        } catch (GeneralSecurityException | IOException ex) {
+            throw new IllegalStateException("Failed to initialize Google ID token verifier", ex);
+        }
+    }
 
     @Override
     public boolean isValid(String idToken) {
-        String url = UriComponentsBuilder.fromUriString(GOOGLE_TOKEN_INFO_URL)
-                .queryParam("id_token", idToken)
-                .toUriString();
-
         try {
-            restTemplate.getForEntity(url, String.class);
-            return true;
-        } catch (RestClientResponseException ex) {
+            GoogleIdToken token = verifier.verify(idToken);
+            return token != null;
+        } catch (GeneralSecurityException | IOException ex) {
             return false;
         }
     }
