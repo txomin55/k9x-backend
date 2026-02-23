@@ -18,7 +18,7 @@ import java.util.Optional;
 @ConditionalOnProperty(value = "k9x-backend.deploy.tech", havingValue = "mongo")
 public class MongoClient extends AbstractMongoClientConfiguration {
 
-    @Value("${spring.mongodb.authentication-database:#{null}}")
+    @Value("${spring.mongodb.authentication-database}")
     private Optional<String> authenticationDatabase;
 
     @Value("${spring.mongodb.host}")
@@ -30,28 +30,26 @@ public class MongoClient extends AbstractMongoClientConfiguration {
     @Value("${spring.mongodb.database}")
     private String mongoDatabaseName;
 
-    @Value("${spring.mongodb.username:#{null}}")
+    @Value("${spring.mongodb.username}")
     private Optional<String> username;
 
-    @Value("${spring.mongodb.password:#{null}}")
+    @Value("${spring.mongodb.password}")
     private Optional<String> password;
 
     @Override
     public com.mongodb.client.MongoClient mongoClient() {
-        if (authenticationDatabase.isPresent()) {
-            return MongoClients.create(
-                    MongoClientSettings.builder()
-                            .applicationName(mongoDatabaseName)
-                            .credential(MongoCredential.createCredential(username.toString(), authenticationDatabase.toString(),
-                                    password.toString().toCharArray()))
-                            .applyToClusterSettings(builder ->
-                                    builder.hosts(Collections.singletonList(new ServerAddress(mongoHost, mongoPort))))
-                            .build());
-        }
-
+        String user = username.orElseThrow(() ->
+                new IllegalStateException("Mongo username is required when authenticationDatabase is set"));
+        String pass = password.orElseThrow(() ->
+                new IllegalStateException("Mongo password is required when authenticationDatabase is set"));
         return MongoClients.create(
                 MongoClientSettings.builder()
                         .applicationName(mongoDatabaseName)
+                        .credential(MongoCredential.createCredential(
+                                user,
+                                authenticationDatabase.get(),
+                                pass.toCharArray()
+                        ))
                         .applyToClusterSettings(builder ->
                                 builder.hosts(Collections.singletonList(new ServerAddress(mongoHost, mongoPort))))
                         .build());

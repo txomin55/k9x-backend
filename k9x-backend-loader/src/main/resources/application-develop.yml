@@ -3,6 +3,7 @@ spring:
     host: localhost
     port: 27017
     database: k9x-backend
+    authentication-database: k9x-auth
 
 k9x-backend:
   auth:
