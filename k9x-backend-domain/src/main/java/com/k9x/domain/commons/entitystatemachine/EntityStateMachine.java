@@ -13,11 +13,14 @@ public enum EntityStateMachine {
     }
 
     public static EntityStateMachine valueOfState(String state) {
+        if (state == null) {
+            return ERROR;
+        }
         for (EntityStateMachine e : values()) {
             if (e.state.equals(state)) {
                 return e;
             }
         }
-        return null;
+        return ERROR;
     }
 }
