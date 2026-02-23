@@ -15,12 +15,13 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class Auth implements Filter {
 
-    public static final String USER_DETAILS = "USER_DETAILS ";
+    public static final String USER_DETAILS = "USER_DETAILS";
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
     private final AuthorizationExtractor authorizationExtractor;
@@ -85,7 +86,7 @@ public class Auth implements Filter {
             return false;
         }
 
-        if (equalsNullable(cachedDetails.getSubject(), tokenDetails.getSubject())) {
+        if (!Objects.equals(cachedDetails.getSubject(), tokenDetails.getSubject())) {
             return false;
         }
 
@@ -93,7 +94,7 @@ public class Auth implements Filter {
             return false;
         }
 
-        if (equalsNullable(cachedDetails.getIssuer(), tokenDetails.getIssuer())) {
+        if (!Objects.equals(cachedDetails.getIssuer(), tokenDetails.getIssuer())) {
             return false;
         }
 
@@ -112,10 +113,4 @@ public class Auth implements Filter {
         return Instant.now().isBefore(expiresAt);
     }
 
-    private boolean equalsNullable(String left, String right) {
-        if (left == null) {
-            return right != null;
-        }
-        return !left.equals(right);
-    }
 }
