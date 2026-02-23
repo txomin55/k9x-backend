@@ -51,7 +51,7 @@ public class GoogleValidateIdTokenAdapter implements ValidateIdTokenPort {
                 return Optional.empty();
             }
             return Optional.ofNullable(token.getPayload().getEmail());
-        } catch (GeneralSecurityException | IOException ex) {
+        } catch (Exception ex) {
             return Optional.empty();
         }
     }
