@@ -4,9 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.k9x.application.authentication.dto.AuthTokenDTO;
 import com.k9x.application.authentication.port.JwtTokenCacheManagerPort;
 import com.k9x.infrastructure.in.rest.configuration.session.AuthorizationExtractor;
-import org.springframework.stereotype.Service;
 
-@Service
 public class JwtTokenCacheManagerAdapter implements JwtTokenCacheManagerPort {
 
     private final Cache<String, String> authTokenCache;

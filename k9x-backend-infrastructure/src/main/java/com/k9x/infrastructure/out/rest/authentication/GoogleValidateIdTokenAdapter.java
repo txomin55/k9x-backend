@@ -6,29 +6,24 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.k9x.application.authentication.port.ValidateIdTokenPort;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-@Service
 public class GoogleValidateIdTokenAdapter implements ValidateIdTokenPort {
 
     private final GoogleIdTokenVerifier verifier;
 
     public GoogleValidateIdTokenAdapter(
-            @Value("${k9x-backend.security.google-client-ids}") String googleClientIds
+            String googleClientId
     ) {
-        String clientIdsValue = googleClientIds == null ? "" : googleClientIds;
-        List<String> audiences = Arrays.stream(clientIdsValue.split(","))
+        List<String> audiences = Arrays.stream(googleClientId.split(","))
                 .map(String::trim)
                 .filter(value -> !value.isEmpty())
-                .collect(Collectors.toList());
+                .toList();
 
         try {
 
@@ -51,7 +46,7 @@ public class GoogleValidateIdTokenAdapter implements ValidateIdTokenPort {
                 return Optional.empty();
             }
             return Optional.ofNullable(token.getPayload().getEmail());
-        } catch (Exception ex) {
+        } catch (Exception _) {
             return Optional.empty();
         }
     }

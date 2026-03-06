@@ -17,6 +17,9 @@ springBoot {
 val springProfilesActive = (findProperty("springProfilesActive") as String?) ?: "develop"
 val projectArtifactId: String = project.name
 val projectVersion = project.version.toString()
+val googleClientId = (findProperty("google.client_id") as String?) ?: ""
+val googleClientSecret = (findProperty("google.client_secret") as String?) ?: ""
+val googleRedirectUrl = (findProperty("google.redirect_url") as String?) ?: ""
 
 tasks.processResources {
     filesMatching("application.yml") {
@@ -25,6 +28,9 @@ tasks.processResources {
                 "spring.profiles.active" to springProfilesActive,
                 "project.artifactId" to projectArtifactId,
                 "project.version" to projectVersion,
+                "google.client_id" to googleClientId,
+                "google.client_secret" to googleClientSecret,
+                "google.redirect_url" to googleRedirectUrl,
             ),
             "beginToken" to "@",
             "endToken" to "@",

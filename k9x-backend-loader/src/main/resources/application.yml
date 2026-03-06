@@ -22,10 +22,14 @@ k9x-backend:
   security:
     jwt-secret: "change-me-to-a-32-byte-minimum-secret"
     jwt-cache-ttl-minutes: 15
-    google-client-ids: "32555940559.apps.googleusercontent.com"
   info:
     app:
       name: '@project.artifactId@'
       version: '@project.version@'
   deploy:
     tech: in-memory
+  login:
+    google:
+      client_id: "@google.client_id@"
+      client_secret: "@google.client_secret@"
+      redirect_url: "@google.redirect_url@"
