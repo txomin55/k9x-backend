@@ -6,16 +6,13 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClients;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 
 import java.util.Collections;
-import java.util.Optional;
 
 @NullMarked
 @Configuration
-@ConditionalOnProperty(value = "k9x-backend.deploy.tech", havingValue = "mongo")
 public class MongoClient extends AbstractMongoClientConfiguration {
 
     @Value("${spring.mongodb.authentication-database}")

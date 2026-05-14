@@ -4,13 +4,11 @@ import com.k9x.application.dog.port.GetDogListPersistencePort;
 import com.k9x.application.dog.port.GetDogPersistencePort;
 import com.k9x.infrastructure.out.mongo.dog.adapter.GetDogListMongoAdapter;
 import com.k9x.infrastructure.out.mongo.dog.adapter.GetDogMongoAdapter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 @Configuration
-@ConditionalOnProperty(value = "k9x-backend.deploy.tech", havingValue = "mongo")
 public class DogMongoAdapterConfiguration {
 
     private final MongoTemplate mongoTemplate;

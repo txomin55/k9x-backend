@@ -61,11 +61,11 @@ the `Authorization` header:
 
 - The filter parses the JWT using the `AuthorizationExtractor`.
 - It validates the token against the Caffeine cache:
-  - The cache stores the latest JWT per user email.
-  - If the cached token does not exist, or the token data (subject, issuer,
-    audience) does not match, the request is rejected.
-  - The `version` claim must match the cached token `version`.
-  - The `iat` timestamp is checked against `k9x-backend.security.jwt-cache-ttl-minutes`.
+    - The cache stores the latest JWT per user email.
+    - If the cached token does not exist, or the token data (subject, issuer,
+      audience) does not match, the request is rejected.
+    - The `version` claim must match the cached token `version`.
+    - The `iat` timestamp is checked against `k9x-backend.security.jwt-cache-ttl-minutes`.
 
 ## JWT cache and versioning (Caffeine)
 
@@ -95,12 +95,15 @@ http://localhost:4000/swagger-ui.html It's configured to be run only in develop 
 
 OpenAPI is configured via `OpenApiConfiguration`:
 
-- `k9x-backend-infrastructure/src/main/java/com/k9x/infrastructure/in/rest/configuration/openapi/OpenApiConfiguration.java`
+-
+
+`k9x-backend-infrastructure/src/main/java/com/k9x/infrastructure/in/rest/configuration/openapi/OpenApiConfiguration.java`
+
 - Sets API title to `K9x-Backend API`
 - Defines `bearerAuth` security scheme (HTTP bearer, JWT)
 - Groups:
-  - `secured`: `/api/**` with `bearerAuth` requirement
-  - `public`: all non-`/api/**` paths without security (removes security schemes for this group)
+    - `secured`: `/api/**` with `bearerAuth` requirement
+    - `public`: all non-`/api/**` paths without security (removes security schemes for this group)
 - Endpoints are generated in the OAS stubs package (`com.k9x.oas.stub.api`). The loader app scans that package so
   the generated controllers are registered at runtime.
 - Use `http://localhost:4000/v3/api-docs/secured` for `/api/**` endpoints.
@@ -111,7 +114,8 @@ OpenAPI is configured via `OpenApiConfiguration`:
 * production (IP server specified in the application-production.yml file)
 
 To compile this project, run the build from the repository root. By default, the profile used is `develop` but there are
-2 others (explained above). The build targets Java 25; for an exact JVM 25.0.2, set `JAVA_HOME` (or `org.gradle.java.home`)
+2 others (explained above). The build targets Java 25; for an exact JVM 25.0.2, set `JAVA_HOME` (or
+`org.gradle.java.home`)
 to a JDK 25.0.2 installation.
 
 The project pulls packages from GitHub Packages; configure credentials via environment variables or local
@@ -125,20 +129,10 @@ Local properties (recommended):
 
 `GRADLE_USER_HOME=/tmp/gradle ./gradlew build -PspringProfilesActive=production`
 
-The application has 2 types of implementation as regards persistence, this variable is set with the name of
-module.build.tech:
-
-* in-memory (implementation of in-memory bbdd)
-* mongo (implementation of mongo bbdd)
-
-For communication between modules, just It has the following implementation, but here you can configure others such as
-
-Kafka, Rabbit ...
-
 ## Execution
 
 To execute this project, you must go to the loader project and execute (this way we would use the persistence
 
 implementation in mongo instead of the default one from memory):
 
-`GRADLE_USER_HOME=/tmp/gradle ./gradlew :k9x-backend-loader:bootRun -Dspring.profiles.active=production -Dk9x-backend.deploy.tech=mongo`
+`GRADLE_USER_HOME=/tmp/gradle ./gradlew :k9x-backend-loader:bootRun -Dspring.profiles.active=production`
