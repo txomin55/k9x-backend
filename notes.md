@@ -16,7 +16,12 @@
 
 ### MVP
 
-- Postgresql https://supabase.com/dashboard/org/jdtxnyedrfjutiaadkwi
+- Postgresql https://supabase.com/dashboard/project/rivmavaifjpjrifqlzzk
+    - pass: jx%9!@i*kEw?r9K
+    - host: db.rivmavaifjpjrifqlzzk.supabase.co
+    - port: 5432
+    - database: postgres
+    - user: postgres
 - Search - Nominatim Manual https://share.google/UqKWMxkAICjfdBM5t para recuperar coordenadas a partir de direccion
 
 # Funcionalidades premium

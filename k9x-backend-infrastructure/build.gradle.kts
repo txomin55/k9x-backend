@@ -1,18 +1,29 @@
+import org.jooq.meta.jaxb.Property
+
+plugins {
+    id("org.jooq.jooq-codegen-gradle") version "3.19.23"
+}
+
 val jjwtVersion = "0.13.0"
 val restAssuredVersion = "6.0.0"
 val k9xStubsVersion = "0.0.1-SNAPSHOT"
+val jooqVersion = "3.19.23"
 
 dependencies {
     implementation(project(":k9x-backend-application"))
     implementation(project(":k9x-backend-domain"))
     implementation("com.k9x:oas-definition-stubs:$k9xStubsVersion")
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+    implementation("org.springframework.boot:spring-boot-starter-jooq")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
     implementation("com.github.ben-manes.caffeine:caffeine")
     implementation("com.google.api-client:google-api-client:2.7.2")
     implementation("com.google.http-client:google-http-client-gson:1.44.2")
+
+    runtimeOnly("org.postgresql:postgresql")
+    implementation("org.flywaydb:flyway-core")
+    runtimeOnly("org.flywaydb:flyway-database-postgresql")
 
     compileOnly("org.springframework:spring-context")
 
@@ -24,6 +35,40 @@ dependencies {
     testImplementation("junit:junit")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 
+    jooqCodegen("org.jooq:jooq-meta-extensions:$jooqVersion")
+}
+
+jooq {
+    configuration {
+        generator {
+            database {
+                name = "org.jooq.meta.extensions.ddl.DDLDatabase"
+                withProperties(
+                    Property().withKey("scripts").withValue("src/main/resources/db/schema"),
+                    Property().withKey("sort").withValue("flyway"),
+                    Property().withKey("defaultNameCase").withValue("lower")
+                )
+            }
+            generate {
+                isDeprecated = false
+                isRecords = true
+            }
+            target {
+                packageName = "com.k9x.infrastructure.out.postgres.jooq.generated"
+                directory = "src/main/generated"
+            }
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java.srcDir("src/main/generated")
+    }
+}
+
+tasks.named("compileJava") {
+    dependsOn("jooqCodegen")
 }
 
 repositories {

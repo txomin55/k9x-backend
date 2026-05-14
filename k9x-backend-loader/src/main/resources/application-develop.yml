@@ -1,6 +1,8 @@
 spring:
-  mongodb:
-    host: localhost
-    port: 27017
-    database: k9x-backend
-    authentication-database: k9x-auth
+  datasource:
+    url: jdbc:postgresql://localhost:2345/k9x-backend
+    username: admin
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jooq:
+    sql-dialect: POSTGRES
