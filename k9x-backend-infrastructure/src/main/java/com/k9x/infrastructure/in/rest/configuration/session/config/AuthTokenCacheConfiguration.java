@@ -29,7 +29,7 @@ public class AuthTokenCacheConfiguration {
         return Caffeine.newBuilder()
                 .expireAfterWrite(ttlMinutes, TimeUnit.MINUTES)
                 .maximumSize(10_000)
-                .removalListener((String key, String value, RemovalCause cause) -> userInfoCache.invalidate(key))
+                .removalListener((String key, String _, RemovalCause _) -> userInfoCache.invalidate(key))
                 .build();
     }
 }

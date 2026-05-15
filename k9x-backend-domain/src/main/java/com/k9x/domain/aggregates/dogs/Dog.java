@@ -30,4 +30,20 @@ public record Dog(
     public String getOwner() {
         return this.owner;
     }
+
+    public String getCreator() {
+        return this.creator;
+    }
+
+    public String getCountry() {
+        return this.country;
+    }
+
+    public String getTeam() {
+        return this.team;
+    }
+
+    public String getIdentity() {
+        return this.identity;
+    }
 }

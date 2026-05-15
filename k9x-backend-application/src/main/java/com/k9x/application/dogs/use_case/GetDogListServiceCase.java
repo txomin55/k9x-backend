@@ -27,12 +27,12 @@ public class GetDogListServiceCase {
                                 dog.getId(),
                                 dog.getName(),
                                 dog.getImage(),
-                                userId.equals(dog.owner()),
-                                dog.creator(),
-                                dog.country(),
-                                dog.team(),
-                                dog.owner(),
-                                dog.identity()
+                                userId.equals(dog.getOwner()),
+                                dog.getCreator(),
+                                dog.getCountry(),
+                                dog.getTeam(),
+                                dog.getOwner(),
+                                dog.getIdentity()
                         )
                 )
                 .toList();
