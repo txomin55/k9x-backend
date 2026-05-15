@@ -1,8 +1,9 @@
 package com.k9x.application.dogs.use_case;
 
 import com.k9x.application.dogs.dto.DogDTO;
+import com.k9x.application.dogs.exceptions.OwnerNonProvidedWhenOrganizer;
 import com.k9x.application.dogs.port.GetDogListPersistencePort;
-import com.k9x.domain.dog.model.Dog;
+import com.k9x.domain.aggregates.dogs.Dog;
 
 import java.util.List;
 
@@ -14,10 +15,32 @@ public class GetDogListServiceCase {
         this.getDogListPersistencePort = getDogListPersistencePort;
     }
 
-    public List<DogDTO> getDogs(String owner) {
-        List<Dog> dogs = getDogListPersistencePort.getDogs(owner);
+    public List<DogDTO> getDogs(String userId, boolean organizer, boolean onlyOwned) {
 
-        return dogs.stream().map(dog -> new DogDTO(dog.getId(), dog.getName(), dog.getImage(), dog.getOwner()))
+        assertOwnerWhenNoOrganizer(userId, organizer);
+
+        String dogsByOwner = !organizer || onlyOwned ? userId : null;
+        List<Dog> dogs = getDogListPersistencePort.getDogs(dogsByOwner);
+
+        return dogs.stream()
+                .map(dog -> new DogDTO(
+                                dog.getId(),
+                                dog.getName(),
+                                dog.getImage(),
+                                userId.equals(dog.owner()),
+                                dog.creator(),
+                                dog.country(),
+                                dog.team(),
+                                dog.owner(),
+                                dog.identity()
+                        )
+                )
                 .toList();
+    }
+
+    private void assertOwnerWhenNoOrganizer(String owner, boolean organizer) {
+        if (owner == null && !organizer) {
+            throw new OwnerNonProvidedWhenOrganizer();
+        }
     }
 }

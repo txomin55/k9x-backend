@@ -7,7 +7,7 @@ import com.k9x.application.users.port.ExchangeAuthorizationCodePort;
 import com.k9x.application.users.port.JwtTokenCacheManagerPort;
 import com.k9x.application.users.port.JwtTokenGeneratorPort;
 import com.k9x.application.users.port.ValidateIdTokenPort;
-import com.k9x.domain.commons.exception.UnauthorizedResourceException;
+import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 import java.time.Duration;
 import java.util.Optional;

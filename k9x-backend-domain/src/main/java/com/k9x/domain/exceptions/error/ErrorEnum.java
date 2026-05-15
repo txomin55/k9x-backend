@@ -1,9 +1,9 @@
-package com.k9x.domain.commons.exception.error;
+package com.k9x.domain.exceptions.error;
 
 public enum ErrorEnum {
 
     UNAUTHORIZED_RESOURCE_ERROR("error.unauthorized_resource"),
-    UNAUTHORIZED_RESOURCE_STATE_TRANSITION_ERROR("error.unauthorized_resource_state_transition");
+    NO_OWNER_WHEN_NO_ORGANIZER("error.no_owner_when_no_organizer");
 
     private final String id;
 

@@ -1,5 +1,21 @@
 CREATE SCHEMA k9x;
 
+CREATE TABLE k9x.users
+(
+    id    VARCHAR(255) NOT NULL,
+    email VARCHAR(50)  NOT NULL,
+    image VARCHAR(255) NOT NULL,
+    CONSTRAINT users_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE k9x.organizers
+(
+    user_id VARCHAR(255) NOT NULL,
+    name    VARCHAR(255) NOT NULL,
+    CONSTRAINT organizers_pkey PRIMARY KEY (user_id),
+    CONSTRAINT organizers_user_fk FOREIGN KEY (user_id) REFERENCES k9x.users (id)
+);
+
 CREATE TABLE k9x.dogs
 (
     id          VARCHAR(255) NOT NULL,

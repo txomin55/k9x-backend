@@ -1,4 +1,4 @@
-package com.k9x.domain.dog.model;
+package com.k9x.domain.aggregates.dogs;
 
 public record Dog(
         String id,
@@ -14,10 +14,6 @@ public record Dog(
         long createdAt,
         long deletedAt
 ) {
-
-    public boolean belongsToSameOwner(String owner) {
-        return this.owner != null ? this.owner.equals(owner) : this.creator.equals(owner);
-    }
 
     public String getId() {
         return this.id;

@@ -2,7 +2,10 @@ package com.k9x.infrastructure.in.rest.configuration.filter;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.k9x.application.users.dto.AuthTokenDTO;
+import com.k9x.application.users.dto.UserInfoDTO;
+import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.infrastructure.in.rest.configuration.session.AuthorizationExtractor;
+
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,15 +29,21 @@ public class Auth implements Filter {
 
     private final AuthorizationExtractor authorizationExtractor;
     private final Cache<String, String> authTokenCache;
+    private final Cache<String, UserInfoDTO> userInfoCache;
+    private final GetUserInfoPersistencePort getUserInfoPort;
     private final Duration tokenTtl;
 
     public Auth(
             AuthorizationExtractor authorizationExtractor,
             Cache<String, String> authTokenCache,
+            Cache<String, UserInfoDTO> userInfoCache,
+            GetUserInfoPersistencePort getUserInfoPort,
             @Value("${k9x-backend.security.jwt-cache-ttl-minutes}") long ttlMinutes
     ) {
         this.authorizationExtractor = authorizationExtractor;
         this.authTokenCache = authTokenCache;
+        this.userInfoCache = userInfoCache;
+        this.getUserInfoPort = getUserInfoPort;
         this.tokenTtl = Duration.ofMinutes(ttlMinutes);
     }
 
@@ -46,7 +55,7 @@ public class Auth implements Filter {
         HttpServletResponse response = (HttpServletResponse) res;
 
         String path = request.getRequestURI();
-        if (!path.startsWith("/api/")) {
+        if (!path.startsWith("/secured/")) {
             chain.doFilter(req, res);
             return;
         }
@@ -64,7 +73,20 @@ public class Auth implements Filter {
                 return;
             }
 
-            request.setAttribute(USER_DETAILS, userDetails);
+            UserInfoDTO userInfo = userInfoCache.getIfPresent(userDetails.getSubject());
+            if (userInfo == null) {
+                userInfo = getUserInfoPort.findById(userDetails.getSubject());
+                if (userInfo != null) {
+                    userInfoCache.put(userDetails.getSubject(), userInfo);
+                }
+            }
+
+            if (userInfo == null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            request.setAttribute(USER_DETAILS, userInfo);
 
             chain.doFilter(req, res);
         } catch (RuntimeException ex) {

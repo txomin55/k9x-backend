@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.in.rest.configuration.session.config;
 
-import com.k9x.application.users.dto.AuthTokenDTO;
+import com.k9x.application.users.dto.UserInfoDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -21,9 +21,9 @@ public class RequestUserDetailsConfiguration {
 
     @Bean
     @RequestScope
-    AuthTokenDTO requestUserDetails(HttpServletRequest request) {
+    UserInfoDTO requestUserDetails(HttpServletRequest request) {
         Object value = request.getAttribute(USER_DETAILS);
-        if (value instanceof AuthTokenDTO userDetails) {
+        if (value instanceof UserInfoDTO userDetails) {
             return userDetails;
         }
 

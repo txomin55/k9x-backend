@@ -1,7 +1,7 @@
 package com.k9x.configuration.secured.dogs;
 
 import com.k9x.application.dogs.use_case.GetDogListServiceCase;
-import com.k9x.application.users.dto.AuthTokenDTO;
+import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.CreateDog;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.GetDogList;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.RemoveDog;
@@ -28,7 +28,7 @@ public class SecuredDogsEndpointConfiguration {
     }
 
     @Bean
-    public GetDogList getDogList(GetDogListServiceCase getDogListServiceCase, AuthTokenDTO authTokenDTO) {
-        return new GetDogList(getDogListServiceCase, authTokenDTO);
+    public GetDogList getDogList(GetDogListServiceCase getDogListServiceCase, UserInfoDTO userInfoDTO) {
+        return new GetDogList(getDogListServiceCase, userInfoDTO);
     }
 }

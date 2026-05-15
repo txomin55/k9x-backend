@@ -1,6 +1,6 @@
-package com.k9x.domain.commons.exception;
+package com.k9x.domain.exceptions;
 
-import com.k9x.domain.commons.exception.error.ErrorEnum;
+import com.k9x.domain.exceptions.error.ErrorEnum;
 
 import java.io.Serial;
 import java.util.Date;

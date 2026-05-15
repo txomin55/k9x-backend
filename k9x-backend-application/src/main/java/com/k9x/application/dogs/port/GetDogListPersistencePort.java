@@ -1,6 +1,6 @@
 package com.k9x.application.dogs.port;
 
-import com.k9x.domain.dog.model.Dog;
+import com.k9x.domain.aggregates.dogs.Dog;
 
 import java.util.List;
 
