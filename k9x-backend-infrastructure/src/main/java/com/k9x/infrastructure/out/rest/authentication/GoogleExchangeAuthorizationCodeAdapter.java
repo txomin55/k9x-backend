@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.out.rest.authentication;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.k9x.application.authentication.port.ExchangeAuthorizationCodePort;
+import com.k9x.application.users.port.ExchangeAuthorizationCodePort;
 
 import java.io.IOException;
 import java.net.URI;

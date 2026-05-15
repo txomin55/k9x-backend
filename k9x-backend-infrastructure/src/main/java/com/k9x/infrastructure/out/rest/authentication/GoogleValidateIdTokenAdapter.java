@@ -5,7 +5,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.k9x.application.authentication.port.ValidateIdTokenPort;
+import com.k9x.application.users.port.ValidateIdTokenPort;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;

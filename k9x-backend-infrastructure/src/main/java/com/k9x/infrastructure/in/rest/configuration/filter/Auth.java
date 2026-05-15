@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.in.rest.configuration.filter;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import com.k9x.application.authentication.dto.AuthTokenDTO;
+import com.k9x.application.users.dto.AuthTokenDTO;
 import com.k9x.infrastructure.in.rest.configuration.session.AuthorizationExtractor;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +27,7 @@ public class Auth implements Filter {
     private final AuthorizationExtractor authorizationExtractor;
     private final Cache<String, String> authTokenCache;
     private final Duration tokenTtl;
+
     public Auth(
             AuthorizationExtractor authorizationExtractor,
             Cache<String, String> authTokenCache,

@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.jwt;
 
-import com.k9x.application.authentication.port.JwtTokenGeneratorPort;
+import com.k9x.application.users.port.JwtTokenGeneratorPort;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 

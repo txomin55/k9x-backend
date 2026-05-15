@@ -1,16 +1,14 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.dogs;
 
-import com.k9x.application.authentication.dto.AuthTokenDTO;
-import com.k9x.application.dog.action.GetDogListServiceCase;
-import com.k9x.application.dog.dto.DogDTO;
+import com.k9x.application.dogs.dto.DogDTO;
+import com.k9x.application.dogs.use_case.GetDogListServiceCase;
+import com.k9x.application.users.dto.AuthTokenDTO;
 import com.k9x.oas.stub.api.SecuredDogsFetchAllApiDelegate;
 import com.k9x.oas.stub.model.DogSummaryResponseDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public class GetDogList implements SecuredDogsFetchAllApiDelegate {
 
     private final GetDogListServiceCase getDogListService;

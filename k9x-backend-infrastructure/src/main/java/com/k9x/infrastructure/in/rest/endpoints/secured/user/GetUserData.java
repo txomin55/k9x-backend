@@ -1,13 +1,11 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.user;
 
 
-import com.k9x.application.authentication.dto.AuthTokenDTO;
+import com.k9x.application.users.dto.AuthTokenDTO;
 import com.k9x.oas.stub.api.SecuredUserFetchApiDelegate;
 import com.k9x.oas.stub.model.UserProfileResponseDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
-@Service
 public class GetUserData implements SecuredUserFetchApiDelegate {
 
     private final AuthTokenDTO userDetails;
@@ -18,6 +16,6 @@ public class GetUserData implements SecuredUserFetchApiDelegate {
 
     @Override
     public ResponseEntity<UserProfileResponseDTO> fetchUserDataSecured() {
-        return ResponseEntity.ok(new UserProfileResponseDTO(userDetails.getSubject().split("@")[0], userDetails.getSubject(), false));
+        return ResponseEntity.ok(new UserProfileResponseDTO(userDetails.getSubject().split("@")[0], userDetails.getSubject(), true));
     }
 }

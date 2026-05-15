@@ -4,11 +4,9 @@ import com.k9x.oas.stub.api.SecuredCollectionsFecthAllApiDelegate;
 import com.k9x.oas.stub.model.CollectionsResponseDTO;
 import com.k9x.oas.stub.model.IdNameDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public class GetCollections implements SecuredCollectionsFecthAllApiDelegate {
 
     @Override

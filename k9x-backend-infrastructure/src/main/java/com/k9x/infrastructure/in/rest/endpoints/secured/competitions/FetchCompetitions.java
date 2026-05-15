@@ -5,11 +5,9 @@ import com.k9x.oas.stub.model.CompetitionNotificationDetailResponseDTO;
 import com.k9x.oas.stub.model.CompetitionResponseDTO;
 import com.k9x.oas.stub.model.CompetitionStageDetailResponseDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public class FetchCompetitions implements SecuredCompetitionsFetchAllApiDelegate {
 
     @Override

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:2345/k9x-backend
+    url: jdbc:postgresql://localhost:2345/postgres
     username: admin
     password: password
     driver-class-name: org.postgresql.Driver

@@ -1,10 +1,10 @@
 package com.k9x.configuration.authentication;
 
-import com.k9x.application.authentication.action.LoginServiceCase;
-import com.k9x.application.authentication.port.ExchangeAuthorizationCodePort;
-import com.k9x.application.authentication.port.JwtTokenCacheManagerPort;
-import com.k9x.application.authentication.port.JwtTokenGeneratorPort;
-import com.k9x.application.authentication.port.ValidateIdTokenPort;
+import com.k9x.application.users.port.ExchangeAuthorizationCodePort;
+import com.k9x.application.users.port.JwtTokenCacheManagerPort;
+import com.k9x.application.users.port.JwtTokenGeneratorPort;
+import com.k9x.application.users.port.ValidateIdTokenPort;
+import com.k9x.application.users.use_case.LoginServiceCase;
 import com.k9x.infrastructure.out.rest.authentication.GoogleExchangeAuthorizationCodeAdapter;
 import com.k9x.infrastructure.out.rest.authentication.GoogleValidateIdTokenAdapter;
 import org.springframework.beans.factory.annotation.Value;

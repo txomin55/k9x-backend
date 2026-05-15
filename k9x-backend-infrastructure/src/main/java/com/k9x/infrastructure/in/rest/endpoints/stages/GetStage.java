@@ -3,11 +3,9 @@ package com.k9x.infrastructure.in.rest.endpoints.stages;
 import com.k9x.oas.stub.api.StagesFetchOneApiDelegate;
 import com.k9x.oas.stub.model.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public class GetStage implements StagesFetchOneApiDelegate {
 
     @Override

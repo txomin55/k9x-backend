@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.in.rest.configuration.session.config;
 
-import com.k9x.application.authentication.dto.AuthTokenDTO;
+import com.k9x.application.users.dto.AuthTokenDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
