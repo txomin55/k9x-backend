@@ -42,6 +42,23 @@ subprojects {
         }
     }
 
+    apply(plugin = "jvm-test-suite")
+
+    extensions.configure<TestingExtension> {
+        suites {
+            register<JvmTestSuite>("unitTest") {
+                useJUnitJupiter()
+                dependencies {
+                    implementation(project())
+                }
+            }
+        }
+    }
+
+    configurations.named("unitTestImplementation") {
+        extendsFrom(configurations.getByName("implementation"))
+    }
+
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
     }

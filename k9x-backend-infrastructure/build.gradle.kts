@@ -30,10 +30,9 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.rest-assured:rest-assured:$restAssuredVersion")
-    testImplementation("junit:junit")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+    unitTestImplementation("org.springframework.boot:spring-boot-starter-test")
+    unitTestImplementation("io.rest-assured:rest-assured:$restAssuredVersion")
+    unitTestRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     jooqCodegen("org.jooq:jooq-meta-extensions:$jooqVersion")
 }
