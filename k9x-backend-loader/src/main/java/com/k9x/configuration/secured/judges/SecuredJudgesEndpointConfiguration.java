@@ -1,5 +1,6 @@
 package com.k9x.configuration.secured.judges;
 
+import com.k9x.application.judges.use_case.CreateJudgeServiceCase;
 import com.k9x.application.judges.use_case.DeleteJudgeServiceCase;
 import com.k9x.application.judges.use_case.GetJudgeListServiceCase;
 import com.k9x.application.users.dto.UserInfoDTO;
@@ -14,8 +15,8 @@ import org.springframework.context.annotation.Configuration;
 public class SecuredJudgesEndpointConfiguration {
 
     @Bean
-    public CreateJudge createJudge() {
-        return new CreateJudge();
+    public CreateJudge createJudge(CreateJudgeServiceCase createJudgeServiceCase, UserInfoDTO userInfoDTO) {
+        return new CreateJudge(createJudgeServiceCase, userInfoDTO);
     }
 
     @Bean
