@@ -3,6 +3,7 @@ package com.k9x.configuration.secured.dogs;
 import com.k9x.application.dogs.use_case.CreateDogServiceCase;
 import com.k9x.application.dogs.use_case.DeleteDogServiceCase;
 import com.k9x.application.dogs.use_case.GetDogListServiceCase;
+import com.k9x.application.dogs.use_case.UpdateDogServiceCase;
 import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.CreateDog;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.GetDogList;
@@ -25,8 +26,8 @@ public class SecuredDogsEndpointConfiguration {
     }
 
     @Bean
-    public UpdateDog updateDog() {
-        return new UpdateDog();
+    public UpdateDog updateDog(UpdateDogServiceCase updateDogServiceCase, UserInfoDTO userInfoDTO) {
+        return new UpdateDog(updateDogServiceCase, userInfoDTO);
     }
 
     @Bean
