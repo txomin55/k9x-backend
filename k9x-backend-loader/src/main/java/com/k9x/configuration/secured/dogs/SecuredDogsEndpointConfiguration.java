@@ -1,5 +1,6 @@
 package com.k9x.configuration.secured.dogs;
 
+import com.k9x.application.dogs.use_case.DeleteDogServiceCase;
 import com.k9x.application.dogs.use_case.GetDogListServiceCase;
 import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.CreateDog;
@@ -18,8 +19,8 @@ public class SecuredDogsEndpointConfiguration {
     }
 
     @Bean
-    public RemoveDog removeDog() {
-        return new RemoveDog();
+    public RemoveDog removeDog(DeleteDogServiceCase deleteDogServiceCase, UserInfoDTO userInfoDTO) {
+        return new RemoveDog(deleteDogServiceCase, userInfoDTO);
     }
 
     @Bean
