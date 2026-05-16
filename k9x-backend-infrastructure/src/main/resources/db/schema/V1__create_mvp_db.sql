@@ -29,7 +29,7 @@ CREATE TABLE k9x.dogs
     team        VARCHAR(50)  NOT NULL,
     last_update BIGINT       NOT NULL,
     created_at  BIGINT       NOT NULL,
-    deleted_at  BIGINT       NOT NULL,
+    deleted_at  BIGINT,
     CONSTRAINT dogs_pkey PRIMARY KEY (id)
 );
 
@@ -40,6 +40,6 @@ CREATE TABLE k9x.judges
     creator     VARCHAR(50)  NOT NULL,
     last_update BIGINT       NOT NULL,
     created_at  BIGINT       NOT NULL,
-    deleted_at  BIGINT       NOT NULL,
+    deleted_at  BIGINT,
     CONSTRAINT judges_pkey PRIMARY KEY (id)
 );

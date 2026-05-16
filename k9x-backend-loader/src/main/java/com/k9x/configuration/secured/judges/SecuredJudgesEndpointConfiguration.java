@@ -1,5 +1,6 @@
 package com.k9x.configuration.secured.judges;
 
+import com.k9x.application.judges.use_case.DeleteJudgeServiceCase;
 import com.k9x.application.judges.use_case.GetJudgeListServiceCase;
 import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.judges.CreateJudge;
@@ -23,8 +24,8 @@ public class SecuredJudgesEndpointConfiguration {
     }
 
     @Bean
-    public RemoveJudge removeJudge() {
-        return new RemoveJudge();
+    public RemoveJudge removeJudge(DeleteJudgeServiceCase deleteJudgeServiceCase, UserInfoDTO userInfoDTO) {
+        return new RemoveJudge(deleteJudgeServiceCase, userInfoDTO);
     }
 
     @Bean

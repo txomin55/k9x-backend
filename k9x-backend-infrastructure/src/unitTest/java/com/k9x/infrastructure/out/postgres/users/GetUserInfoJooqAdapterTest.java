@@ -43,7 +43,7 @@ class GetUserInfoJooqAdapterTest {
 
     @Test
     void maps_record_to_user_info_dto() {
-        MockDataProvider provider = ctx -> {
+        MockDataProvider provider = _ -> {
             DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);
             Result<Record> result = mockDsl.newResult(FIELDS);
             Record record = mockDsl.newRecord(FIELDS);
@@ -64,7 +64,7 @@ class GetUserInfoJooqAdapterTest {
 
     @Test
     void returns_null_when_user_not_found() {
-        MockDataProvider provider = ctx -> {
+        MockDataProvider provider = _ -> {
             Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(FIELDS);
             return new MockResult[]{new MockResult(0, result)};
         };

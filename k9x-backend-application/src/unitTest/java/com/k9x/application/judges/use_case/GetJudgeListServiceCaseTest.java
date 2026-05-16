@@ -47,7 +47,7 @@ class GetJudgeListServiceCaseTest {
 
     @Test
     void maps_judge_fields_to_dto_correctly() {
-        Judge judge = new Judge("id-1", "Rex", "user-1", 0L, 0L, 0L);
+        Judge judge = new Judge("id-1", "Rex", "user-1", 0L, 0L, null);
         when(getJudgeListPersistencePort.getJudges("user-1")).thenReturn(List.of(judge));
 
         List<JudgeDTO> result = serviceCase.getJudges("user-1", true);

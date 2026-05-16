@@ -6,7 +6,7 @@ public record Judge(
         String creator,
         long lastUpdate,
         long createdAt,
-        long deletedAt
+        Long deletedAt
 ) {
 
     public String getId() {

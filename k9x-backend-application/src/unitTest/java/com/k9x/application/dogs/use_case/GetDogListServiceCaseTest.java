@@ -1,7 +1,7 @@
 package com.k9x.application.dogs.use_case;
 
 import com.k9x.application.dogs.dto.DogDTO;
-import com.k9x.application.dogs.exceptions.OwnerNonProvidedWhenOrganizer;
+import com.k9x.application.dogs.exceptions.OwnerNonProvidedWhenOrganizerException;
 import com.k9x.application.dogs.port.GetDogListPersistencePort;
 import com.k9x.domain.aggregates.dogs.Dog;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +33,7 @@ class GetDogListServiceCaseTest {
     @Test
     void throws_exception_when_no_owner_is_provided_and_user_is_not_organizer() {
         assertThatThrownBy(() -> serviceCase.getDogs(null, false, false))
-                .isInstanceOf(OwnerNonProvidedWhenOrganizer.class);
+                .isInstanceOf(OwnerNonProvidedWhenOrganizerException.class);
     }
 
     @Test
@@ -65,8 +65,8 @@ class GetDogListServiceCaseTest {
 
     @Test
     void maps_dog_to_dto_with_owned_flag() {
-        Dog ownDog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-1", "creator-1", "ES", "team-1", 0L, 0L, 0L);
-        Dog othersDog = new Dog("id-2", "ident-2", "breed", "Max", "img2.png", "user-2", "creator-2", "FR", "team-2", 0L, 0L, 0L);
+        Dog ownDog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-1", "creator-1", "ES", "team-1", 0L, 0L, null);
+        Dog othersDog = new Dog("id-2", "ident-2", "breed", "Max", "img2.png", "user-2", "creator-2", "FR", "team-2", 0L, 0L, null);
         when(getDogListPersistencePort.getDogs(null)).thenReturn(List.of(ownDog, othersDog));
 
         List<DogDTO> result = serviceCase.getDogs("user-1", true, false);
@@ -78,7 +78,7 @@ class GetDogListServiceCaseTest {
 
     @Test
     void maps_dog_fields_to_dto_correctly() {
-        Dog dog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-1", "creator-1", "ES", "team-1", 0L, 0L, 0L);
+        Dog dog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-1", "creator-1", "ES", "team-1", 0L, 0L, null);
         when(getDogListPersistencePort.getDogs("user-1")).thenReturn(List.of(dog));
 
         List<DogDTO> result = serviceCase.getDogs("user-1", false, false);

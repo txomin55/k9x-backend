@@ -1,7 +1,7 @@
 package com.k9x.application.dogs.use_case;
 
 import com.k9x.application.dogs.dto.DogDTO;
-import com.k9x.application.dogs.exceptions.OwnerNonProvidedWhenOrganizer;
+import com.k9x.application.dogs.exceptions.OwnerNonProvidedWhenOrganizerException;
 import com.k9x.application.dogs.port.GetDogListPersistencePort;
 import com.k9x.domain.aggregates.dogs.Dog;
 
@@ -40,7 +40,7 @@ public class GetDogListServiceCase {
 
     private void assertOwnerWhenNoOrganizer(String owner, boolean organizer) {
         if (owner == null && !organizer) {
-            throw new OwnerNonProvidedWhenOrganizer();
+            throw new OwnerNonProvidedWhenOrganizerException();
         }
     }
 }

@@ -63,7 +63,7 @@ class GetDogListJooqAdapterTest {
             record.set(Tables.DOGS.TEAM, "team-1");
             record.set(Tables.DOGS.LAST_UPDATE, 1000L);
             record.set(Tables.DOGS.CREATED_AT, 2000L);
-            record.set(Tables.DOGS.DELETED_AT, 0L);
+            record.set(Tables.DOGS.DELETED_AT, null);
             result.add(record);
             return new MockResult[]{new MockResult(1, result)};
         };
@@ -84,6 +84,6 @@ class GetDogListJooqAdapterTest {
         assertThat(dog.team()).isEqualTo("team-1");
         assertThat(dog.lastUpdate()).isEqualTo(1000L);
         assertThat(dog.createdAt()).isEqualTo(2000L);
-        assertThat(dog.deletedAt()).isEqualTo(0L);
+        assertThat(dog.deletedAt()).isNull();
     }
 }
