@@ -13,10 +13,13 @@ public class CreateJudgeServiceCase {
     }
 
     public void createJudge(String id, String name, String userId, boolean organizer) {
+        assertOrganizer(organizer);
+        createJudgePersistencePort.createJudge(id, name, userId, DateUtils.nowUtcMillis());
+    }
+
+    private void assertOrganizer(boolean organizer) {
         if (!organizer) {
             throw new UnauthorizedResourceException();
         }
-
-        createJudgePersistencePort.createJudge(id, name, userId, DateUtils.nowUtcMillis());
     }
 }

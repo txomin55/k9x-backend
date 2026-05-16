@@ -15,11 +15,15 @@ public class GetJudgeListServiceCase {
     }
 
     public List<JudgeDTO> getJudges(String userId, boolean organizer) {
-        if (!organizer) {
-            throw new UnauthorizedResourceException();
-        }
+        assertOrganizer(organizer);
         return getJudgeListPersistencePort.getJudges(userId).stream()
                 .map(judge -> new JudgeDTO(judge.getId(), judge.getName()))
                 .toList();
+    }
+
+    private void assertOrganizer(boolean organizer) {
+        if (!organizer) {
+            throw new UnauthorizedResourceException();
+        }
     }
 }

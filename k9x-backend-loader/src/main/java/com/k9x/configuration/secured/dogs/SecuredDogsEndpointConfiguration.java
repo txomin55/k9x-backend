@@ -1,5 +1,6 @@
 package com.k9x.configuration.secured.dogs;
 
+import com.k9x.application.dogs.use_case.CreateDogServiceCase;
 import com.k9x.application.dogs.use_case.DeleteDogServiceCase;
 import com.k9x.application.dogs.use_case.GetDogListServiceCase;
 import com.k9x.application.users.dto.UserInfoDTO;
@@ -14,8 +15,8 @@ import org.springframework.context.annotation.Configuration;
 public class SecuredDogsEndpointConfiguration {
 
     @Bean
-    public CreateDog createDog() {
-        return new CreateDog();
+    public CreateDog createDog(CreateDogServiceCase createDogServiceCase, UserInfoDTO userInfoDTO) {
+        return new CreateDog(createDogServiceCase, userInfoDTO);
     }
 
     @Bean

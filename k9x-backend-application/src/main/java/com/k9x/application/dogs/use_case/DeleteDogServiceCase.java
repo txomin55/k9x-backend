@@ -21,10 +21,19 @@ public class DeleteDogServiceCase {
 
     public void deleteDog(String dogId, String userId, boolean organizer) {
         Dog dog = getDogPersistencePort.getDog(dogId);
+        assertDogExists(dog);
+        assertUserCanDeleteDog(dog, userId, organizer);
+        assertDogNotDeleted(dog);
+        deleteDogPersistencePort.deleteDog(dogId, DateUtils.nowUtcMillis());
+    }
+
+    private void assertDogExists(Dog dog) {
         if (dog == null) {
             throw new DogNotFoundException();
         }
+    }
 
+    private void assertUserCanDeleteDog(Dog dog, String userId, boolean organizer) {
         if (dog.owner() != null) {
             if (!dog.owner().equals(userId)) {
                 throw new UnauthorizedResourceException();
@@ -37,11 +46,11 @@ public class DeleteDogServiceCase {
                 throw new UnauthorizedResourceException();
             }
         }
+    }
 
+    private void assertDogNotDeleted(Dog dog) {
         if (dog.deletedAt() != null) {
             throw new DogAlreadyDeletedException();
         }
-
-        deleteDogPersistencePort.deleteDog(dogId, DateUtils.nowUtcMillis());
     }
 }
