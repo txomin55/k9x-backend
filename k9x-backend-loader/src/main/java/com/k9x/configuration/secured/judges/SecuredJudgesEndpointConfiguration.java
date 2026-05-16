@@ -1,5 +1,7 @@
 package com.k9x.configuration.secured.judges;
 
+import com.k9x.application.judges.use_case.GetJudgeListServiceCase;
+import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.judges.CreateJudge;
 import com.k9x.infrastructure.in.rest.endpoints.secured.judges.FetchJudges;
 import com.k9x.infrastructure.in.rest.endpoints.secured.judges.RemoveJudge;
@@ -16,8 +18,8 @@ public class SecuredJudgesEndpointConfiguration {
     }
 
     @Bean
-    public FetchJudges fetchJudges() {
-        return new FetchJudges();
+    public FetchJudges fetchJudges(GetJudgeListServiceCase getJudgeListServiceCase, UserInfoDTO userInfoDTO) {
+        return new FetchJudges(getJudgeListServiceCase, userInfoDTO);
     }
 
     @Bean
