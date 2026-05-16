@@ -3,6 +3,7 @@ package com.k9x.configuration.secured.judges;
 import com.k9x.application.judges.use_case.CreateJudgeServiceCase;
 import com.k9x.application.judges.use_case.DeleteJudgeServiceCase;
 import com.k9x.application.judges.use_case.GetJudgeListServiceCase;
+import com.k9x.application.judges.use_case.UpdateJudgeServiceCase;
 import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.judges.CreateJudge;
 import com.k9x.infrastructure.in.rest.endpoints.secured.judges.FetchJudges;
@@ -30,7 +31,7 @@ public class SecuredJudgesEndpointConfiguration {
     }
 
     @Bean
-    public UpdateJudge updateJudge() {
-        return new UpdateJudge();
+    public UpdateJudge updateJudge(UpdateJudgeServiceCase updateJudgeServiceCase, UserInfoDTO userInfoDTO) {
+        return new UpdateJudge(updateJudgeServiceCase, userInfoDTO);
     }
 }

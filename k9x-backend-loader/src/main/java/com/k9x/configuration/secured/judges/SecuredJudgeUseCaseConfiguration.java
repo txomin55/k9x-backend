@@ -4,9 +4,11 @@ import com.k9x.application.judges.port.CreateJudgePersistencePort;
 import com.k9x.application.judges.port.DeleteJudgePersistencePort;
 import com.k9x.application.judges.port.GetJudgeListPersistencePort;
 import com.k9x.application.judges.port.GetJudgePersistencePort;
+import com.k9x.application.judges.port.UpdateJudgePersistencePort;
 import com.k9x.application.judges.use_case.CreateJudgeServiceCase;
 import com.k9x.application.judges.use_case.DeleteJudgeServiceCase;
 import com.k9x.application.judges.use_case.GetJudgeListServiceCase;
+import com.k9x.application.judges.use_case.UpdateJudgeServiceCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,5 +29,11 @@ public class SecuredJudgeUseCaseConfiguration {
     public DeleteJudgeServiceCase deleteJudgeServiceCase(GetJudgePersistencePort getJudgePersistencePort,
                                                          DeleteJudgePersistencePort deleteJudgePersistencePort) {
         return new DeleteJudgeServiceCase(getJudgePersistencePort, deleteJudgePersistencePort);
+    }
+
+    @Bean
+    public UpdateJudgeServiceCase updateJudgeServiceCase(GetJudgePersistencePort getJudgePersistencePort,
+                                                         UpdateJudgePersistencePort updateJudgePersistencePort) {
+        return new UpdateJudgeServiceCase(getJudgePersistencePort, updateJudgePersistencePort);
     }
 }
