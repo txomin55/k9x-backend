@@ -20,7 +20,8 @@ public class SecuredStageUseCaseConfiguration {
 
     @Bean
     public UpdateStageServiceCase updateStageServiceCase(GetStagePersistencePort getStagePersistencePort,
+                                                         GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                          UpdateStagePersistencePort updateStagePersistencePort) {
-        return new UpdateStageServiceCase(getStagePersistencePort, updateStagePersistencePort);
+        return new UpdateStageServiceCase(getStagePersistencePort, getCompetitionPersistencePort, updateStagePersistencePort);
     }
 }
