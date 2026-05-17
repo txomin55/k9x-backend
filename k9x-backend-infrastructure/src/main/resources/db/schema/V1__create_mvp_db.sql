@@ -43,3 +43,34 @@ CREATE TABLE k9x.judges
     deleted_at  BIGINT,
     CONSTRAINT judges_pkey PRIMARY KEY (id)
 );
+
+CREATE TABLE k9x.competitions
+(
+    id          VARCHAR(255) NOT NULL,
+    name        VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    address     VARCHAR(255),
+    coord_alt   DOUBLE PRECISION,
+    coord_long  DOUBLE PRECISION,
+    creator     VARCHAR(50)  NOT NULL,
+    last_update BIGINT       NOT NULL,
+    created_at  BIGINT       NOT NULL,
+    deleted_at  BIGINT,
+    CONSTRAINT competitions_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE k9x.stages
+(
+    id             VARCHAR(255) NOT NULL,
+    name           VARCHAR(255) NOT NULL,
+    competition_id VARCHAR(50)  NOT NULL,
+    date_from      BIGINT       NOT NULL,
+    date_to        BIGINT       NOT NULL,
+    creator        VARCHAR(50)  NOT NULL,
+    last_update    BIGINT       NOT NULL,
+    created_at     BIGINT       NOT NULL,
+    deleted_at     BIGINT,
+    CONSTRAINT stages_pkey PRIMARY KEY (id),
+    CONSTRAINT stages_organization_fk FOREIGN KEY (competition_id) REFERENCES k9x.competitions (id)
+
+);

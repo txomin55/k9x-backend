@@ -1,5 +1,7 @@
 package com.k9x.configuration.secured.competitions;
 
+import com.k9x.application.competitions.use_case.CreateCompetitionServiceCase;
+import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.competitions.CreateCompetition;
 import com.k9x.infrastructure.in.rest.endpoints.secured.competitions.FetchCompetitions;
 import com.k9x.infrastructure.in.rest.endpoints.secured.competitions.RemoveCompetition;
@@ -11,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 public class SecuredCompetitionsEndpointConfiguration {
 
     @Bean
-    public CreateCompetition createCompetition() {
-        return new CreateCompetition();
+    public CreateCompetition createCompetition(CreateCompetitionServiceCase createCompetitionServiceCase, UserInfoDTO userInfoDTO) {
+        return new CreateCompetition(createCompetitionServiceCase, userInfoDTO);
     }
 
     @Bean
