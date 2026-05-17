@@ -7,7 +7,9 @@ public enum ErrorEnum {
     JUDGE_NOT_FOUND("error.judge_not_found"),
     JUDGE_ALREADY_DELETED("error.judge_already_deleted"),
     DOG_NOT_FOUND("error.dog_not_found"),
-    DOG_ALREADY_DELETED("error.dog_already_deleted");
+    DOG_ALREADY_DELETED("error.dog_already_deleted"),
+    COMPETITION_NOT_FOUND("error.competition_not_found"),
+    COMPETITION_ALREADY_DELETED("error.competition_already_deleted");
 
     private final String id;
 
