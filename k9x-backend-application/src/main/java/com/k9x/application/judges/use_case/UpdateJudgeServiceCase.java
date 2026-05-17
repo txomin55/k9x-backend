@@ -1,5 +1,6 @@
 package com.k9x.application.judges.use_case;
 
+import com.k9x.application.judges.exceptions.JudgeAlreadyDeletedException;
 import com.k9x.application.judges.exceptions.JudgeNotFoundException;
 import com.k9x.application.judges.port.GetJudgePersistencePort;
 import com.k9x.application.judges.port.UpdateJudgePersistencePort;
@@ -22,6 +23,7 @@ public class UpdateJudgeServiceCase {
         assertOrganizer(organizer);
         Judge judge = getJudgePersistencePort.getJudge(judgeId);
         assertJudgeExists(judge);
+        assertJudgeNotDeleted(judge);
         assertUserIsJudgeCreator(judge, userId);
         updateJudgePersistencePort.updateJudge(judgeId, name, DateUtils.nowUtcMillis());
     }
@@ -35,6 +37,12 @@ public class UpdateJudgeServiceCase {
     private void assertJudgeExists(Judge judge) {
         if (judge == null) {
             throw new JudgeNotFoundException();
+        }
+    }
+
+    private void assertJudgeNotDeleted(Judge judge) {
+        if (judge.deletedAt() != null) {
+            throw new JudgeAlreadyDeletedException();
         }
     }
 

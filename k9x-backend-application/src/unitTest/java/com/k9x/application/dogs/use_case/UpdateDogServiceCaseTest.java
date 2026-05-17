@@ -1,5 +1,6 @@
 package com.k9x.application.dogs.use_case;
 
+import com.k9x.application.dogs.exceptions.DogAlreadyDeletedException;
 import com.k9x.application.dogs.exceptions.DogNotFoundException;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
@@ -36,6 +37,17 @@ class UpdateDogServiceCaseTest {
 
         assertThatThrownBy(() -> serviceCase.updateDog("dog-1", "Rex", "img", "Lab", "id", "user-1", "user-1", "team", "ES", false))
                 .isInstanceOf(DogNotFoundException.class);
+
+        verifyNoInteractions(updateDogPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_dog_is_deleted() {
+        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "user-1", "creator-1", "ES", "team", 0L, 0L, 1700000000000L);
+        when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
+
+        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", "Rex", "img", "Lab", "id", "user-1", "user-1", "team", "ES", false))
+                .isInstanceOf(DogAlreadyDeletedException.class);
 
         verifyNoInteractions(updateDogPersistencePort);
     }

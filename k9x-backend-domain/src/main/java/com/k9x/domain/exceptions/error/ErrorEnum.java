@@ -9,7 +9,9 @@ public enum ErrorEnum {
     DOG_NOT_FOUND("error.dog_not_found"),
     DOG_ALREADY_DELETED("error.dog_already_deleted"),
     COMPETITION_NOT_FOUND("error.competition_not_found"),
-    COMPETITION_ALREADY_DELETED("error.competition_already_deleted");
+    COMPETITION_ALREADY_DELETED("error.competition_already_deleted"),
+    STAGE_NOT_FOUND("error.stage_not_found"),
+    STAGE_ALREADY_DELETED("error.stage_already_deleted");
 
     private final String id;
 

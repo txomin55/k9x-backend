@@ -1,5 +1,6 @@
 package com.k9x.application.judges.use_case;
 
+import com.k9x.application.judges.exceptions.JudgeAlreadyDeletedException;
 import com.k9x.application.judges.exceptions.JudgeNotFoundException;
 import com.k9x.application.judges.port.GetJudgePersistencePort;
 import com.k9x.application.judges.port.UpdateJudgePersistencePort;
@@ -44,6 +45,17 @@ class UpdateJudgeServiceCaseTest {
 
         assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", "Rex", "user-1", true))
                 .isInstanceOf(JudgeNotFoundException.class);
+
+        verifyNoInteractions(updateJudgePersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_judge_is_deleted() {
+        Judge judge = new Judge("judge-1", "Rex", "user-1", 0L, 0L, 1700000000000L);
+        when(getJudgePersistencePort.getJudge("judge-1")).thenReturn(judge);
+
+        assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", "Rex", "user-1", true))
+                .isInstanceOf(JudgeAlreadyDeletedException.class);
 
         verifyNoInteractions(updateJudgePersistencePort);
     }

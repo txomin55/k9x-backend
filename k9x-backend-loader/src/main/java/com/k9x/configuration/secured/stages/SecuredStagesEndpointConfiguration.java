@@ -1,6 +1,7 @@
 package com.k9x.configuration.secured.stages;
 
 import com.k9x.application.stages.use_case.CreateStageServiceCase;
+import com.k9x.application.stages.use_case.UpdateStageServiceCase;
 import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.stages.CreateStage;
 import com.k9x.infrastructure.in.rest.endpoints.secured.stages.RemoveStage;
@@ -22,7 +23,7 @@ public class SecuredStagesEndpointConfiguration {
     }
 
     @Bean
-    public UpdateStage updateStage() {
-        return new UpdateStage();
+    public UpdateStage updateStage(UpdateStageServiceCase updateStageServiceCase, UserInfoDTO userInfoDTO) {
+        return new UpdateStage(updateStageServiceCase, userInfoDTO);
     }
 }
