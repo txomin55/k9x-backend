@@ -28,9 +28,7 @@ public class UpdateCompetitionServiceCase {
                                   String userId, boolean organizer) {
         assertOrganizer(organizer);
         Competition competition = getCompetitionPersistencePort.getCompetition(id);
-        assertCompetitionExists(competition);
-        assertCompetitionNotDeleted(competition);
-        assertUserIsCompetitionCreator(competition, userId);
+        assertCompetitionValidations(competition, userId);
         Coordinates coordinates = geoCoordinatesPort.getCoordinates(address);
         updateCompetitionPersistencePort.updateCompetition(id, name, description, address,
                 coordinates.coordAlt(), coordinates.coordLong(), DateUtils.nowUtcMillis());
@@ -42,19 +40,13 @@ public class UpdateCompetitionServiceCase {
         }
     }
 
-    private void assertCompetitionExists(Competition competition) {
+    private void assertCompetitionValidations(Competition competition, String userId) {
         if (competition == null) {
             throw new CompetitionNotFoundException();
         }
-    }
-
-    private void assertCompetitionNotDeleted(Competition competition) {
         if (competition.deletedAt() != null) {
             throw new CompetitionAlreadyDeletedException();
         }
-    }
-
-    private void assertUserIsCompetitionCreator(Competition competition, String userId) {
         if (!competition.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }

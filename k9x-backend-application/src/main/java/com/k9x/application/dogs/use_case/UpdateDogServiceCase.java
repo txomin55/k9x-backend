@@ -22,25 +22,17 @@ public class UpdateDogServiceCase {
     public void updateDog(String dogId, String name, String image, String breed, String identity,
                           String owner, String userId, String team, String country, boolean organizer) {
         Dog dog = getDogPersistencePort.getDog(dogId);
-        assertDogExists(dog);
-        assertDogNotDeleted(dog);
-        assertUserCanUpdateDog(dog, userId, organizer);
+        assertDogValidations(dog, userId, organizer);
         updateDogPersistencePort.updateDog(dogId, name, image, breed, identity, owner, team, country, DateUtils.nowUtcMillis());
     }
 
-    private void assertDogExists(Dog dog) {
+    private void assertDogValidations(Dog dog, String userId, boolean organizer) {
         if (dog == null) {
             throw new DogNotFoundException();
         }
-    }
-
-    private void assertDogNotDeleted(Dog dog) {
         if (dog.deletedAt() != null) {
             throw new DogAlreadyDeletedException();
         }
-    }
-
-    private void assertUserCanUpdateDog(Dog dog, String userId, boolean organizer) {
         if (dog.owner() != null) {
             if (!dog.owner().equals(userId)) {
                 throw new UnauthorizedResourceException();

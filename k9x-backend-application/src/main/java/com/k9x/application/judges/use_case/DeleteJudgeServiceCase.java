@@ -22,9 +22,7 @@ public class DeleteJudgeServiceCase {
     public void deleteJudge(String judgeId, String userId, boolean organizer) {
         assertOrganizer(organizer);
         Judge judge = getJudgePersistencePort.getJudge(judgeId);
-        assertJudgeExists(judge);
-        assertUserIsJudgeCreator(judge, userId);
-        assertJudgeNotDeleted(judge);
+        assertJudgeValidations(judge, userId);
         deleteJudgePersistencePort.deleteJudge(judgeId, DateUtils.nowUtcMillis());
     }
 
@@ -34,19 +32,13 @@ public class DeleteJudgeServiceCase {
         }
     }
 
-    private void assertJudgeExists(Judge judge) {
+    private void assertJudgeValidations(Judge judge, String userId) {
         if (judge == null) {
             throw new JudgeNotFoundException();
         }
-    }
-
-    private void assertUserIsJudgeCreator(Judge judge, String userId) {
         if (!judge.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
-    }
-
-    private void assertJudgeNotDeleted(Judge judge) {
         if (judge.deletedAt() != null) {
             throw new JudgeAlreadyDeletedException();
         }

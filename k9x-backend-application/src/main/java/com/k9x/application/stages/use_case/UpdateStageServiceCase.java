@@ -28,12 +28,9 @@ public class UpdateStageServiceCase {
     public void updateStage(String stageId, String name, Long dateFrom, Long dateTo, String userId, boolean organizer) {
         assertOrganizer(organizer);
         Stage stage = getStagePersistencePort.getStage(stageId);
-        assertStageExists(stage);
-        assertStageNotDeleted(stage);
-        assertUserIsStageCreator(stage, userId);
+        assertStageValidations(stage, userId);
         Competition competition = getCompetitionPersistencePort.getCompetition(stage.competitionId());
-        assertCompetitionNotDeleted(competition);
-        assertUserIsCompetitionCreator(competition, userId);
+        assertCompetitionValidations(competition, userId);
         updateStagePersistencePort.updateStage(stageId, name, dateFrom, dateTo, DateUtils.nowUtcMillis());
     }
 
@@ -43,31 +40,22 @@ public class UpdateStageServiceCase {
         }
     }
 
-    private void assertStageExists(Stage stage) {
+    private void assertStageValidations(Stage stage, String userId) {
         if (stage == null) {
             throw new StageNotFoundException();
         }
-    }
-
-    private void assertStageNotDeleted(Stage stage) {
         if (stage.deletedAt() != null) {
             throw new StageAlreadyDeletedException();
         }
-    }
-
-    private void assertUserIsStageCreator(Stage stage, String userId) {
         if (!stage.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
     }
 
-    private void assertCompetitionNotDeleted(Competition competition) {
+    private void assertCompetitionValidations(Competition competition, String userId) {
         if (competition.deletedAt() != null) {
             throw new CompetitionAlreadyDeletedException();
         }
-    }
-
-    private void assertUserIsCompetitionCreator(Competition competition, String userId) {
         if (!competition.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }

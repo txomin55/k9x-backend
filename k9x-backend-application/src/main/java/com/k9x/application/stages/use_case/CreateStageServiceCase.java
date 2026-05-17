@@ -23,9 +23,7 @@ public class CreateStageServiceCase {
                             String userId, boolean organizer) {
         assertOrganizer(organizer);
         Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
-        assertCompetitionExists(competition);
-        assertCompetitionNotDeleted(competition);
-        assertUserIsCompetitionCreator(competition, userId);
+        assertCompetitionValidations(competition, userId);
         createStagePersistencePort.createStage(id, name, competitionId, dateFrom, dateTo, userId, DateUtils.nowUtcMillis());
     }
 
@@ -35,19 +33,13 @@ public class CreateStageServiceCase {
         }
     }
 
-    private void assertCompetitionExists(Competition competition) {
+    private void assertCompetitionValidations(Competition competition, String userId) {
         if (competition == null) {
             throw new CompetitionNotFoundException();
         }
-    }
-
-    private void assertCompetitionNotDeleted(Competition competition) {
         if (competition.deletedAt() != null) {
             throw new CompetitionAlreadyDeletedException();
         }
-    }
-
-    private void assertUserIsCompetitionCreator(Competition competition, String userId) {
         if (!competition.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
