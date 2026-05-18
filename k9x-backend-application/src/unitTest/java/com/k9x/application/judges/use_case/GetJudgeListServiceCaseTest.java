@@ -1,6 +1,7 @@
 package com.k9x.application.judges.use_case;
 
 import com.k9x.application.judges.port.GetJudgeListPersistencePort;
+import com.k9x.application.judges.use_case.dto.JudgeDTO;
 import com.k9x.domain.aggregates.judges.Judge;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import org.junit.jupiter.api.BeforeEach;

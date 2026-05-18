@@ -6,6 +6,7 @@ import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.exceptions.StageNotFoundException;
 import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.application.stages.port.UpdateStagePersistencePort;
+import com.k9x.application.stages.use_case.command.UpdateStageCommand;
 import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.aggregates.stages.Stage;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
