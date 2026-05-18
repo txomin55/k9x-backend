@@ -2,6 +2,7 @@ package com.k9x.configuration.secured.competitions;
 
 import com.k9x.application.competitions.use_case.CreateCompetitionServiceCase;
 import com.k9x.application.competitions.use_case.DeleteCompetitionServiceCase;
+import com.k9x.application.competitions.use_case.GetCompetitionListServiceCase;
 import com.k9x.application.competitions.use_case.UpdateCompetitionServiceCase;
 import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.competitions.CreateCompetition;
@@ -20,8 +21,8 @@ public class SecuredCompetitionsEndpointConfiguration {
     }
 
     @Bean
-    public FetchCompetitions fetchCompetitions() {
-        return new FetchCompetitions();
+    public FetchCompetitions fetchCompetitions(GetCompetitionListServiceCase getCompetitionListServiceCase, UserInfoDTO userInfoDTO) {
+        return new FetchCompetitions(getCompetitionListServiceCase, userInfoDTO);
     }
 
     @Bean

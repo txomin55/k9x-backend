@@ -1,5 +1,7 @@
 package com.k9x.application.dogs.use_case;
 
+import com.k9x.application.dogs.command.UpdateDogCommand;
+import com.k9x.application.dogs.payload.UpdateDogPersistencePayload;
 import com.k9x.application.dogs.exceptions.DogAlreadyDeletedException;
 import com.k9x.application.dogs.exceptions.DogNotFoundException;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
@@ -19,11 +21,11 @@ public class UpdateDogServiceCase {
         this.updateDogPersistencePort = updateDogPersistencePort;
     }
 
-    public void updateDog(String dogId, String name, String image, String breed, String identity,
-                          String owner, String userId, String team, String country, boolean organizer) {
+    public void updateDog(String dogId, UpdateDogCommand command, String userId, boolean organizer) {
         Dog dog = getDogPersistencePort.getDog(dogId);
         assertDogValidations(dog, userId, organizer);
-        updateDogPersistencePort.updateDog(dogId, name, image, breed, identity, owner, team, country, DateUtils.nowUtcMillis());
+        updateDogPersistencePort.updateDog(dogId, new UpdateDogPersistencePayload(command.name(), command.image(),
+                command.breed(), command.identity(), command.owner(), command.team(), command.country(), DateUtils.nowUtcMillis()));
     }
 
     private void assertDogValidations(Dog dog, String userId, boolean organizer) {

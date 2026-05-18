@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.out.postgres.competitions;
 
+import com.k9x.application.competitions.payload.UpdateCompetitionPersistencePayload;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -31,19 +32,20 @@ class UpdateCompetitionJooqAdapterTest {
 
         long lastUpdate = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new UpdateCompetitionJooqAdapter(dsl).updateCompetition("comp-123", "World Cup", "A great competition",
-                "Madrid, Spain", 40.4168, -3.7038, lastUpdate);
+        new UpdateCompetitionJooqAdapter(dsl).updateCompetition("comp-123",
+                new UpdateCompetitionPersistencePayload("World Cup", "A great competition", "ES", "Madrid, Spain", 40.4168, -3.7038, lastUpdate));
 
         assertThat(capturedSql.get())
                 .contains("update \"k9x\".\"competitions\"")
                 .contains("\"name\"")
                 .contains("\"description\"")
+                .contains("\"country\"")
                 .contains("\"address\"")
                 .contains("\"coord_alt\"")
                 .contains("\"coord_long\"")
                 .contains("\"last_update\"")
                 .contains("\"id\"");
         assertThat(capturedBindings.get()).contains("comp-123", "World Cup", "A great competition",
-                "Madrid, Spain", 40.4168, -3.7038, lastUpdate);
+                "ES", "Madrid, Spain", 40.4168, -3.7038, lastUpdate);
     }
 }

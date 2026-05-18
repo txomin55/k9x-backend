@@ -1,6 +1,7 @@
 package com.k9x.application.stages.use_case;
 
 import com.k9x.application.competitions.exceptions.CompetitionAlreadyDeletedException;
+import com.k9x.application.stages.command.UpdateStageCommand;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.exceptions.StageNotFoundException;
@@ -16,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,7 +41,7 @@ class UpdateStageServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_organizer() {
-        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", "Stage 1", 1L, 2L, "user-1", false))
+        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", new UpdateStageCommand("Stage 1", 1L, 2L), "user-1", false))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(getStagePersistencePort, getCompetitionPersistencePort, updateStagePersistencePort);
@@ -49,7 +51,7 @@ class UpdateStageServiceCaseTest {
     void throws_exception_when_stage_not_found() {
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(null);
 
-        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", "Stage 1", 1L, 2L, "user-1", true))
+        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", new UpdateStageCommand("Stage 1", 1L, 2L), "user-1", true))
                 .isInstanceOf(StageNotFoundException.class);
 
         verifyNoInteractions(getCompetitionPersistencePort, updateStagePersistencePort);
@@ -60,7 +62,7 @@ class UpdateStageServiceCaseTest {
         Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", 0L, 0L, 1700000000000L);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
 
-        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", "Stage 1", 1L, 2L, "user-1", true))
+        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", new UpdateStageCommand("Stage 1", 1L, 2L), "user-1", true))
                 .isInstanceOf(StageAlreadyDeletedException.class);
 
         verifyNoInteractions(getCompetitionPersistencePort, updateStagePersistencePort);
@@ -71,7 +73,7 @@ class UpdateStageServiceCaseTest {
         Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "other-user", 0L, 0L, null);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
 
-        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", "Stage 1", 1L, 2L, "user-1", true))
+        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", new UpdateStageCommand("Stage 1", 1L, 2L), "user-1", true))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(getCompetitionPersistencePort, updateStagePersistencePort);
@@ -84,7 +86,7 @@ class UpdateStageServiceCaseTest {
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(deletedCompetition);
 
-        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", "Stage 1", 1L, 2L, "user-1", true))
+        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", new UpdateStageCommand("Stage 1", 1L, 2L), "user-1", true))
                 .isInstanceOf(CompetitionAlreadyDeletedException.class);
 
         verifyNoInteractions(updateStagePersistencePort);
@@ -97,7 +99,7 @@ class UpdateStageServiceCaseTest {
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
 
-        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", "Stage 1", 1L, 2L, "user-1", true))
+        assertThatThrownBy(() -> serviceCase.updateStage("stage-1", new UpdateStageCommand("Stage 1", 1L, 2L), "user-1", true))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(updateStagePersistencePort);
@@ -110,8 +112,8 @@ class UpdateStageServiceCaseTest {
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
 
-        serviceCase.updateStage("stage-1", "New Name", 1L, 2L, "user-1", true);
+        serviceCase.updateStage("stage-1", new UpdateStageCommand("New Name", 1L, 2L), "user-1", true);
 
-        verify(updateStagePersistencePort).updateStage(eq("stage-1"), eq("New Name"), eq(1L), eq(2L), anyLong());
+        verify(updateStagePersistencePort).updateStage(eq("stage-1"), any());
     }
 }

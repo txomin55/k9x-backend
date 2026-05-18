@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.out.postgres.judges;
 
+import com.k9x.application.judges.payload.UpdateJudgePersistencePayload;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -31,7 +32,8 @@ class UpdateJudgeJooqAdapterTest {
 
         long lastUpdate = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new UpdateJudgeJooqAdapter(dsl).updateJudge("judge-123", "NewName", lastUpdate);
+        new UpdateJudgeJooqAdapter(dsl).updateJudge("judge-123",
+                new UpdateJudgePersistencePayload("NewName", lastUpdate));
 
         assertThat(capturedSql.get())
                 .contains("update \"k9x\".\"judges\"")

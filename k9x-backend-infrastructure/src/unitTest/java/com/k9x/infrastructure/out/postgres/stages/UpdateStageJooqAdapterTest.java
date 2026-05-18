@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.out.postgres.stages;
 
+import com.k9x.application.stages.payload.UpdateStagePersistencePayload;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -31,7 +32,8 @@ class UpdateStageJooqAdapterTest {
 
         long lastUpdate = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new UpdateStageJooqAdapter(dsl).updateStage("stage-123", "New Name", 1L, 2L, lastUpdate);
+        new UpdateStageJooqAdapter(dsl).updateStage("stage-123",
+                new UpdateStagePersistencePayload("New Name", 1L, 2L, lastUpdate));
 
         assertThat(capturedSql.get())
                 .contains("update \"k9x\".\"stages\"")

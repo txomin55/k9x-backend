@@ -1,6 +1,8 @@
 package com.k9x.application.competitions.use_case;
 
+import com.k9x.application.competitions.command.UpdateCompetitionCommand;
 import com.k9x.application.competitions.dto.Coordinates;
+import com.k9x.application.competitions.payload.UpdateCompetitionPersistencePayload;
 import com.k9x.application.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.application.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.application.competitions.port.GeoCoordinatesPort;
@@ -24,14 +26,14 @@ public class UpdateCompetitionServiceCase {
         this.updateCompetitionPersistencePort = updateCompetitionPersistencePort;
     }
 
-    public void updateCompetition(String id, String name, String description, String address,
-                                  String userId, boolean organizer) {
+    public void updateCompetition(String id, UpdateCompetitionCommand command, String userId, boolean organizer) {
         assertOrganizer(organizer);
         Competition competition = getCompetitionPersistencePort.getCompetition(id);
         assertCompetitionValidations(competition, userId);
-        Coordinates coordinates = geoCoordinatesPort.getCoordinates(address);
-        updateCompetitionPersistencePort.updateCompetition(id, name, description, address,
-                coordinates.coordAlt(), coordinates.coordLong(), DateUtils.nowUtcMillis());
+        Coordinates coordinates = geoCoordinatesPort.getCoordinates(command.address());
+        updateCompetitionPersistencePort.updateCompetition(id, new UpdateCompetitionPersistencePayload(
+                command.name(), command.description(), command.country(), command.address(),
+                coordinates.coordAlt(), coordinates.coordLong(), DateUtils.nowUtcMillis()));
     }
 
     private void assertOrganizer(boolean organizer) {

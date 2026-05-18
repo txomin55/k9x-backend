@@ -1,5 +1,6 @@
 package com.k9x.application.judges.use_case;
 
+import com.k9x.application.judges.command.UpdateJudgeCommand;
 import com.k9x.application.judges.exceptions.JudgeAlreadyDeletedException;
 import com.k9x.application.judges.exceptions.JudgeNotFoundException;
 import com.k9x.application.judges.port.GetJudgePersistencePort;
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,7 +35,7 @@ class UpdateJudgeServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_organizer() {
-        assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", "Rex", "user-1", false))
+        assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", new UpdateJudgeCommand("Rex"), "user-1", false))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(getJudgePersistencePort, updateJudgePersistencePort);
@@ -43,7 +45,7 @@ class UpdateJudgeServiceCaseTest {
     void throws_exception_when_judge_not_found() {
         when(getJudgePersistencePort.getJudge("judge-1")).thenReturn(null);
 
-        assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", "Rex", "user-1", true))
+        assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", new UpdateJudgeCommand("Rex"), "user-1", true))
                 .isInstanceOf(JudgeNotFoundException.class);
 
         verifyNoInteractions(updateJudgePersistencePort);
@@ -54,7 +56,7 @@ class UpdateJudgeServiceCaseTest {
         Judge judge = new Judge("judge-1", "Rex", "user-1", 0L, 0L, 1700000000000L);
         when(getJudgePersistencePort.getJudge("judge-1")).thenReturn(judge);
 
-        assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", "Rex", "user-1", true))
+        assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", new UpdateJudgeCommand("Rex"), "user-1", true))
                 .isInstanceOf(JudgeAlreadyDeletedException.class);
 
         verifyNoInteractions(updateJudgePersistencePort);
@@ -65,7 +67,7 @@ class UpdateJudgeServiceCaseTest {
         Judge judge = new Judge("judge-1", "Rex", "other-user", 0L, 0L, null);
         when(getJudgePersistencePort.getJudge("judge-1")).thenReturn(judge);
 
-        assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", "Rex", "user-1", true))
+        assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", new UpdateJudgeCommand("Rex"), "user-1", true))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(updateJudgePersistencePort);
@@ -76,8 +78,8 @@ class UpdateJudgeServiceCaseTest {
         Judge judge = new Judge("judge-1", "Rex", "user-1", 0L, 0L, null);
         when(getJudgePersistencePort.getJudge("judge-1")).thenReturn(judge);
 
-        serviceCase.updateJudge("judge-1", "NewName", "user-1", true);
+        serviceCase.updateJudge("judge-1", new UpdateJudgeCommand("NewName"), "user-1", true);
 
-        verify(updateJudgePersistencePort).updateJudge(eq("judge-1"), eq("NewName"), anyLong());
+        verify(updateJudgePersistencePort).updateJudge(eq("judge-1"), any());
     }
 }

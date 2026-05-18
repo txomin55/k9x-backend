@@ -2,6 +2,8 @@ package com.k9x.application.stages.use_case;
 
 import com.k9x.application.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
+import com.k9x.application.stages.command.UpdateStageCommand;
+import com.k9x.application.stages.payload.UpdateStagePersistencePayload;
 import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.exceptions.StageNotFoundException;
 import com.k9x.application.stages.port.GetStagePersistencePort;
@@ -25,13 +27,13 @@ public class UpdateStageServiceCase {
         this.updateStagePersistencePort = updateStagePersistencePort;
     }
 
-    public void updateStage(String stageId, String name, Long dateFrom, Long dateTo, String userId, boolean organizer) {
+    public void updateStage(String stageId, UpdateStageCommand command, String userId, boolean organizer) {
         assertOrganizer(organizer);
         Stage stage = getStagePersistencePort.getStage(stageId);
         assertStageValidations(stage, userId);
         Competition competition = getCompetitionPersistencePort.getCompetition(stage.competitionId());
         assertCompetitionValidations(competition, userId);
-        updateStagePersistencePort.updateStage(stageId, name, dateFrom, dateTo, DateUtils.nowUtcMillis());
+        updateStagePersistencePort.updateStage(stageId, new UpdateStagePersistencePayload(command.name(), command.dateFrom(), command.dateTo(), DateUtils.nowUtcMillis()));
     }
 
     private void assertOrganizer(boolean organizer) {

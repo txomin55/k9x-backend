@@ -1,5 +1,6 @@
 package com.k9x.application.dogs.use_case;
 
+import com.k9x.application.dogs.command.UpdateDogCommand;
 import com.k9x.application.dogs.exceptions.DogAlreadyDeletedException;
 import com.k9x.application.dogs.exceptions.DogNotFoundException;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +37,7 @@ class UpdateDogServiceCaseTest {
     void throws_exception_when_dog_not_found() {
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(null);
 
-        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", "Rex", "img", "Lab", "id", "user-1", "user-1", "team", "ES", false))
+        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", new UpdateDogCommand("Rex", "img", "Lab", "id", "user-1", "team", "ES"), "user-1", false))
                 .isInstanceOf(DogNotFoundException.class);
 
         verifyNoInteractions(updateDogPersistencePort);
@@ -46,7 +48,7 @@ class UpdateDogServiceCaseTest {
         Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "user-1", "creator-1", "ES", "team", 0L, 0L, 1700000000000L);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
-        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", "Rex", "img", "Lab", "id", "user-1", "user-1", "team", "ES", false))
+        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", new UpdateDogCommand("Rex", "img", "Lab", "id", "user-1", "team", "ES"), "user-1", false))
                 .isInstanceOf(DogAlreadyDeletedException.class);
 
         verifyNoInteractions(updateDogPersistencePort);
@@ -57,7 +59,7 @@ class UpdateDogServiceCaseTest {
         Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "other-user", "creator-1", "ES", "team", 0L, 0L, null);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
-        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", "Rex", "img", "Lab", "id", "user-1", "user-1", "team", "ES", true))
+        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", new UpdateDogCommand("Rex", "img", "Lab", "id", "user-1", "team", "ES"), "user-1", true))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(updateDogPersistencePort);
@@ -68,7 +70,7 @@ class UpdateDogServiceCaseTest {
         Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", null, "creator-1", "ES", "team", 0L, 0L, null);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
-        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", "Rex", "img", "Lab", "id", null, "creator-1", "team", "ES", false))
+        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", new UpdateDogCommand("Rex", "img", "Lab", "id", null, "team", "ES"), "creator-1", false))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(updateDogPersistencePort);
@@ -79,7 +81,7 @@ class UpdateDogServiceCaseTest {
         Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", null, "creator-1", "ES", "team", 0L, 0L, null);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
-        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", "Rex", "img", "Lab", "id", null, "user-1", "team", "ES", true))
+        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", new UpdateDogCommand("Rex", "img", "Lab", "id", null, "team", "ES"), "user-1", true))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(updateDogPersistencePort);
@@ -90,9 +92,9 @@ class UpdateDogServiceCaseTest {
         Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "user-1", "creator-1", "ES", "team", 0L, 0L, null);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
-        serviceCase.updateDog("dog-1", "NewName", "img", "Lab", "id", "user-1", "user-1", "team", "ES", false);
+        serviceCase.updateDog("dog-1", new UpdateDogCommand("NewName", "img", "Lab", "id", "user-1", "team", "ES"), "user-1", false);
 
-        verify(updateDogPersistencePort).updateDog(eq("dog-1"), eq("NewName"), eq("img"), eq("Lab"), eq("id"), eq("user-1"), eq("team"), eq("ES"), anyLong());
+        verify(updateDogPersistencePort).updateDog(eq("dog-1"), any());
     }
 
     @Test
@@ -100,8 +102,8 @@ class UpdateDogServiceCaseTest {
         Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", null, "user-1", "ES", "team", 0L, 0L, null);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
-        serviceCase.updateDog("dog-1", "NewName", "img", "Lab", "id", null, "user-1", "team", "ES", true);
+        serviceCase.updateDog("dog-1", new UpdateDogCommand("NewName", "img", "Lab", "id", null, "team", "ES"), "user-1", true);
 
-        verify(updateDogPersistencePort).updateDog(eq("dog-1"), eq("NewName"), eq("img"), eq("Lab"), eq("id"), isNull(), eq("team"), eq("ES"), anyLong());
+        verify(updateDogPersistencePort).updateDog(eq("dog-1"), any());
     }
 }

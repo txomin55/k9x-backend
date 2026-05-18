@@ -1,5 +1,7 @@
 package com.k9x.application.judges.use_case;
 
+import com.k9x.application.judges.command.UpdateJudgeCommand;
+import com.k9x.application.judges.payload.UpdateJudgePersistencePayload;
 import com.k9x.application.judges.exceptions.JudgeAlreadyDeletedException;
 import com.k9x.application.judges.exceptions.JudgeNotFoundException;
 import com.k9x.application.judges.port.GetJudgePersistencePort;
@@ -19,11 +21,11 @@ public class UpdateJudgeServiceCase {
         this.updateJudgePersistencePort = updateJudgePersistencePort;
     }
 
-    public void updateJudge(String judgeId, String name, String userId, boolean organizer) {
+    public void updateJudge(String judgeId, UpdateJudgeCommand command, String userId, boolean organizer) {
         assertOrganizer(organizer);
         Judge judge = getJudgePersistencePort.getJudge(judgeId);
         assertJudgeValidations(judge, userId);
-        updateJudgePersistencePort.updateJudge(judgeId, name, DateUtils.nowUtcMillis());
+        updateJudgePersistencePort.updateJudge(judgeId, new UpdateJudgePersistencePayload(command.name(), DateUtils.nowUtcMillis()));
     }
 
     private void assertOrganizer(boolean organizer) {

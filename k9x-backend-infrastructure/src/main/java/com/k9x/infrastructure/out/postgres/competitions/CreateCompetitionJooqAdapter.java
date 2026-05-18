@@ -17,6 +17,7 @@ public class CreateCompetitionJooqAdapter implements CreateCompetitionPersistenc
         dsl.insertInto(Tables.COMPETITIONS)
                 .set(Tables.COMPETITIONS.ID, id)
                 .set(Tables.COMPETITIONS.NAME, name)
+                .set(Tables.COMPETITIONS.COUNTRY, "")
                 .set(Tables.COMPETITIONS.CREATOR, creator)
                 .set(Tables.COMPETITIONS.CREATED_AT, createdAt)
                 .set(Tables.COMPETITIONS.LAST_UPDATE, createdAt)

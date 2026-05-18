@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.out.postgres.dogs;
 
+import com.k9x.application.dogs.payload.UpdateDogPersistencePayload;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -31,7 +32,8 @@ class UpdateDogJooqAdapterTest {
 
         long lastUpdate = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new UpdateDogJooqAdapter(dsl).updateDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "team-1", "ES", lastUpdate);
+        new UpdateDogJooqAdapter(dsl).updateDog("dog-123",
+                new UpdateDogPersistencePayload("Rex", "img.png", "Labrador", "K9-001", "owner-1", "team-1", "ES", lastUpdate));
 
         assertThat(capturedSql.get())
                 .contains("update \"k9x\".\"dogs\"")

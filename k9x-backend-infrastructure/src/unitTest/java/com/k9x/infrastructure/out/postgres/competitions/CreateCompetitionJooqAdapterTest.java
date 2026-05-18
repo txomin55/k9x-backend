@@ -37,9 +37,10 @@ class CreateCompetitionJooqAdapterTest {
                 .contains("insert into \"k9x\".\"competitions\"")
                 .contains("\"id\"")
                 .contains("\"name\"")
+                .contains("\"country\"")
                 .contains("\"creator\"")
                 .contains("\"created_at\"")
                 .contains("\"last_update\"");
-        assertThat(capturedBindings.get()).contains("comp-123", "World Cup", "user-1", createdAt);
+        assertThat(capturedBindings.get()).contains("comp-123", "World Cup", "", "user-1", createdAt);
     }
 }

@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.judges;
 
+import com.k9x.application.judges.command.UpdateJudgeCommand;
 import com.k9x.application.judges.use_case.UpdateJudgeServiceCase;
 import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.oas.stub.api.SecuredJudgesUpdateApiDelegate;
@@ -18,7 +19,7 @@ public class UpdateJudge implements SecuredJudgesUpdateApiDelegate {
 
     @Override
     public ResponseEntity<String> updateJudgeSecured(String id, UpdateJudgeRequestDTO body) {
-        updateJudgeServiceCase.updateJudge(id, body.getName(), userDetails.getEmail(), userDetails.isOrganizer());
+        updateJudgeServiceCase.updateJudge(id, new UpdateJudgeCommand(body.getName()), userDetails.getEmail(), userDetails.isOrganizer());
         return ResponseEntity.ok().build();
     }
 }

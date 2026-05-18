@@ -48,6 +48,7 @@ CREATE TABLE k9x.competitions
 (
     id          VARCHAR(255) NOT NULL,
     name        VARCHAR(255) NOT NULL,
+    country     VARCHAR(50),
     description VARCHAR(255),
     address     VARCHAR(255),
     coord_alt   DOUBLE PRECISION,

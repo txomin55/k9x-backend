@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.out.postgres.dogs;
 
+import com.k9x.application.dogs.payload.UpdateDogPersistencePayload;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
@@ -13,17 +14,16 @@ public class UpdateDogJooqAdapter implements UpdateDogPersistencePort {
     }
 
     @Override
-    public void updateDog(String id, String name, String image, String breed, String identity,
-                          String owner, String team, String country, long lastUpdate) {
+    public void updateDog(String id, UpdateDogPersistencePayload payload) {
         dsl.update(Tables.DOGS)
-                .set(Tables.DOGS.NAME, name)
-                .set(Tables.DOGS.IMAGE, image)
-                .set(Tables.DOGS.BREED, breed)
-                .set(Tables.DOGS.IDENTITY, identity)
-                .set(Tables.DOGS.OWNER, owner)
-                .set(Tables.DOGS.TEAM, team)
-                .set(Tables.DOGS.COUNTRY, country)
-                .set(Tables.DOGS.LAST_UPDATE, lastUpdate)
+                .set(Tables.DOGS.NAME, payload.name())
+                .set(Tables.DOGS.IMAGE, payload.image())
+                .set(Tables.DOGS.BREED, payload.breed())
+                .set(Tables.DOGS.IDENTITY, payload.identity())
+                .set(Tables.DOGS.OWNER, payload.owner())
+                .set(Tables.DOGS.TEAM, payload.team())
+                .set(Tables.DOGS.COUNTRY, payload.country())
+                .set(Tables.DOGS.LAST_UPDATE, payload.lastUpdate())
                 .where(Tables.DOGS.ID.eq(id))
                 .execute();
     }

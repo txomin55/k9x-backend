@@ -1,6 +1,8 @@
 package com.k9x.application.competitions.use_case;
 
+import com.k9x.application.competitions.command.UpdateCompetitionCommand;
 import com.k9x.application.competitions.dto.Coordinates;
+import com.k9x.application.competitions.payload.UpdateCompetitionPersistencePayload;
 import com.k9x.application.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.application.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.application.competitions.port.GeoCoordinatesPort;
@@ -14,6 +16,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.mockito.ArgumentCaptor;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
@@ -38,7 +43,7 @@ class UpdateCompetitionServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_organizer() {
-        assertThatThrownBy(() -> serviceCase.updateCompetition("comp-1", "Name", "Desc", "Address", "user-1", false))
+        assertThatThrownBy(() -> serviceCase.updateCompetition("comp-1", new UpdateCompetitionCommand("Name", "Desc", "ES", "Address"), "user-1", false))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(getCompetitionPersistencePort, geoCoordinatesPort, updateCompetitionPersistencePort);
@@ -48,7 +53,7 @@ class UpdateCompetitionServiceCaseTest {
     void throws_exception_when_competition_does_not_exist() {
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(null);
 
-        assertThatThrownBy(() -> serviceCase.updateCompetition("comp-1", "Name", "Desc", "Address", "user-1", true))
+        assertThatThrownBy(() -> serviceCase.updateCompetition("comp-1", new UpdateCompetitionCommand("Name", "Desc", "ES", "Address"), "user-1", true))
                 .isInstanceOf(CompetitionNotFoundException.class);
 
         verifyNoInteractions(geoCoordinatesPort, updateCompetitionPersistencePort);
@@ -59,7 +64,7 @@ class UpdateCompetitionServiceCaseTest {
         Competition competition = new Competition("comp-1", "World Cup", "user-1", 0L, 0L, 1700000000000L);
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
 
-        assertThatThrownBy(() -> serviceCase.updateCompetition("comp-1", "Name", "Desc", "Address", "user-1", true))
+        assertThatThrownBy(() -> serviceCase.updateCompetition("comp-1", new UpdateCompetitionCommand("Name", "Desc", "ES", "Address"), "user-1", true))
                 .isInstanceOf(CompetitionAlreadyDeletedException.class);
 
         verifyNoInteractions(geoCoordinatesPort, updateCompetitionPersistencePort);
@@ -70,7 +75,7 @@ class UpdateCompetitionServiceCaseTest {
         Competition competition = new Competition("comp-1", "World Cup", "other-user", 0L, 0L, null);
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
 
-        assertThatThrownBy(() -> serviceCase.updateCompetition("comp-1", "Name", "Desc", "Address", "user-1", true))
+        assertThatThrownBy(() -> serviceCase.updateCompetition("comp-1", new UpdateCompetitionCommand("Name", "Desc", "ES", "Address"), "user-1", true))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(geoCoordinatesPort, updateCompetitionPersistencePort);
@@ -83,9 +88,16 @@ class UpdateCompetitionServiceCaseTest {
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
         when(geoCoordinatesPort.getCoordinates("Address")).thenReturn(coordinates);
 
-        serviceCase.updateCompetition("comp-1", "Name", "Desc", "Address", "user-1", true);
+        serviceCase.updateCompetition("comp-1", new UpdateCompetitionCommand("Name", "Desc", "ES", "Address"), "user-1", true);
 
-        verify(updateCompetitionPersistencePort).updateCompetition(eq("comp-1"), eq("Name"), eq("Desc"),
-                eq("Address"), eq(40.4168), eq(-3.7038), anyLong());
+        ArgumentCaptor<UpdateCompetitionPersistencePayload> captor = ArgumentCaptor.forClass(UpdateCompetitionPersistencePayload.class);
+        verify(updateCompetitionPersistencePort).updateCompetition(eq("comp-1"), captor.capture());
+        UpdateCompetitionPersistencePayload payload = captor.getValue();
+        assertThat(payload.name()).isEqualTo("Name");
+        assertThat(payload.description()).isEqualTo("Desc");
+        assertThat(payload.country()).isEqualTo("ES");
+        assertThat(payload.address()).isEqualTo("Address");
+        assertThat(payload.coordAlt()).isEqualTo(40.4168);
+        assertThat(payload.coordLong()).isEqualTo(-3.7038);
     }
 }

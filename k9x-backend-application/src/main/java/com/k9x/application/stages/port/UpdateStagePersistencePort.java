@@ -1,6 +1,8 @@
 package com.k9x.application.stages.port;
 
+import com.k9x.application.stages.payload.UpdateStagePersistencePayload;
+
 public interface UpdateStagePersistencePort {
 
-    void updateStage(String id, String name, Long dateFrom, Long dateTo, long lastUpdate);
+    void updateStage(String id, UpdateStagePersistencePayload payload);
 }

@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.out.postgres.judges;
 
+import com.k9x.application.judges.payload.UpdateJudgePersistencePayload;
 import com.k9x.application.judges.port.UpdateJudgePersistencePort;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
@@ -13,10 +14,10 @@ public class UpdateJudgeJooqAdapter implements UpdateJudgePersistencePort {
     }
 
     @Override
-    public void updateJudge(String id, String name, long lastUpdate) {
+    public void updateJudge(String id, UpdateJudgePersistencePayload payload) {
         dsl.update(Tables.JUDGES)
-                .set(Tables.JUDGES.NAME, name)
-                .set(Tables.JUDGES.LAST_UPDATE, lastUpdate)
+                .set(Tables.JUDGES.NAME, payload.name())
+                .set(Tables.JUDGES.LAST_UPDATE, payload.lastUpdate())
                 .where(Tables.JUDGES.ID.eq(id))
                 .execute();
     }

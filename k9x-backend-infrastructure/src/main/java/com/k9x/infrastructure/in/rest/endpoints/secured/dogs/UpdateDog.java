@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.dogs;
 
+import com.k9x.application.dogs.command.UpdateDogCommand;
 import com.k9x.application.dogs.use_case.UpdateDogServiceCase;
 import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.oas.stub.api.SecuredDogsUpdateApiDelegate;
@@ -18,18 +19,10 @@ public class UpdateDog implements SecuredDogsUpdateApiDelegate {
 
     @Override
     public ResponseEntity<String> updateDogSecured(String id, UpdateDogRequestDTO body) {
-        updateDogServiceCase.updateDog(
-                id,
-                body.getName(),
-                body.getImage(),
-                body.getBreed(),
-                body.getIdentifier(),
-                body.getOwner(),
-                userDetails.getEmail(),
-                body.getTeam(),
-                body.getCountry(),
-                userDetails.isOrganizer()
-        );
+        updateDogServiceCase.updateDog(id,
+                new UpdateDogCommand(body.getName(), body.getImage(), body.getBreed(), body.getIdentifier(),
+                        body.getOwner(), body.getTeam(), body.getCountry()),
+                userDetails.getEmail(), userDetails.isOrganizer());
         return ResponseEntity.ok().build();
     }
 }
