@@ -1,6 +1,7 @@
 package com.k9x.configuration.secured.competitions;
 
 import com.k9x.application.competitions.use_case.CreateCompetitionServiceCase;
+import com.k9x.application.competitions.use_case.DeleteCompetitionServiceCase;
 import com.k9x.application.competitions.use_case.UpdateCompetitionServiceCase;
 import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.competitions.CreateCompetition;
@@ -24,8 +25,8 @@ public class SecuredCompetitionsEndpointConfiguration {
     }
 
     @Bean
-    public RemoveCompetition removeCompetition() {
-        return new RemoveCompetition();
+    public RemoveCompetition removeCompetition(DeleteCompetitionServiceCase deleteCompetitionServiceCase, UserInfoDTO userInfoDTO) {
+        return new RemoveCompetition(deleteCompetitionServiceCase, userInfoDTO);
     }
 
     @Bean
