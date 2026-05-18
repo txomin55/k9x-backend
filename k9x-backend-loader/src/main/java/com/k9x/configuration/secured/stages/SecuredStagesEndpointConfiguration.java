@@ -3,7 +3,7 @@ package com.k9x.configuration.secured.stages;
 import com.k9x.application.stages.use_case.CreateStageServiceCase;
 import com.k9x.application.stages.use_case.DeleteStageServiceCase;
 import com.k9x.application.stages.use_case.UpdateStageServiceCase;
-import com.k9x.application.users.dto.UserInfoDTO;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.stages.CreateStage;
 import com.k9x.infrastructure.in.rest.endpoints.secured.stages.RemoveStage;
 import com.k9x.infrastructure.in.rest.endpoints.secured.stages.UpdateStage;

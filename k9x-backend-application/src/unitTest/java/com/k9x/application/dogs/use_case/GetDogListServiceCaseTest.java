@@ -1,8 +1,8 @@
 package com.k9x.application.dogs.use_case;
 
-import com.k9x.application.dogs.dto.DogDTO;
 import com.k9x.application.dogs.exceptions.OwnerNonProvidedWhenOrganizerException;
 import com.k9x.application.dogs.port.GetDogListPersistencePort;
+import com.k9x.application.dogs.use_case.dto.DogDTO;
 import com.k9x.domain.aggregates.dogs.Dog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

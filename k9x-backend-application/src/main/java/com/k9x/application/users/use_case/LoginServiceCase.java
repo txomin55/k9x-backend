@@ -1,12 +1,12 @@
 package com.k9x.application.users.use_case;
 
-import com.k9x.application.users.command.LoginCommand;
-import com.k9x.application.users.dto.AuthTokenDTO;
-import com.k9x.application.users.dto.LoginDTO;
 import com.k9x.application.users.port.ExchangeAuthorizationCodePort;
 import com.k9x.application.users.port.JwtTokenCacheManagerPort;
 import com.k9x.application.users.port.JwtTokenGeneratorPort;
 import com.k9x.application.users.port.ValidateIdTokenPort;
+import com.k9x.application.users.use_case.command.LoginCommand;
+import com.k9x.application.users.use_case.dto.AuthTokenDTO;
+import com.k9x.application.users.use_case.dto.LoginDTO;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 import java.time.Duration;

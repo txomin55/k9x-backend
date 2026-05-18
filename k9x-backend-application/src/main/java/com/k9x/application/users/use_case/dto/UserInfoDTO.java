@@ -1,4 +1,4 @@
-package com.k9x.application.users.dto;
+package com.k9x.application.users.use_case.dto;
 
 public class UserInfoDTO {
 

@@ -2,13 +2,12 @@ package com.k9x.application.stages.use_case;
 
 import com.k9x.application.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
-import com.k9x.application.stages.command.UpdateStageCommand;
-import com.k9x.application.stages.payload.UpdateStagePersistencePayload;
+import com.k9x.application.stages.port.payload.UpdateStagePersistencePayload;
+import com.k9x.application.stages.use_case.command.UpdateStageCommand;
 import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.exceptions.StageNotFoundException;
 import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.application.stages.port.UpdateStagePersistencePort;
-import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.aggregates.stages.Stage;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
@@ -33,7 +32,7 @@ public class UpdateStageServiceCase {
         assertStageValidations(stage, userId);
         Competition competition = getCompetitionPersistencePort.getCompetition(stage.competitionId());
         assertCompetitionValidations(competition, userId);
-        updateStagePersistencePort.updateStage(stageId, new UpdateStagePersistencePayload(command.name(), command.dateFrom(), command.dateTo(), DateUtils.nowUtcMillis()));
+        updateStagePersistencePort.updateStage(stageId, UpdateStagePersistencePayload.from(command));
     }
 
     private void assertOrganizer(boolean organizer) {

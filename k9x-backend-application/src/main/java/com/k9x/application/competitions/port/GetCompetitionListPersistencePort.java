@@ -1,6 +1,6 @@
 package com.k9x.application.competitions.port;
 
-import com.k9x.application.competitions.dto.FetchCompetitionDTO;
+import com.k9x.application.competitions.use_case.dto.FetchCompetitionDTO;
 
 import java.util.List;
 

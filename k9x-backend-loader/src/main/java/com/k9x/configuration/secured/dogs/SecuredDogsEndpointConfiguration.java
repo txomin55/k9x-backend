@@ -4,7 +4,7 @@ import com.k9x.application.dogs.use_case.CreateDogServiceCase;
 import com.k9x.application.dogs.use_case.DeleteDogServiceCase;
 import com.k9x.application.dogs.use_case.GetDogListServiceCase;
 import com.k9x.application.dogs.use_case.UpdateDogServiceCase;
-import com.k9x.application.users.dto.UserInfoDTO;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.CreateDog;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.GetDogList;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.RemoveDog;

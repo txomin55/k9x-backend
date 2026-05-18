@@ -1,7 +1,6 @@
 package com.k9x.application.stages.use_case;
 
 import com.k9x.application.competitions.exceptions.CompetitionAlreadyDeletedException;
-import com.k9x.application.stages.command.UpdateStageCommand;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.exceptions.StageNotFoundException;

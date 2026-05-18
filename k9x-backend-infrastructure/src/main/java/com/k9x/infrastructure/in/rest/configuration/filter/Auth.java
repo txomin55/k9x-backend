@@ -1,11 +1,10 @@
 package com.k9x.infrastructure.in.rest.configuration.filter;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import com.k9x.application.users.dto.AuthTokenDTO;
-import com.k9x.application.users.dto.UserInfoDTO;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
+import com.k9x.application.users.use_case.dto.AuthTokenDTO;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.configuration.session.AuthorizationExtractor;
-
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

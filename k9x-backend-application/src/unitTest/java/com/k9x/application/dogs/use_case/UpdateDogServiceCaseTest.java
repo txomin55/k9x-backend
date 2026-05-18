@@ -1,6 +1,5 @@
 package com.k9x.application.dogs.use_case;
 
-import com.k9x.application.dogs.command.UpdateDogCommand;
 import com.k9x.application.dogs.exceptions.DogAlreadyDeletedException;
 import com.k9x.application.dogs.exceptions.DogNotFoundException;
 import com.k9x.application.dogs.port.GetDogPersistencePort;

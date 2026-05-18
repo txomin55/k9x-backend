@@ -1,12 +1,11 @@
 package com.k9x.application.dogs.use_case;
 
-import com.k9x.application.dogs.command.UpdateDogCommand;
-import com.k9x.application.dogs.payload.UpdateDogPersistencePayload;
+import com.k9x.application.dogs.port.payload.UpdateDogPersistencePayload;
+import com.k9x.application.dogs.use_case.command.UpdateDogCommand;
 import com.k9x.application.dogs.exceptions.DogAlreadyDeletedException;
 import com.k9x.application.dogs.exceptions.DogNotFoundException;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
-import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.aggregates.dogs.Dog;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
@@ -24,8 +23,7 @@ public class UpdateDogServiceCase {
     public void updateDog(String dogId, UpdateDogCommand command, String userId, boolean organizer) {
         Dog dog = getDogPersistencePort.getDog(dogId);
         assertDogValidations(dog, userId, organizer);
-        updateDogPersistencePort.updateDog(dogId, new UpdateDogPersistencePayload(command.name(), command.image(),
-                command.breed(), command.identity(), command.owner(), command.team(), command.country(), DateUtils.nowUtcMillis()));
+        updateDogPersistencePort.updateDog(dogId, UpdateDogPersistencePayload.from(command));
     }
 
     private void assertDogValidations(Dog dog, String userId, boolean organizer) {

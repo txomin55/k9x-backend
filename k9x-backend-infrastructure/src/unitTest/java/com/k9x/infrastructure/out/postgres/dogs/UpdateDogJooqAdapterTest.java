@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.dogs;
 
-import com.k9x.application.dogs.payload.UpdateDogPersistencePayload;
+import com.k9x.application.dogs.port.payload.UpdateDogPersistencePayload;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;

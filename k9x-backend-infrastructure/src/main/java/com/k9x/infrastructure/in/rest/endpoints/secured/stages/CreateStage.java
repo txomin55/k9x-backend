@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.stages;
 
 import com.k9x.application.stages.use_case.CreateStageServiceCase;
-import com.k9x.application.users.dto.UserInfoDTO;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.oas.stub.api.SecuredStagesCreateApiDelegate;
 import com.k9x.oas.stub.model.CreateStageRequestDTO;
 import org.springframework.http.ResponseEntity;

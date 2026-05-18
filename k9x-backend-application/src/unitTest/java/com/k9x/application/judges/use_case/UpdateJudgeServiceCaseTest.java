@@ -1,6 +1,5 @@
 package com.k9x.application.judges.use_case;
 
-import com.k9x.application.judges.command.UpdateJudgeCommand;
 import com.k9x.application.judges.exceptions.JudgeAlreadyDeletedException;
 import com.k9x.application.judges.exceptions.JudgeNotFoundException;
 import com.k9x.application.judges.port.GetJudgePersistencePort;

@@ -1,6 +1,6 @@
 package com.k9x.application.judges.port;
 
-import com.k9x.application.judges.payload.UpdateJudgePersistencePayload;
+import com.k9x.application.judges.port.payload.UpdateJudgePersistencePayload;
 
 public interface UpdateJudgePersistencePort {
 

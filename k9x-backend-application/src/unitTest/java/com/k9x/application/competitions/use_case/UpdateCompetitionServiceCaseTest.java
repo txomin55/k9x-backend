@@ -1,8 +1,8 @@
 package com.k9x.application.competitions.use_case;
 
-import com.k9x.application.competitions.command.UpdateCompetitionCommand;
-import com.k9x.application.competitions.dto.Coordinates;
-import com.k9x.application.competitions.payload.UpdateCompetitionPersistencePayload;
+import com.k9x.application.competitions.port.payload.UpdateCompetitionPersistencePayload;
+import com.k9x.application.competitions.use_case.command.UpdateCompetitionCommand;
+import com.k9x.application.competitions.use_case.dto.Coordinates;
 import com.k9x.application.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.application.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.application.competitions.port.GeoCoordinatesPort;

@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.in.rest.configuration.session.jwt;
 
-import com.k9x.application.users.dto.AuthTokenDTO;
+import com.k9x.application.users.use_case.dto.AuthTokenDTO;
 import com.k9x.infrastructure.in.rest.configuration.session.AuthorizationExtractor;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

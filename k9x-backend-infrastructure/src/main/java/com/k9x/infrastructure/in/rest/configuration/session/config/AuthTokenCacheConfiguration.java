@@ -3,7 +3,7 @@ package com.k9x.infrastructure.in.rest.configuration.session.config;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
-import com.k9x.application.users.dto.UserInfoDTO;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

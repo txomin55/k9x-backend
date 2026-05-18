@@ -1,8 +1,8 @@
 package com.k9x.infrastructure.out.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import com.k9x.application.users.dto.AuthTokenDTO;
 import com.k9x.application.users.port.JwtTokenCacheManagerPort;
+import com.k9x.application.users.use_case.dto.AuthTokenDTO;
 import com.k9x.infrastructure.in.rest.configuration.session.AuthorizationExtractor;
 
 public class JwtTokenCacheManagerAdapter implements JwtTokenCacheManagerPort {

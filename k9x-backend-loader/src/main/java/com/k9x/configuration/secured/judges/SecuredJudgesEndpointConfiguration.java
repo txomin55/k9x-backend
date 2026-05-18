@@ -4,7 +4,7 @@ import com.k9x.application.judges.use_case.CreateJudgeServiceCase;
 import com.k9x.application.judges.use_case.DeleteJudgeServiceCase;
 import com.k9x.application.judges.use_case.GetJudgeListServiceCase;
 import com.k9x.application.judges.use_case.UpdateJudgeServiceCase;
-import com.k9x.application.users.dto.UserInfoDTO;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.judges.CreateJudge;
 import com.k9x.infrastructure.in.rest.endpoints.secured.judges.FetchJudges;
 import com.k9x.infrastructure.in.rest.endpoints.secured.judges.RemoveJudge;

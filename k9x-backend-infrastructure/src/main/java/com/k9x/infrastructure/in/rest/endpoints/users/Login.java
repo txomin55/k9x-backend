@@ -1,8 +1,8 @@
 package com.k9x.infrastructure.in.rest.endpoints.users;
 
-import com.k9x.application.users.command.LoginCommand;
-import com.k9x.application.users.dto.LoginDTO;
 import com.k9x.application.users.use_case.LoginServiceCase;
+import com.k9x.application.users.use_case.command.LoginCommand;
+import com.k9x.application.users.use_case.dto.LoginDTO;
 import com.k9x.oas.stub.api.UsersLoginApiDelegate;
 import com.k9x.oas.stub.model.LoginRequestDTO;
 import org.springframework.http.ResponseEntity;

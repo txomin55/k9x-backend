@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.in.rest.configuration.session.config;
 
-import com.k9x.application.users.dto.UserInfoDTO;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;

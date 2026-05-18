@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.judges;
 
 import com.k9x.application.judges.use_case.DeleteJudgeServiceCase;
-import com.k9x.application.users.dto.UserInfoDTO;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.oas.stub.api.SecuredJudgesRemoveApiDelegate;
 import org.springframework.http.ResponseEntity;
 

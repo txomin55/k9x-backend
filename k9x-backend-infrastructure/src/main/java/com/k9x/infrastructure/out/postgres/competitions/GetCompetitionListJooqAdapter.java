@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.out.postgres.competitions;
 
-import com.k9x.application.competitions.dto.FetchCompetitionDTO;
-import com.k9x.application.competitions.dto.FetchStageDTO;
+import com.k9x.application.competitions.use_case.dto.FetchCompetitionDTO;
+import com.k9x.application.competitions.use_case.dto.FetchStageDTO;
 import com.k9x.application.competitions.port.GetCompetitionListPersistencePort;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;

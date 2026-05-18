@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.competitions;
 
-import com.k9x.application.competitions.payload.UpdateCompetitionPersistencePayload;
+import com.k9x.application.competitions.port.payload.UpdateCompetitionPersistencePayload;
 import com.k9x.application.competitions.port.UpdateCompetitionPersistencePort;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;

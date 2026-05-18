@@ -1,7 +1,7 @@
 package com.k9x.application.competitions.use_case;
 
-import com.k9x.application.competitions.dto.FetchCompetitionDTO;
 import com.k9x.application.competitions.port.GetCompetitionListPersistencePort;
+import com.k9x.application.competitions.use_case.dto.FetchCompetitionDTO;
 import com.k9x.domain.aggregates.competitions.CompetitionStatus;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 

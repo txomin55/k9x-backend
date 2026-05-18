@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.users;
 
-import com.k9x.application.users.dto.UserInfoDTO;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.*;
 import org.jooq.Record;

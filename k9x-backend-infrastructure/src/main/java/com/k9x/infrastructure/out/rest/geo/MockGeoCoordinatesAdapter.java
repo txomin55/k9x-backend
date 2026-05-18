@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.rest.geo;
 
-import com.k9x.application.competitions.dto.Coordinates;
+import com.k9x.application.competitions.use_case.dto.Coordinates;
 import com.k9x.application.competitions.port.GeoCoordinatesPort;
 
 public class MockGeoCoordinatesAdapter implements GeoCoordinatesPort {

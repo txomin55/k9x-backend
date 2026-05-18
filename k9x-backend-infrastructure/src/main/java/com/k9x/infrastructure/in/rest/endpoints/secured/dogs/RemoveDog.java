@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.dogs;
 
 import com.k9x.application.dogs.use_case.DeleteDogServiceCase;
-import com.k9x.application.users.dto.UserInfoDTO;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.oas.stub.api.SecuredDogsRemoveApiDelegate;
 import org.springframework.http.ResponseEntity;
 

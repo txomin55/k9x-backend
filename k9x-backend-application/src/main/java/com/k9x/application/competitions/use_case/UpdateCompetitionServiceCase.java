@@ -1,14 +1,13 @@
 package com.k9x.application.competitions.use_case;
 
-import com.k9x.application.competitions.command.UpdateCompetitionCommand;
-import com.k9x.application.competitions.dto.Coordinates;
-import com.k9x.application.competitions.payload.UpdateCompetitionPersistencePayload;
+import com.k9x.application.competitions.port.payload.UpdateCompetitionPersistencePayload;
+import com.k9x.application.competitions.use_case.command.UpdateCompetitionCommand;
+import com.k9x.application.competitions.use_case.dto.Coordinates;
 import com.k9x.application.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.application.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.application.competitions.port.GeoCoordinatesPort;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.UpdateCompetitionPersistencePort;
-import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
@@ -31,9 +30,7 @@ public class UpdateCompetitionServiceCase {
         Competition competition = getCompetitionPersistencePort.getCompetition(id);
         assertCompetitionValidations(competition, userId);
         Coordinates coordinates = geoCoordinatesPort.getCoordinates(command.address());
-        updateCompetitionPersistencePort.updateCompetition(id, new UpdateCompetitionPersistencePayload(
-                command.name(), command.description(), command.country(), command.address(),
-                coordinates.coordAlt(), coordinates.coordLong(), DateUtils.nowUtcMillis()));
+        updateCompetitionPersistencePort.updateCompetition(id, UpdateCompetitionPersistencePayload.from(command, coordinates));
     }
 
     private void assertOrganizer(boolean organizer) {
