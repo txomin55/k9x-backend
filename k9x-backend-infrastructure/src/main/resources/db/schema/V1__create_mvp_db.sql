@@ -73,5 +73,17 @@ CREATE TABLE k9x.stages
     deleted_at     BIGINT,
     CONSTRAINT stages_pkey PRIMARY KEY (id),
     CONSTRAINT stages_organization_fk FOREIGN KEY (competition_id) REFERENCES k9x.competitions (id)
+);
 
+CREATE TABLE obdx.events
+(
+    id          VARCHAR(255) NOT NULL,
+    name        VARCHAR(255) NOT NULL,
+    creator     VARCHAR(50)  NOT NULL,
+    stage_id    VARCHAR(50)  NOT NULL,
+    last_update BIGINT       NOT NULL,
+    created_at  BIGINT       NOT NULL,
+    deleted_at  BIGINT,
+    CONSTRAINT obdx_events_pkey PRIMARY KEY (id),
+    CONSTRAINT stages_obdx_events_fk FOREIGN KEY (stage_id) REFERENCES k9x.stages (id)
 );

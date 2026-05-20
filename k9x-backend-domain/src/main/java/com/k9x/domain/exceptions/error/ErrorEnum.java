@@ -11,7 +11,9 @@ public enum ErrorEnum {
     COMPETITION_NOT_FOUND("error.competition_not_found"),
     COMPETITION_ALREADY_DELETED("error.competition_already_deleted"),
     STAGE_NOT_FOUND("error.stage_not_found"),
-    STAGE_ALREADY_DELETED("error.stage_already_deleted");
+    STAGE_ALREADY_DELETED("error.stage_already_deleted"),
+    EVENT_NOT_FOUND("error.event_not_found"),
+    EVENT_ALREADY_DELETED("error.event_already_deleted");
 
     private final String id;
 

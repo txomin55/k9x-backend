@@ -1,0 +1,49 @@
+{
+  "id": "OBDX_RSCE_DEBUTANTE_V0",
+  "description": "RSCE debutante version 20/05/2026",
+  "total_calculation": "AVG",
+  "break_tie": [
+    "TODO"
+  ],
+  "break_tie_tie": [
+    "TODO"
+  ],
+  "exercises": [
+    {
+      "id": "OBDX_RSCE_DEBUTANTE_V0_JUNTO",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE_V0_POSICIONES_SOBRE_MARCHA",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE_V0_LLAMADA",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE_V0_APPORT",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE_V0_CONTROL_DISTANCIA",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE_V0_LLAMADA_CON_SALTO",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE_V0_CONOS",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE_V0_PERMANENCIA",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE_V0_IMPRESION",
+      "coef": 2
+    }
+  ]
+}

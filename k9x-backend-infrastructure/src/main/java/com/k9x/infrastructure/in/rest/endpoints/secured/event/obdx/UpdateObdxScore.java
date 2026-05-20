@@ -1,4 +1,4 @@
-package com.k9x.infrastructure.in.rest.endpoints.secured.event;
+package com.k9x.infrastructure.in.rest.endpoints.secured.event.obdx;
 
 import com.k9x.oas.stub.api.SecuredEventsUpdateScoreObdxApiDelegate;
 import com.k9x.oas.stub.model.UpdateCollectionScoreRequestDTO;

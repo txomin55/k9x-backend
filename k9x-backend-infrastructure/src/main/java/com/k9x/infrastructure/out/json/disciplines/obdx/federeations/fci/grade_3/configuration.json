@@ -1,0 +1,53 @@
+{
+  "id": "OBDX_FCI_GRADE_3_3.V0",
+  "description": "FCI grade 3 version 20/05/2026",
+  "total_calculation": "AVG",
+  "break_tie": [
+    "OBDX_FCI_GRADE_3_3.3_V0",
+    "OBDX_FCI_GRADE_3_3.5_V0",
+    "OBDX_FCI_GRADE_3_3.6_V0"
+  ],
+  "break_tie_tie": [],
+  "exercises": [
+    {
+      "id": "OBDX_FCI_GRADE_3_3.1_V0",
+      "coef": 2
+    },
+    {
+      "id": "OBDX_FCI_GRADE_3_3.2_V0",
+      "coef": 2
+    },
+    {
+      "id": "OBDX_FCI_GRADE_3_3.3_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_FCI_GRADE_3_3.4_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_FCI_GRADE_3_3.5_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_FCI_GRADE_3_3.6_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_FCI_GRADE_3_3.7_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_FCI_GRADE_3_3.8_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_FCI_GRADE_3_3.9_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_FCI_GRADE_3_3.10_V0",
+      "coef": 4
+    }
+  ]
+}

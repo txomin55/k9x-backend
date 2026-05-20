@@ -1,6 +1,6 @@
 # Test Coverage — Endpoints
 
-Leyenda: ✅ test existe · ❌ sin tests · (implementación existe pero sin test)
+Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementación
 
 ---
 
@@ -60,10 +60,10 @@ Leyenda: ✅ test existe · ❌ sin tests · (implementación existe pero sin te
 
 | Endpoint | Service Case | jOOQ Adapter Test |
 |---|---|---|
-| `CreateEvent` | ❌ | ❌ |
+| `CreateEvent` | ✅ | ✅ |
+| `RemoveEvent` | ✅ | ✅ |
 | `EnrollEvent` | ❌ | ❌ |
 | `FetchAllByStagesEventData` | ❌ | ❌ |
-| `RemoveEvent` | ❌ | ❌ |
 | `UpdateObdxEventInfo` | ❌ | ❌ |
 | `UpdateObdxScore` | ❌ | ❌ |
 
@@ -121,10 +121,10 @@ Leyenda: ✅ test existe · ❌ sin tests · (implementación existe pero sin te
 | Judges | 4 / 4 | 4 / 4 |
 | Stages (secured) | 3 / 3 | 3 / 3 |
 | Stages (public) | 0 / 2 | 1 / 2 |
-| Events (secured) | 0 / 6 | 0 / 6 |
+| Events (secured) | 2 / 6 | 2 / 6 |
 | Events (public) | 0 / 1 | 0 / 1 |
 | Collections | 0 / 2 | 0 / 2 |
 | Disciplines | 0 / 1 | 0 / 1 |
 | User (secured) | 0 / 3 | 1 / 3 |
 | Users (public) | 1 / 1 | 0 / 1 |
-| **Total** | **16 / 31** | **17 / 31** |
+| **Total** | **18 / 31** | **19 / 31** |
