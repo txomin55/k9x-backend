@@ -1,6 +1,7 @@
 {
   "id": "OBDX_RSCE_GRADE_1_V0",
   "description": "RSCE grade 1 version 20/05/2026",
+  "country": "ES",
   "total_calculation": "AVG",
   "break_tie": [
     "OBDX_RSCE_GRADE_1_1.2_V0",

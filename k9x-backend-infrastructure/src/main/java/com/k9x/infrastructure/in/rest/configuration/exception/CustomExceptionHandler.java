@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.in.rest.configuration.exception;
 
+import com.k9x.domain.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.exceptions.DomainException;
 import com.k9x.domain.exceptions.NotFoundResourceException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
@@ -51,6 +52,14 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         CustomError error = new CustomError(
                 messageSource.getMessage(ex.getId(), ex.getArgs(), locale), HttpStatus.UNAUTHORIZED.value());
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(DisciplineConfigurationMalformedException.class)
+    @ResponseBody
+    final ResponseEntity<CustomError> handleDisciplineConfigurationMalformedException(DisciplineConfigurationMalformedException ex, Locale locale) {
+        CustomError error = new CustomError(
+                messageSource.getMessage(ex.getId(), ex.getArgs(), locale), HttpStatus.CONFLICT.value());
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(InterruptedException.class)

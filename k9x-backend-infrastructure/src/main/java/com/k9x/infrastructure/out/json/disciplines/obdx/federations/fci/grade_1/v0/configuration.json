@@ -1,6 +1,7 @@
 {
   "id": "OBDX_FCI_GRADE_1_V0",
   "description": "FCI grade 1 version 20/05/2026",
+  "country": "EU",
   "total_calculation": "AVG",
   "break_tie": [
     "OBDX_FCI_GRADE_1_1.2_V0",

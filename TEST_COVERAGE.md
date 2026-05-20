@@ -88,9 +88,9 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 
 ## Disciplines (secured)
 
-| Endpoint | Service Case | jOOQ Adapter Test |
+| Endpoint | Service Case | Adapter Test |
 |---|---|---|
-| `GetDisciplines` | ❌ | ❌ |
+| `GetDisciplines` | ✅ | ✅ |
 
 ---
 
@@ -124,7 +124,7 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 | Events (secured) | 2 / 6 | 2 / 6 |
 | Events (public) | 0 / 1 | 0 / 1 |
 | Collections | 0 / 2 | 0 / 2 |
-| Disciplines | 0 / 1 | 0 / 1 |
+| Disciplines | 1 / 1 | 1 / 1 |
 | User (secured) | 0 / 3 | 1 / 3 |
 | Users (public) | 1 / 1 | 0 / 1 |
-| **Total** | **18 / 31** | **19 / 31** |
+| **Total** | **19 / 31** | **20 / 31** |

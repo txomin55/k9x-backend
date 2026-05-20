@@ -66,6 +66,12 @@ sourceSets {
     }
 }
 
+tasks.named<ProcessResources>("processResources") {
+    from("src/main/java") {
+        include("**/*.json")
+    }
+}
+
 tasks.named("compileJava") {
     dependsOn("jooqCodegen")
 }

@@ -1,6 +1,7 @@
 {
   "id": "OBDX_RSCE_DEBUTANTE_V0",
   "description": "RSCE debutante version 20/05/2026",
+  "country": "ES",
   "total_calculation": "AVG",
   "break_tie": [
     "TODO"
