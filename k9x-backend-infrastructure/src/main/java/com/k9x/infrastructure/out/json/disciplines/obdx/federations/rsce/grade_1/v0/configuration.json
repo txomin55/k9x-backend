@@ -11,6 +11,20 @@
   "break_tie_tie": [
     "OBDX_RSCE_GRADE_1.9_V0"
   ],
+  "allowed_values": [
+    0,
+    5,
+    5.5,
+    6,
+    6.5,
+    7,
+    7.5,
+    8,
+    8.5,
+    9,
+    9.5,
+    10
+  ],
   "exercises": [
     {
       "id": "OBDX_RSCE_GRADE_1.1_V0",

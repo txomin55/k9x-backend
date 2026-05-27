@@ -16,7 +16,10 @@ public enum ErrorEnum {
     EVENT_NOT_FOUND("error.event_not_found"),
     EVENT_ALREADY_DELETED("error.event_already_deleted"),
     DISCIPLINE_CONFIGURATION_MALFORMED("error.discipline_configuration_malformed"),
-    EVENT_CONFIGURATION_ID_REQUIRED("error.event_configuration_id_required");
+    EVENT_CONFIGURATION_ID_REQUIRED("error.event_configuration_id_required"),
+    SCORE_NOT_ALLOWED("error.score_not_allowed"),
+    USER_NOT_COLLECTOR("error.user_not_collector"),
+    EXERCISE_CONFIGURATION_NOT_FOUND("error.exercise_configuration_not_found");
 
     private final String id;
 

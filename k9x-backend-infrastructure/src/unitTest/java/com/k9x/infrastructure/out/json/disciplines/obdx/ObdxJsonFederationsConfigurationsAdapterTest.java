@@ -33,7 +33,7 @@ class ObdxJsonFederationsConfigurationsAdapterTest {
         List<ObdxConfigurationsDTO> result = adapter.getConfigurations();
 
         assertThat(result).extracting(c -> c.info().id())
-                .containsExactlyInAnyOrder("FCI", "RSCE");
+                .containsExactlyInAnyOrder("CPC", "FCI", "RSCE");
     }
 
     @Test

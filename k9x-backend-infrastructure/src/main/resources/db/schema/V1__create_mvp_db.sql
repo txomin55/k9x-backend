@@ -123,3 +123,18 @@ CREATE TABLE obdx.event_exercises
     CONSTRAINT obdx_event_exercises_pkey PRIMARY KEY (event_id, exercise_id),
     CONSTRAINT obdx_event_exercises_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id)
 );
+
+CREATE TABLE obdx.event_scores
+(
+    event_id    VARCHAR(255) NOT NULL,
+    exercise_id VARCHAR(255) NOT NULL,
+    judge_id    VARCHAR(255) NOT NULL,
+    dog_id      VARCHAR(255) NOT NULL,
+    score       NUMERIC(3, 1),
+    created_at  BIGINT       NOT NULL,
+    last_update BIGINT       NOT NULL,
+    CONSTRAINT obdx_event_scores_pkey PRIMARY KEY (event_id, exercise_id, judge_id, dog_id),
+    CONSTRAINT obdx_event_scores_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id),
+    CONSTRAINT obdx_event_scores_judge_fk FOREIGN KEY (judge_id) REFERENCES k9x.judges (id),
+    CONSTRAINT obdx_event_scores_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
+)

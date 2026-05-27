@@ -4,6 +4,7 @@ import com.k9x.application.events.obdx.use_case.CreateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.DeleteObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.EnrollObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
+import com.k9x.application.events.obdx.use_case.UpdateObdxScoreServiceCase;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.EnrollEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.FetchAllByStagesEventData;
@@ -43,7 +44,7 @@ public class SecuredEventEndpointConfiguration {
     }
 
     @Bean
-    public UpdateObdxScore updateObdxScore() {
-        return new UpdateObdxScore();
+    public UpdateObdxScore updateObdxScore(UpdateObdxScoreServiceCase updateObdxScoreServiceCase, UserInfoDTO userInfoDTO) {
+        return new UpdateObdxScore(updateObdxScoreServiceCase, userInfoDTO);
     }
 }
