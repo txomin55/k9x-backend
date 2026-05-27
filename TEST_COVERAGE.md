@@ -121,10 +121,10 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 | Judges           | 4 / 4         | 4 / 4         |
 | Stages (secured) | 3 / 3         | 3 / 3         |
 | Stages (public)  | 0 / 2         | 1 / 2         |
-| Events (secured) | 5 / 6         | 5 / 6         |
+| Events (secured) | 6 / 6         | 6 / 6         |
 | Events (public)  | 0 / 1         | 0 / 1         |
 | Collections      | 0 / 2         | 0 / 2         |
 | Disciplines      | 1 / 1         | 1 / 1         |
 | User (secured)   | 0 / 3         | 1 / 3         |
 | Users (public)   | 1 / 1         | 0 / 1         |
-| **Total**        | **21 / 31**   | **22 / 31**   |
+| **Total**        | **23 / 31**   | **24 / 31**   |
