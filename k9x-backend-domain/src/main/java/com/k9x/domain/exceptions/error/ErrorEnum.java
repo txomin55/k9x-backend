@@ -12,6 +12,7 @@ public enum ErrorEnum {
     COMPETITION_ALREADY_DELETED("error.competition_already_deleted"),
     STAGE_NOT_FOUND("error.stage_not_found"),
     STAGE_ALREADY_DELETED("error.stage_already_deleted"),
+    STAGE_EXPIRED("error.stage_expired"),
     EVENT_NOT_FOUND("error.event_not_found"),
     EVENT_ALREADY_DELETED("error.event_already_deleted"),
     DISCIPLINE_CONFIGURATION_MALFORMED("error.discipline_configuration_malformed"),

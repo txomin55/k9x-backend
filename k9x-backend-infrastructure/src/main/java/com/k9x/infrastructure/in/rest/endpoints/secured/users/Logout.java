@@ -1,4 +1,4 @@
-package com.k9x.infrastructure.in.rest.endpoints.secured.user;
+package com.k9x.infrastructure.in.rest.endpoints.secured.users;
 
 import com.k9x.oas.stub.api.SecuredUserLogoutApiDelegate;
 import org.springframework.http.ResponseEntity;

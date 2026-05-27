@@ -57,7 +57,7 @@ class DeleteStageServiceCaseTest {
 
     @Test
     void throws_exception_when_stage_is_deleted() {
-        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", 0L, 0L, 1700000000000L);
+        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, 1700000000000L);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
 
         assertThatThrownBy(() -> serviceCase.deleteStage("stage-1", "user-1", true))
@@ -68,7 +68,7 @@ class DeleteStageServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_stage_creator() {
-        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "other-user", 0L, 0L, null);
+        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "other-user", Long.MAX_VALUE, 0L, 0L, null);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
 
         assertThatThrownBy(() -> serviceCase.deleteStage("stage-1", "user-1", true))
@@ -79,7 +79,7 @@ class DeleteStageServiceCaseTest {
 
     @Test
     void throws_exception_when_competition_is_deleted() {
-        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", 0L, 0L, null);
+        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, null);
         Competition deletedCompetition = new Competition("comp-1", "World Cup", "user-1", 0L, 0L, 1700000000000L);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(deletedCompetition);
@@ -92,7 +92,7 @@ class DeleteStageServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_competition_creator() {
-        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", 0L, 0L, null);
+        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, null);
         Competition competition = new Competition("comp-1", "World Cup", "other-user", 0L, 0L, null);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
@@ -105,7 +105,7 @@ class DeleteStageServiceCaseTest {
 
     @Test
     void deletes_stage_when_all_validations_pass() {
-        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", 0L, 0L, null);
+        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, null);
         Competition competition = new Competition("comp-1", "World Cup", "user-1", 0L, 0L, null);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);

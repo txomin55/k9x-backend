@@ -1,5 +1,4 @@
 CREATE SCHEMA k9x;
-
 CREATE TABLE k9x.users
 (
     id    VARCHAR(255) NOT NULL,
@@ -64,7 +63,7 @@ CREATE TABLE k9x.stages
 (
     id             VARCHAR(255) NOT NULL,
     name           VARCHAR(255) NOT NULL,
-    competition_id VARCHAR(50)  NOT NULL,
+    competition_id VARCHAR(255) NOT NULL,
     date_from      BIGINT       NOT NULL,
     date_to        BIGINT       NOT NULL,
     creator        VARCHAR(50)  NOT NULL,
@@ -75,13 +74,14 @@ CREATE TABLE k9x.stages
     CONSTRAINT stages_organization_fk FOREIGN KEY (competition_id) REFERENCES k9x.competitions (id)
 );
 
+CREATE SCHEMA obdx;
 CREATE TABLE obdx.events
 (
     id               VARCHAR(255) NOT NULL,
     configuration_id VARCHAR(50),
     name             VARCHAR(255) NOT NULL,
     creator          VARCHAR(50)  NOT NULL,
-    stage_id         VARCHAR(50)  NOT NULL,
+    stage_id         VARCHAR(255) NOT NULL,
     last_update      BIGINT       NOT NULL,
     created_at       BIGINT       NOT NULL,
     deleted_at       BIGINT,
@@ -93,8 +93,10 @@ CREATE TABLE obdx.event_competitors
 (
     event_id    VARCHAR(255) NOT NULL,
     dog_id      VARCHAR(255) NOT NULL,
-    position    SMALLINT     NOT NULL,
+    position    SMALLINT,
+    verified    BOOLEAN,
     last_update BIGINT       NOT NULL,
+    CONSTRAINT obdx_event_competitors_pkey PRIMARY KEY (event_id, dog_id),
     CONSTRAINT obdx_event_competitors_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id),
     CONSTRAINT obdx_event_competitors_dogs_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
 );
@@ -105,6 +107,7 @@ CREATE TABLE obdx.event_judges
     judge_id     VARCHAR(255) NOT NULL,
     collector_id VARCHAR(255),
     last_update  BIGINT       NOT NULL,
+    CONSTRAINT obdx_event_judges_pkey PRIMARY KEY (event_id, judge_id),
     CONSTRAINT obdx_event_judges_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id),
     CONSTRAINT obdx_event_judges_judge_fk FOREIGN KEY (judge_id) REFERENCES k9x.judges (id),
     CONSTRAINT obdx_event_judges_users_fk FOREIGN KEY (collector_id) REFERENCES k9x.users (id)
@@ -117,5 +120,6 @@ CREATE TABLE obdx.event_exercises
     position    SMALLINT     NOT NULL,
     tags        VARCHAR(50)[],
     last_update BIGINT       NOT NULL,
+    CONSTRAINT obdx_event_exercises_pkey PRIMARY KEY (event_id, exercise_id),
     CONSTRAINT obdx_event_exercises_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id)
 );

@@ -2,14 +2,15 @@ package com.k9x.configuration.secured.event;
 
 import com.k9x.application.events.obdx.use_case.CreateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.DeleteObdxEventServiceCase;
+import com.k9x.application.events.obdx.use_case.EnrollObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
-import com.k9x.infrastructure.in.rest.endpoints.secured.event.EnrollEvent;
-import com.k9x.infrastructure.in.rest.endpoints.secured.event.FetchAllByStagesEventData;
-import com.k9x.infrastructure.in.rest.endpoints.secured.event.obdx.CreateObdxEvent;
-import com.k9x.infrastructure.in.rest.endpoints.secured.event.obdx.RemoveObdxEvent;
-import com.k9x.infrastructure.in.rest.endpoints.secured.event.obdx.UpdateObdxEventInfo;
-import com.k9x.infrastructure.in.rest.endpoints.secured.event.obdx.UpdateObdxScore;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.EnrollEvent;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.FetchAllByStagesEventData;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.CreateObdxEvent;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.RemoveObdxEvent;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventInfo;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxScore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,8 +23,8 @@ public class SecuredEventEndpointConfiguration {
     }
 
     @Bean
-    public EnrollEvent enrollEvent() {
-        return new EnrollEvent();
+    public EnrollEvent enrollEvent(EnrollObdxEventServiceCase enrollObdxEventServiceCase) {
+        return new EnrollEvent(enrollObdxEventServiceCase);
     }
 
     @Bean

@@ -5,6 +5,7 @@ public record Stage(
         String name,
         String competitionId,
         String creator,
+        long dateTo,
         long lastUpdate,
         long createdAt,
         Long deletedAt

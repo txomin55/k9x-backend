@@ -1,4 +1,4 @@
-package com.k9x.infrastructure.in.rest.endpoints.secured.discipline.obdx;
+package com.k9x.infrastructure.in.rest.endpoints.secured.disciplines.obdx;
 
 import com.k9x.application.disciplines.obdx.use_case.GetObdxFederationsConfigurationsServiceCase;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;

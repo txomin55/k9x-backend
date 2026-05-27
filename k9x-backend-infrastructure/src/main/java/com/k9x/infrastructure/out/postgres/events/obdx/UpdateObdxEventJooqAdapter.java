@@ -35,6 +35,7 @@ public class UpdateObdxEventJooqAdapter implements UpdateObdxEventPersistencePor
                         .set(Tables.EVENT_COMPETITORS.EVENT_ID, id)
                         .set(Tables.EVENT_COMPETITORS.DOG_ID, competitor.dogId())
                         .set(Tables.EVENT_COMPETITORS.POSITION, competitor.position())
+                        .set(Tables.EVENT_COMPETITORS.VERIFIED, true)
                         .set(Tables.EVENT_COMPETITORS.LAST_UPDATE, payload.lastUpdate())
                         .execute();
             }

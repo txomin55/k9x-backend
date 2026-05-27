@@ -49,6 +49,7 @@ class GetStageJooqAdapterTest {
             record.set(Tables.STAGES.NAME, "Stage 1");
             record.set(Tables.STAGES.COMPETITION_ID, "comp-1");
             record.set(Tables.STAGES.CREATOR, "user-1");
+            record.set(Tables.STAGES.DATE_TO, 9999999999999L);
             record.set(Tables.STAGES.LAST_UPDATE, 1000L);
             record.set(Tables.STAGES.CREATED_AT, 2000L);
             record.set(Tables.STAGES.DELETED_AT, null);
@@ -63,6 +64,7 @@ class GetStageJooqAdapterTest {
         assertThat(stage.name()).isEqualTo("Stage 1");
         assertThat(stage.competitionId()).isEqualTo("comp-1");
         assertThat(stage.creator()).isEqualTo("user-1");
+        assertThat(stage.dateTo()).isEqualTo(9999999999999L);
         assertThat(stage.lastUpdate()).isEqualTo(1000L);
         assertThat(stage.createdAt()).isEqualTo(2000L);
         assertThat(stage.deletedAt()).isNull();

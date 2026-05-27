@@ -8,42 +8,34 @@
     {
       "id": "OBDX_CPC_COBS.1_V0",
       "coef": 1
-      //Apresentação
     },
     {
       "id": "OBDX_CPC_COBS.2_V0",
       "coef": 4
-      //Junto sem trela com posições
     },
     {
       "id": "OBDX_CPC_COBS.3_V0",
       "coef": 3
-      //Chamada directa a 15 metros
     },
     {
       "id": "OBDX_CPC_COBS.4_V0",
       "coef": 4
-      //Busca de um objecto
     },
     {
       "id": "OBDX_CPC_COBS.5_V0",
       "coef": 3
-      //Controlo à distância a 2 metros
     },
     {
       "id": "OBDX_CPC_COBS.6_V0",
       "coef": 2
-      //Junto com trela
     },
     {
       "id": "OBDX_CPC_COBS.7_V0",
       "coef": 2
-      //Deitado por 1 minuto condutor a 15 metros
     },
     {
       "id": "OBDX_CPC_COBS.7_V0",
       "coef": 1
-      //Impressão geral
     }
   ]
 }

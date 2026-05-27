@@ -64,8 +64,9 @@ class UpdateObdxEventJooqAdapterTest {
                 .contains("\"event_id\"")
                 .contains("\"dog_id\"")
                 .contains("\"position\"")
+                .contains("\"verified\"")
                 .contains("\"last_update\"");
-        assertThat(capturedBindings.get(2)).contains("event-1", "dog-1", (short) 1, lastUpdate);
+        assertThat(capturedBindings.get(2)).contains("event-1", "dog-1", (short) 1, true, lastUpdate);
 
         assertThat(capturedSqls.get(3))
                 .contains("delete from \"obdx\".\"event_exercises\"")

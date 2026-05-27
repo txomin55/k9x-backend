@@ -23,6 +23,7 @@ public class GetStageJooqAdapter implements GetStagePersistencePort {
                         r.get(Tables.STAGES.NAME),
                         r.get(Tables.STAGES.COMPETITION_ID),
                         r.get(Tables.STAGES.CREATOR),
+                        r.get(Tables.STAGES.DATE_TO),
                         r.get(Tables.STAGES.LAST_UPDATE),
                         r.get(Tables.STAGES.CREATED_AT),
                         r.get(Tables.STAGES.DELETED_AT)

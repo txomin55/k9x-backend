@@ -2,10 +2,12 @@ package com.k9x.configuration.secured.event;
 
 import com.k9x.application.events.obdx.port.CreateObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.DeleteObdxEventPersistencePort;
+import com.k9x.application.events.obdx.port.EnrollObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.GetObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.UpdateObdxEventPersistencePort;
 import com.k9x.application.events.obdx.use_case.CreateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.DeleteObdxEventServiceCase;
+import com.k9x.application.events.obdx.use_case.EnrollObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
 import com.k9x.application.stages.port.GetStagePersistencePort;
 import org.springframework.context.annotation.Bean;
@@ -31,5 +33,12 @@ public class SecuredEventUseCaseConfiguration {
     public UpdateObdxEventServiceCase updateEventServiceCase(GetObdxEventPersistencePort getObdxEventPersistencePort,
                                                              UpdateObdxEventPersistencePort updateObdxEventPersistencePort) {
         return new UpdateObdxEventServiceCase(getObdxEventPersistencePort, updateObdxEventPersistencePort);
+    }
+
+    @Bean
+    public EnrollObdxEventServiceCase enrollEventServiceCase(GetObdxEventPersistencePort getObdxEventPersistencePort,
+                                                             GetStagePersistencePort getStagePersistencePort,
+                                                             EnrollObdxEventPersistencePort enrollObdxEventPersistencePort) {
+        return new EnrollObdxEventServiceCase(getObdxEventPersistencePort, getStagePersistencePort, enrollObdxEventPersistencePort);
     }
 }

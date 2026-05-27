@@ -62,7 +62,7 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 |-----------------------------|--------------|-------------------|
 | `CreateObdxEvent`           | ✅            | ✅                 |
 | `RemoveObdxEvent`           | ✅            | ✅                 |
-| `EnrollEvent`               | ❌            | ❌                 |
+| `EnrollEvent`               | ✅            | ✅                 |
 | `FetchAllByStagesEventData` | ❌            | ❌                 |
 | `UpdateObdxEventInfo`       | ✅            | ✅                 |
 | `UpdateObdxScore`           | ❌            | ❌                 |
@@ -121,10 +121,10 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 | Judges           | 4 / 4         | 4 / 4         |
 | Stages (secured) | 3 / 3         | 3 / 3         |
 | Stages (public)  | 0 / 2         | 1 / 2         |
-| Events (secured) | 3 / 6         | 3 / 6         |
+| Events (secured) | 4 / 6         | 4 / 6         |
 | Events (public)  | 0 / 1         | 0 / 1         |
 | Collections      | 0 / 2         | 0 / 2         |
 | Disciplines      | 1 / 1         | 1 / 1         |
 | User (secured)   | 0 / 3         | 1 / 3         |
 | Users (public)   | 1 / 1         | 0 / 1         |
-| **Total**        | **20 / 31**   | **21 / 31**   |
+| **Total**        | **21 / 31**   | **22 / 31**   |
