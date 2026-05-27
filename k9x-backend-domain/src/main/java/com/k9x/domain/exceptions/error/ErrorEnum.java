@@ -14,7 +14,8 @@ public enum ErrorEnum {
     STAGE_ALREADY_DELETED("error.stage_already_deleted"),
     EVENT_NOT_FOUND("error.event_not_found"),
     EVENT_ALREADY_DELETED("error.event_already_deleted"),
-    DISCIPLINE_CONFIGURATION_MALFORMED("error.discipline_configuration_malformed");
+    DISCIPLINE_CONFIGURATION_MALFORMED("error.discipline_configuration_malformed"),
+    EVENT_CONFIGURATION_ID_REQUIRED("error.event_configuration_id_required");
 
     private final String id;
 

@@ -208,6 +208,7 @@ Endpoint beans receive their service case and `UserInfoDTO` beans as constructor
 - Soft deletes: every table has `deleted_at BIGINT` (nullable — `NULL` = active).
 - Timestamps (`created_at`, `last_update`, `deleted_at`) are stored as epoch milliseconds (`BIGINT`).
 - jOOQ classes are generated from the DDL at build time.
+- **Important**: the jOOQ generated classes may contain columns (e.g. `created_at`) that were removed from the DDL in a later migration. Always check the DDL before setting fields in adapters — never trust the generated class alone.
 
 ---
 
@@ -234,6 +235,8 @@ class UpdateXxxServiceCaseTest {
 ```
 
 Use `any()` for the payload argument in the happy-path `verify` — field-level assertions go in a separate test with `ArgumentCaptor` if needed.
+
+After implementing a new endpoint (service case, adapter, or tests), update `TEST_COVERAGE.md` at the repo root — mark the endpoint row and adjust the summary totals.
 
 ### Infrastructure unit tests (jOOQ MockDataProvider)
 

@@ -77,13 +77,45 @@ CREATE TABLE k9x.stages
 
 CREATE TABLE obdx.events
 (
-    id          VARCHAR(255) NOT NULL,
-    name        VARCHAR(255) NOT NULL,
-    creator     VARCHAR(50)  NOT NULL,
-    stage_id    VARCHAR(50)  NOT NULL,
-    last_update BIGINT       NOT NULL,
-    created_at  BIGINT       NOT NULL,
-    deleted_at  BIGINT,
+    id               VARCHAR(255) NOT NULL,
+    configuration_id VARCHAR(50),
+    name             VARCHAR(255) NOT NULL,
+    creator          VARCHAR(50)  NOT NULL,
+    stage_id         VARCHAR(50)  NOT NULL,
+    last_update      BIGINT       NOT NULL,
+    created_at       BIGINT       NOT NULL,
+    deleted_at       BIGINT,
     CONSTRAINT obdx_events_pkey PRIMARY KEY (id),
-    CONSTRAINT stages_obdx_events_fk FOREIGN KEY (stage_id) REFERENCES k9x.stages (id)
+    CONSTRAINT obdx_events_fk FOREIGN KEY (stage_id) REFERENCES k9x.stages (id)
+);
+
+CREATE TABLE obdx.event_competitors
+(
+    event_id    VARCHAR(255) NOT NULL,
+    dog_id      VARCHAR(255) NOT NULL,
+    position    SMALLINT     NOT NULL,
+    last_update BIGINT       NOT NULL,
+    CONSTRAINT obdx_event_competitors_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id),
+    CONSTRAINT obdx_event_competitors_dogs_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
+);
+
+CREATE TABLE obdx.event_judges
+(
+    event_id     VARCHAR(255) NOT NULL,
+    judge_id     VARCHAR(255) NOT NULL,
+    collector_id VARCHAR(255),
+    last_update  BIGINT       NOT NULL,
+    CONSTRAINT obdx_event_judges_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id),
+    CONSTRAINT obdx_event_judges_judge_fk FOREIGN KEY (judge_id) REFERENCES k9x.judges (id),
+    CONSTRAINT obdx_event_judges_users_fk FOREIGN KEY (collector_id) REFERENCES k9x.users (id)
+);
+
+CREATE TABLE obdx.event_exercises
+(
+    event_id    VARCHAR(255) NOT NULL,
+    exercise_id VARCHAR(255) NOT NULL,
+    position    SMALLINT     NOT NULL,
+    tags        VARCHAR(50)[],
+    last_update BIGINT       NOT NULL,
+    CONSTRAINT obdx_event_exercises_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id)
 );

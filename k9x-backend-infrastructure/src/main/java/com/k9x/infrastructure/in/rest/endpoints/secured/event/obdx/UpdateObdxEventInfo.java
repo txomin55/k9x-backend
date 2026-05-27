@@ -1,47 +1,44 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.event.obdx;
 
+import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
+import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.oas.stub.api.SecuredEventsUpdateInfoObdxApiDelegate;
 import com.k9x.oas.stub.model.UpdateEventRequestDTO;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public class UpdateObdxEventInfo implements SecuredEventsUpdateInfoObdxApiDelegate {
+
+    private final UpdateObdxEventServiceCase updateObdxEventServiceCase;
+    private final UserInfoDTO userDetails;
+
+    public UpdateObdxEventInfo(UpdateObdxEventServiceCase updateObdxEventServiceCase, UserInfoDTO userDetails) {
+        this.updateObdxEventServiceCase = updateObdxEventServiceCase;
+        this.userDetails = userDetails;
+    }
 
     @Override
     public ResponseEntity<String> updateObdxEventSecured(String id, UpdateEventRequestDTO body) {
-        return ResponseEntity.ok("MOCKED");
+        updateObdxEventServiceCase.updateEvent(
+                id,
+                new UpdateObdxEventCommand(
+                        body.getName(),
+                        body.getConfigurationId(),
+                        body.getCompetitors() == null ? List.of() : body.getCompetitors().stream()
+                                .map(c -> new UpdateObdxEventCommand.CompetitorCommand(c.getDogId(), c.getOrder()))
+                                .toList(),
+                        body.getExercises() == null ? List.of() : body.getExercises().stream()
+                                .map(e -> new UpdateObdxEventCommand.ExerciseCommand(e.getId(), e.getOrder(), e.getTags()))
+                                .toList(),
+                        body.getJudges() == null ? List.of() : body.getJudges().stream()
+                                .map(j -> new UpdateObdxEventCommand.JudgeCommand(j.getId(), j.getCollectorEmail()))
+                                .toList()
+                ),
+                userDetails.getEmail(),
+                userDetails.isOrganizer()
+        );
+        return ResponseEntity.ok().build();
     }
 }
-
-/*
-* {
-    "name": "string",
-    "competitors": [
-        {
-            "dogId": "string",
-            "owner": "string",
-            "identity": "string",
-            "team": "string",
-            "country": "string",
-            "order": 0,
-            "status": "string"
-        }
-    ],
-    "exercises": [
-        {
-            "id": "string",
-            "name": "string",
-            "order": 0,
-            "tags": [
-                "string"
-            ]
-        }
-    ],
-    "configurationId": "string",
-    "judges": [
-        {
-            "id": "string",
-            "collectorEmail": "string"
-        }
-    ]
-}
-* */
