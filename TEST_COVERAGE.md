@@ -63,7 +63,7 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 | `CreateObdxEvent`           | ✅            | ✅                 |
 | `RemoveObdxEvent`           | ✅            | ✅                 |
 | `EnrollEvent`               | ✅            | ✅                 |
-| `FetchAllByStagesEventData` | ❌            | ❌                 |
+| `FetchAllByStagesEventData` | ✅            | ✅                 |
 | `UpdateObdxEventInfo`       | ✅            | ✅                 |
 | `UpdateObdxScore`           | ✅            | ✅                 |
 

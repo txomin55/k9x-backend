@@ -3,6 +3,7 @@ package com.k9x.configuration.secured.event;
 import com.k9x.application.events.obdx.use_case.CreateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.DeleteObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.EnrollObdxEventServiceCase;
+import com.k9x.application.events.obdx.use_case.GetObdxEventListServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxScoreServiceCase;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
@@ -29,8 +30,8 @@ public class SecuredEventEndpointConfiguration {
     }
 
     @Bean
-    public FetchAllByStagesEventData fetchAllByStagesEventData() {
-        return new FetchAllByStagesEventData();
+    public FetchAllByStagesEventData fetchAllByStagesEventData(GetObdxEventListServiceCase getObdxEventListServiceCase, UserInfoDTO userInfoDTO) {
+        return new FetchAllByStagesEventData(getObdxEventListServiceCase, userInfoDTO);
     }
 
     @Bean

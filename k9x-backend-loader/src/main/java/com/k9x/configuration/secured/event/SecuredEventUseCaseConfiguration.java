@@ -5,12 +5,14 @@ import com.k9x.application.events.obdx.port.CreateObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.DeleteObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.EnrollObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.GetObdxEventCollectorPersistencePort;
+import com.k9x.application.events.obdx.port.GetObdxEventListPersistencePort;
 import com.k9x.application.events.obdx.port.GetObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.UpdateObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.UpdateObdxScorePersistencePort;
 import com.k9x.application.events.obdx.use_case.CreateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.DeleteObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.EnrollObdxEventServiceCase;
+import com.k9x.application.events.obdx.use_case.GetObdxEventListServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxScoreServiceCase;
 import com.k9x.application.stages.port.GetStagePersistencePort;
@@ -44,6 +46,12 @@ public class SecuredEventUseCaseConfiguration {
                                                              GetStagePersistencePort getStagePersistencePort,
                                                              EnrollObdxEventPersistencePort enrollObdxEventPersistencePort) {
         return new EnrollObdxEventServiceCase(getObdxEventPersistencePort, getStagePersistencePort, enrollObdxEventPersistencePort);
+    }
+
+    @Bean
+    public GetObdxEventListServiceCase getEventListServiceCase(GetStagePersistencePort getStagePersistencePort,
+                                                               GetObdxEventListPersistencePort getObdxEventListPersistencePort) {
+        return new GetObdxEventListServiceCase(getStagePersistencePort, getObdxEventListPersistencePort);
     }
 
     @Bean
