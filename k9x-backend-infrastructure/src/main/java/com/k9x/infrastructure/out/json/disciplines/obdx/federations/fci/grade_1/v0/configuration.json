@@ -2,51 +2,50 @@
   "id": "OBDX_FCI_GRADE_1_V0",
   "description": "FCI grade 1 version 20/05/2026",
   "country": "EU",
-  "total_calculation": "AVG",
   "break_tie": [
-    "OBDX_FCI_GRADE_1_1.2_V0",
-    "OBDX_FCI_GRADE_1_1.4_V0",
-    "OBDX_FCI_GRADE_1_1.5_V0",
-    "OBDX_FCI_GRADE_1_1.9_V0"
+    "OBDX_FCI_GRADE_1.2_V0",
+    "OBDX_FCI_GRADE_1.4_V0",
+    "OBDX_FCI_GRADE_1.5_V0",
+    "OBDX_FCI_GRADE_1.9_V0"
   ],
   "break_tie_tie": [
-    "OBDX_FCI_GRADE_1_1.9_V0"
+    "OBDX_FCI_GRADE_1.9_V0"
   ],
   "exercises": [
     {
-      "id": "OBDX_FCI_GRADE_1_1.1_V0",
+      "id": "OBDX_FCI_GRADE_1.1_V0",
       "coef": 3
     },
     {
-      "id": "OBDX_FCI_GRADE_1_1.2_V0",
+      "id": "OBDX_FCI_GRADE_1.2_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_FCI_GRADE_1_1.3_V0",
+      "id": "OBDX_FCI_GRADE_1.3_V0",
       "coef": 3
     },
     {
-      "id": "OBDX_FCI_GRADE_1_1.4_V0",
+      "id": "OBDX_FCI_GRADE_1.4_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_FCI_GRADE_1_1.5_V0",
+      "id": "OBDX_FCI_GRADE_1.5_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_FCI_GRADE_1_1.6_V0",
+      "id": "OBDX_FCI_GRADE_1.6_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_FCI_GRADE_1_1.7_V0",
+      "id": "OBDX_FCI_GRADE_1.7_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_FCI_GRADE_1_1.8_V0",
+      "id": "OBDX_FCI_GRADE_1.8_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_FCI_GRADE_1_1.9_V0",
+      "id": "OBDX_FCI_GRADE_1.9_V0",
       "coef": 2
     }
   ]

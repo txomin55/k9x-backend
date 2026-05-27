@@ -1,0 +1,49 @@
+{
+  "id": "OBDX_RSCE_DEBUTANTE_V0",
+  "description": "RSCE debutante version 20/05/2026",
+  "country": "ES",
+  "break_tie": [
+    "TODO"
+  ],
+  "break_tie_tie": [
+    "TODO"
+  ],
+  "exercises": [
+    {
+      "id": "OBDX_RSCE_DEBUTANTE.1_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE.2_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE.3_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE.4_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE.5_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE.6_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE.7_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE.8_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_RSCE_DEBUTANTE.9_V0",
+      "coef": 2
+    }
+  ]
+}

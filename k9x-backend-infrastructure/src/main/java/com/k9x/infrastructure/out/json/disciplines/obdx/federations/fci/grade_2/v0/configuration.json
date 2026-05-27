@@ -1,0 +1,56 @@
+{
+  "id": "OBDX_FCI_GRADE_2_V0",
+  "description": "FCI grade 2 version 20/05/2026",
+  "country": "EU",
+  "break_tie": [
+    "OBDX_FCI_GRADE_2.2_V0",
+    "OBDX_FCI_GRADE_2.4_V0",
+    "OBDX_FCI_GRADE_2.5_V0",
+    "OBDX_FCI_GRADE_2.10_V0"
+  ],
+  "break_tie_tie": [
+    "OBDX_FCI_GRADE_2.10_V0"
+  ],
+  "exercises": [
+    {
+      "id": "OBDX_FCI_GRADE_2.1_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_FCI_GRADE_2.2_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_FCI_GRADE_2.3_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_FCI_GRADE_2.4_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_FCI_GRADE_2.5_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_FCI_GRADE_2.6_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_FCI_GRADE_2.7_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_FCI_GRADE_2.8_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX_FCI_GRADE_2.9_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX_FCI_GRADE_2.10_V0",
+      "coef": 2
+    }
+  ]
+}
