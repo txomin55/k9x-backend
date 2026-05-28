@@ -7,4 +7,6 @@ public interface JwtTokenCacheManagerPort {
     void overrideEntry(String id, String jwtToken);
 
     AuthTokenDTO retrieveEntry(String id);
+
+    void deleteEntry(String id);
 }

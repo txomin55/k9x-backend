@@ -1,5 +1,6 @@
 package com.k9x.configuration.secured.users;
 
+import com.k9x.application.users.use_case.LogoutServiceCase;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.users.GetUserData;
 import com.k9x.infrastructure.in.rest.endpoints.secured.users.Logout;
@@ -11,8 +12,8 @@ import org.springframework.context.annotation.Configuration;
 public class SecuredUserEndpointConfiguration {
 
     @Bean
-    public Logout logout() {
-        return new Logout();
+    public Logout logout(LogoutServiceCase logoutServiceCase, UserInfoDTO userInfoDTO) {
+        return new Logout(logoutServiceCase, userInfoDTO);
     }
 
     @Bean

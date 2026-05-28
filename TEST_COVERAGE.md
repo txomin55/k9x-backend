@@ -99,7 +99,7 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 | Endpoint       | Service Case | jOOQ Adapter Test |
 |----------------|--------------|-------------------|
 | `GetUserData`  | ❌            | ✅                 |
-| `Logout`       | ❌            | ❌                 |
+| `Logout`       | ✅            | ❌                 |
 | `RegisterPush` | ❌            | ❌                 |
 
 ---
@@ -125,6 +125,6 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 | Events (public)  | 0 / 1         | 0 / 1         |
 | Collections      | 2 / 2         | 2 / 2         |
 | Disciplines      | 1 / 1         | 1 / 1         |
-| User (secured)   | 0 / 3         | 1 / 3         |
+| User (secured)   | 1 / 3         | 1 / 3         |
 | Users (public)   | 1 / 1         | 0 / 1         |
-| **Total**        | **25 / 31**   | **29 / 31**   |
+| **Total**        | **26 / 31**   | **29 / 31**   |

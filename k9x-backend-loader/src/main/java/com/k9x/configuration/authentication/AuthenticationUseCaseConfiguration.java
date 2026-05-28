@@ -5,6 +5,7 @@ import com.k9x.application.users.port.JwtTokenCacheManagerPort;
 import com.k9x.application.users.port.JwtTokenGeneratorPort;
 import com.k9x.application.users.port.ValidateIdTokenPort;
 import com.k9x.application.users.use_case.LoginServiceCase;
+import com.k9x.application.users.use_case.LogoutServiceCase;
 import com.k9x.infrastructure.out.rest.authentication.GoogleExchangeAuthorizationCodeAdapter;
 import com.k9x.infrastructure.out.rest.authentication.GoogleValidateIdTokenAdapter;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,11 @@ public class AuthenticationUseCaseConfiguration {
             @Value("${k9x-backend.login.google.client_id}") String googleClientId
     ) {
         return new GoogleValidateIdTokenAdapter(googleClientId);
+    }
+
+    @Bean
+    public LogoutServiceCase logoutServiceCase(JwtTokenCacheManagerPort jwtTokenCacheManagerPort) {
+        return new LogoutServiceCase(jwtTokenCacheManagerPort);
     }
 
     @Bean

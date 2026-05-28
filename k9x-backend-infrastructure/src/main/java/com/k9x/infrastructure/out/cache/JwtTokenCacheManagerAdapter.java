@@ -31,4 +31,9 @@ public class JwtTokenCacheManagerAdapter implements JwtTokenCacheManagerPort {
         }
         return authorizationExtractor.getDataFromToken(token);
     }
+
+    @Override
+    public void deleteEntry(String id) {
+        authTokenCache.invalidate(id);
+    }
 }
