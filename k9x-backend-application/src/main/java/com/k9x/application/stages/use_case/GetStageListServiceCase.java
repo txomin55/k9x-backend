@@ -47,7 +47,7 @@ public class GetStageListServiceCase {
         try {
             return getObdxFederationsConfigurationsPort.getConfigurations().stream()
                     .flatMap(f -> f.configurations().stream())
-                    .collect(Collectors.toMap(ObdxConfigurationDTO::id, ObdxConfigurationDTO::name, (a, b) -> a));
+                    .collect(Collectors.toMap(ObdxConfigurationDTO::id, ObdxConfigurationDTO::name, (a, _) -> a));
         } catch (IOException e) {
             throw new DisciplineConfigurationMalformedException();
         }

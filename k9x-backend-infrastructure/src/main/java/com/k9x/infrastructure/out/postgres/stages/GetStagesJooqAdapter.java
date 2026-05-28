@@ -11,7 +11,6 @@ import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventCompe
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.Events;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record;
 import org.jooq.Result;
 
 import java.util.ArrayList;
