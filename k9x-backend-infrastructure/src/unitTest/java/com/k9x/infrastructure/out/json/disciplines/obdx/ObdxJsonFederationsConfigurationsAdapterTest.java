@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,11 +24,12 @@ class ObdxJsonFederationsConfigurationsAdapterTest {
         MessageSource messageSource = mock(MessageSource.class);
         when(messageSource.getMessage(anyString(), isNull(), anyString(), any()))
                 .thenAnswer(invocation -> invocation.getArgument(2));
-        adapter = new ObdxJsonFederationsConfigurationsAdapter(new ObjectMapper(), messageSource);
+        ObdxFederationsConfigurationsCache cache = new ObdxFederationsConfigurationsCache(new ObjectMapper());
+        adapter = new ObdxJsonFederationsConfigurationsAdapter(cache, messageSource);
     }
 
     @Test
-    void returns_configurations_for_all_federations() throws IOException {
+    void returns_configurations_for_all_federations() {
         List<ObdxConfigurationsDTO> result = adapter.getConfigurations();
 
         assertThat(result).extracting(c -> c.info().id())
@@ -37,7 +37,7 @@ class ObdxJsonFederationsConfigurationsAdapterTest {
     }
 
     @Test
-    void federation_id_is_uppercase() throws IOException {
+    void federation_id_is_uppercase() {
         List<ObdxConfigurationsDTO> result = adapter.getConfigurations();
 
         assertThat(result).allSatisfy(config ->
@@ -45,7 +45,7 @@ class ObdxJsonFederationsConfigurationsAdapterTest {
     }
 
     @Test
-    void each_federation_has_configurations_with_exercises() throws IOException {
+    void each_federation_has_configurations_with_exercises() {
         List<ObdxConfigurationsDTO> result = adapter.getConfigurations();
 
         assertThat(result).allSatisfy(federation -> {
@@ -56,7 +56,7 @@ class ObdxJsonFederationsConfigurationsAdapterTest {
     }
 
     @Test
-    void exercise_names_fall_back_to_id_when_no_translation() throws IOException {
+    void exercise_names_fall_back_to_id_when_no_translation() {
         List<ObdxConfigurationsDTO> result = adapter.getConfigurations();
 
         result.forEach(federation ->

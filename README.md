@@ -131,8 +131,10 @@ Local properties (recommended):
 
 ## Execution
 
-To execute this project, you must go to the loader project and execute (this way we would use the persistence
+First execute
 
-implementation in mongo instead of the default one from memory):
+`docker stop k9x_postgres_container && docker rm k9x_postgres_container && docker run -d --name k9x_postgres_container -p 2345:5432 -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=password -e POSTGRES_DB=k9x-backend postgres:18`
+
+To execute this project, you must go to the loader project and execute
 
 `GRADLE_USER_HOME=/tmp/gradle ./gradlew :k9x-backend-loader:bootRun -Dspring.profiles.active=production`

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.k9x.application.disciplines.obdx.port.GetObdxConfigurationAllowedValuesPort;
 import com.k9x.application.disciplines.obdx.port.GetObdxExerciseAllowedValuesPort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
+import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxFederationsConfigurationsCache;
 import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxJsonConfigurationAllowedValuesAdapter;
 import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxJsonExerciseAllowedValuesAdapter;
 import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxJsonFederationsConfigurationsAdapter;
@@ -15,18 +16,30 @@ import org.springframework.context.annotation.Configuration;
 public class DisciplineJsonAdapterConfiguration {
 
     @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
+
+    @Bean
+    public ObdxFederationsConfigurationsCache obdxFederationsConfigurationsCache(ObjectMapper objectMapper) {
+        return new ObdxFederationsConfigurationsCache(objectMapper);
+    }
+
+    @Bean
     public GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort(
-            ObjectMapper objectMapper, MessageSource messageSource) {
-        return new ObdxJsonFederationsConfigurationsAdapter(objectMapper, messageSource);
+            ObdxFederationsConfigurationsCache cache, MessageSource messageSource) {
+        return new ObdxJsonFederationsConfigurationsAdapter(cache, messageSource);
     }
 
     @Bean
-    public GetObdxExerciseAllowedValuesPort getObdxExerciseAllowedValuesPort(ObjectMapper objectMapper) {
-        return new ObdxJsonExerciseAllowedValuesAdapter(objectMapper);
+    public GetObdxExerciseAllowedValuesPort getObdxExerciseAllowedValuesPort(
+            ObdxFederationsConfigurationsCache cache) {
+        return new ObdxJsonExerciseAllowedValuesAdapter(cache);
     }
 
     @Bean
-    public GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort(ObjectMapper objectMapper) {
-        return new ObdxJsonConfigurationAllowedValuesAdapter(objectMapper);
+    public GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort(
+            ObdxFederationsConfigurationsCache cache) {
+        return new ObdxJsonConfigurationAllowedValuesAdapter(cache);
     }
 }
