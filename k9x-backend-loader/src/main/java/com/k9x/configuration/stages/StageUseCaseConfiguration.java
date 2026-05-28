@@ -1,8 +1,10 @@
 package com.k9x.configuration.stages;
 
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
+import com.k9x.application.stages.port.GetStageDetailPersistencePort;
 import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.GetStageListServiceCase;
+import com.k9x.application.stages.use_case.GetStageServiceCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,5 +15,11 @@ public class StageUseCaseConfiguration {
     public GetStageListServiceCase getStageListServiceCase(GetStageListPersistencePort getStageListPersistencePort,
                                                            GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
         return new GetStageListServiceCase(getStageListPersistencePort, getObdxFederationsConfigurationsPort);
+    }
+
+    @Bean
+    public GetStageServiceCase getStageServiceCase(GetStageDetailPersistencePort getStageDetailPersistencePort,
+                                                   GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
+        return new GetStageServiceCase(getStageDetailPersistencePort, getObdxFederationsConfigurationsPort);
     }
 }

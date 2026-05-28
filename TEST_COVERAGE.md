@@ -51,7 +51,7 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 
 | Endpoint    | Service Case | jOOQ Adapter Test |
 |-------------|--------------|-------------------|
-| `GetStage`  | ❌            | ✅                 |
+| `GetStage`  | ✅            | ✅                 |
 | `GetStages` | ✅            | ✅                 |
 
 ---
@@ -120,11 +120,11 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 | Dogs             | 4 / 4         | 4 / 4         |
 | Judges           | 4 / 4         | 4 / 4         |
 | Stages (secured) | 3 / 3         | 3 / 3         |
-| Stages (public)  | 1 / 2         | 2 / 2         |
+| Stages (public)  | 2 / 2         | 2 / 2         |
 | Events (secured) | 6 / 6         | 6 / 6         |
 | Events (public)  | 0 / 1         | 0 / 1         |
 | Collections      | 2 / 2         | 2 / 2         |
 | Disciplines      | 1 / 1         | 1 / 1         |
 | User (secured)   | 1 / 3         | 1 / 3         |
 | Users (public)   | 1 / 1         | 0 / 1         |
-| **Total**        | **27 / 31**   | **30 / 31**   |
+| **Total**        | **28 / 31**   | **31 / 31**   |
