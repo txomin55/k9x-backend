@@ -1,20 +1,11 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.collections;
 
 import com.k9x.application.collections.use_case.GetCollectionServiceCase;
-import com.k9x.application.collections.use_case.dto.FetchCollectionCompetitorDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionDetailDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.oas.stub.api.SecuredCollectionsFetchOneApiDelegate;
-import com.k9x.oas.stub.model.CollectionResponseDTO;
-import com.k9x.oas.stub.model.CollectionScoreResponseDTO;
-import com.k9x.oas.stub.model.CompetitorScoresResponseDTO;
-import com.k9x.oas.stub.model.EventCompetitorResponseDTO;
-import com.k9x.oas.stub.model.ExerciseResponseDTO;
-import com.k9x.oas.stub.model.ExerciseScoresResponseDTO;
-import com.k9x.oas.stub.model.IdNameDTO;
-import com.k9x.oas.stub.model.ObdxCompetitorsScoresResponseDTO;
-import com.k9x.oas.stub.model.ScoresConfigurationResponseDTO;
+import com.k9x.oas.stub.model.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

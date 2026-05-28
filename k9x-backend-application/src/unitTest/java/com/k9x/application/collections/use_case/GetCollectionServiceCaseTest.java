@@ -6,7 +6,6 @@ import com.k9x.application.collections.port.GetCollectionExercisesPersistencePor
 import com.k9x.application.collections.port.GetCollectionScoresPersistencePort;
 import com.k9x.application.collections.use_case.dto.FetchCollectionCompetitorDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionDetailDTO;
-import com.k9x.application.collections.use_case.dto.FetchCollectionExerciseDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionScoreDTO;
 import com.k9x.application.disciplines.obdx.port.GetObdxConfigurationAllowedValuesPort;
@@ -35,18 +34,23 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GetCollectionServiceCaseTest {
 
-    @Mock private GetObdxEventPersistencePort getObdxEventPersistencePort;
-    @Mock private GetStagePersistencePort getStagePersistencePort;
-    @Mock private GetCollectionEventJudgesPersistencePort getCollectionEventJudgesPersistencePort;
-    @Mock private GetCollectionCompetitorsPersistencePort getCollectionCompetitorsPersistencePort;
-    @Mock private GetCollectionExercisesPersistencePort getCollectionExercisesPersistencePort;
-    @Mock private GetCollectionScoresPersistencePort getCollectionScoresPersistencePort;
-    @Mock private GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort;
-
-    private GetCollectionServiceCase serviceCase;
-
     private static final ObdxEvent ACTIVE_EVENT = new ObdxEvent("event-1", "config-1", "Event A", "stage-1", "creator@test.com", 0L, 0L, null);
     private static final Stage ACTIVE_STAGE = new Stage("stage-1", "Stage A", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, null);
+    @Mock
+    private GetObdxEventPersistencePort getObdxEventPersistencePort;
+    @Mock
+    private GetStagePersistencePort getStagePersistencePort;
+    @Mock
+    private GetCollectionEventJudgesPersistencePort getCollectionEventJudgesPersistencePort;
+    @Mock
+    private GetCollectionCompetitorsPersistencePort getCollectionCompetitorsPersistencePort;
+    @Mock
+    private GetCollectionExercisesPersistencePort getCollectionExercisesPersistencePort;
+    @Mock
+    private GetCollectionScoresPersistencePort getCollectionScoresPersistencePort;
+    @Mock
+    private GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort;
+    private GetCollectionServiceCase serviceCase;
 
     @BeforeEach
     void setUp() {
