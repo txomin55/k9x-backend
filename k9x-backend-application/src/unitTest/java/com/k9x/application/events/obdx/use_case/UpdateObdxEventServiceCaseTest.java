@@ -79,7 +79,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_event_is_deleted() {
-        ObdxEvent event = new ObdxEvent("event-1", "Event 1", "stage-1", "user-1", 0L, 0L, 1700000000000L);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, 1700000000000L);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", VALID_COMMAND, "user-1", true))
@@ -90,7 +90,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_event_creator() {
-        ObdxEvent event = new ObdxEvent("event-1", "Event 1", "stage-1", "other-user", 0L, 0L, null);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "other-user", 0L, 0L, null);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", VALID_COMMAND, "user-1", true))
@@ -101,7 +101,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void updates_event_when_all_validations_pass() {
-        ObdxEvent event = new ObdxEvent("event-1", "Event 1", "stage-1", "user-1", 0L, 0L, null);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
 
         serviceCase.updateEvent("event-1", VALID_COMMAND, "user-1", true);

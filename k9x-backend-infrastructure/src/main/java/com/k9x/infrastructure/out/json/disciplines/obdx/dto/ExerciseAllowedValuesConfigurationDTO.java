@@ -7,7 +7,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record ExerciseAllowedValuesConfigurationDTO(@JsonProperty("allowed_values") List<BigDecimal> allowedValues,
+public record ExerciseAllowedValuesConfigurationDTO(String id,
+                                                    @JsonProperty("allowed_values") List<BigDecimal> allowedValues,
                                                     List<Exercise> exercises) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)

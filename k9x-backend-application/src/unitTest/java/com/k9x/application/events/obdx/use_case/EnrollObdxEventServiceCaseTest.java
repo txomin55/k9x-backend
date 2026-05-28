@@ -51,7 +51,7 @@ class EnrollObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_event_is_deleted() {
-        ObdxEvent event = new ObdxEvent("event-1", "Event 1", "stage-1", "user-1", 0L, 0L, 1700000000000L);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, 1700000000000L);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
 
         assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1")))
@@ -62,7 +62,7 @@ class EnrollObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_stage_is_expired() {
-        ObdxEvent event = new ObdxEvent("event-1", "Event 1", "stage-1", "user-1", 0L, 0L, null);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null);
         Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", 1L, 0L, 0L, null);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
@@ -75,7 +75,7 @@ class EnrollObdxEventServiceCaseTest {
 
     @Test
     void enrolls_event_when_all_validations_pass() {
-        ObdxEvent event = new ObdxEvent("event-1", "Event 1", "stage-1", "user-1", 0L, 0L, null);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null);
         Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, null);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);

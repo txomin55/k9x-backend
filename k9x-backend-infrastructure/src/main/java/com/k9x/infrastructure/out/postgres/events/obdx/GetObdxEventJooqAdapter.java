@@ -20,6 +20,7 @@ public class GetObdxEventJooqAdapter implements GetObdxEventPersistencePort {
                 .where(Tables.EVENTS.ID.eq(id))
                 .fetchOptional(r -> new ObdxEvent(
                         r.get(Tables.EVENTS.ID),
+                        r.get(Tables.EVENTS.CONFIGURATION_ID),
                         r.get(Tables.EVENTS.NAME),
                         r.get(Tables.EVENTS.STAGE_ID),
                         r.get(Tables.EVENTS.CREATOR),

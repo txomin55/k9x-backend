@@ -44,7 +44,7 @@ class UpdateObdxEventJooqAdapterTest {
 
         new UpdateObdxEventJooqAdapter(dsl).updateEvent("event-1", payload);
 
-        assertThat(capturedSqls).hasSize(7);
+        assertThat(capturedSqls).hasSize(9);
 
         assertThat(capturedSqls.get(0))
                 .contains("update \"obdx\".\"events\"")
@@ -55,45 +55,63 @@ class UpdateObdxEventJooqAdapterTest {
         assertThat(capturedBindings.get(0)).contains("event-1", "Event 1", "config-1", lastUpdate);
 
         assertThat(capturedSqls.get(1))
-                .contains("delete from \"obdx\".\"event_competitors\"")
-                .contains("\"event_id\"");
-        assertThat(capturedBindings.get(1)).contains("event-1");
+                .contains("delete from \"obdx\".\"event_scores\"")
+                .contains("\"event_id\"")
+                .contains("\"exercise_id\"")
+                .contains("\"judge_id\"")
+                .contains("\"dog_id\"");
+        assertThat(capturedBindings.get(1)).contains("event-1", "exercise-1", "judge-1", "dog-1");
 
         assertThat(capturedSqls.get(2))
+                .contains("delete from \"obdx\".\"event_competitors\"")
+                .contains("\"event_id\"");
+        assertThat(capturedBindings.get(2)).contains("event-1");
+
+        assertThat(capturedSqls.get(3))
                 .contains("insert into \"obdx\".\"event_competitors\"")
                 .contains("\"event_id\"")
                 .contains("\"dog_id\"")
                 .contains("\"position\"")
                 .contains("\"verified\"")
                 .contains("\"last_update\"");
-        assertThat(capturedBindings.get(2)).contains("event-1", "dog-1", (short) 1, true, lastUpdate);
-
-        assertThat(capturedSqls.get(3))
-                .contains("delete from \"obdx\".\"event_exercises\"")
-                .contains("\"event_id\"");
-        assertThat(capturedBindings.get(3)).contains("event-1");
+        assertThat(capturedBindings.get(3)).contains("event-1", "dog-1", (short) 1, true, lastUpdate);
 
         assertThat(capturedSqls.get(4))
+                .contains("delete from \"obdx\".\"event_exercises\"")
+                .contains("\"event_id\"");
+        assertThat(capturedBindings.get(4)).contains("event-1");
+
+        assertThat(capturedSqls.get(5))
                 .contains("insert into \"obdx\".\"event_exercises\"")
                 .contains("\"event_id\"")
                 .contains("\"exercise_id\"")
                 .contains("\"position\"")
                 .contains("\"tags\"")
                 .contains("\"last_update\"");
-        assertThat(capturedBindings.get(4)).contains("event-1", "exercise-1", (short) 1, lastUpdate);
-
-        assertThat(capturedSqls.get(5))
-                .contains("delete from \"obdx\".\"event_judges\"")
-                .contains("\"event_id\"");
-        assertThat(capturedBindings.get(5)).contains("event-1");
+        assertThat(capturedBindings.get(5)).contains("event-1", "exercise-1", (short) 1, lastUpdate);
 
         assertThat(capturedSqls.get(6))
+                .contains("delete from \"obdx\".\"event_judges\"")
+                .contains("\"event_id\"");
+        assertThat(capturedBindings.get(6)).contains("event-1");
+
+        assertThat(capturedSqls.get(7))
                 .contains("insert into \"obdx\".\"event_judges\"")
                 .contains("\"event_id\"")
                 .contains("\"judge_id\"")
                 .contains("\"collector_id\"")
                 .contains("\"last_update\"");
-        assertThat(capturedBindings.get(6)).contains("event-1", "judge-1", "collector@example.com", lastUpdate);
+        assertThat(capturedBindings.get(7)).contains("event-1", "judge-1", "collector@example.com", lastUpdate);
+
+        assertThat(capturedSqls.get(8))
+                .contains("insert into \"obdx\".\"event_scores\"")
+                .contains("\"event_id\"")
+                .contains("\"dog_id\"")
+                .contains("\"exercise_id\"")
+                .contains("\"judge_id\"")
+                .contains("on conflict")
+                .contains("do nothing");
+        assertThat(capturedBindings.get(8)).contains("event-1", "dog-1", "exercise-1", "judge-1", lastUpdate);
     }
 
     @Test
@@ -114,10 +132,11 @@ class UpdateObdxEventJooqAdapterTest {
 
         new UpdateObdxEventJooqAdapter(dsl).updateEvent("event-1", payload);
 
-        assertThat(capturedSqls).hasSize(4);
+        assertThat(capturedSqls).hasSize(5);
         assertThat(capturedSqls.get(0)).contains("update \"obdx\".\"events\"");
-        assertThat(capturedSqls.get(1)).contains("delete from \"obdx\".\"event_competitors\"");
-        assertThat(capturedSqls.get(2)).contains("delete from \"obdx\".\"event_exercises\"");
-        assertThat(capturedSqls.get(3)).contains("delete from \"obdx\".\"event_judges\"");
+        assertThat(capturedSqls.get(1)).contains("delete from \"obdx\".\"event_scores\"");
+        assertThat(capturedSqls.get(2)).contains("delete from \"obdx\".\"event_competitors\"");
+        assertThat(capturedSqls.get(3)).contains("delete from \"obdx\".\"event_exercises\"");
+        assertThat(capturedSqls.get(4)).contains("delete from \"obdx\".\"event_judges\"");
     }
 }

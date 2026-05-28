@@ -1,0 +1,42 @@
+package com.k9x.infrastructure.out.postgres.collections;
+
+import com.k9x.application.collections.port.GetCollectionCompetitorsPersistencePort;
+import com.k9x.application.collections.use_case.dto.FetchCollectionCompetitorDTO;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Dogs;
+import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventCompetitors;
+import org.jooq.DSLContext;
+
+import java.util.List;
+
+public class GetCollectionCompetitorsJooqAdapter implements GetCollectionCompetitorsPersistencePort {
+
+    private final DSLContext dsl;
+
+    public GetCollectionCompetitorsJooqAdapter(DSLContext dsl) {
+        this.dsl = dsl;
+    }
+
+    @Override
+    public List<FetchCollectionCompetitorDTO> getCompetitors(String eventId) {
+        EventCompetitors ec = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
+        Dogs d = Tables.DOGS;
+
+        return dsl.select(ec.DOG_ID, ec.POSITION, ec.VERIFIED,
+                        d.NAME, d.IDENTITY, d.OWNER, d.TEAM, d.COUNTRY)
+                .from(ec)
+                .join(d).on(d.ID.eq(ec.DOG_ID).and(d.DELETED_AT.isNull()))
+                .where(ec.EVENT_ID.eq(eventId))
+                .fetch(r -> new FetchCollectionCompetitorDTO(
+                        r.get(ec.DOG_ID),
+                        r.get(d.NAME),
+                        r.get(d.IDENTITY),
+                        r.get(d.OWNER),
+                        r.get(d.TEAM),
+                        r.get(d.COUNTRY),
+                        r.get(ec.POSITION),
+                        r.get(ec.VERIFIED),
+                        null
+                ));
+    }
+}

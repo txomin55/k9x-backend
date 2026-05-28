@@ -81,7 +81,7 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 
 | Endpoint         | Service Case | jOOQ Adapter Test |
 |------------------|--------------|-------------------|
-| `GetCollection`  | ❌            | ❌                 |
+| `GetCollection`  | ✅            | ✅                 |
 | `GetCollections` | ✅            | ✅                 |
 
 ---
@@ -123,8 +123,8 @@ Leyenda: ✅ test existe · ⚠️ implementado, sin tests · ❌ sin implementa
 | Stages (public)  | 0 / 2         | 1 / 2         |
 | Events (secured) | 6 / 6         | 6 / 6         |
 | Events (public)  | 0 / 1         | 0 / 1         |
-| Collections      | 1 / 2         | 1 / 2         |
+| Collections      | 2 / 2         | 2 / 2         |
 | Disciplines      | 1 / 1         | 1 / 1         |
 | User (secured)   | 0 / 3         | 1 / 3         |
 | Users (public)   | 1 / 1         | 0 / 1         |
-| **Total**        | **24 / 31**   | **25 / 31**   |
+| **Total**        | **25 / 31**   | **29 / 31**   |

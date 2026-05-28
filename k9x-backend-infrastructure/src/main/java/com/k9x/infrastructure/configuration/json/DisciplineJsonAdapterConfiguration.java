@@ -1,8 +1,10 @@
 package com.k9x.infrastructure.configuration.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.k9x.application.disciplines.obdx.port.GetObdxConfigurationAllowedValuesPort;
 import com.k9x.application.disciplines.obdx.port.GetObdxExerciseAllowedValuesPort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
+import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxJsonConfigurationAllowedValuesAdapter;
 import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxJsonExerciseAllowedValuesAdapter;
 import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxJsonFederationsConfigurationsAdapter;
 import org.springframework.context.MessageSource;
@@ -21,5 +23,10 @@ public class DisciplineJsonAdapterConfiguration {
     @Bean
     public GetObdxExerciseAllowedValuesPort getObdxExerciseAllowedValuesPort(ObjectMapper objectMapper) {
         return new ObdxJsonExerciseAllowedValuesAdapter(objectMapper);
+    }
+
+    @Bean
+    public GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort(ObjectMapper objectMapper) {
+        return new ObdxJsonConfigurationAllowedValuesAdapter(objectMapper);
     }
 }

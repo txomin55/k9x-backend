@@ -46,6 +46,7 @@ class GetObdxEventJooqAdapterTest {
             Result<Record> result = mockDsl.newResult(Tables.EVENTS.fields());
             Record record = mockDsl.newRecord(Tables.EVENTS.fields());
             record.set(Tables.EVENTS.ID, "event-1");
+            record.set(Tables.EVENTS.CONFIGURATION_ID, "config-1");
             record.set(Tables.EVENTS.NAME, "Event 1");
             record.set(Tables.EVENTS.STAGE_ID, "stage-1");
             record.set(Tables.EVENTS.CREATOR, "user-1");
@@ -60,6 +61,7 @@ class GetObdxEventJooqAdapterTest {
         ObdxEvent event = new GetObdxEventJooqAdapter(dsl).getEvent("event-1");
 
         assertThat(event.id()).isEqualTo("event-1");
+        assertThat(event.configurationId()).isEqualTo("config-1");
         assertThat(event.name()).isEqualTo("Event 1");
         assertThat(event.stageId()).isEqualTo("stage-1");
         assertThat(event.creator()).isEqualTo("user-1");

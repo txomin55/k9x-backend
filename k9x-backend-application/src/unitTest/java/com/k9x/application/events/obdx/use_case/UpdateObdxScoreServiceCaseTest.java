@@ -60,7 +60,7 @@ class UpdateObdxScoreServiceCaseTest {
 
     @Test
     void throws_exception_when_event_is_deleted() {
-        ObdxEvent event = new ObdxEvent("event-1", "Event 1", "stage-1", "user-1", 0L, 0L, 1700000000000L);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, 1700000000000L);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
 
         assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
@@ -72,7 +72,7 @@ class UpdateObdxScoreServiceCaseTest {
 
     @Test
     void throws_exception_when_stage_is_expired() {
-        ObdxEvent event = new ObdxEvent("event-1", "Event 1", "stage-1", "user-1", 0L, 0L, null);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null);
         Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", 1L, 0L, 0L, null);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
@@ -130,7 +130,7 @@ class UpdateObdxScoreServiceCaseTest {
     }
 
     private void givenActiveEventAndStage() {
-        ObdxEvent event = new ObdxEvent("event-1", "Event 1", "stage-1", "user-1", 0L, 0L, null);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null);
         Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, null);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
