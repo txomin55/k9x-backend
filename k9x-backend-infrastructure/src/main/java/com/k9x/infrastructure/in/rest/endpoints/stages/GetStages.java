@@ -1,7 +1,11 @@
 package com.k9x.infrastructure.in.rest.endpoints.stages;
 
+import com.k9x.application.stages.use_case.GetStageListServiceCase;
 import com.k9x.oas.stub.api.StagesFetchAllApiDelegate;
-import com.k9x.oas.stub.model.*;
+import com.k9x.oas.stub.model.CompetitionLocationDetailResponseDTO;
+import com.k9x.oas.stub.model.IdNameDTO;
+import com.k9x.oas.stub.model.StageSummaryResponseDTO;
+import com.k9x.oas.stub.model.StageEventSummaryResponseDTO;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
@@ -9,23 +13,37 @@ import java.util.List;
 
 public class GetStages implements StagesFetchAllApiDelegate {
 
+    private final GetStageListServiceCase getStageListServiceCase;
+
+    public GetStages(GetStageListServiceCase getStageListServiceCase) {
+        this.getStageListServiceCase = getStageListServiceCase;
+    }
+
     @Override
     public ResponseEntity<List<StageSummaryResponseDTO>> fetchAllStages() {
-        return ResponseEntity.ok(List.of(
-                new StageSummaryResponseDTO(
-                        "stage-1",
-                        "Stage One",
-                        "Mocked stage description",
-                        "ES",
-                        new CompetitionLocationDetailResponseDTO("Calle Mayor 1, Madrid", new BigDecimal("40.4168"), new BigDecimal("-3.7038")),
-                        1747000000L,
-                        1747100000L,
-                        List.of(
-                                new StageEventSummaryResponseDTO("event-1", "Obedience Open", new IdNameDTO("disc-1", "Obedience"), 5, "OPEN")
-                        ),
-                        "OPEN",
-                        "Mocked Organizer"
-                )
-        ));
+        return ResponseEntity.ok(
+                getStageListServiceCase.getStages().stream()
+                        .map(stage -> new StageSummaryResponseDTO(
+                                stage.id(),
+                                stage.name(),
+                                stage.description(),
+                                stage.country(),
+                                new CompetitionLocationDetailResponseDTO(
+                                        stage.address(),
+                                        stage.coordAlt() != null ? BigDecimal.valueOf(stage.coordAlt()) : null,
+                                        stage.coordLong() != null ? BigDecimal.valueOf(stage.coordLong()) : null),
+                                stage.dateFrom(),
+                                stage.dateTo(),
+                                stage.events().stream()
+                                        .map(e -> new StageEventSummaryResponseDTO(
+                                                e.id(),
+                                                e.name(),
+                                                new IdNameDTO(e.configurationId(), e.disciplineName()),
+                                                e.competitorCount(),
+                                                e.status()))
+                                        .toList(),
+                                stage.status(),
+                                stage.organizer()))
+                        .toList());
     }
 }
