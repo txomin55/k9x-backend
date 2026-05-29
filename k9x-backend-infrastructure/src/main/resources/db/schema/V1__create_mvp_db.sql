@@ -77,14 +77,15 @@ CREATE TABLE k9x.stages
 CREATE SCHEMA obdx;
 CREATE TABLE obdx.events
 (
-    id               VARCHAR(255) NOT NULL,
-    configuration_id VARCHAR(50),
-    name             VARCHAR(255) NOT NULL,
-    creator          VARCHAR(50)  NOT NULL,
-    stage_id         VARCHAR(255) NOT NULL,
-    last_update      BIGINT       NOT NULL,
-    created_at       BIGINT       NOT NULL,
-    deleted_at       BIGINT,
+    id                VARCHAR(255) NOT NULL,
+    configuration_id  VARCHAR(50),
+    score_calculation VARCHAR(10)  NOT NULL DEFAULT 'AVG',
+    name              VARCHAR(255) NOT NULL,
+    creator           VARCHAR(50)  NOT NULL,
+    stage_id          VARCHAR(255) NOT NULL,
+    last_update       BIGINT       NOT NULL,
+    created_at        BIGINT       NOT NULL,
+    deleted_at        BIGINT,
     CONSTRAINT obdx_events_pkey PRIMARY KEY (id),
     CONSTRAINT obdx_events_fk FOREIGN KEY (stage_id) REFERENCES k9x.stages (id)
 );

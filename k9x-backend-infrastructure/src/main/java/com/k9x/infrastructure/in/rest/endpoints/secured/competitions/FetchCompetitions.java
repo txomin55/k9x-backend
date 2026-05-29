@@ -32,8 +32,8 @@ public class FetchCompetitions implements SecuredCompetitionsFetchAllApiDelegate
                                 competition.address(),
                                 competition.stages().stream()
                                         .map(stage -> new CompetitionStageDetailResponseDTO(
-                                                stage.dateFrom() != null ? stage.dateFrom().intValue() : null,
-                                                stage.dateTo() != null ? stage.dateTo().intValue() : null,
+                                                stage.dateFrom() != null ? stage.dateFrom().intValue() : null, // TODO: use Long once CompetitionStageDetailResponseDTO.dateFrom is updated in OAS
+                                                stage.dateTo() != null ? stage.dateTo().intValue() : null, // TODO: use Long once CompetitionStageDetailResponseDTO.dateTo is updated in OAS
                                                 stage.id(),
                                                 stage.name()
                                         ))

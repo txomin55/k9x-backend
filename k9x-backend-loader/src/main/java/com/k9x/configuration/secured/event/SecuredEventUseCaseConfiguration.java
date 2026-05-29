@@ -1,6 +1,7 @@
 package com.k9x.configuration.secured.event;
 
 import com.k9x.application.disciplines.obdx.port.GetObdxExerciseAllowedValuesPort;
+import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.port.CreateObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.DeleteObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.EnrollObdxEventPersistencePort;
@@ -37,8 +38,9 @@ public class SecuredEventUseCaseConfiguration {
 
     @Bean
     public UpdateObdxEventServiceCase updateEventServiceCase(GetObdxEventPersistencePort getObdxEventPersistencePort,
-                                                             UpdateObdxEventPersistencePort updateObdxEventPersistencePort) {
-        return new UpdateObdxEventServiceCase(getObdxEventPersistencePort, updateObdxEventPersistencePort);
+                                                             UpdateObdxEventPersistencePort updateObdxEventPersistencePort,
+                                                             GetObdxClassificationConfigPort getObdxClassificationConfigPort) {
+        return new UpdateObdxEventServiceCase(getObdxEventPersistencePort, updateObdxEventPersistencePort, getObdxClassificationConfigPort);
     }
 
     @Bean

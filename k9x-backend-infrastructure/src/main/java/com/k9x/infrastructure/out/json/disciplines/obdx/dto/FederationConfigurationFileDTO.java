@@ -10,9 +10,11 @@ import java.util.List;
 public record FederationConfigurationFileDTO(String id,
                                              String country,
                                              @JsonProperty("allowed_values") List<BigDecimal> allowedValues,
+                                             @JsonProperty("break_tie") List<String> breakTie,
+                                             @JsonProperty("break_tie_tie") List<String> breakTieTie,
                                              List<Exercise> exercises) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record Exercise(String id) {
+    public record Exercise(String id, @JsonProperty("coef") BigDecimal coef) {
     }
 }

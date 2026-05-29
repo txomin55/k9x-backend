@@ -2,6 +2,7 @@ package com.k9x.infrastructure.configuration.postgres;
 
 import com.k9x.application.events.obdx.port.CreateObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.DeleteObdxEventPersistencePort;
+import com.k9x.application.events.obdx.port.GetClassificationPersistencePort;
 import com.k9x.application.events.obdx.port.GetObdxEventCollectorPersistencePort;
 import com.k9x.application.events.obdx.port.GetObdxEventListPersistencePort;
 import com.k9x.application.events.obdx.port.GetObdxEventPersistencePort;
@@ -11,6 +12,7 @@ import com.k9x.application.events.obdx.port.UpdateObdxScorePersistencePort;
 import com.k9x.infrastructure.out.postgres.events.obdx.CreateObdxEventJooqAdapter;
 import com.k9x.infrastructure.out.postgres.events.obdx.DeleteObdxEventJooqAdapter;
 import com.k9x.infrastructure.out.postgres.events.obdx.EnrollObdxEventJooqAdapter;
+import com.k9x.infrastructure.out.postgres.events.obdx.GetClassificationJooqAdapter;
 import com.k9x.infrastructure.out.postgres.events.obdx.GetObdxEventCollectorJooqAdapter;
 import com.k9x.infrastructure.out.postgres.events.obdx.GetObdxEventJooqAdapter;
 import com.k9x.infrastructure.out.postgres.events.obdx.GetObdxEventListJooqAdapter;
@@ -67,5 +69,10 @@ public class EventJooqAdapterConfiguration {
     @Bean
     public UpdateObdxScorePersistencePort updateScorePersistencePort() {
         return new UpdateObdxScoreJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetClassificationPersistencePort getClassificationPersistencePort() {
+        return new GetClassificationJooqAdapter(dsl);
     }
 }

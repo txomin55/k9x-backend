@@ -1,5 +1,7 @@
 package com.k9x.domain.aggregates.events.obdx;
 
+import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
+
 public record ObdxEvent(
         String id,
         String configurationId,
@@ -8,6 +10,7 @@ public record ObdxEvent(
         String creator,
         long lastUpdate,
         long createdAt,
-        Long deletedAt
+        Long deletedAt,
+        ObdxAvgMethod scoreCalculation
 ) {
 }

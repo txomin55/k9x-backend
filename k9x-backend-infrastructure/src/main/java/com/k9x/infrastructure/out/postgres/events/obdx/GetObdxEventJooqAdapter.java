@@ -1,6 +1,7 @@
 package com.k9x.infrastructure.out.postgres.events.obdx;
 
 import com.k9x.application.events.obdx.port.GetObdxEventPersistencePort;
+import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.aggregates.events.obdx.ObdxEvent;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables;
 import org.jooq.DSLContext;
@@ -26,7 +27,8 @@ public class GetObdxEventJooqAdapter implements GetObdxEventPersistencePort {
                         r.get(Tables.EVENTS.CREATOR),
                         r.get(Tables.EVENTS.LAST_UPDATE),
                         r.get(Tables.EVENTS.CREATED_AT),
-                        r.get(Tables.EVENTS.DELETED_AT)
+                        r.get(Tables.EVENTS.DELETED_AT),
+                        ObdxAvgMethod.valueOf(r.get(Tables.EVENTS.SCORE_CALCULATION))
                 )).orElse(null);
     }
 }

@@ -4,9 +4,13 @@ import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventConfigurationIdRequiredException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.port.GetObdxEventPersistencePort;
+import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.port.UpdateObdxEventPersistencePort;
+import com.k9x.application.events.obdx.use_case.dto.ObdxClassificationConfigDTO;
+import com.k9x.domain.aggregates.disciplines.ClassificationCacheEvictStrategy;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.domain.aggregates.events.obdx.ObdxEvent;
+import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
@@ -28,6 +33,9 @@ class UpdateObdxEventServiceCaseTest {
     @Mock
     private UpdateObdxEventPersistencePort updateObdxEventPersistencePort;
 
+    @Mock
+    private GetObdxClassificationConfigPort getObdxClassificationConfigPort;
+
     private UpdateObdxEventServiceCase serviceCase;
 
     private static final UpdateObdxEventCommand VALID_COMMAND = new UpdateObdxEventCommand(
@@ -36,7 +44,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @BeforeEach
     void setUp() {
-        serviceCase = new UpdateObdxEventServiceCase(getObdxEventPersistencePort, updateObdxEventPersistencePort);
+        serviceCase = new UpdateObdxEventServiceCase(getObdxEventPersistencePort, updateObdxEventPersistencePort, getObdxClassificationConfigPort);
     }
 
     @Test
@@ -79,7 +87,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_event_is_deleted() {
-        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, 1700000000000L);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, 1700000000000L, ObdxAvgMethod.MID_AVG);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", VALID_COMMAND, "user-1", true))
@@ -90,7 +98,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_event_creator() {
-        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "other-user", 0L, 0L, null);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "other-user", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", VALID_COMMAND, "user-1", true))
@@ -101,8 +109,10 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void updates_event_when_all_validations_pass() {
-        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
+        ObdxClassificationConfigDTO config = new ObdxClassificationConfigDTO(ClassificationCacheEvictStrategy.OBDX, null, Map.of(), List.of(), List.of());
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
+        when(getObdxClassificationConfigPort.getConfig("config-1")).thenReturn(config);
 
         serviceCase.updateEvent("event-1", VALID_COMMAND, "user-1", true);
 

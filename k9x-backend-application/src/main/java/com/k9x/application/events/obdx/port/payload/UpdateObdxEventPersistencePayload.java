@@ -2,12 +2,14 @@ package com.k9x.application.events.obdx.port.payload;
 
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.application.utils.date.DateUtils;
+import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 
 import java.util.List;
 
 public record UpdateObdxEventPersistencePayload(
         String name,
         String configurationId,
+        ObdxAvgMethod scoreCalculation,
         List<CompetitorItem> competitors,
         List<ExerciseItem> exercises,
         List<JudgeItem> judges,
@@ -17,10 +19,11 @@ public record UpdateObdxEventPersistencePayload(
     public record ExerciseItem(String exerciseId, short position, String[] tags) {}
     public record JudgeItem(String judgeId, String collectorId) {}
 
-    public static UpdateObdxEventPersistencePayload from(UpdateObdxEventCommand command) {
+    public static UpdateObdxEventPersistencePayload from(UpdateObdxEventCommand command, ObdxAvgMethod scoreCalculation) {
         return new UpdateObdxEventPersistencePayload(
                 command.name(),
                 command.configurationId(),
+                scoreCalculation,
                 command.competitors().stream()
                         .map(c -> new CompetitorItem(c.dogId(), c.order().shortValue()))
                         .toList(),

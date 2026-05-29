@@ -7,6 +7,7 @@ import com.k9x.application.events.obdx.port.GetObdxEventPersistencePort;
 import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.domain.aggregates.events.obdx.ObdxEvent;
+import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.aggregates.stages.Stage;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +58,7 @@ class DeleteObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_event_is_deleted() {
-        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, 1700000000000L);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, 1700000000000L, ObdxAvgMethod.MID_AVG);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
 
         assertThatThrownBy(() -> serviceCase.deleteEvent("event-1", "user-1", true))
@@ -68,7 +69,7 @@ class DeleteObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_stage_is_deleted() {
-        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
         Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, 1700000000000L);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
@@ -81,7 +82,7 @@ class DeleteObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_stage_creator() {
-        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
         Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "other-user", Long.MAX_VALUE, 0L, 0L, null);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
@@ -94,7 +95,7 @@ class DeleteObdxEventServiceCaseTest {
 
     @Test
     void deletes_event_when_all_validations_pass() {
-        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null);
+        ObdxEvent event = new ObdxEvent("event-1", null, "Event 1", "stage-1", "user-1", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
         Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, null);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(event);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);

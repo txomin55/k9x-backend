@@ -1,6 +1,7 @@
 package com.k9x.infrastructure.out.postgres.events.obdx;
 
 import com.k9x.application.events.obdx.port.payload.UpdateObdxEventPersistencePayload;
+import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -36,6 +37,7 @@ class UpdateObdxEventJooqAdapterTest {
         UpdateObdxEventPersistencePayload payload = new UpdateObdxEventPersistencePayload(
                 "Event 1",
                 "config-1",
+                ObdxAvgMethod.MID_AVG,
                 List.of(new UpdateObdxEventPersistencePayload.CompetitorItem("dog-1", (short) 1)),
                 List.of(new UpdateObdxEventPersistencePayload.ExerciseItem("exercise-1", (short) 1, new String[]{"tag1"})),
                 List.of(new UpdateObdxEventPersistencePayload.JudgeItem("judge-1", "collector@example.com")),
@@ -127,7 +129,7 @@ class UpdateObdxEventJooqAdapterTest {
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
 
         UpdateObdxEventPersistencePayload payload = new UpdateObdxEventPersistencePayload(
-                "Event 1", "config-1", List.of(), List.of(), List.of(), 1700000000000L
+                "Event 1", "config-1", ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), 1700000000000L
         );
 
         new UpdateObdxEventJooqAdapter(dsl).updateEvent("event-1", payload);

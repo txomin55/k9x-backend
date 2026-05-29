@@ -1,6 +1,7 @@
 package com.k9x.configuration.events;
 
-import com.k9x.infrastructure.in.rest.endpoints.events.GetEventClassification;
+import com.k9x.application.events.obdx.use_case.GetObdxEventClassificationServiceCase;
+import com.k9x.infrastructure.in.rest.endpoints.events.obdx.GetObdxEventClassification;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -8,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class EventsEndpointConfiguration {
 
     @Bean
-    public GetEventClassification getEventClassification() {
-        return new GetEventClassification();
+    public GetObdxEventClassification getEventClassification(GetObdxEventClassificationServiceCase getClassificationServiceCase) {
+        return new GetObdxEventClassification(getClassificationServiceCase);
     }
 }

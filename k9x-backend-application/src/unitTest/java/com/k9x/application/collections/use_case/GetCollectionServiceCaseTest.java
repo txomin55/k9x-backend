@@ -16,6 +16,7 @@ import com.k9x.application.events.obdx.port.GetObdxEventPersistencePort;
 import com.k9x.application.stages.exceptions.StageExpiredException;
 import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.domain.aggregates.events.obdx.ObdxEvent;
+import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.aggregates.stages.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GetCollectionServiceCaseTest {
 
-    private static final ObdxEvent ACTIVE_EVENT = new ObdxEvent("event-1", "config-1", "Event A", "stage-1", "creator@test.com", 0L, 0L, null);
+    private static final ObdxEvent ACTIVE_EVENT = new ObdxEvent("event-1", "config-1", "Event A", "stage-1", "creator@test.com", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
     private static final Stage ACTIVE_STAGE = new Stage("stage-1", "Stage A", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, null);
     @Mock
     private GetObdxEventPersistencePort getObdxEventPersistencePort;
@@ -78,7 +79,7 @@ class GetCollectionServiceCaseTest {
 
     @Test
     void throws_exception_when_event_is_deleted() {
-        ObdxEvent deletedEvent = new ObdxEvent("event-1", "config-1", "Event A", "stage-1", "creator@test.com", 0L, 0L, 1700000000000L);
+        ObdxEvent deletedEvent = new ObdxEvent("event-1", "config-1", "Event A", "stage-1", "creator@test.com", 0L, 0L, 1700000000000L, ObdxAvgMethod.MID_AVG);
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(deletedEvent);
 
         assertThatThrownBy(() -> serviceCase.getCollection("event-1", "user@test.com"))

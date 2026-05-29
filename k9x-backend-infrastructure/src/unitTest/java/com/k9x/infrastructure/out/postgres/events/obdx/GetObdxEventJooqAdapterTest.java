@@ -53,6 +53,7 @@ class GetObdxEventJooqAdapterTest {
             record.set(Tables.EVENTS.LAST_UPDATE, 1000L);
             record.set(Tables.EVENTS.CREATED_AT, 2000L);
             record.set(Tables.EVENTS.DELETED_AT, null);
+            record.set(Tables.EVENTS.SCORE_CALCULATION, "MID_AVG");
             result.add(record);
             return new MockResult[]{new MockResult(1, result)};
         };
