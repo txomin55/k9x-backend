@@ -4,11 +4,8 @@ import com.k9x.application.collections.use_case.dto.FetchCollectionDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventJudges;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.Events;
-import org.jooq.DSLContext;
-import org.jooq.Field;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.jooq.tools.jdbc.MockDataProvider;
@@ -22,7 +19,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GetCollectionListJooqAdapterTest {
+class GetObdxCollectionListJooqAdapterTest {
 
     private static final Events E = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENTS;
     private static final EventJudges EJ = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_JUDGES;

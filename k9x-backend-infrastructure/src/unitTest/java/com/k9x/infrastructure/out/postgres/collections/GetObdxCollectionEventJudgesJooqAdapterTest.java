@@ -5,11 +5,8 @@ import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Judges;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Users;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventJudges;
-import org.jooq.DSLContext;
-import org.jooq.Field;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.jooq.tools.jdbc.MockDataProvider;
@@ -23,7 +20,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GetCollectionEventJudgesJooqAdapterTest {
+class GetObdxCollectionEventJudgesJooqAdapterTest {
 
     private static final EventJudges EJ = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_JUDGES;
     private static final Judges J = Tables.JUDGES;
@@ -50,7 +47,7 @@ class GetCollectionEventJudgesJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetCollectionEventJudgesJooqAdapter(dsl).getJudges("event-1");
+        new GetObdxCollectionEventJudgesJooqAdapter(dsl).getJudges("event-1");
 
         assertThat(capturedSql.get())
                 .contains("from \"obdx\".\"event_judges\"")
@@ -74,7 +71,7 @@ class GetCollectionEventJudgesJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<FetchCollectionJudgeWithCollectorDTO> judges = new GetCollectionEventJudgesJooqAdapter(dsl).getJudges("event-1");
+        List<FetchCollectionJudgeWithCollectorDTO> judges = new GetObdxCollectionEventJudgesJooqAdapter(dsl).getJudges("event-1");
 
         assertThat(judges).hasSize(1);
         assertThat(judges.getFirst().judgeId()).isEqualTo("judge-1");
@@ -89,7 +86,7 @@ class GetCollectionEventJudgesJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<FetchCollectionJudgeWithCollectorDTO> judges = new GetCollectionEventJudgesJooqAdapter(dsl).getJudges("event-1");
+        List<FetchCollectionJudgeWithCollectorDTO> judges = new GetObdxCollectionEventJudgesJooqAdapter(dsl).getJudges("event-1");
 
         assertThat(judges).isEmpty();
     }

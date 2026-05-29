@@ -1,17 +1,17 @@
 package com.k9x.infrastructure.out.postgres.collections;
 
-import com.k9x.application.collections.port.GetCollectionExercisesPersistencePort;
+import com.k9x.application.collections.port.GetObdxCollectionExercisesPersistencePort;
 import com.k9x.application.collections.use_case.dto.FetchCollectionExerciseDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables;
 import org.jooq.DSLContext;
 
 import java.util.List;
 
-public class GetCollectionExercisesJooqAdapter implements GetCollectionExercisesPersistencePort {
+public class GetObdxCollectionExercisesJooqAdapter implements GetObdxCollectionExercisesPersistencePort {
 
     private final DSLContext dsl;
 
-    public GetCollectionExercisesJooqAdapter(DSLContext dsl) {
+    public GetObdxCollectionExercisesJooqAdapter(DSLContext dsl) {
         this.dsl = dsl;
     }
 

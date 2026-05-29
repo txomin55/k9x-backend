@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.collections;
 
-import com.k9x.application.collections.port.GetCollectionCompetitorsPersistencePort;
+import com.k9x.application.collections.port.GetObdxCollectionCompetitorsPersistencePort;
 import com.k9x.application.collections.use_case.dto.FetchCollectionCompetitorDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Dogs;
@@ -9,11 +9,11 @@ import org.jooq.DSLContext;
 
 import java.util.List;
 
-public class GetCollectionCompetitorsJooqAdapter implements GetCollectionCompetitorsPersistencePort {
+public class GetObdxCollectionCompetitorsJooqAdapter implements GetObdxCollectionCompetitorsPersistencePort {
 
     private final DSLContext dsl;
 
-    public GetCollectionCompetitorsJooqAdapter(DSLContext dsl) {
+    public GetObdxCollectionCompetitorsJooqAdapter(DSLContext dsl) {
         this.dsl = dsl;
     }
 

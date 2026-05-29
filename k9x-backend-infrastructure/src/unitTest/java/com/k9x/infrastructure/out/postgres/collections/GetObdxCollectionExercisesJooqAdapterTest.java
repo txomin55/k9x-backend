@@ -2,11 +2,8 @@ package com.k9x.infrastructure.out.postgres.collections;
 
 import com.k9x.application.collections.use_case.dto.FetchCollectionExerciseDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables;
-import org.jooq.DSLContext;
-import org.jooq.Field;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.jooq.tools.jdbc.MockDataProvider;
@@ -18,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GetCollectionExercisesJooqAdapterTest {
+class GetObdxCollectionExercisesJooqAdapterTest {
 
     private static final Field<?>[] SELECT_FIELDS = {
             Tables.EVENT_EXERCISES.EXERCISE_ID, Tables.EVENT_EXERCISES.POSITION
@@ -37,7 +34,7 @@ class GetCollectionExercisesJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetCollectionExercisesJooqAdapter(dsl).getExercises("event-1");
+        new GetObdxCollectionExercisesJooqAdapter(dsl).getExercises("event-1");
 
         assertThat(capturedSql.get())
                 .contains("from \"obdx\".\"event_exercises\"")
@@ -58,7 +55,7 @@ class GetCollectionExercisesJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<FetchCollectionExerciseDTO> exercises = new GetCollectionExercisesJooqAdapter(dsl).getExercises("event-1");
+        List<FetchCollectionExerciseDTO> exercises = new GetObdxCollectionExercisesJooqAdapter(dsl).getExercises("event-1");
 
         assertThat(exercises).hasSize(1);
         assertThat(exercises.getFirst().exerciseId()).isEqualTo("exercise-1");
@@ -72,7 +69,7 @@ class GetCollectionExercisesJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<FetchCollectionExerciseDTO> exercises = new GetCollectionExercisesJooqAdapter(dsl).getExercises("event-1");
+        List<FetchCollectionExerciseDTO> exercises = new GetObdxCollectionExercisesJooqAdapter(dsl).getExercises("event-1");
 
         assertThat(exercises).isEmpty();
     }

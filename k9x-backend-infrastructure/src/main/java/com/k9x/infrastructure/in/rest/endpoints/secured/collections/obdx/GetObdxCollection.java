@@ -1,6 +1,6 @@
-package com.k9x.infrastructure.in.rest.endpoints.secured.collections;
+package com.k9x.infrastructure.in.rest.endpoints.secured.collections.obdx;
 
-import com.k9x.application.collections.use_case.GetCollectionServiceCase;
+import com.k9x.application.collections.use_case.GetObdxCollectionServiceCase;
 import com.k9x.application.collections.use_case.dto.FetchCollectionDetailDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
@@ -12,19 +12,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class GetCollection implements SecuredCollectionsFetchOneApiDelegate {
+public class GetObdxCollection implements SecuredCollectionsFetchOneApiDelegate {
 
-    private final GetCollectionServiceCase getCollectionServiceCase;
+    private final GetObdxCollectionServiceCase getObdxCollectionServiceCase;
     private final UserInfoDTO userDetails;
 
-    public GetCollection(GetCollectionServiceCase getCollectionServiceCase, UserInfoDTO userDetails) {
-        this.getCollectionServiceCase = getCollectionServiceCase;
+    public GetObdxCollection(GetObdxCollectionServiceCase getObdxCollectionServiceCase, UserInfoDTO userDetails) {
+        this.getObdxCollectionServiceCase = getObdxCollectionServiceCase;
         this.userDetails = userDetails;
     }
 
     @Override
     public ResponseEntity<CollectionResponseDTO> fetchOneCollection(String id) {
-        FetchCollectionDetailDTO detail = getCollectionServiceCase.getCollection(id, userDetails.getEmail());
+        FetchCollectionDetailDTO detail = getObdxCollectionServiceCase.getCollection(id, userDetails.getEmail());
 
         Map<String, String> judgeNames = detail.judges().stream()
                 .collect(Collectors.toMap(FetchCollectionJudgeWithCollectorDTO::judgeId,

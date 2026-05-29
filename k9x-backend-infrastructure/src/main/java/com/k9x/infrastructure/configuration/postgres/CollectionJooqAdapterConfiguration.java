@@ -1,15 +1,7 @@
 package com.k9x.infrastructure.configuration.postgres;
 
-import com.k9x.application.collections.port.GetCollectionCompetitorsPersistencePort;
-import com.k9x.application.collections.port.GetCollectionEventJudgesPersistencePort;
-import com.k9x.application.collections.port.GetCollectionExercisesPersistencePort;
-import com.k9x.application.collections.port.GetCollectionListPersistencePort;
-import com.k9x.application.collections.port.GetCollectionScoresPersistencePort;
-import com.k9x.infrastructure.out.postgres.collections.GetCollectionCompetitorsJooqAdapter;
-import com.k9x.infrastructure.out.postgres.collections.GetCollectionEventJudgesJooqAdapter;
-import com.k9x.infrastructure.out.postgres.collections.GetCollectionExercisesJooqAdapter;
-import com.k9x.infrastructure.out.postgres.collections.GetCollectionListJooqAdapter;
-import com.k9x.infrastructure.out.postgres.collections.GetCollectionScoresJooqAdapter;
+import com.k9x.application.collections.port.*;
+import com.k9x.infrastructure.out.postgres.collections.*;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,22 +21,22 @@ public class CollectionJooqAdapterConfiguration {
     }
 
     @Bean
-    public GetCollectionEventJudgesPersistencePort getCollectionEventJudgesPersistencePort() {
-        return new GetCollectionEventJudgesJooqAdapter(dsl);
+    public GetObdxCollectionEventJudgesPersistencePort getCollectionEventJudgesPersistencePort() {
+        return new GetObdxCollectionEventJudgesJooqAdapter(dsl);
     }
 
     @Bean
-    public GetCollectionCompetitorsPersistencePort getCollectionCompetitorsPersistencePort() {
-        return new GetCollectionCompetitorsJooqAdapter(dsl);
+    public GetObdxCollectionCompetitorsPersistencePort getCollectionCompetitorsPersistencePort() {
+        return new GetObdxCollectionCompetitorsJooqAdapter(dsl);
     }
 
     @Bean
-    public GetCollectionExercisesPersistencePort getCollectionExercisesPersistencePort() {
-        return new GetCollectionExercisesJooqAdapter(dsl);
+    public GetObdxCollectionExercisesPersistencePort getCollectionExercisesPersistencePort() {
+        return new GetObdxCollectionExercisesJooqAdapter(dsl);
     }
 
     @Bean
-    public GetCollectionScoresPersistencePort getCollectionScoresPersistencePort() {
-        return new GetCollectionScoresJooqAdapter(dsl);
+    public GetObdxCollectionScoresPersistencePort getCollectionScoresPersistencePort() {
+        return new GetObdxCollectionScoresJooqAdapter(dsl);
     }
 }

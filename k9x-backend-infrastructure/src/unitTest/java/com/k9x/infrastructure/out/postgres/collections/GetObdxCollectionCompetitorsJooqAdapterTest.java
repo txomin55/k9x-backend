@@ -4,11 +4,8 @@ import com.k9x.application.collections.use_case.dto.FetchCollectionCompetitorDTO
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Dogs;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventCompetitors;
-import org.jooq.DSLContext;
-import org.jooq.Field;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.jooq.tools.jdbc.MockDataProvider;
@@ -22,7 +19,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GetCollectionCompetitorsJooqAdapterTest {
+class GetObdxCollectionCompetitorsJooqAdapterTest {
 
     private static final EventCompetitors EC = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
     private static final Dogs D = Tables.DOGS;
@@ -49,7 +46,7 @@ class GetCollectionCompetitorsJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetCollectionCompetitorsJooqAdapter(dsl).getCompetitors("event-1");
+        new GetObdxCollectionCompetitorsJooqAdapter(dsl).getCompetitors("event-1");
 
         assertThat(capturedSql.get())
                 .contains("from \"obdx\".\"event_competitors\"")
@@ -77,7 +74,7 @@ class GetCollectionCompetitorsJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<FetchCollectionCompetitorDTO> competitors = new GetCollectionCompetitorsJooqAdapter(dsl).getCompetitors("event-1");
+        List<FetchCollectionCompetitorDTO> competitors = new GetObdxCollectionCompetitorsJooqAdapter(dsl).getCompetitors("event-1");
 
         assertThat(competitors).hasSize(1);
         FetchCollectionCompetitorDTO comp = competitors.getFirst();
@@ -99,7 +96,7 @@ class GetCollectionCompetitorsJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<FetchCollectionCompetitorDTO> competitors = new GetCollectionCompetitorsJooqAdapter(dsl).getCompetitors("event-1");
+        List<FetchCollectionCompetitorDTO> competitors = new GetObdxCollectionCompetitorsJooqAdapter(dsl).getCompetitors("event-1");
 
         assertThat(competitors).isEmpty();
     }

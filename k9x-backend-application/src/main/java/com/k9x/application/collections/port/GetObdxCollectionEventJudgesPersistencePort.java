@@ -4,6 +4,6 @@ import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithColl
 
 import java.util.List;
 
-public interface GetCollectionEventJudgesPersistencePort {
+public interface GetObdxCollectionEventJudgesPersistencePort {
     List<FetchCollectionJudgeWithCollectorDTO> getJudges(String eventId);
 }

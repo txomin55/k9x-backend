@@ -4,6 +4,6 @@ import com.k9x.application.collections.use_case.dto.FetchCollectionScoreDTO;
 
 import java.util.List;
 
-public interface GetCollectionScoresPersistencePort {
+public interface GetObdxCollectionScoresPersistencePort {
     List<FetchCollectionScoreDTO> getScores(String eventId);
 }

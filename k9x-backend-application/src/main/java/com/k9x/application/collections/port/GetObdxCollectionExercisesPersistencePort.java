@@ -4,6 +4,6 @@ import com.k9x.application.collections.use_case.dto.FetchCollectionExerciseDTO;
 
 import java.util.List;
 
-public interface GetCollectionExercisesPersistencePort {
+public interface GetObdxCollectionExercisesPersistencePort {
     List<FetchCollectionExerciseDTO> getExercises(String eventId);
 }

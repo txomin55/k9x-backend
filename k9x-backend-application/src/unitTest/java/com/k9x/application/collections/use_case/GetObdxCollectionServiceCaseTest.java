@@ -1,9 +1,9 @@
 package com.k9x.application.collections.use_case;
 
-import com.k9x.application.collections.port.GetCollectionCompetitorsPersistencePort;
-import com.k9x.application.collections.port.GetCollectionEventJudgesPersistencePort;
-import com.k9x.application.collections.port.GetCollectionExercisesPersistencePort;
-import com.k9x.application.collections.port.GetCollectionScoresPersistencePort;
+import com.k9x.application.collections.port.GetObdxCollectionCompetitorsPersistencePort;
+import com.k9x.application.collections.port.GetObdxCollectionEventJudgesPersistencePort;
+import com.k9x.application.collections.port.GetObdxCollectionExercisesPersistencePort;
+import com.k9x.application.collections.port.GetObdxCollectionScoresPersistencePort;
 import com.k9x.application.collections.use_case.dto.FetchCollectionCompetitorDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionDetailDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
@@ -15,8 +15,8 @@ import com.k9x.application.events.obdx.exceptions.UserNotCollectorException;
 import com.k9x.application.events.obdx.port.GetObdxEventPersistencePort;
 import com.k9x.application.stages.exceptions.StageExpiredException;
 import com.k9x.application.stages.port.GetStagePersistencePort;
-import com.k9x.domain.aggregates.events.obdx.ObdxEvent;
 import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.aggregates.events.obdx.ObdxEvent;
 import com.k9x.domain.aggregates.stages.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class GetCollectionServiceCaseTest {
+class GetObdxCollectionServiceCaseTest {
 
     private static final ObdxEvent ACTIVE_EVENT = new ObdxEvent("event-1", "config-1", "Event A", "stage-1", "creator@test.com", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
     private static final Stage ACTIVE_STAGE = new Stage("stage-1", "Stage A", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, null);
@@ -42,26 +42,26 @@ class GetCollectionServiceCaseTest {
     @Mock
     private GetStagePersistencePort getStagePersistencePort;
     @Mock
-    private GetCollectionEventJudgesPersistencePort getCollectionEventJudgesPersistencePort;
+    private GetObdxCollectionEventJudgesPersistencePort getObdxCollectionEventJudgesPersistencePort;
     @Mock
-    private GetCollectionCompetitorsPersistencePort getCollectionCompetitorsPersistencePort;
+    private GetObdxCollectionCompetitorsPersistencePort getObdxCollectionCompetitorsPersistencePort;
     @Mock
-    private GetCollectionExercisesPersistencePort getCollectionExercisesPersistencePort;
+    private GetObdxCollectionExercisesPersistencePort getObdxCollectionExercisesPersistencePort;
     @Mock
-    private GetCollectionScoresPersistencePort getCollectionScoresPersistencePort;
+    private GetObdxCollectionScoresPersistencePort getObdxCollectionScoresPersistencePort;
     @Mock
     private GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort;
-    private GetCollectionServiceCase serviceCase;
+    private GetObdxCollectionServiceCase serviceCase;
 
     @BeforeEach
     void setUp() {
-        serviceCase = new GetCollectionServiceCase(
+        serviceCase = new GetObdxCollectionServiceCase(
                 getObdxEventPersistencePort,
                 getStagePersistencePort,
-                getCollectionEventJudgesPersistencePort,
-                getCollectionCompetitorsPersistencePort,
-                getCollectionExercisesPersistencePort,
-                getCollectionScoresPersistencePort,
+                getObdxCollectionEventJudgesPersistencePort,
+                getObdxCollectionCompetitorsPersistencePort,
+                getObdxCollectionExercisesPersistencePort,
+                getObdxCollectionScoresPersistencePort,
                 getObdxConfigurationAllowedValuesPort);
     }
 
@@ -72,9 +72,9 @@ class GetCollectionServiceCaseTest {
         assertThatThrownBy(() -> serviceCase.getCollection("event-1", "user@test.com"))
                 .isInstanceOf(EventNotFoundException.class);
 
-        verifyNoInteractions(getStagePersistencePort, getCollectionEventJudgesPersistencePort,
-                getCollectionCompetitorsPersistencePort, getCollectionExercisesPersistencePort,
-                getCollectionScoresPersistencePort, getObdxConfigurationAllowedValuesPort);
+        verifyNoInteractions(getStagePersistencePort, getObdxCollectionEventJudgesPersistencePort,
+                getObdxCollectionCompetitorsPersistencePort, getObdxCollectionExercisesPersistencePort,
+                getObdxCollectionScoresPersistencePort, getObdxConfigurationAllowedValuesPort);
     }
 
     @Test
@@ -85,9 +85,9 @@ class GetCollectionServiceCaseTest {
         assertThatThrownBy(() -> serviceCase.getCollection("event-1", "user@test.com"))
                 .isInstanceOf(EventAlreadyDeletedException.class);
 
-        verifyNoInteractions(getStagePersistencePort, getCollectionEventJudgesPersistencePort,
-                getCollectionCompetitorsPersistencePort, getCollectionExercisesPersistencePort,
-                getCollectionScoresPersistencePort, getObdxConfigurationAllowedValuesPort);
+        verifyNoInteractions(getStagePersistencePort, getObdxCollectionEventJudgesPersistencePort,
+                getObdxCollectionCompetitorsPersistencePort, getObdxCollectionExercisesPersistencePort,
+                getObdxCollectionScoresPersistencePort, getObdxConfigurationAllowedValuesPort);
     }
 
     @Test
@@ -99,8 +99,8 @@ class GetCollectionServiceCaseTest {
         assertThatThrownBy(() -> serviceCase.getCollection("event-1", "user@test.com"))
                 .isInstanceOf(StageExpiredException.class);
 
-        verifyNoInteractions(getCollectionEventJudgesPersistencePort, getCollectionCompetitorsPersistencePort,
-                getCollectionExercisesPersistencePort, getCollectionScoresPersistencePort,
+        verifyNoInteractions(getObdxCollectionEventJudgesPersistencePort, getObdxCollectionCompetitorsPersistencePort,
+                getObdxCollectionExercisesPersistencePort, getObdxCollectionScoresPersistencePort,
                 getObdxConfigurationAllowedValuesPort);
     }
 
@@ -111,7 +111,7 @@ class GetCollectionServiceCaseTest {
         );
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(ACTIVE_EVENT);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(ACTIVE_STAGE);
-        when(getCollectionEventJudgesPersistencePort.getJudges("event-1")).thenReturn(judges);
+        when(getObdxCollectionEventJudgesPersistencePort.getJudges("event-1")).thenReturn(judges);
 
         assertThatThrownBy(() -> serviceCase.getCollection("event-1", "notcollector@test.com"))
                 .isInstanceOf(UserNotCollectorException.class);
@@ -125,10 +125,10 @@ class GetCollectionServiceCaseTest {
         );
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(ACTIVE_EVENT);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(ACTIVE_STAGE);
-        when(getCollectionEventJudgesPersistencePort.getJudges("event-1")).thenReturn(judges);
-        when(getCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(List.of());
-        when(getCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());
-        when(getCollectionScoresPersistencePort.getScores("event-1")).thenReturn(List.of());
+        when(getObdxCollectionEventJudgesPersistencePort.getJudges("event-1")).thenReturn(judges);
+        when(getObdxCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(List.of());
+        when(getObdxCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());
+        when(getObdxCollectionScoresPersistencePort.getScores("event-1")).thenReturn(List.of());
         when(getObdxConfigurationAllowedValuesPort.getAllowedValues("config-1")).thenReturn(List.of(new BigDecimal("7.5")));
 
         FetchCollectionDetailDTO result = serviceCase.getCollection("event-1", "creator@test.com");
@@ -145,10 +145,10 @@ class GetCollectionServiceCaseTest {
         );
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(ACTIVE_EVENT);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(ACTIVE_STAGE);
-        when(getCollectionEventJudgesPersistencePort.getJudges("event-1")).thenReturn(judges);
-        when(getCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(List.of());
-        when(getCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());
-        when(getCollectionScoresPersistencePort.getScores("event-1")).thenReturn(List.of());
+        when(getObdxCollectionEventJudgesPersistencePort.getJudges("event-1")).thenReturn(judges);
+        when(getObdxCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(List.of());
+        when(getObdxCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());
+        when(getObdxCollectionScoresPersistencePort.getScores("event-1")).thenReturn(List.of());
         when(getObdxConfigurationAllowedValuesPort.getAllowedValues("config-1")).thenReturn(List.of());
 
         FetchCollectionDetailDTO result = serviceCase.getCollection("event-1", "collector@test.com");
@@ -167,10 +167,10 @@ class GetCollectionServiceCaseTest {
         );
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(ACTIVE_EVENT);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(ACTIVE_STAGE);
-        when(getCollectionEventJudgesPersistencePort.getJudges("event-1")).thenReturn(judges);
-        when(getCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(rawCompetitors);
-        when(getCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());
-        when(getCollectionScoresPersistencePort.getScores("event-1")).thenReturn(List.of());
+        when(getObdxCollectionEventJudgesPersistencePort.getJudges("event-1")).thenReturn(judges);
+        when(getObdxCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(rawCompetitors);
+        when(getObdxCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());
+        when(getObdxCollectionScoresPersistencePort.getScores("event-1")).thenReturn(List.of());
         when(getObdxConfigurationAllowedValuesPort.getAllowedValues("config-1")).thenReturn(List.of());
 
         FetchCollectionDetailDTO result = serviceCase.getCollection("event-1", "collector@test.com");
@@ -190,10 +190,10 @@ class GetCollectionServiceCaseTest {
         );
         when(getObdxEventPersistencePort.getEvent("event-1")).thenReturn(ACTIVE_EVENT);
         when(getStagePersistencePort.getStage("stage-1")).thenReturn(ACTIVE_STAGE);
-        when(getCollectionEventJudgesPersistencePort.getJudges("event-1")).thenReturn(judges);
-        when(getCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(List.of());
-        when(getCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());
-        when(getCollectionScoresPersistencePort.getScores("event-1")).thenReturn(scores);
+        when(getObdxCollectionEventJudgesPersistencePort.getJudges("event-1")).thenReturn(judges);
+        when(getObdxCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(List.of());
+        when(getObdxCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());
+        when(getObdxCollectionScoresPersistencePort.getScores("event-1")).thenReturn(scores);
         when(getObdxConfigurationAllowedValuesPort.getAllowedValues("config-1")).thenReturn(List.of());
 
         FetchCollectionDetailDTO result = serviceCase.getCollection("event-1", "collector@test.com");

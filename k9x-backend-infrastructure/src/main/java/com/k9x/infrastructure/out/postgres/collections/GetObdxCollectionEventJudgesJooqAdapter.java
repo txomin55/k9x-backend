@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.collections;
 
-import com.k9x.application.collections.port.GetCollectionEventJudgesPersistencePort;
+import com.k9x.application.collections.port.GetObdxCollectionEventJudgesPersistencePort;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Judges;
@@ -10,11 +10,11 @@ import org.jooq.DSLContext;
 
 import java.util.List;
 
-public class GetCollectionEventJudgesJooqAdapter implements GetCollectionEventJudgesPersistencePort {
+public class GetObdxCollectionEventJudgesJooqAdapter implements GetObdxCollectionEventJudgesPersistencePort {
 
     private final DSLContext dsl;
 
-    public GetCollectionEventJudgesJooqAdapter(DSLContext dsl) {
+    public GetObdxCollectionEventJudgesJooqAdapter(DSLContext dsl) {
         this.dsl = dsl;
     }
 

@@ -2,11 +2,8 @@ package com.k9x.infrastructure.out.postgres.collections;
 
 import com.k9x.application.collections.use_case.dto.FetchCollectionScoreDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables;
-import org.jooq.DSLContext;
-import org.jooq.Field;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.jooq.tools.jdbc.MockDataProvider;
@@ -19,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GetCollectionScoresJooqAdapterTest {
+class GetObdxCollectionScoresJooqAdapterTest {
 
     private static final Field<?>[] SELECT_FIELDS = {
             Tables.EVENT_SCORES.DOG_ID, Tables.EVENT_SCORES.EXERCISE_ID,
@@ -39,7 +36,7 @@ class GetCollectionScoresJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetCollectionScoresJooqAdapter(dsl).getScores("event-1");
+        new GetObdxCollectionScoresJooqAdapter(dsl).getScores("event-1");
 
         assertThat(capturedSql.get())
                 .contains("from \"obdx\".\"event_scores\"")
@@ -62,7 +59,7 @@ class GetCollectionScoresJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<FetchCollectionScoreDTO> scores = new GetCollectionScoresJooqAdapter(dsl).getScores("event-1");
+        List<FetchCollectionScoreDTO> scores = new GetObdxCollectionScoresJooqAdapter(dsl).getScores("event-1");
 
         assertThat(scores).hasSize(1);
         FetchCollectionScoreDTO score = scores.getFirst();
@@ -79,7 +76,7 @@ class GetCollectionScoresJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<FetchCollectionScoreDTO> scores = new GetCollectionScoresJooqAdapter(dsl).getScores("event-1");
+        List<FetchCollectionScoreDTO> scores = new GetObdxCollectionScoresJooqAdapter(dsl).getScores("event-1");
 
         assertThat(scores).isEmpty();
     }

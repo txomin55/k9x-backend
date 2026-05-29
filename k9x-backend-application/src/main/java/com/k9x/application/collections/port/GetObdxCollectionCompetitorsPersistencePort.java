@@ -4,6 +4,6 @@ import com.k9x.application.collections.use_case.dto.FetchCollectionCompetitorDTO
 
 import java.util.List;
 
-public interface GetCollectionCompetitorsPersistencePort {
+public interface GetObdxCollectionCompetitorsPersistencePort {
     List<FetchCollectionCompetitorDTO> getCompetitors(String eventId);
 }
