@@ -1,6 +1,6 @@
 package com.k9x.application.events.obdx.port.payload;
 
-import com.k9x.application.events.obdx.use_case.command.UpdateObdxScoreCommand;
+import com.k9x.application.events.obdx.use_cases.command.UpdateObdxScoreCommand;
 import com.k9x.application.utils.date.DateUtils;
 
 import java.math.BigDecimal;

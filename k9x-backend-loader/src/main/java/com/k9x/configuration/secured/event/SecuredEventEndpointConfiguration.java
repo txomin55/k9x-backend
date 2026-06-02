@@ -1,18 +1,19 @@
 package com.k9x.configuration.secured.event;
 
-import com.k9x.application.events.obdx.use_case.CreateObdxEventServiceCase;
-import com.k9x.application.events.obdx.use_case.DeleteObdxEventServiceCase;
-import com.k9x.application.events.obdx.use_case.EnrollObdxEventServiceCase;
-import com.k9x.application.events.obdx.use_case.GetObdxEventListServiceCase;
-import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
-import com.k9x.application.events.obdx.use_case.UpdateObdxScoreServiceCase;
+import com.k9x.application.events.obdx.use_cases.UpdateObdxEventServiceCase;
+import com.k9x.application.events.obdx.use_cases.UpdateObdxScoreServiceCase;
+import com.k9x.application.events.use_cases.CreateEventServiceCase;
+import com.k9x.application.events.use_cases.DeleteEventServiceCase;
+import com.k9x.application.events.use_cases.EnrollEventServiceCase;
+import com.k9x.application.events.use_cases.GetEventServiceCase;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.CreateEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.EnrollEvent;
-import com.k9x.infrastructure.in.rest.endpoints.secured.events.FetchAllByStagesEventData;
-import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.CreateObdxEvent;
-import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.RemoveObdxEvent;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.GetEvent;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.RemoveEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventInfo;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxScore;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,23 +21,23 @@ import org.springframework.context.annotation.Configuration;
 public class SecuredEventEndpointConfiguration {
 
     @Bean
-    public CreateObdxEvent createEvent(CreateObdxEventServiceCase createObdxEventServiceCase, UserInfoDTO userInfoDTO) {
-        return new CreateObdxEvent(createObdxEventServiceCase, userInfoDTO);
+    public CreateEvent createEvent(CreateEventServiceCase createEventServiceCase, UserInfoDTO userInfoDTO) {
+        return new CreateEvent(createEventServiceCase, userInfoDTO);
     }
 
     @Bean
-    public EnrollEvent enrollEvent(EnrollObdxEventServiceCase enrollObdxEventServiceCase) {
-        return new EnrollEvent(enrollObdxEventServiceCase);
+    public EnrollEvent enrollEvent(EnrollEventServiceCase enrollEventServiceCase) {
+        return new EnrollEvent(enrollEventServiceCase);
     }
 
     @Bean
-    public FetchAllByStagesEventData fetchAllByStagesEventData(GetObdxEventListServiceCase getObdxEventListServiceCase, UserInfoDTO userInfoDTO) {
-        return new FetchAllByStagesEventData(getObdxEventListServiceCase, userInfoDTO);
+    public GetEvent getEvent(GetEventServiceCase getEventServiceCase, UserInfoDTO userInfoDTO, MessageSource messageSource) {
+        return new GetEvent(getEventServiceCase, userInfoDTO, messageSource);
     }
 
     @Bean
-    public RemoveObdxEvent removeEvent(DeleteObdxEventServiceCase deleteObdxEventServiceCase, UserInfoDTO userInfoDTO) {
-        return new RemoveObdxEvent(deleteObdxEventServiceCase, userInfoDTO);
+    public RemoveEvent removeEvent(DeleteEventServiceCase deleteEventServiceCase, UserInfoDTO userInfoDTO) {
+        return new RemoveEvent(deleteEventServiceCase, userInfoDTO);
     }
 
     @Bean

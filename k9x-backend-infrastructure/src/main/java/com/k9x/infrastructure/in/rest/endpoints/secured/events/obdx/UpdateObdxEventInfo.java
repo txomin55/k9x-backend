@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx;
 
-import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
-import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
+import com.k9x.application.events.obdx.use_cases.UpdateObdxEventServiceCase;
+import com.k9x.application.events.obdx.use_cases.command.UpdateObdxEventCommand;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.oas.stub.api.SecuredEventsUpdateInfoObdxApiDelegate;
 import com.k9x.oas.stub.model.UpdateEventRequestDTO;
@@ -27,10 +27,10 @@ public class UpdateObdxEventInfo implements SecuredEventsUpdateInfoObdxApiDelega
                         body.getName(),
                         body.getConfigurationId(),
                         body.getCompetitors() == null ? List.of() : body.getCompetitors().stream()
-                                .map(c -> new UpdateObdxEventCommand.CompetitorCommand(c.getDogId(), c.getOrder()))
+                                .map(c -> new UpdateObdxEventCommand.CompetitorCommand(c.getDogId(), c.getPosition()))
                                 .toList(),
                         body.getExercises() == null ? List.of() : body.getExercises().stream()
-                                .map(e -> new UpdateObdxEventCommand.ExerciseCommand(e.getId(), e.getOrder(), e.getTags()))
+                                .map(e -> new UpdateObdxEventCommand.ExerciseCommand(e.getId(), e.getPosition(), e.getTags()))
                                 .toList(),
                         body.getJudges() == null ? List.of() : body.getJudges().stream()
                                 .map(j -> new UpdateObdxEventCommand.JudgeCommand(j.getId(), j.getCollectorEmail()))

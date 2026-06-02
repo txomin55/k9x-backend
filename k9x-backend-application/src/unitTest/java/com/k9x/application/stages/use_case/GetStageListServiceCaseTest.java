@@ -1,9 +1,9 @@
 package com.k9x.application.stages.use_case;
 
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
-import com.k9x.application.disciplines.obdx.use_case.dto.ObdxConfigurationDTO;
-import com.k9x.application.disciplines.obdx.use_case.dto.ObdxConfigurationsDTO;
-import com.k9x.application.disciplines.obdx.use_case.dto.ObdxFederationInfoDTO;
+import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
+import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
+import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
 import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
@@ -43,9 +43,9 @@ class GetStageListServiceCaseTest {
         FetchStageListDTO stage = new FetchStageListDTO("s-1", "Stage A", "desc", "ES",
                 "Calle Mayor 1", 40.4, -3.7, 1000L, 2000L, "Organizer Name", List.of(event), null);
 
-        ObdxConfigurationDTO config = new ObdxConfigurationDTO("obdx-1", "Obedience", List.of());
-        ObdxConfigurationsDTO federation = new ObdxConfigurationsDTO(
-                new ObdxFederationInfoDTO("FED", "Federation", "ES"), List.of(config));
+        ConfigurationDTO config = new ConfigurationDTO("obdx-1", "Obedience", List.of());
+        ConfigurationsDTO federation = new ConfigurationsDTO(
+                new FederationInfoDTO("FED", "Federation", "ES"), List.of(config));
 
         when(getStageListPersistencePort.getStages()).thenReturn(List.of(stage));
         when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of(federation));

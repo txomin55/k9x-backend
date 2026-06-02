@@ -1,23 +1,14 @@
 package com.k9x.infrastructure.configuration.postgres;
 
-import com.k9x.application.events.obdx.port.CreateObdxEventPersistencePort;
-import com.k9x.application.events.obdx.port.DeleteObdxEventPersistencePort;
-import com.k9x.application.events.obdx.port.GetClassificationPersistencePort;
-import com.k9x.application.events.obdx.port.GetObdxEventCollectorPersistencePort;
-import com.k9x.application.events.obdx.port.GetObdxEventListPersistencePort;
-import com.k9x.application.events.obdx.port.GetObdxEventPersistencePort;
-import com.k9x.application.events.obdx.port.EnrollObdxEventPersistencePort;
-import com.k9x.application.events.obdx.port.UpdateObdxEventPersistencePort;
-import com.k9x.application.events.obdx.port.UpdateObdxScorePersistencePort;
-import com.k9x.infrastructure.out.postgres.events.obdx.CreateObdxEventJooqAdapter;
-import com.k9x.infrastructure.out.postgres.events.obdx.DeleteObdxEventJooqAdapter;
-import com.k9x.infrastructure.out.postgres.events.obdx.EnrollObdxEventJooqAdapter;
-import com.k9x.infrastructure.out.postgres.events.obdx.GetClassificationJooqAdapter;
-import com.k9x.infrastructure.out.postgres.events.obdx.GetObdxEventCollectorJooqAdapter;
-import com.k9x.infrastructure.out.postgres.events.obdx.GetObdxEventJooqAdapter;
-import com.k9x.infrastructure.out.postgres.events.obdx.GetObdxEventListJooqAdapter;
-import com.k9x.infrastructure.out.postgres.events.obdx.UpdateObdxEventJooqAdapter;
-import com.k9x.infrastructure.out.postgres.events.obdx.UpdateObdxScoreJooqAdapter;
+import com.k9x.application.events.obdx.port.*;
+import com.k9x.application.events.obdx.use_cases.port.CreateObdxEventPersistencePort;
+import com.k9x.application.events.obdx.use_cases.port.GetEventPersistencePort;
+import com.k9x.application.events.obdx.use_cases.port.GetObdxEventDataPersistencePort;
+import com.k9x.infrastructure.out.postgres.events.CreateEventJooqAdapter;
+import com.k9x.infrastructure.out.postgres.events.DeleteEventJooqAdapter;
+import com.k9x.infrastructure.out.postgres.events.EnrollEventJooqAdapter;
+import com.k9x.infrastructure.out.postgres.events.GetEventJooqAdapter;
+import com.k9x.infrastructure.out.postgres.events.obdx.*;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,17 +24,17 @@ public class EventJooqAdapterConfiguration {
 
     @Bean
     public CreateObdxEventPersistencePort createEventPersistencePort() {
-        return new CreateObdxEventJooqAdapter(dsl);
+        return new CreateEventJooqAdapter(dsl);
     }
 
     @Bean
-    public GetObdxEventPersistencePort getEventPersistencePort() {
-        return new GetObdxEventJooqAdapter(dsl);
+    public GetEventPersistencePort getEventPersistencePort() {
+        return new GetEventJooqAdapter(dsl);
     }
 
     @Bean
     public DeleteObdxEventPersistencePort deleteEventPersistencePort() {
-        return new DeleteObdxEventJooqAdapter(dsl);
+        return new DeleteEventJooqAdapter(dsl);
     }
 
     @Bean
@@ -53,7 +44,7 @@ public class EventJooqAdapterConfiguration {
 
     @Bean
     public EnrollObdxEventPersistencePort enrollEventPersistencePort() {
-        return new EnrollObdxEventJooqAdapter(dsl);
+        return new EnrollEventJooqAdapter(dsl);
     }
 
     @Bean
@@ -62,8 +53,8 @@ public class EventJooqAdapterConfiguration {
     }
 
     @Bean
-    public GetObdxEventListPersistencePort getEventListPersistencePort() {
-        return new GetObdxEventListJooqAdapter(dsl);
+    public GetObdxEventDataPersistencePort getEventDataPersistencePort() {
+        return new GetObdxEventDataJooqAdapter(dsl);
     }
 
     @Bean
@@ -73,6 +64,6 @@ public class EventJooqAdapterConfiguration {
 
     @Bean
     public GetClassificationPersistencePort getClassificationPersistencePort() {
-        return new GetClassificationJooqAdapter(dsl);
+        return new GetObdxClassificationJooqAdapter(dsl);
     }
 }

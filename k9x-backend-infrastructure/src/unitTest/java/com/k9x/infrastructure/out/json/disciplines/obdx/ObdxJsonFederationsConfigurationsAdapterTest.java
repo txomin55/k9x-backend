@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.out.json.disciplines.obdx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.k9x.application.disciplines.obdx.use_case.dto.ObdxConfigurationsDTO;
+import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
@@ -9,9 +9,7 @@ import org.springframework.context.MessageSource;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,7 +28,7 @@ class ObdxJsonFederationsConfigurationsAdapterTest {
 
     @Test
     void returns_configurations_for_all_federations() {
-        List<ObdxConfigurationsDTO> result = adapter.getConfigurations();
+        List<ConfigurationsDTO> result = adapter.getConfigurations();
 
         assertThat(result).extracting(c -> c.info().id())
                 .containsExactlyInAnyOrder("CPC", "FCI", "RSCE");
@@ -38,7 +36,7 @@ class ObdxJsonFederationsConfigurationsAdapterTest {
 
     @Test
     void federation_id_is_uppercase() {
-        List<ObdxConfigurationsDTO> result = adapter.getConfigurations();
+        List<ConfigurationsDTO> result = adapter.getConfigurations();
 
         assertThat(result).allSatisfy(config ->
                 assertThat(config.info().id()).isEqualTo(config.info().id().toUpperCase()));
@@ -46,7 +44,7 @@ class ObdxJsonFederationsConfigurationsAdapterTest {
 
     @Test
     void each_federation_has_configurations_with_exercises() {
-        List<ObdxConfigurationsDTO> result = adapter.getConfigurations();
+        List<ConfigurationsDTO> result = adapter.getConfigurations();
 
         assertThat(result).allSatisfy(federation -> {
             assertThat(federation.configurations()).isNotEmpty();
@@ -57,7 +55,7 @@ class ObdxJsonFederationsConfigurationsAdapterTest {
 
     @Test
     void exercise_names_fall_back_to_id_when_no_translation() {
-        List<ObdxConfigurationsDTO> result = adapter.getConfigurations();
+        List<ConfigurationsDTO> result = adapter.getConfigurations();
 
         result.forEach(federation ->
                 federation.configurations().forEach(config ->

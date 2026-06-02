@@ -2,7 +2,7 @@ package com.k9x.infrastructure.out.json.disciplines.obdx;
 
 import com.k9x.application.disciplines.obdx.exceptions.ExerciseConfigurationNotFoundException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
-import com.k9x.application.events.obdx.use_case.dto.ObdxClassificationConfigDTO;
+import com.k9x.application.events.obdx.use_cases.dto.ObdxClassificationConfigDTO;
 import com.k9x.domain.aggregates.disciplines.ClassificationCacheEvictStrategy;
 import com.k9x.infrastructure.out.json.disciplines.obdx.dto.FederationConfigurationFileDTO;
 
@@ -18,13 +18,6 @@ public class ObdxJsonClassificationConfigAdapter implements GetObdxClassificatio
 
     public ObdxJsonClassificationConfigAdapter(ObdxFederationsConfigurationsCache cache) {
         this.configById = buildIndex(cache);
-    }
-
-    @Override
-    public ObdxClassificationConfigDTO getConfig(String configurationId) {
-        ObdxClassificationConfigDTO config = configById.get(configurationId);
-        if (config == null) throw new ExerciseConfigurationNotFoundException();
-        return config;
     }
 
     private static Map<String, ObdxClassificationConfigDTO> buildIndex(ObdxFederationsConfigurationsCache cache) {
@@ -48,5 +41,12 @@ public class ObdxJsonClassificationConfigAdapter implements GetObdxClassificatio
                     raw.breakTieTie() != null ? raw.breakTieTie() : List.of()));
         }
         return result;
+    }
+
+    @Override
+    public ObdxClassificationConfigDTO getConfig(String configurationId) {
+        ObdxClassificationConfigDTO config = configById.get(configurationId);
+        if (config == null) throw new ExerciseConfigurationNotFoundException();
+        return config;
     }
 }

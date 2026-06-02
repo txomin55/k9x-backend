@@ -1,6 +1,6 @@
 package com.k9x.application.events.obdx.port.payload;
 
-import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
+import com.k9x.application.events.obdx.use_cases.command.UpdateObdxEventCommand;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 
@@ -15,10 +15,6 @@ public record UpdateObdxEventPersistencePayload(
         List<JudgeItem> judges,
         long lastUpdate
 ) {
-    public record CompetitorItem(String dogId, short position) {}
-    public record ExerciseItem(String exerciseId, short position, String[] tags) {}
-    public record JudgeItem(String judgeId, String collectorId) {}
-
     public static UpdateObdxEventPersistencePayload from(UpdateObdxEventCommand command, ObdxAvgMethod scoreCalculation) {
         return new UpdateObdxEventPersistencePayload(
                 command.name(),
@@ -36,5 +32,14 @@ public record UpdateObdxEventPersistencePayload(
                         .toList(),
                 DateUtils.nowUtcMillis()
         );
+    }
+
+    public record CompetitorItem(String dogId, short position) {
+    }
+
+    public record ExerciseItem(String exerciseId, short position, String[] tags) {
+    }
+
+    public record JudgeItem(String judgeId, String collectorId) {
     }
 }

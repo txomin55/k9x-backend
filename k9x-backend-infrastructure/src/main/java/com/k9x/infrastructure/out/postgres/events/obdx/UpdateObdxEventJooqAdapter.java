@@ -9,6 +9,8 @@ import org.jooq.impl.DSL;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables.EVENTS;
+
 public class UpdateObdxEventJooqAdapter implements UpdateObdxEventPersistencePort {
 
     private final DSLContext dsl;
@@ -22,12 +24,12 @@ public class UpdateObdxEventJooqAdapter implements UpdateObdxEventPersistencePor
         dsl.transaction(configuration -> {
             DSLContext ctx = DSL.using(configuration);
 
-            ctx.update(Tables.EVENTS)
-                    .set(Tables.EVENTS.NAME, payload.name())
-                    .set(Tables.EVENTS.CONFIGURATION_ID, payload.configurationId())
-                    .set(Tables.EVENTS.SCORE_CALCULATION, payload.scoreCalculation().name())
-                    .set(Tables.EVENTS.LAST_UPDATE, payload.lastUpdate())
-                    .where(Tables.EVENTS.ID.eq(id))
+            ctx.update(EVENTS)
+                    .set(EVENTS.NAME, payload.name())
+                    .set(EVENTS.CONFIGURATION_ID, payload.configurationId())
+                    .set(EVENTS.SCORE_CALCULATION, payload.scoreCalculation().name())
+                    .set(EVENTS.LAST_UPDATE, payload.lastUpdate())
+                    .where(EVENTS.ID.eq(id))
                     .execute();
 
             List<String> newExerciseIds = payload.exercises().stream()

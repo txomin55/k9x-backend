@@ -1,9 +1,9 @@
 package com.k9x.application.stages.use_case;
 
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
-import com.k9x.application.disciplines.obdx.use_case.dto.ObdxConfigurationDTO;
-import com.k9x.application.disciplines.obdx.use_case.dto.ObdxConfigurationsDTO;
-import com.k9x.application.disciplines.obdx.use_case.dto.ObdxFederationInfoDTO;
+import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
+import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
+import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
 import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.exceptions.StageHasNoEventsException;
 import com.k9x.application.stages.exceptions.StageNotFoundException;
@@ -81,9 +81,9 @@ class GetStageServiceCaseTest {
         FetchStageDetailDTO stage = new FetchStageDetailDTO("s-1", "Stage A", 1000L, 2000L,
                 "Calle Mayor 1", "Organizer", null, List.of(event));
 
-        ObdxConfigurationDTO config = new ObdxConfigurationDTO("obdx-1", "Obedience", List.of());
-        ObdxConfigurationsDTO federation = new ObdxConfigurationsDTO(
-                new ObdxFederationInfoDTO("FED", "Federation", "ES"), List.of(config));
+        ConfigurationDTO config = new ConfigurationDTO("obdx-1", "Obedience", List.of());
+        ConfigurationsDTO federation = new ConfigurationsDTO(
+                new FederationInfoDTO("FED", "Federation", "ES"), List.of(config));
 
         when(getStageDetailPersistencePort.getStage("s-1")).thenReturn(stage);
         when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of(federation));

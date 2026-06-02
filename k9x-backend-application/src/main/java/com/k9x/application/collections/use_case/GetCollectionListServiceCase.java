@@ -18,7 +18,7 @@ public class GetCollectionListServiceCase {
     public List<FetchCollectionDTO> getCollections(String userId) {
         return getCollectionListPersistencePort.getCollections(userId, DateUtils.nowUtcMillis()).stream()
                 .map(c -> new FetchCollectionDTO(c.eventId(), c.eventName(), c.stageName(),
-                        c.competitionName(), CollectionStatus.OPEN.name(), c.judges()))
+                        c.competitionName(), c.discipline(), CollectionStatus.OPEN.name(), c.judges()))
                 .toList();
     }
 }

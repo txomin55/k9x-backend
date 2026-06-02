@@ -4,7 +4,7 @@ import com.k9x.application.collections.port.*;
 import com.k9x.application.collections.use_case.GetCollectionListServiceCase;
 import com.k9x.application.collections.use_case.GetObdxCollectionServiceCase;
 import com.k9x.application.disciplines.obdx.port.GetObdxConfigurationAllowedValuesPort;
-import com.k9x.application.events.obdx.port.GetObdxEventPersistencePort;
+import com.k9x.application.events.obdx.use_cases.port.GetEventPersistencePort;
 import com.k9x.application.stages.port.GetStagePersistencePort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +19,7 @@ public class CollectionUseCaseConfiguration {
 
     @Bean
     public GetObdxCollectionServiceCase getCollectionServiceCase(
-            GetObdxEventPersistencePort getObdxEventPersistencePort,
+            GetEventPersistencePort getEventPersistencePort,
             GetStagePersistencePort getStagePersistencePort,
             GetObdxCollectionEventJudgesPersistencePort getObdxCollectionEventJudgesPersistencePort,
             GetObdxCollectionCompetitorsPersistencePort getObdxCollectionCompetitorsPersistencePort,
@@ -27,7 +27,7 @@ public class CollectionUseCaseConfiguration {
             GetObdxCollectionScoresPersistencePort getObdxCollectionScoresPersistencePort,
             GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort) {
         return new GetObdxCollectionServiceCase(
-                getObdxEventPersistencePort,
+                getEventPersistencePort,
                 getStagePersistencePort,
                 getObdxCollectionEventJudgesPersistencePort,
                 getObdxCollectionCompetitorsPersistencePort,

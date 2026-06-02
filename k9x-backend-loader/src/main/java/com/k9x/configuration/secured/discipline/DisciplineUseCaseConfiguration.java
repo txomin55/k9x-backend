@@ -1,7 +1,7 @@
 package com.k9x.configuration.secured.discipline;
 
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
-import com.k9x.application.disciplines.obdx.use_case.GetObdxFederationsConfigurationsServiceCase;
+import com.k9x.application.disciplines.use_case.GetDisciplineFederationsConfigurationsServiceCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
 public class DisciplineUseCaseConfiguration {
 
     @Bean
-    public GetObdxFederationsConfigurationsServiceCase getDisciplineFederationsConfigurationsServiceCase(
+    public GetDisciplineFederationsConfigurationsServiceCase getDisciplineFederationsConfigurationsServiceCase(
             GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
-        return new GetObdxFederationsConfigurationsServiceCase(getObdxFederationsConfigurationsPort);
+        return new GetDisciplineFederationsConfigurationsServiceCase(getObdxFederationsConfigurationsPort);
     }
 }

@@ -9,12 +9,12 @@ import com.k9x.application.disciplines.obdx.port.GetObdxConfigurationAllowedValu
 import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.exceptions.UserNotCollectorException;
-import com.k9x.application.events.obdx.port.GetObdxEventPersistencePort;
+import com.k9x.application.events.obdx.use_cases.port.GetEventPersistencePort;
 import com.k9x.application.stages.exceptions.StageExpiredException;
 import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.application.utils.date.DateUtils;
-import com.k9x.domain.aggregates.events.obdx.EventCompetitorStatus;
-import com.k9x.domain.aggregates.events.obdx.ObdxEvent;
+import com.k9x.domain.aggregates.events.Event;
+import com.k9x.domain.aggregates.events.EventCompetitorStatus;
 import com.k9x.domain.aggregates.stages.Stage;
 
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class GetObdxCollectionServiceCase {
 
-    private final GetObdxEventPersistencePort getObdxEventPersistencePort;
+    private final GetEventPersistencePort getEventPersistencePort;
     private final GetStagePersistencePort getStagePersistencePort;
     private final GetObdxCollectionEventJudgesPersistencePort getObdxCollectionEventJudgesPersistencePort;
     private final GetObdxCollectionCompetitorsPersistencePort getObdxCollectionCompetitorsPersistencePort;
@@ -32,14 +32,14 @@ public class GetObdxCollectionServiceCase {
     private final GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort;
 
     public GetObdxCollectionServiceCase(
-            GetObdxEventPersistencePort getObdxEventPersistencePort,
+            GetEventPersistencePort getEventPersistencePort,
             GetStagePersistencePort getStagePersistencePort,
             GetObdxCollectionEventJudgesPersistencePort getObdxCollectionEventJudgesPersistencePort,
             GetObdxCollectionCompetitorsPersistencePort getObdxCollectionCompetitorsPersistencePort,
             GetObdxCollectionExercisesPersistencePort getObdxCollectionExercisesPersistencePort,
             GetObdxCollectionScoresPersistencePort getObdxCollectionScoresPersistencePort,
             GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort) {
-        this.getObdxEventPersistencePort = getObdxEventPersistencePort;
+        this.getEventPersistencePort = getEventPersistencePort;
         this.getStagePersistencePort = getStagePersistencePort;
         this.getObdxCollectionEventJudgesPersistencePort = getObdxCollectionEventJudgesPersistencePort;
         this.getObdxCollectionCompetitorsPersistencePort = getObdxCollectionCompetitorsPersistencePort;
@@ -49,7 +49,7 @@ public class GetObdxCollectionServiceCase {
     }
 
     public FetchCollectionDetailDTO getCollection(String eventId, String userId) {
-        ObdxEvent event = getObdxEventPersistencePort.getEvent(eventId);
+        Event event = getEventPersistencePort.getEvent(eventId);
         assertEventValidations(event);
         Stage stage = getStagePersistencePort.getStage(event.stageId());
         assertStageNotExpired(stage);
@@ -66,7 +66,7 @@ public class GetObdxCollectionServiceCase {
         List<FetchCollectionCompetitorDTO> competitors =
                 getObdxCollectionCompetitorsPersistencePort.getCompetitors(eventId).stream()
                         .map(c -> new FetchCollectionCompetitorDTO(c.dogId(), c.dogName(), c.dogIdentity(),
-                                c.owner(), c.team(), c.country(), c.position(), c.verified(),
+                                c.breed(), c.owner(), c.team(), c.country(), c.position(), c.verified(),
                                 EventCompetitorStatus.ENROLLED.name()))
                         .toList();
         List<FetchCollectionExerciseDTO> exercises =
@@ -77,6 +77,7 @@ public class GetObdxCollectionServiceCase {
 
         return new FetchCollectionDetailDTO(
                 event.configurationId(),
+                event.discipline(),
                 getObdxConfigurationAllowedValuesPort.getAllowedValues(event.configurationId()),
                 visibleJudges,
                 competitors,
@@ -85,7 +86,7 @@ public class GetObdxCollectionServiceCase {
         );
     }
 
-    private void assertEventValidations(ObdxEvent event) {
+    private void assertEventValidations(Event event) {
         if (event == null) throw new EventNotFoundException();
         if (event.deletedAt() != null) throw new EventAlreadyDeletedException();
     }

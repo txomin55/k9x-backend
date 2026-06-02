@@ -1,10 +1,10 @@
 package com.k9x.infrastructure.out.json.disciplines.obdx;
 
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
-import com.k9x.application.disciplines.obdx.use_case.dto.ExerciseDTO;
-import com.k9x.application.disciplines.obdx.use_case.dto.ObdxConfigurationDTO;
-import com.k9x.application.disciplines.obdx.use_case.dto.ObdxConfigurationsDTO;
-import com.k9x.application.disciplines.obdx.use_case.dto.ObdxFederationInfoDTO;
+import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
+import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
+import com.k9x.application.disciplines.use_case.dto.ExerciseDTO;
+import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
@@ -23,8 +23,8 @@ public class ObdxJsonFederationsConfigurationsAdapter implements GetObdxFederati
     }
 
     @Override
-    public List<ObdxConfigurationsDTO> getConfigurations() {
-        LinkedHashMap<String, List<ObdxConfigurationDTO>> byFederation = new LinkedHashMap<>();
+    public List<ConfigurationsDTO> getConfigurations() {
+        LinkedHashMap<String, List<ConfigurationDTO>> byFederation = new LinkedHashMap<>();
         LinkedHashMap<String, String> countryByFederation = new LinkedHashMap<>();
 
         for (ObdxFederationsConfigurationsCache.Entry entry : cache.getAll()) {
@@ -35,18 +35,18 @@ public class ObdxJsonFederationsConfigurationsAdapter implements GetObdxFederati
                     .map(e -> new ExerciseDTO(e.id(), translate(e.id())))
                     .toList();
             byFederation.computeIfAbsent(federationKey, _ -> new ArrayList<>())
-                    .add(new ObdxConfigurationDTO(config.id(), translate(config.id()), exercises));
+                    .add(new ConfigurationDTO(config.id(), translate(config.id()), exercises));
         }
 
         return byFederation.entrySet().stream()
-                .map(entry -> new ObdxConfigurationsDTO(
+                .map(entry -> new ConfigurationsDTO(
                         federationInfo(entry.getKey(), countryByFederation.get(entry.getKey())),
                         entry.getValue()))
                 .toList();
     }
 
-    private ObdxFederationInfoDTO federationInfo(String key, String country) {
-        return new ObdxFederationInfoDTO(
+    private FederationInfoDTO federationInfo(String key, String country) {
+        return new FederationInfoDTO(
                 key.toUpperCase(),
                 translate("federation." + key + ".name", key),
                 country);

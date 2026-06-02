@@ -5,10 +5,10 @@ import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Competitions;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Events;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Organizers;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Stages;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventCompetitors;
-import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.Events;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Result;
@@ -31,7 +31,7 @@ public class GetStagesJooqAdapter implements GetStageListPersistencePort {
         Stages s = Tables.STAGES;
         Competitions c = Tables.COMPETITIONS;
         Organizers o = Tables.ORGANIZERS;
-        Events e = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENTS;
+        Events e = Tables.EVENTS;
         EventCompetitors ec = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
 
         Field<String> eventName = e.NAME.as("event_name");

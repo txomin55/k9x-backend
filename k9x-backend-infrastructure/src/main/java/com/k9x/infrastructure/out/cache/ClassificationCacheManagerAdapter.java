@@ -2,12 +2,10 @@ package com.k9x.infrastructure.out.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.k9x.application.events.obdx.port.ClassificationCacheManagerPort;
-import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
+import com.k9x.application.events.obdx.use_cases.dto.FetchClassificationDTO;
+import com.k9x.application.events.obdx.use_cases.port.ClassificationCacheManagerPort;
 
 public class ClassificationCacheManagerAdapter implements ClassificationCacheManagerPort {
-
-    private record Entry(FetchClassificationDTO dto, long computedAt) {}
 
     private final Cache<String, Entry> cache;
 
@@ -26,5 +24,8 @@ public class ClassificationCacheManagerAdapter implements ClassificationCacheMan
     @Override
     public void put(String eventId, FetchClassificationDTO dto) {
         cache.put(eventId, new Entry(dto, System.currentTimeMillis()));
+    }
+
+    private record Entry(FetchClassificationDTO dto, long computedAt) {
     }
 }

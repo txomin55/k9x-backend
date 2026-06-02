@@ -1,6 +1,6 @@
 package com.k9x.application.events.obdx.port.payload;
 
-import com.k9x.application.events.obdx.use_case.command.EnrollObdxEventCommand;
+import com.k9x.application.events.obdx.use_cases.command.EnrollObdxEventCommand;
 import com.k9x.application.utils.date.DateUtils;
 
 public record EnrollObdxEventPersistencePayload(String dogId, long lastUpdate) {

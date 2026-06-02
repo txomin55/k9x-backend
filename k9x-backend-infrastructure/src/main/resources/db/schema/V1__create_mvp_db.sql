@@ -74,10 +74,10 @@ CREATE TABLE k9x.stages
     CONSTRAINT stages_organization_fk FOREIGN KEY (competition_id) REFERENCES k9x.competitions (id)
 );
 
-CREATE SCHEMA obdx;
-CREATE TABLE obdx.events
+CREATE TABLE k9x.events
 (
     id                VARCHAR(255) NOT NULL,
+    discipline        VARCHAR(50),
     configuration_id  VARCHAR(50),
     score_calculation VARCHAR(10)  NOT NULL DEFAULT 'AVG',
     name              VARCHAR(255) NOT NULL,
@@ -86,10 +86,11 @@ CREATE TABLE obdx.events
     last_update       BIGINT       NOT NULL,
     created_at        BIGINT       NOT NULL,
     deleted_at        BIGINT,
-    CONSTRAINT obdx_events_pkey PRIMARY KEY (id),
-    CONSTRAINT obdx_events_fk FOREIGN KEY (stage_id) REFERENCES k9x.stages (id)
+    CONSTRAINT k9x_events_pkey PRIMARY KEY (id),
+    CONSTRAINT k9x_events_fk FOREIGN KEY (stage_id) REFERENCES k9x.stages (id)
 );
 
+CREATE SCHEMA obdx;
 CREATE TABLE obdx.event_competitors
 (
     event_id    VARCHAR(255) NOT NULL,
@@ -98,7 +99,7 @@ CREATE TABLE obdx.event_competitors
     verified    BOOLEAN,
     last_update BIGINT       NOT NULL,
     CONSTRAINT obdx_event_competitors_pkey PRIMARY KEY (event_id, dog_id),
-    CONSTRAINT obdx_event_competitors_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id),
+    CONSTRAINT obdx_event_competitors_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
     CONSTRAINT obdx_event_competitors_dogs_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
 );
 
@@ -109,7 +110,7 @@ CREATE TABLE obdx.event_judges
     collector_id VARCHAR(255),
     last_update  BIGINT       NOT NULL,
     CONSTRAINT obdx_event_judges_pkey PRIMARY KEY (event_id, judge_id),
-    CONSTRAINT obdx_event_judges_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id),
+    CONSTRAINT obdx_event_judges_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
     CONSTRAINT obdx_event_judges_judge_fk FOREIGN KEY (judge_id) REFERENCES k9x.judges (id),
     CONSTRAINT obdx_event_judges_users_fk FOREIGN KEY (collector_id) REFERENCES k9x.users (id)
 );
@@ -122,7 +123,7 @@ CREATE TABLE obdx.event_exercises
     tags        VARCHAR(50)[],
     last_update BIGINT       NOT NULL,
     CONSTRAINT obdx_event_exercises_pkey PRIMARY KEY (event_id, exercise_id),
-    CONSTRAINT obdx_event_exercises_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id)
+    CONSTRAINT obdx_event_exercises_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id)
 );
 
 CREATE TABLE obdx.event_scores
@@ -135,7 +136,7 @@ CREATE TABLE obdx.event_scores
     created_at  BIGINT       NOT NULL,
     last_update BIGINT       NOT NULL,
     CONSTRAINT obdx_event_scores_pkey PRIMARY KEY (event_id, exercise_id, judge_id, dog_id),
-    CONSTRAINT obdx_event_scores_event_fk FOREIGN KEY (event_id) REFERENCES obdx.events (id),
+    CONSTRAINT obdx_event_scores_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
     CONSTRAINT obdx_event_scores_judge_fk FOREIGN KEY (judge_id) REFERENCES k9x.judges (id),
     CONSTRAINT obdx_event_scores_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
 )

@@ -4,12 +4,8 @@ import com.k9x.application.collections.port.GetCollectionListPersistencePort;
 import com.k9x.application.collections.use_case.dto.FetchCollectionDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
-import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Competitions;
-import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Judges;
-import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Stages;
-import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Users;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.*;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventJudges;
-import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.Events;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 
@@ -28,7 +24,7 @@ public class GetCollectionListJooqAdapter implements GetCollectionListPersistenc
 
     @Override
     public List<FetchCollectionDTO> getCollections(String collectorEmail, long nowMillis) {
-        Events e = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENTS;
+        Events e = Tables.EVENTS;
         EventJudges ej = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_JUDGES;
         Stages s = Tables.STAGES;
         Competitions c = Tables.COMPETITIONS;
@@ -55,6 +51,7 @@ public class GetCollectionListJooqAdapter implements GetCollectionListPersistenc
                     r.get(e.NAME),
                     r.get(s.NAME),
                     r.get(c.NAME),
+                    r.get(e.DISCIPLINE),
                     null,
                     new ArrayList<>()
             ));

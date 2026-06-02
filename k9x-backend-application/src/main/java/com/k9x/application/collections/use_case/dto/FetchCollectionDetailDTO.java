@@ -5,6 +5,7 @@ import java.util.List;
 
 public record FetchCollectionDetailDTO(
     String configurationId,
+    String discipline,
     List<BigDecimal> allowedValues,
     List<FetchCollectionJudgeWithCollectorDTO> judges,
     List<FetchCollectionCompetitorDTO> competitors,

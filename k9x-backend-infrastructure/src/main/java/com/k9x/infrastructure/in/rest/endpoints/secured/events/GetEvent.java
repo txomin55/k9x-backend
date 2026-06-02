@@ -1,0 +1,109 @@
+package com.k9x.infrastructure.in.rest.endpoints.secured.events;
+
+import com.k9x.application.events.obdx.use_cases.dto.FetchObdxEventCompetitorDTO;
+import com.k9x.application.events.obdx.use_cases.dto.FetchObdxEventDTO;
+import com.k9x.application.events.obdx.use_cases.dto.FetchObdxEventJudgeDTO;
+import com.k9x.application.events.use_cases.GetEventServiceCase;
+import com.k9x.application.events.use_cases.dto.FetchEventConfigurationDTO;
+import com.k9x.application.events.use_cases.dto.FetchEventDetailDTO;
+import com.k9x.application.events.use_cases.dto.FetchEventExerciseDTO;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
+import com.k9x.oas.stub.api.SecuredEventsFetchOneApiDelegate;
+import com.k9x.oas.stub.model.EventCompetitorResponseDTO;
+import com.k9x.oas.stub.model.EventConfigurationDetailResponseDTO;
+import com.k9x.oas.stub.model.EventDetailResponseDTO;
+import com.k9x.oas.stub.model.EventExerciseDetailResponseDTO;
+import com.k9x.oas.stub.model.EventJudgeDetailResponseDTO;
+import com.k9x.oas.stub.model.FederationConfigurationResponseDTO;
+import com.k9x.oas.stub.model.IdNameDTO;
+import com.k9x.oas.stub.model.ObdxEventDetailResponseDTO;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.ResponseEntity;
+
+import java.util.List;
+
+public class GetEvent implements SecuredEventsFetchOneApiDelegate {
+
+    private final GetEventServiceCase getEventServiceCase;
+    private final UserInfoDTO userDetails;
+    private final MessageSource messageSource;
+
+    public GetEvent(GetEventServiceCase getEventServiceCase, UserInfoDTO userDetails, MessageSource messageSource) {
+        this.getEventServiceCase = getEventServiceCase;
+        this.userDetails = userDetails;
+        this.messageSource = messageSource;
+    }
+
+    @Override
+    public ResponseEntity<EventDetailResponseDTO> getOneEventSecured(String id, List<String> ids) {
+        FetchEventDetailDTO event = getEventServiceCase.getEvent(id, userDetails.getEmail(), userDetails.isOrganizer());
+
+        EventDetailResponseDTO response = new EventDetailResponseDTO();
+        if (event.obdx() != null) {
+            response.setObdx(toObdx(event));
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    private ObdxEventDetailResponseDTO toObdx(FetchEventDetailDTO event) {
+        FetchObdxEventDTO obdx = event.obdx();
+        return new ObdxEventDetailResponseDTO(
+                obdx.id(),
+                new IdNameDTO(obdx.stageId(), obdx.stageName()),
+                obdx.name(),
+                obdx.status(),
+                resolveDiscipline(obdx.discipline()),
+                mapCompetitors(event.competitors()),
+                mapExercises(event.exercises()),
+                mapConfiguration(event.configuration()),
+                mapJudges(event.judges())
+        );
+    }
+
+    private List<EventCompetitorResponseDTO> mapCompetitors(List<FetchObdxEventCompetitorDTO> competitors) {
+        return competitors.stream()
+                .map(c -> new EventCompetitorResponseDTO(
+                        c.owner(),
+                        c.dogIdentity(),
+                        c.team(),
+                        c.country(),
+                        c.position() != null ? c.position().intValue() : null,
+                        c.status(),
+                        c.breed(),
+                        new IdNameDTO(c.dogName(), c.dogId())))
+                .toList();
+    }
+
+    private List<EventExerciseDetailResponseDTO> mapExercises(List<FetchEventExerciseDTO> exercises) {
+        return exercises.stream()
+                .map(e -> new EventExerciseDetailResponseDTO(e.id(), e.name(), e.position(), e.tags()))
+                .toList();
+    }
+
+    private List<EventJudgeDetailResponseDTO> mapJudges(List<FetchObdxEventJudgeDTO> judges) {
+        return judges.stream()
+                .map(j -> new EventJudgeDetailResponseDTO(j.judgeId(), j.judgeName(), j.collectorEmail()))
+                .toList();
+    }
+
+    private EventConfigurationDetailResponseDTO mapConfiguration(FetchEventConfigurationDTO configuration) {
+        if (configuration == null) {
+            return null;
+        }
+        FederationConfigurationResponseDTO federation = configuration.federation() == null ? null
+                : new FederationConfigurationResponseDTO(configuration.federation().id(),
+                configuration.federation().name(), configuration.federation().country());
+        return new EventConfigurationDetailResponseDTO(configuration.id(), configuration.name(), federation);
+    }
+
+    private IdNameDTO resolveDiscipline(String disciplineId) {
+        if (disciplineId == null) {
+            return null;
+        }
+        String name = messageSource.getMessage(
+                "discipline." + disciplineId + ".name", null, LocaleContextHolder.getLocale());
+        return new IdNameDTO(name, disciplineId);
+    }
+}

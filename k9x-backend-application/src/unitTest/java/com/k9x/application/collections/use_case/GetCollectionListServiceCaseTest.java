@@ -33,7 +33,7 @@ class GetCollectionListServiceCaseTest {
     @Test
     void returns_collections_for_collector() {
         List<FetchCollectionDTO> rawCollections = List.of(
-                new FetchCollectionDTO("event-1", "Event A", "Stage A", "Competition A", null,
+                new FetchCollectionDTO("event-1", "Event A", "Stage A", "Competition A", "obdx", null,
                         List.of(new FetchCollectionJudgeDTO("judge-1", "Judge One")))
         );
         when(getCollectionListPersistencePort.getCollections(eq("collector@test.com"), anyLong()))
@@ -44,14 +44,15 @@ class GetCollectionListServiceCaseTest {
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().eventId()).isEqualTo("event-1");
         assertThat(result.getFirst().status()).isEqualTo("OPEN");
+        assertThat(result.getFirst().discipline()).isEqualTo("obdx");
         verify(getCollectionListPersistencePort).getCollections(eq("collector@test.com"), anyLong());
     }
 
     @Test
     void sets_status_open_on_all_results() {
         List<FetchCollectionDTO> rawCollections = List.of(
-                new FetchCollectionDTO("event-1", "Event A", "Stage A", "Competition A", null, List.of()),
-                new FetchCollectionDTO("event-2", "Event B", "Stage B", "Competition B", null, List.of())
+                new FetchCollectionDTO("event-1", "Event A", "Stage A", "Competition A", "obdx", null, List.of()),
+                new FetchCollectionDTO("event-2", "Event B", "Stage B", "Competition B", "obdx", null, List.of())
         );
         when(getCollectionListPersistencePort.getCollections(eq("collector@test.com"), anyLong()))
                 .thenReturn(rawCollections);

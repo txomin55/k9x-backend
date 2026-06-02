@@ -1,7 +1,7 @@
 package com.k9x.application.stages.use_case;
 
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
-import com.k9x.application.disciplines.obdx.use_case.dto.ObdxConfigurationDTO;
+import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
@@ -47,7 +47,7 @@ public class GetStageListServiceCase {
         try {
             return getObdxFederationsConfigurationsPort.getConfigurations().stream()
                     .flatMap(f -> f.configurations().stream())
-                    .collect(Collectors.toMap(ObdxConfigurationDTO::id, ObdxConfigurationDTO::name, (a, _) -> a));
+                    .collect(Collectors.toMap(ConfigurationDTO::id, ConfigurationDTO::name, (a, _) -> a));
         } catch (IOException e) {
             throw new DisciplineConfigurationMalformedException();
         }
