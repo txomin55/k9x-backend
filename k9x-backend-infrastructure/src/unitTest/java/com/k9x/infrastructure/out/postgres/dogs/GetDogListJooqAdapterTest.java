@@ -47,6 +47,29 @@ class GetDogListJooqAdapterTest {
     }
 
     @Test
+    void generates_sql_without_owner_filter_when_owner_is_null() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+        AtomicReference<Object[]> capturedBindings = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            capturedBindings.set(ctx.bindings());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.DOGS.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetDogListJooqAdapter(dsl).getDogs(null);
+
+        assertThat(capturedSql.get())
+                .contains("from \"k9x\".\"dogs\"")
+                .contains("\"k9x\".\"dogs\".\"deleted_at\" is null")
+                .doesNotContain("\"owner\" = ?")
+                .doesNotContain("\"creator\" = ?");
+        assertThat(capturedBindings.get()).isEmpty();
+    }
+
+    @Test
     void maps_records_to_dog_domain() {
         MockDataProvider provider = _ -> {
             DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);
