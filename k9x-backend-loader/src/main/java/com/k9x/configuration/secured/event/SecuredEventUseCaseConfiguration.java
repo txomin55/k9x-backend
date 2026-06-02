@@ -13,6 +13,7 @@ import com.k9x.application.events.use_cases.DeleteEventServiceCase;
 import com.k9x.application.events.use_cases.EnrollEventServiceCase;
 import com.k9x.application.events.use_cases.GetEventServiceCase;
 import com.k9x.application.stages.port.GetStagePersistencePort;
+import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,8 +36,10 @@ public class SecuredEventUseCaseConfiguration {
     @Bean
     public UpdateObdxEventServiceCase updateEventServiceCase(GetEventPersistencePort getEventPersistencePort,
                                                              UpdateObdxEventPersistencePort updateObdxEventPersistencePort,
-                                                             GetObdxClassificationConfigPort getObdxClassificationConfigPort) {
-        return new UpdateObdxEventServiceCase(getEventPersistencePort, updateObdxEventPersistencePort, getObdxClassificationConfigPort);
+                                                             GetObdxClassificationConfigPort getObdxClassificationConfigPort,
+                                                             GetUserInfoPersistencePort getUserInfoPersistencePort) {
+        return new UpdateObdxEventServiceCase(getEventPersistencePort, updateObdxEventPersistencePort,
+                getObdxClassificationConfigPort, getUserInfoPersistencePort);
     }
 
     @Bean

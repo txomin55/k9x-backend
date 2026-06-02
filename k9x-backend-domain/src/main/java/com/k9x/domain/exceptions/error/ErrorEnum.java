@@ -19,6 +19,7 @@ public enum ErrorEnum {
     EVENT_CONFIGURATION_ID_REQUIRED("error.event_configuration_id_required"),
     SCORE_NOT_ALLOWED("error.score_not_allowed"),
     USER_NOT_COLLECTOR("error.user_not_collector"),
+    COLLECTOR_NOT_FOUND("error.collector_not_found"),
     EXERCISE_CONFIGURATION_NOT_FOUND("error.exercise_configuration_not_found");
 
     private final String id;

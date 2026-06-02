@@ -3,11 +3,14 @@ package com.k9x.application.events.obdx.use_cases;
 import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventConfigurationIdRequiredException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
+import com.k9x.application.events.obdx.exceptions.CollectorNotFoundException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.port.UpdateObdxEventPersistencePort;
 import com.k9x.application.events.obdx.use_cases.command.UpdateObdxEventCommand;
 import com.k9x.application.events.obdx.use_cases.dto.ObdxClassificationConfigDTO;
 import com.k9x.application.events.obdx.use_cases.port.GetEventPersistencePort;
+import com.k9x.application.users.port.GetUserInfoPersistencePort;
+import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.domain.aggregates.disciplines.ClassificationCacheEvictStrategy;
 import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.aggregates.events.Event;
@@ -36,11 +39,14 @@ class UpdateObdxEventServiceCaseTest {
     private UpdateObdxEventPersistencePort updateObdxEventPersistencePort;
     @Mock
     private GetObdxClassificationConfigPort getObdxClassificationConfigPort;
+    @Mock
+    private GetUserInfoPersistencePort getUserInfoPersistencePort;
     private UpdateObdxEventServiceCase serviceCase;
 
     @BeforeEach
     void setUp() {
-        serviceCase = new UpdateObdxEventServiceCase(getEventPersistencePort, updateObdxEventPersistencePort, getObdxClassificationConfigPort);
+        serviceCase = new UpdateObdxEventServiceCase(getEventPersistencePort, updateObdxEventPersistencePort,
+                getObdxClassificationConfigPort, getUserInfoPersistencePort);
     }
 
     @Test
@@ -101,6 +107,36 @@ class UpdateObdxEventServiceCaseTest {
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(updateObdxEventPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_collector_email_does_not_exist() {
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", List.of(), List.of(),
+                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "missing@k9x.com")));
+        Event event = new Event("event-1", null, null, "Event 1", "stage-1", "user-1", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
+        when(getEventPersistencePort.getEvent("event-1")).thenReturn(event);
+        when(getUserInfoPersistencePort.findById("missing@k9x.com")).thenReturn(null);
+
+        assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
+                .isInstanceOf(CollectorNotFoundException.class);
+
+        verifyNoInteractions(updateObdxEventPersistencePort);
+    }
+
+    @Test
+    void updates_event_when_collector_email_exists() {
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", List.of(), List.of(),
+                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "collector@k9x.com")));
+        Event event = new Event("event-1", null, null, "Event 1", "stage-1", "user-1", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
+        ObdxClassificationConfigDTO config = new ObdxClassificationConfigDTO(ClassificationCacheEvictStrategy.OBDX, null, Map.of(), List.of(), List.of());
+        when(getEventPersistencePort.getEvent("event-1")).thenReturn(event);
+        when(getUserInfoPersistencePort.findById("collector@k9x.com"))
+                .thenReturn(new UserInfoDTO("collector@k9x.com", "collector@k9x.com", null, false));
+        when(getObdxClassificationConfigPort.getConfig("config-1")).thenReturn(config);
+
+        serviceCase.updateEvent("event-1", command, "user-1", true);
+
+        verify(updateObdxEventPersistencePort).updateEvent(eq("event-1"), any());
     }
 
     @Test
