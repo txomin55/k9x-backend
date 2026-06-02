@@ -16,7 +16,7 @@ public class Cors implements Filter {
 
     private static final Set<String> ALLOWED_ORIGINS = Set.of(
             "http://localhost:4000",
-            "http://localhost:3000"
+            "http://localhost:5173"
     );
 
     @Override

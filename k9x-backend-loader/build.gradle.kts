@@ -22,6 +22,12 @@ val googleClientSecret = (findProperty("google.client_secret") as String?) ?: ""
 val googleRedirectUrl = (findProperty("google.redirect_url") as String?) ?: ""
 
 tasks.processResources {
+    inputs.property("spring.profiles.active", springProfilesActive)
+    inputs.property("project.artifactId", projectArtifactId)
+    inputs.property("project.version", projectVersion)
+    inputs.property("google.client_id", googleClientId)
+    inputs.property("google.client_secret", googleClientSecret)
+    inputs.property("google.redirect_url", googleRedirectUrl)
     filesMatching("application.yml") {
         filter<ReplaceTokens>(
             "tokens" to mapOf(

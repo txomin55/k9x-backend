@@ -16,6 +16,6 @@ public class GetUserData implements SecuredUserFetchApiDelegate {
 
     @Override
     public ResponseEntity<UserProfileResponseDTO> fetchUserDataSecured() {
-        return ResponseEntity.ok(new UserProfileResponseDTO(userDetails.getEmail().split("@")[0], userDetails.getEmail(), userDetails.isOrganizer()));
+        return ResponseEntity.ok(new UserProfileResponseDTO(userDetails.getEmail().split("@")[0], userDetails.getEmail(), userDetails.getImage(), userDetails.isOrganizer()));
     }
 }

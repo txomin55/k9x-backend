@@ -18,6 +18,7 @@ public class GetUserInfoJooqAdapter implements GetUserInfoPersistencePort {
         return dsl.select(
                         Tables.USERS.ID,
                         Tables.USERS.EMAIL,
+                        Tables.USERS.IMAGE,
                         Tables.ORGANIZERS.USER_ID
                 )
                 .from(Tables.USERS)
@@ -26,6 +27,7 @@ public class GetUserInfoJooqAdapter implements GetUserInfoPersistencePort {
                 .fetchOptional(r -> new UserInfoDTO(
                         r.get(Tables.USERS.ID),
                         r.get(Tables.USERS.EMAIL),
+                        r.get(Tables.USERS.IMAGE),
                         r.get(Tables.ORGANIZERS.USER_ID) != null
                 )).orElse(null);
     }

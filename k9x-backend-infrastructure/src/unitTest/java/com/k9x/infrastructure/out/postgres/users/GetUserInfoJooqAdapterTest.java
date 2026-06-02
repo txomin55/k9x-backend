@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class GetUserInfoJooqAdapterTest {
 
-    private static final Field<?>[] FIELDS = {Tables.USERS.ID, Tables.USERS.EMAIL, Tables.ORGANIZERS.USER_ID};
+    private static final Field<?>[] FIELDS = {Tables.USERS.ID, Tables.USERS.EMAIL, Tables.USERS.IMAGE, Tables.ORGANIZERS.USER_ID};
 
     @Test
     void generates_sql_with_left_join_filtered_by_id() {
@@ -34,7 +34,7 @@ class GetUserInfoJooqAdapterTest {
         new GetUserInfoJooqAdapter(dsl).findById("user-123");
 
         assertThat(capturedSql.get())
-                .contains("select \"k9x\".\"users\".\"id\", \"k9x\".\"users\".\"email\", \"k9x\".\"organizers\".\"user_id\"")
+                .contains("select \"k9x\".\"users\".\"id\", \"k9x\".\"users\".\"email\", \"k9x\".\"users\".\"image\", \"k9x\".\"organizers\".\"user_id\"")
                 .contains("from \"k9x\".\"users\"")
                 .contains("left outer join \"k9x\".\"organizers\" on \"k9x\".\"organizers\".\"user_id\" = \"k9x\".\"users\".\"id\"")
                 .contains("where \"k9x\".\"users\".\"id\" = ?");
@@ -49,6 +49,7 @@ class GetUserInfoJooqAdapterTest {
             Record record = mockDsl.newRecord(FIELDS);
             record.set(Tables.USERS.ID, "user-123");
             record.set(Tables.USERS.EMAIL, "user@example.com");
+            record.set(Tables.USERS.IMAGE, "http://img/u.png");
             record.set(Tables.ORGANIZERS.USER_ID, "user-123");
             result.add(record);
             return new MockResult[]{new MockResult(1, result)};
@@ -59,6 +60,7 @@ class GetUserInfoJooqAdapterTest {
 
         assertThat(dto.getId()).isEqualTo("user-123");
         assertThat(dto.getEmail()).isEqualTo("user@example.com");
+        assertThat(dto.getImage()).isEqualTo("http://img/u.png");
         assertThat(dto.isOrganizer()).isTrue();
     }
 

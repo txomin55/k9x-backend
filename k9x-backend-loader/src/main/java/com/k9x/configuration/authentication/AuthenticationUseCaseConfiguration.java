@@ -1,6 +1,8 @@
 package com.k9x.configuration.authentication;
 
+import com.k9x.application.users.port.CreateUserPersistencePort;
 import com.k9x.application.users.port.ExchangeAuthorizationCodePort;
+import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.application.users.port.JwtTokenCacheManagerPort;
 import com.k9x.application.users.port.JwtTokenGeneratorPort;
 import com.k9x.application.users.port.ValidateIdTokenPort;
@@ -46,6 +48,8 @@ public class AuthenticationUseCaseConfiguration {
             ExchangeAuthorizationCodePort exchangeAuthorizationCodePort,
             JwtTokenCacheManagerPort jwtTokenCacheManagerPort,
             JwtTokenGeneratorPort jwtTokenGeneratorPort,
+            GetUserInfoPersistencePort getUserInfoPersistencePort,
+            CreateUserPersistencePort createUserPersistencePort,
             @Value("${k9x-backend.security.jwt-cache-ttl-minutes}") long ttlMinutes
     ) {
         return new LoginServiceCase(
@@ -53,6 +57,8 @@ public class AuthenticationUseCaseConfiguration {
                 exchangeAuthorizationCodePort,
                 jwtTokenCacheManagerPort,
                 jwtTokenGeneratorPort,
+                getUserInfoPersistencePort,
+                createUserPersistencePort,
                 ttlMinutes
         );
     }

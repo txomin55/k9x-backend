@@ -6,6 +6,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.k9x.application.users.port.ValidateIdTokenPort;
+import com.k9x.application.users.use_case.dto.ValidatedIdTokenDTO;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -39,13 +40,20 @@ public class GoogleValidateIdTokenAdapter implements ValidateIdTokenPort {
     }
 
     @Override
-    public Optional<String> getEmailIfValid(String idToken) {
+    public Optional<ValidatedIdTokenDTO> getUserIfValid(String idToken) {
         try {
             GoogleIdToken token = verifier.verify(idToken);
             if (token == null || token.getPayload() == null) {
                 return Optional.empty();
             }
-            return Optional.ofNullable(token.getPayload().getEmail());
+            GoogleIdToken.Payload payload = token.getPayload();
+            String email = payload.getEmail();
+            if (email == null) {
+                return Optional.empty();
+            }
+            Object picture = payload.get("picture");
+            String image = picture != null ? picture.toString() : "";
+            return Optional.of(new ValidatedIdTokenDTO(email, image));
         } catch (Exception _) {
             return Optional.empty();
         }
