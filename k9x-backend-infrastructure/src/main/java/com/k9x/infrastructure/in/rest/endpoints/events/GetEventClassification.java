@@ -5,6 +5,8 @@ import com.k9x.application.events.obdx.use_cases.dto.FetchClassificationDTO;
 import com.k9x.application.events.use_cases.GetEventClassificationServiceCase;
 import com.k9x.oas.stub.api.EventsFetchClassificationApiDelegate;
 import com.k9x.oas.stub.model.*;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
@@ -13,9 +15,12 @@ import java.util.List;
 public class GetEventClassification implements EventsFetchClassificationApiDelegate {
 
     private final GetEventClassificationServiceCase getClassificationServiceCase;
+    private final MessageSource messageSource;
 
-    public GetEventClassification(GetEventClassificationServiceCase getClassificationServiceCase) {
+    public GetEventClassification(GetEventClassificationServiceCase getClassificationServiceCase,
+            MessageSource messageSource) {
         this.getClassificationServiceCase = getClassificationServiceCase;
+        this.messageSource = messageSource;
     }
 
     @Override
@@ -44,7 +49,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                         new IdNameDTO(c.dogName(), c.dogId()),
                         c.exercises().stream()
                                 .map(e -> new StageEventClassificationExerciseScoresResponseDTO(
-                                        new IdNameDTO(e.exerciseId(), e.exerciseId()),
+                                        new IdNameDTO(resolveExerciseName(e.exerciseId()), e.exerciseId()),
                                         e.rawScore(),
                                         e.scoreRating(),
                                         e.totalScore(),
@@ -60,5 +65,12 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                         c.totalScore(),
                         c.scoreRating()))
                 .toList();
+    }
+
+    private String resolveExerciseName(String exerciseId) {
+        if (exerciseId == null) {
+            return null;
+        }
+        return messageSource.getMessage(exerciseId, null, exerciseId, LocaleContextHolder.getLocale());
     }
 }

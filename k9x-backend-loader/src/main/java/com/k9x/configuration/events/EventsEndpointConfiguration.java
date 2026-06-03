@@ -2,6 +2,7 @@ package com.k9x.configuration.events;
 
 import com.k9x.application.events.use_cases.GetEventClassificationServiceCase;
 import com.k9x.infrastructure.in.rest.endpoints.events.GetEventClassification;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,7 +10,8 @@ import org.springframework.context.annotation.Configuration;
 public class EventsEndpointConfiguration {
 
     @Bean
-    public GetEventClassification getEventClassification(GetEventClassificationServiceCase getClassificationServiceCase) {
-        return new GetEventClassification(getClassificationServiceCase);
+    public GetEventClassification getEventClassification(GetEventClassificationServiceCase getClassificationServiceCase,
+            MessageSource messageSource) {
+        return new GetEventClassification(getClassificationServiceCase, messageSource);
     }
 }
