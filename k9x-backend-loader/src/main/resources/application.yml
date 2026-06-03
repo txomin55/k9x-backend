@@ -21,8 +21,9 @@ k9x-backend:
     app:
       name: '@project.artifactId@'
       version: '@project.version@'
-  deploy:
-    tech: in-memory
+  geo:
+    nominatim:
+      user-agent: "k9x-backend/1.0 (txomin.sirera@clarity.ai)"
   login:
     google:
       client_id: "@google.client_id@"

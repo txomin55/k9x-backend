@@ -4,6 +4,5 @@ import com.k9x.application.competitions.use_case.dto.Coordinates;
 
 public interface GeoCoordinatesPort {
 
-    // TODO: implement a real geocoding service that resolves address to coordinates
     Coordinates getCoordinates(String address);
 }
