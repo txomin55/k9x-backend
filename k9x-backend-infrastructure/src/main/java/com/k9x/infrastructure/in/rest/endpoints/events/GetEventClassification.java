@@ -27,8 +27,10 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                 new IdNameDTO(dto.eventName(), dto.eventId()),
                 new IdNameDTO(dto.stageName(), dto.stageId()),
                 new IdNameDTO(dto.configurationId(), dto.configurationId()),
-                BigDecimal.valueOf(dto.scoresLastUpdate()), // TODO: use Long once StageEventClassificationResponseDTO.lastUpdated is updated in OAS
-                new ObdxStageEventClassificationResponseDTO(mapCompetitors(dto.competitors()))));
+                dto.obdx() == null || dto.obdx().scoresLastUpdate() == null ? null
+                        : BigDecimal.valueOf(dto.obdx().scoresLastUpdate()), // TODO: use Long once StageEventClassificationResponseDTO.lastUpdated is updated in OAS
+                dto.obdx() == null ? null
+                        : new ObdxStageEventClassificationResponseDTO(mapCompetitors(dto.obdx().competitors()))));
     }
 
     private List<StageEventClassificationItemResponseDTO> mapCompetitors(

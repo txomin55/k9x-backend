@@ -2,7 +2,7 @@ package com.k9x.infrastructure.out.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.k9x.application.events.obdx.use_cases.dto.FetchClassificationDTO;
+import com.k9x.application.events.obdx.use_cases.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.obdx.use_cases.port.ClassificationCacheManagerPort;
 
 public class ClassificationCacheManagerAdapter implements ClassificationCacheManagerPort {
@@ -14,7 +14,7 @@ public class ClassificationCacheManagerAdapter implements ClassificationCacheMan
     }
 
     @Override
-    public FetchClassificationDTO getIfPresentAndValid(String eventId, int ttlSeconds) {
+    public FetchObdxClassificationDTO getIfPresentAndValid(String eventId, int ttlSeconds) {
         Entry entry = cache.getIfPresent(eventId);
         if (entry == null) return null;
         long ageMillis = System.currentTimeMillis() - entry.computedAt();
@@ -22,10 +22,10 @@ public class ClassificationCacheManagerAdapter implements ClassificationCacheMan
     }
 
     @Override
-    public void put(String eventId, FetchClassificationDTO dto) {
+    public void put(String eventId, FetchObdxClassificationDTO dto) {
         cache.put(eventId, new Entry(dto, System.currentTimeMillis()));
     }
 
-    private record Entry(FetchClassificationDTO dto, long computedAt) {
+    private record Entry(FetchObdxClassificationDTO dto, long computedAt) {
     }
 }
