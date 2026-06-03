@@ -39,7 +39,7 @@ public class GetCollection implements SecuredCollectionsFetchOneObdxApiDelegate 
                 .map(comp -> new CompetitorScoresResponseDTO(
                         detail.exercises().stream()
                                 .map(ex -> new ExerciseScoresResponseDTO(
-                                        new ExerciseResponseDTO(ex.exerciseId(), ex.exerciseId(),
+                                        new ExerciseResponseDTO(ex.exerciseId(), resolveTranslation(ex.exerciseId()),
                                                 ex.position() != null ? ex.position().intValue() : null),
                                         detail.scores().stream()
                                                 .filter(s -> s.dogId().equals(comp.dogId())
@@ -63,10 +63,17 @@ public class GetCollection implements SecuredCollectionsFetchOneObdxApiDelegate 
                 .toList();
 
         return ResponseEntity.ok(new CollectionResponseDTO(
-                new ScoresConfigurationResponseDTO(detail.allowedValues(), detail.configurationId()),
+                new ScoresConfigurationResponseDTO(detail.allowedValues(), resolveTranslation(detail.configurationId())),
                 new ObdxCompetitorsScoresResponseDTO(competitors),
                 resolveDiscipline(detail.discipline())
         ));
+    }
+
+    private String resolveTranslation(String key) {
+        if (key == null) {
+            return null;
+        }
+        return messageSource.getMessage(key, null, key, LocaleContextHolder.getLocale());
     }
 
     private IdNameDTO resolveDiscipline(String disciplineId) {
