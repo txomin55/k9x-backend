@@ -9,7 +9,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public class GetEventClassification implements EventsFetchClassificationApiDelegate {
@@ -18,7 +17,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
     private final MessageSource messageSource;
 
     public GetEventClassification(GetEventClassificationServiceCase getClassificationServiceCase,
-            MessageSource messageSource) {
+                                  MessageSource messageSource) {
         this.getClassificationServiceCase = getClassificationServiceCase;
         this.messageSource = messageSource;
     }
@@ -32,8 +31,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                 new IdNameDTO(dto.eventName(), dto.eventId()),
                 new IdNameDTO(dto.stageName(), dto.stageId()),
                 new IdNameDTO(dto.configurationId(), dto.configurationId()),
-                dto.obdx() == null || dto.obdx().scoresLastUpdate() == null ? null
-                        : BigDecimal.valueOf(dto.obdx().scoresLastUpdate()), // TODO: use Long once StageEventClassificationResponseDTO.lastUpdated is updated in OAS
+                dto.scoresLastUpdate(),
                 dto.obdx() == null ? null
                         : new ObdxStageEventClassificationResponseDTO(mapCompetitors(dto.obdx().competitors()))));
     }

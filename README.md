@@ -138,3 +138,8 @@ First execute
 To execute this project, you must go to the loader project and execute
 
 `GRADLE_USER_HOME=/tmp/gradle ./gradlew :k9x-backend-loader:bootRun -Dspring.profiles.active=production`
+
+Clean gradle cache k9x
+
+`rm -rf ~/.gradle/caches/modules-2/files-2.1/com.k9x/oas-definition-stubs`
+`./gradlew :k9x-backend-infrastructure:compileJava --refresh-dependencies`

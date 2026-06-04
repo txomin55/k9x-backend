@@ -4,7 +4,7 @@ import com.k9x.application.collections.use_case.GetObdxCollectionServiceCase;
 import com.k9x.application.collections.use_case.dto.FetchCollectionDetailDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
-import com.k9x.oas.stub.api.SecuredCollectionsFetchOneObdxApiDelegate;
+import com.k9x.oas.stub.api.SecuredCollectionsFetchOneApiDelegate;
 import com.k9x.oas.stub.model.*;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class GetCollection implements SecuredCollectionsFetchOneObdxApiDelegate {
+public class GetCollection implements SecuredCollectionsFetchOneApiDelegate {
 
     private final GetObdxCollectionServiceCase getObdxCollectionServiceCase;
     private final UserInfoDTO userDetails;

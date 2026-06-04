@@ -44,8 +44,10 @@ public class GetEventClassificationServiceCase {
                 ? getObdxClassificationServiceCase.getClassification(event)
                 : null;
 
+        Long scoresLastUpdate = obdx == null ? null : obdx.scoresLastUpdate();
+
         return new FetchClassificationDTO(eventId, event.name(), event.stageId(), context.stageName(),
-                event.configurationId(), obdx);
+                event.configurationId(), scoresLastUpdate, obdx);
     }
 
     private EventClassificationContextDTO resolveContext(String eventId) {

@@ -4,5 +4,6 @@ public record FetchClassificationDTO(
         String eventId, String eventName,
         String stageId, String stageName,
         String configurationId,
+        Long scoresLastUpdate,
         FetchObdxClassificationDTO obdx) {
 }
