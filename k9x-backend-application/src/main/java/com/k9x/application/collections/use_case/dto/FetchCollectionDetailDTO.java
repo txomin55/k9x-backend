@@ -1,5 +1,7 @@
 package com.k9x.application.collections.use_case.dto;
 
+import com.k9x.application.collections.obdx.use_case.dto.FetchObdxCollectionDTO;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -7,8 +9,5 @@ public record FetchCollectionDetailDTO(
     String configurationId,
     String discipline,
     List<BigDecimal> allowedValues,
-    List<FetchCollectionJudgeWithCollectorDTO> judges,
-    List<FetchCollectionCompetitorDTO> competitors,
-    List<FetchCollectionExerciseDTO> exercises,
-    List<FetchCollectionScoreDTO> scores
+    FetchObdxCollectionDTO obdx
 ) {}

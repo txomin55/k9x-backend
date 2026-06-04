@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.collections;
 
-import com.k9x.application.collections.port.GetObdxCollectionScoresPersistencePort;
+import com.k9x.application.collections.obdx.port.GetObdxCollectionScoresPersistencePort;
 import com.k9x.application.collections.use_case.dto.FetchCollectionScoreDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables;
 import org.jooq.DSLContext;

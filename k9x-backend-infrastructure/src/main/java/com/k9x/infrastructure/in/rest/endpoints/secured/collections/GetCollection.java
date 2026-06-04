@@ -1,8 +1,8 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.collections;
 
-import com.k9x.application.collections.use_case.GetObdxCollectionServiceCase;
+import com.k9x.application.collections.obdx.use_case.dto.FetchCollectionCompetitorScoresDTO;
+import com.k9x.application.collections.use_case.GetCollectionServiceCase;
 import com.k9x.application.collections.use_case.dto.FetchCollectionDetailDTO;
-import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.oas.stub.api.SecuredCollectionsFetchOneApiDelegate;
 import com.k9x.oas.stub.model.*;
@@ -11,62 +11,57 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class GetCollection implements SecuredCollectionsFetchOneApiDelegate {
 
-    private final GetObdxCollectionServiceCase getObdxCollectionServiceCase;
+    private final GetCollectionServiceCase getCollectionServiceCase;
     private final UserInfoDTO userDetails;
     private final MessageSource messageSource;
 
-    public GetCollection(GetObdxCollectionServiceCase getObdxCollectionServiceCase, UserInfoDTO userDetails,
+    public GetCollection(GetCollectionServiceCase getCollectionServiceCase, UserInfoDTO userDetails,
                          MessageSource messageSource) {
-        this.getObdxCollectionServiceCase = getObdxCollectionServiceCase;
+        this.getCollectionServiceCase = getCollectionServiceCase;
         this.userDetails = userDetails;
         this.messageSource = messageSource;
     }
 
     @Override
     public ResponseEntity<CollectionResponseDTO> fetchOneCollection(String id) {
-        FetchCollectionDetailDTO detail = getObdxCollectionServiceCase.getCollection(id, userDetails.getEmail());
+        FetchCollectionDetailDTO detail = getCollectionServiceCase.getCollection(id, userDetails.getEmail());
 
-        Map<String, String> judgeNames = detail.judges().stream()
-                .collect(Collectors.toMap(FetchCollectionJudgeWithCollectorDTO::judgeId,
-                        FetchCollectionJudgeWithCollectorDTO::judgeName));
+        return ResponseEntity.ok(new CollectionResponseDTO(
+                new ScoresConfigurationResponseDTO(detail.allowedValues(), resolveTranslation(detail.configurationId())),
+                detail.obdx() == null ? null
+                        : new ObdxCompetitorsScoresResponseDTO(mapCompetitors(detail.obdx().competitors())),
+                resolveDiscipline(detail.discipline())
+        ));
+    }
 
-        List<CompetitorScoresResponseDTO> competitors = detail.competitors().stream()
+    private List<CompetitorScoresResponseDTO> mapCompetitors(List<FetchCollectionCompetitorScoresDTO> competitors) {
+        return competitors.stream()
                 .map(comp -> new CompetitorScoresResponseDTO(
-                        detail.exercises().stream()
+                        comp.exercises().stream()
                                 .map(ex -> new ExerciseScoresResponseDTO(
                                         new ExerciseResponseDTO(ex.exerciseId(), resolveTranslation(ex.exerciseId()),
                                                 ex.position() != null ? ex.position().intValue() : null),
-                                        detail.scores().stream()
-                                                .filter(s -> s.dogId().equals(comp.dogId())
-                                                        && s.exerciseId().equals(ex.exerciseId()))
+                                        ex.scores().stream()
                                                 .map(s -> new CollectionScoreResponseDTO(s.score(),
-                                                        new IdNameDTO(judgeNames.get(s.judgeId()), s.judgeId())))
+                                                        new IdNameDTO(s.judgeName(), s.judgeId())))
                                                 .toList()
                                 ))
                                 .toList(),
                         new EventCompetitorResponseDTO(
-                                comp.owner(),
-                                comp.dogIdentity(),
-                                comp.team(),
-                                comp.country(),
-                                comp.position() != null ? comp.position().intValue() : null,
-                                comp.status(),
-                                comp.breed(),
-                                new IdNameDTO(comp.dogName(), comp.dogId())
+                                comp.competitor().owner(),
+                                comp.competitor().dogIdentity(),
+                                comp.competitor().team(),
+                                comp.competitor().country(),
+                                comp.competitor().position() != null ? comp.competitor().position().intValue() : null,
+                                comp.competitor().status(),
+                                comp.competitor().breed(),
+                                new IdNameDTO(comp.competitor().dogName(), comp.competitor().dogId())
                         )
                 ))
                 .toList();
-
-        return ResponseEntity.ok(new CollectionResponseDTO(
-                new ScoresConfigurationResponseDTO(detail.allowedValues(), resolveTranslation(detail.configurationId())),
-                new ObdxCompetitorsScoresResponseDTO(competitors),
-                resolveDiscipline(detail.discipline())
-        ));
     }
 
     private String resolveTranslation(String key) {

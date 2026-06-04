@@ -3,8 +3,8 @@ package com.k9x.application.events.obdx.use_cases;
 import com.k9x.application.disciplines.obdx.port.GetObdxExerciseAllowedValuesPort;
 import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
-import com.k9x.application.events.obdx.exceptions.ScoreNotAllowedException;
-import com.k9x.application.events.obdx.exceptions.UserNotCollectorException;
+import com.k9x.application.events.obdx.exceptions.ObdxScoreNotAllowedException;
+import com.k9x.application.events.obdx.exceptions.ObdxUserNotCollectorException;
 import com.k9x.application.events.obdx.port.GetObdxEventCollectorPersistencePort;
 import com.k9x.application.events.obdx.port.UpdateObdxScorePersistencePort;
 import com.k9x.application.events.obdx.port.payload.UpdateObdxScorePersistencePayload;
@@ -60,13 +60,13 @@ public class UpdateObdxScoreServiceCase {
 
     private void assertUserIsCollector(String eventId, String judgeId, String userEmail) {
         String collectorId = getObdxEventCollectorPersistencePort.getCollectorId(eventId, judgeId);
-        if (collectorId == null || !collectorId.equals(userEmail)) throw new UserNotCollectorException();
+        if (collectorId == null || !collectorId.equals(userEmail)) throw new ObdxUserNotCollectorException();
     }
 
     private void assertScoreAllowed(String exerciseId, BigDecimal score) {
         List<BigDecimal> allowedValues = getObdxExerciseAllowedValuesPort.getAllowedValues(exerciseId);
         if (score == null || allowedValues.stream().noneMatch(v -> v.compareTo(score) == 0)) {
-            throw new ScoreNotAllowedException();
+            throw new ObdxScoreNotAllowedException();
         }
     }
 }

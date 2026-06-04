@@ -3,7 +3,7 @@ package com.k9x.application.events.obdx.use_cases;
 import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventConfigurationIdRequiredException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
-import com.k9x.application.events.obdx.exceptions.CollectorNotFoundException;
+import com.k9x.application.events.obdx.exceptions.ObdxCollectorNotFoundException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.port.UpdateObdxEventPersistencePort;
 import com.k9x.application.events.obdx.use_cases.command.UpdateObdxEventCommand;
@@ -118,7 +118,7 @@ class UpdateObdxEventServiceCaseTest {
         when(getUserInfoPersistencePort.findById("missing@k9x.com")).thenReturn(null);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
-                .isInstanceOf(CollectorNotFoundException.class);
+                .isInstanceOf(ObdxCollectorNotFoundException.class);
 
         verifyNoInteractions(updateObdxEventPersistencePort);
     }

@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.collections;
 
-import com.k9x.application.collections.port.GetObdxCollectionEventJudgesPersistencePort;
+import com.k9x.application.collections.obdx.port.GetObdxCollectionEventJudgesPersistencePort;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Judges;

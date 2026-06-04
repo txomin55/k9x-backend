@@ -1,6 +1,10 @@
 package com.k9x.infrastructure.configuration.postgres;
 
-import com.k9x.application.collections.port.*;
+import com.k9x.application.collections.obdx.port.GetObdxCollectionCompetitorsPersistencePort;
+import com.k9x.application.collections.obdx.port.GetObdxCollectionEventJudgesPersistencePort;
+import com.k9x.application.collections.obdx.port.GetObdxCollectionExercisesPersistencePort;
+import com.k9x.application.collections.obdx.port.GetObdxCollectionScoresPersistencePort;
+import com.k9x.application.collections.port.GetCollectionListPersistencePort;
 import com.k9x.infrastructure.out.postgres.collections.*;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;

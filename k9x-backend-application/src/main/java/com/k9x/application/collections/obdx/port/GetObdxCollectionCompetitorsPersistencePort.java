@@ -1,4 +1,4 @@
-package com.k9x.application.collections.port;
+package com.k9x.application.collections.obdx.port;
 
 import com.k9x.application.collections.use_case.dto.FetchCollectionCompetitorDTO;
 

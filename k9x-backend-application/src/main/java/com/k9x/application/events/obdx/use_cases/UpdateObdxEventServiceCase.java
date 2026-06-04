@@ -3,7 +3,7 @@ package com.k9x.application.events.obdx.use_cases;
 import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventConfigurationIdRequiredException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
-import com.k9x.application.events.obdx.exceptions.CollectorNotFoundException;
+import com.k9x.application.events.obdx.exceptions.ObdxCollectorNotFoundException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.port.UpdateObdxEventPersistencePort;
 import com.k9x.application.events.obdx.port.payload.UpdateObdxEventPersistencePayload;
@@ -65,7 +65,7 @@ public class UpdateObdxEventServiceCase {
                 .distinct()
                 .forEach(email -> {
                     if (getUserInfoPersistencePort.findById(email) == null) {
-                        throw new CollectorNotFoundException(email);
+                        throw new ObdxCollectorNotFoundException(email);
                     }
                 });
     }

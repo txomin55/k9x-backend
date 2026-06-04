@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.collections;
 
-import com.k9x.application.collections.port.GetObdxCollectionCompetitorsPersistencePort;
+import com.k9x.application.collections.obdx.port.GetObdxCollectionCompetitorsPersistencePort;
 import com.k9x.application.collections.use_case.dto.FetchCollectionCompetitorDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Dogs;

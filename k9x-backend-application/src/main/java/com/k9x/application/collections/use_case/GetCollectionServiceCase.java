@@ -1,51 +1,44 @@
 package com.k9x.application.collections.use_case;
 
-import com.k9x.application.collections.port.GetObdxCollectionCompetitorsPersistencePort;
-import com.k9x.application.collections.port.GetObdxCollectionEventJudgesPersistencePort;
-import com.k9x.application.collections.port.GetObdxCollectionExercisesPersistencePort;
-import com.k9x.application.collections.port.GetObdxCollectionScoresPersistencePort;
-import com.k9x.application.collections.use_case.dto.*;
+import com.k9x.application.collections.obdx.port.GetObdxCollectionEventJudgesPersistencePort;
+import com.k9x.application.collections.obdx.use_case.GetObdxCollectionServiceCase;
+import com.k9x.application.collections.obdx.use_case.dto.FetchObdxCollectionDTO;
+import com.k9x.application.collections.use_case.dto.FetchCollectionDetailDTO;
+import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
 import com.k9x.application.disciplines.obdx.port.GetObdxConfigurationAllowedValuesPort;
 import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
-import com.k9x.application.events.obdx.exceptions.UserNotCollectorException;
+import com.k9x.application.events.obdx.exceptions.ObdxUserNotCollectorException;
 import com.k9x.application.events.obdx.use_cases.port.GetEventPersistencePort;
 import com.k9x.application.stages.exceptions.StageExpiredException;
 import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.application.utils.date.DateUtils;
+import com.k9x.domain.aggregates.disciplines.Discipline;
 import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.events.EventCompetitorStatus;
 import com.k9x.domain.aggregates.stages.Stage;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Locale;
 
-public class GetObdxCollectionServiceCase {
+public class GetCollectionServiceCase {
 
     private final GetEventPersistencePort getEventPersistencePort;
     private final GetStagePersistencePort getStagePersistencePort;
     private final GetObdxCollectionEventJudgesPersistencePort getObdxCollectionEventJudgesPersistencePort;
-    private final GetObdxCollectionCompetitorsPersistencePort getObdxCollectionCompetitorsPersistencePort;
-    private final GetObdxCollectionExercisesPersistencePort getObdxCollectionExercisesPersistencePort;
-    private final GetObdxCollectionScoresPersistencePort getObdxCollectionScoresPersistencePort;
     private final GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort;
+    private final GetObdxCollectionServiceCase getObdxCollectionServiceCase;
 
-    public GetObdxCollectionServiceCase(
+    public GetCollectionServiceCase(
             GetEventPersistencePort getEventPersistencePort,
             GetStagePersistencePort getStagePersistencePort,
             GetObdxCollectionEventJudgesPersistencePort getObdxCollectionEventJudgesPersistencePort,
-            GetObdxCollectionCompetitorsPersistencePort getObdxCollectionCompetitorsPersistencePort,
-            GetObdxCollectionExercisesPersistencePort getObdxCollectionExercisesPersistencePort,
-            GetObdxCollectionScoresPersistencePort getObdxCollectionScoresPersistencePort,
-            GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort) {
+            GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort,
+            GetObdxCollectionServiceCase getObdxCollectionServiceCase) {
         this.getEventPersistencePort = getEventPersistencePort;
         this.getStagePersistencePort = getStagePersistencePort;
         this.getObdxCollectionEventJudgesPersistencePort = getObdxCollectionEventJudgesPersistencePort;
-        this.getObdxCollectionCompetitorsPersistencePort = getObdxCollectionCompetitorsPersistencePort;
-        this.getObdxCollectionExercisesPersistencePort = getObdxCollectionExercisesPersistencePort;
-        this.getObdxCollectionScoresPersistencePort = getObdxCollectionScoresPersistencePort;
         this.getObdxConfigurationAllowedValuesPort = getObdxConfigurationAllowedValuesPort;
+        this.getObdxCollectionServiceCase = getObdxCollectionServiceCase;
     }
 
     public FetchCollectionDetailDTO getCollection(String eventId, String userId) {
@@ -59,30 +52,16 @@ public class GetObdxCollectionServiceCase {
         List<FetchCollectionJudgeWithCollectorDTO> visibleJudges =
                 resolveVisibleJudges(allJudges, event.creator(), userId);
 
-        Set<String> visibleJudgeIds = visibleJudges.stream()
-                .map(FetchCollectionJudgeWithCollectorDTO::judgeId)
-                .collect(Collectors.toSet());
-
-        List<FetchCollectionCompetitorDTO> competitors =
-                getObdxCollectionCompetitorsPersistencePort.getCompetitors(eventId).stream()
-                        .map(c -> new FetchCollectionCompetitorDTO(c.dogId(), c.dogName(), c.dogIdentity(),
-                                c.breed(), c.owner(), c.team(), c.country(), c.position(), c.verified(),
-                                EventCompetitorStatus.ENROLLED.name()))
-                        .toList();
-        List<FetchCollectionExerciseDTO> exercises =
-                getObdxCollectionExercisesPersistencePort.getExercises(eventId);
-        List<FetchCollectionScoreDTO> scores = getObdxCollectionScoresPersistencePort.getScores(eventId).stream()
-                .filter(s -> visibleJudgeIds.contains(s.judgeId()))
-                .toList();
+        Discipline discipline = Discipline.valueOf(event.discipline().toUpperCase(Locale.ROOT));
+        FetchObdxCollectionDTO obdx = discipline == Discipline.OBDX
+                ? getObdxCollectionServiceCase.getCollection(eventId, visibleJudges)
+                : null;
 
         return new FetchCollectionDetailDTO(
                 event.configurationId(),
                 event.discipline(),
                 getObdxConfigurationAllowedValuesPort.getAllowedValues(event.configurationId()),
-                visibleJudges,
-                competitors,
-                exercises,
-                scores
+                obdx
         );
     }
 
@@ -101,7 +80,7 @@ public class GetObdxCollectionServiceCase {
         List<FetchCollectionJudgeWithCollectorDTO> collectorJudges = allJudges.stream()
                 .filter(j -> userId.equals(j.collectorEmail()))
                 .toList();
-        if (collectorJudges.isEmpty()) throw new UserNotCollectorException();
+        if (collectorJudges.isEmpty()) throw new ObdxUserNotCollectorException();
         return collectorJudges;
     }
 }

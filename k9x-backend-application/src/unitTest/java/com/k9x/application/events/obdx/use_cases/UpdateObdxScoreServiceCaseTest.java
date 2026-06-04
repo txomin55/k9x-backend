@@ -3,8 +3,8 @@ package com.k9x.application.events.obdx.use_cases;
 import com.k9x.application.disciplines.obdx.port.GetObdxExerciseAllowedValuesPort;
 import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
-import com.k9x.application.events.obdx.exceptions.ScoreNotAllowedException;
-import com.k9x.application.events.obdx.exceptions.UserNotCollectorException;
+import com.k9x.application.events.obdx.exceptions.ObdxScoreNotAllowedException;
+import com.k9x.application.events.obdx.exceptions.ObdxUserNotCollectorException;
 import com.k9x.application.events.obdx.port.GetObdxEventCollectorPersistencePort;
 import com.k9x.application.events.obdx.port.UpdateObdxScorePersistencePort;
 import com.k9x.application.events.obdx.use_cases.command.UpdateObdxScoreCommand;
@@ -94,7 +94,7 @@ class UpdateObdxScoreServiceCaseTest {
         when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("other@k9x.io");
 
         assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
-                .isInstanceOf(UserNotCollectorException.class);
+                .isInstanceOf(ObdxUserNotCollectorException.class);
 
         verifyNoInteractions(getObdxExerciseAllowedValuesPort, updateObdxScorePersistencePort);
     }
@@ -105,7 +105,7 @@ class UpdateObdxScoreServiceCaseTest {
         when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn(null);
 
         assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
-                .isInstanceOf(UserNotCollectorException.class);
+                .isInstanceOf(ObdxUserNotCollectorException.class);
     }
 
     @Test
@@ -116,7 +116,7 @@ class UpdateObdxScoreServiceCaseTest {
                 .thenReturn(List.of(new BigDecimal("5"), new BigDecimal("6")));
 
         assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
-                .isInstanceOf(ScoreNotAllowedException.class);
+                .isInstanceOf(ObdxScoreNotAllowedException.class);
 
         verifyNoInteractions(updateObdxScorePersistencePort);
     }
