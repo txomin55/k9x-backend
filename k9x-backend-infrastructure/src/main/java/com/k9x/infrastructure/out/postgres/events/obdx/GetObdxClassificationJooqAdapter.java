@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.out.postgres.events.obdx;
 
 import com.k9x.application.events.obdx.port.GetClassificationPersistencePort;
-import com.k9x.application.events.obdx.use_cases.dto.FetchClassificationRawRowDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationRawRowDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Dogs;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Judges;

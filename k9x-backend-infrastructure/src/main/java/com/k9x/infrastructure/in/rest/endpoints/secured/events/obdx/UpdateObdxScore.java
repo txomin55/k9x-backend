@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx;
 
-import com.k9x.application.events.obdx.use_cases.UpdateObdxScoreServiceCase;
-import com.k9x.application.events.obdx.use_cases.command.UpdateObdxScoreCommand;
+import com.k9x.application.events.obdx.use_case.UpdateObdxScoreServiceCase;
+import com.k9x.application.events.obdx.use_case.command.UpdateObdxScoreCommand;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.oas.stub.api.SecuredEventsUpdateScoreObdxApiDelegate;
 import com.k9x.oas.stub.model.UpdateCollectionScoreRequestDTO;

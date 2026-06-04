@@ -44,8 +44,9 @@ public class GetStageServiceCase {
                 stage.address(), stage.organizer(), null,
                 stage.events().stream()
                         .map(e -> new FetchStageDetailEventDTO(
-                                e.id(), e.name(), e.configurationId(),
-                                configNameById.getOrDefault(e.configurationId(), e.configurationId())))
+                                e.id(), e.name(), e.disciplineId(), e.configurationId(),
+                                configNameById.getOrDefault(e.configurationId(), e.configurationId()),
+                                e.competitors()))
                         .toList());
     }
 

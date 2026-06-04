@@ -2,11 +2,11 @@ package com.k9x.configuration.events;
 
 import com.k9x.application.events.obdx.port.GetClassificationPersistencePort;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
-import com.k9x.application.events.obdx.use_cases.GetObdxClassificationServiceCase;
-import com.k9x.application.events.obdx.use_cases.port.ClassificationCacheManagerPort;
-import com.k9x.application.events.obdx.use_cases.port.GetEventPersistencePort;
-import com.k9x.application.events.use_cases.GetEventClassificationServiceCase;
-import com.k9x.application.events.use_cases.port.EventClassificationCacheManagerPort;
+import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
+import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
+import com.k9x.application.events.obdx.use_case.port.GetEventPersistencePort;
+import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
+import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
 import com.k9x.application.stages.port.GetStagePersistencePort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

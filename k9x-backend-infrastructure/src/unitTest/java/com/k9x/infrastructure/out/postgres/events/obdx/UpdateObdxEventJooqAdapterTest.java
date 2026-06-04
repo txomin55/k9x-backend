@@ -49,7 +49,7 @@ class UpdateObdxEventJooqAdapterTest {
         assertThat(capturedSqls).hasSize(9);
 
         assertThat(capturedSqls.get(0))
-                .contains("update \"obdx\".\"events\"")
+                .contains("update \"k9x\".\"events\"")
                 .contains("\"name\"")
                 .contains("\"configuration_id\"")
                 .contains("\"last_update\"")
@@ -135,7 +135,7 @@ class UpdateObdxEventJooqAdapterTest {
         new UpdateObdxEventJooqAdapter(dsl).updateEvent("event-1", payload);
 
         assertThat(capturedSqls).hasSize(5);
-        assertThat(capturedSqls.get(0)).contains("update \"obdx\".\"events\"");
+        assertThat(capturedSqls.get(0)).contains("update \"k9x\".\"events\"");
         assertThat(capturedSqls.get(1)).contains("delete from \"obdx\".\"event_scores\"");
         assertThat(capturedSqls.get(2)).contains("delete from \"obdx\".\"event_competitors\"");
         assertThat(capturedSqls.get(3)).contains("delete from \"obdx\".\"event_exercises\"");

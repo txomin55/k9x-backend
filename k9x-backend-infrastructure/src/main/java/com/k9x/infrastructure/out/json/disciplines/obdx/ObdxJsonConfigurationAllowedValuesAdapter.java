@@ -16,13 +16,6 @@ public class ObdxJsonConfigurationAllowedValuesAdapter implements GetObdxConfigu
         this.allowedValuesByConfigId = buildIndex(cache);
     }
 
-    @Override
-    public List<BigDecimal> getAllowedValues(String configurationId) {
-        List<BigDecimal> values = allowedValuesByConfigId.get(configurationId);
-        if (values == null) throw new ExerciseConfigurationNotFoundException();
-        return values;
-    }
-
     private static Map<String, List<BigDecimal>> buildIndex(ObdxFederationsConfigurationsCache cache) {
         Map<String, List<BigDecimal>> result = new HashMap<>();
         for (ObdxFederationsConfigurationsCache.Entry entry : cache.getAll()) {
@@ -31,5 +24,12 @@ public class ObdxJsonConfigurationAllowedValuesAdapter implements GetObdxConfigu
             }
         }
         return result;
+    }
+
+    @Override
+    public List<BigDecimal> getAllowedValues(String configurationId) {
+        List<BigDecimal> values = allowedValuesByConfigId.get(configurationId);
+        if (values == null) throw new ExerciseConfigurationNotFoundException();
+        return values;
     }
 }

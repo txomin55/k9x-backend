@@ -1,8 +1,8 @@
 package com.k9x.infrastructure.in.rest.endpoints.events;
 
-import com.k9x.application.events.obdx.use_cases.dto.FetchClassificationCompetitorDTO;
-import com.k9x.application.events.obdx.use_cases.dto.FetchClassificationDTO;
-import com.k9x.application.events.use_cases.GetEventClassificationServiceCase;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
+import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
 import com.k9x.oas.stub.api.EventsFetchClassificationApiDelegate;
 import com.k9x.oas.stub.model.*;
 import org.springframework.context.MessageSource;
@@ -43,7 +43,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                         c.country(),
                         c.owner(),
                         c.team(),
-                        c.status(), // TODO: map c.tied() once StageEventClassificationItemResponseDTO exposes a tied field
+                        c.status(),
                         new IdNameDTO(c.dogName(), c.dogId()),
                         c.exercises().stream()
                                 .map(e -> new StageEventClassificationExerciseScoresResponseDTO(
@@ -61,7 +61,8 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                                 .toList(),
                         c.position(),
                         c.totalScore(),
-                        c.scoreRating()))
+                        c.scoreRating(),
+                        c.tied()))
                 .toList();
     }
 

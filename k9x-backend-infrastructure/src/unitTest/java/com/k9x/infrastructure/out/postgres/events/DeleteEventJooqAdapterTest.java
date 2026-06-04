@@ -1,6 +1,5 @@
 package com.k9x.infrastructure.out.postgres.events;
 
-import com.k9x.infrastructure.out.postgres.events.DeleteEventJooqAdapter;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -35,9 +34,9 @@ class DeleteEventJooqAdapterTest {
         new DeleteEventJooqAdapter(dsl).deleteEvent("event-1", deletedAt);
 
         assertThat(capturedSql.get())
-                .contains("update \"obdx\".\"events\"")
+                .contains("update \"k9x\".\"events\"")
                 .contains("set \"deleted_at\" = ?")
-                .contains("where \"obdx\".\"events\".\"id\" = ?");
+                .contains("where \"k9x\".\"events\".\"id\" = ?");
         assertThat(capturedBindings.get()[0]).isEqualTo(deletedAt);
         assertThat(capturedBindings.get()[1]).isEqualTo("event-1");
     }

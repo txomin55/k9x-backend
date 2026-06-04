@@ -1,9 +1,9 @@
 package com.k9x.infrastructure.configuration.postgres;
 
 import com.k9x.application.events.obdx.port.*;
-import com.k9x.application.events.obdx.use_cases.port.CreateObdxEventPersistencePort;
-import com.k9x.application.events.obdx.use_cases.port.GetEventPersistencePort;
-import com.k9x.application.events.obdx.use_cases.port.GetObdxEventDataPersistencePort;
+import com.k9x.application.events.obdx.use_case.port.CreateObdxEventPersistencePort;
+import com.k9x.application.events.obdx.use_case.port.GetEventPersistencePort;
+import com.k9x.application.events.obdx.use_case.port.GetObdxEventDataPersistencePort;
 import com.k9x.infrastructure.out.postgres.events.CreateEventJooqAdapter;
 import com.k9x.infrastructure.out.postgres.events.DeleteEventJooqAdapter;
 import com.k9x.infrastructure.out.postgres.events.EnrollEventJooqAdapter;

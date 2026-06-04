@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.events;
 
-import com.k9x.application.events.obdx.use_cases.command.EnrollObdxEventCommand;
-import com.k9x.application.events.use_cases.EnrollEventServiceCase;
+import com.k9x.application.events.obdx.use_case.command.EnrollObdxEventCommand;
+import com.k9x.application.events.use_case.EnrollEventServiceCase;
 import com.k9x.oas.stub.api.SecuredEventsEnrollApiDelegate;
 import com.k9x.oas.stub.model.EnrollStageEventRequestDTO;
 import org.springframework.http.ResponseEntity;

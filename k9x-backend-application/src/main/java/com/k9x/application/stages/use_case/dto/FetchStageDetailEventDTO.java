@@ -1,4 +1,8 @@
 package com.k9x.application.stages.use_case.dto;
 
-public record FetchStageDetailEventDTO(String id, String name, String configurationId, String disciplineName) {
+import java.util.List;
+
+public record FetchStageDetailEventDTO(String id, String name, String disciplineId,
+                                       String configurationId, String configurationName,
+                                       List<FetchStageDetailCompetitorDTO> competitors) {
 }

@@ -1,6 +1,6 @@
 package com.k9x.application.events.obdx.port.payload;
 
-import com.k9x.application.events.obdx.use_cases.command.UpdateObdxEventCommand;
+import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 

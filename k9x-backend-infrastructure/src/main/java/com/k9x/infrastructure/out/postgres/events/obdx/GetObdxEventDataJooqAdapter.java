@@ -1,10 +1,10 @@
 package com.k9x.infrastructure.out.postgres.events.obdx;
 
-import com.k9x.application.events.obdx.use_cases.dto.FetchObdxEventCompetitorDTO;
-import com.k9x.application.events.obdx.use_cases.dto.FetchObdxEventDataDTO;
-import com.k9x.application.events.obdx.use_cases.dto.FetchObdxEventExerciseDTO;
-import com.k9x.application.events.obdx.use_cases.dto.FetchObdxEventJudgeDTO;
-import com.k9x.application.events.obdx.use_cases.port.GetObdxEventDataPersistencePort;
+import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventCompetitorDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventDataDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventExerciseDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventJudgeDTO;
+import com.k9x.application.events.obdx.use_case.port.GetObdxEventDataPersistencePort;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Dogs;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Judges;

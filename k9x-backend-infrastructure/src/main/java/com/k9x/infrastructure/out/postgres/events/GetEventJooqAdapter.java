@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.events;
 
-import com.k9x.application.events.obdx.use_cases.port.GetEventPersistencePort;
+import com.k9x.application.events.obdx.use_case.port.GetEventPersistencePort;
 import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.aggregates.events.Event;
 import org.jooq.DSLContext;

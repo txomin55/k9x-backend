@@ -1,7 +1,6 @@
 package com.k9x.infrastructure.out.postgres.events;
 
 import com.k9x.domain.aggregates.events.Event;
-import com.k9x.infrastructure.out.postgres.events.GetEventJooqAdapter;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -35,8 +34,8 @@ class GetEventJooqAdapterTest {
         new GetEventJooqAdapter(dsl).getEvent("event-1");
 
         assertThat(capturedSql.get())
-                .contains("from \"obdx\".\"events\"")
-                .contains("where \"obdx\".\"events\".\"id\" = ?");
+                .contains("from \"k9x\".\"events\"")
+                .contains("where \"k9x\".\"events\".\"id\" = ?");
         assertThat(capturedBindings.get()).containsExactly("event-1");
     }
 

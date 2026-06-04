@@ -16,13 +16,6 @@ public class ObdxJsonExerciseAllowedValuesAdapter implements GetObdxExerciseAllo
         this.allowedValuesByExerciseId = buildIndex(cache);
     }
 
-    @Override
-    public List<BigDecimal> getAllowedValues(String exerciseId) {
-        List<BigDecimal> values = allowedValuesByExerciseId.get(exerciseId);
-        if (values == null) throw new ExerciseConfigurationNotFoundException();
-        return values;
-    }
-
     private static Map<String, List<BigDecimal>> buildIndex(ObdxFederationsConfigurationsCache cache) {
         Map<String, List<BigDecimal>> result = new HashMap<>();
         for (ObdxFederationsConfigurationsCache.Entry entry : cache.getAll()) {
@@ -33,5 +26,12 @@ public class ObdxJsonExerciseAllowedValuesAdapter implements GetObdxExerciseAllo
             }
         }
         return result;
+    }
+
+    @Override
+    public List<BigDecimal> getAllowedValues(String exerciseId) {
+        List<BigDecimal> values = allowedValuesByExerciseId.get(exerciseId);
+        if (values == null) throw new ExerciseConfigurationNotFoundException();
+        return values;
     }
 }

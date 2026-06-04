@@ -2,7 +2,7 @@ package com.k9x.infrastructure.out.postgres.stages;
 
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
-import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.Events;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Events;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class GetStagesJooqAdapterTest {
 
-    private static final Events E = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENTS;
+    private static final Events E = Tables.EVENTS;
 
     private static final Field<?>[] FIELDS = {
             Tables.STAGES.ID,
@@ -56,11 +56,11 @@ class GetStagesJooqAdapterTest {
         assertThat(capturedSql.get())
                 .contains("from \"k9x\".\"stages\"")
                 .contains("join \"k9x\".\"organizers\"")
-                .contains("join \"obdx\".\"events\"")
+                .contains("join \"k9x\".\"events\"")
                 .doesNotContain("left outer join \"k9x\".\"organizers\"")
-                .doesNotContain("left outer join \"obdx\".\"events\"")
+                .doesNotContain("left outer join \"k9x\".\"events\"")
                 .contains("\"k9x\".\"stages\".\"deleted_at\" is null")
-                .contains("\"obdx\".\"events\".\"deleted_at\" is null")
+                .contains("\"k9x\".\"events\".\"deleted_at\" is null")
                 .contains("order by \"k9x\".\"stages\".\"date_from\" asc");
     }
 

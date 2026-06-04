@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.events;
 
-import com.k9x.application.events.use_cases.CreateEventServiceCase;
+import com.k9x.application.events.use_case.CreateEventServiceCase;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.oas.stub.api.SecuredEventsCreateApiDelegate;
 import com.k9x.oas.stub.model.CreateEventRequestDTO;

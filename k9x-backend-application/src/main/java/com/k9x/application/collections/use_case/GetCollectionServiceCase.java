@@ -9,7 +9,7 @@ import com.k9x.application.disciplines.obdx.port.GetObdxConfigurationAllowedValu
 import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.exceptions.ObdxUserNotCollectorException;
-import com.k9x.application.events.obdx.use_cases.port.GetEventPersistencePort;
+import com.k9x.application.events.obdx.use_case.port.GetEventPersistencePort;
 import com.k9x.application.stages.exceptions.StageExpiredException;
 import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.application.utils.date.DateUtils;

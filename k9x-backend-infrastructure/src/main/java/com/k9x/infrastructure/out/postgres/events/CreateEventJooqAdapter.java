@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.events;
 
-import com.k9x.application.events.obdx.use_cases.port.CreateObdxEventPersistencePort;
+import com.k9x.application.events.obdx.use_case.port.CreateObdxEventPersistencePort;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 

@@ -1,6 +1,6 @@
 package com.k9x.application.events.obdx.port;
 
-import com.k9x.application.events.obdx.use_cases.dto.FetchClassificationRawRowDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationRawRowDTO;
 
 import java.util.List;
 

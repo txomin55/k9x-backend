@@ -76,8 +76,9 @@ class GetStageServiceCaseTest {
     }
 
     @Test
-    void returns_stage_with_resolved_discipline_names() throws IOException {
-        FetchStageDetailEventDTO event = new FetchStageDetailEventDTO("evt-1", "Open", "obdx-1", null);
+    void returns_stage_with_resolved_configuration_names() throws IOException {
+        FetchStageDetailEventDTO event = new FetchStageDetailEventDTO("evt-1", "Open", "obdx", "obdx-1",
+                null, List.of());
         FetchStageDetailDTO stage = new FetchStageDetailDTO("s-1", "Stage A", 1000L, 2000L,
                 "Calle Mayor 1", "Organizer", null, List.of(event));
 
@@ -93,12 +94,13 @@ class GetStageServiceCaseTest {
         assertThat(result.id()).isEqualTo("s-1");
         assertThat(result.deletedAt()).isNull();
         assertThat(result.events()).hasSize(1);
-        assertThat(result.events().getFirst().disciplineName()).isEqualTo("Obedience");
+        assertThat(result.events().getFirst().configurationName()).isEqualTo("Obedience");
     }
 
     @Test
     void throws_when_configurations_cannot_be_loaded() throws IOException {
-        FetchStageDetailEventDTO event = new FetchStageDetailEventDTO("evt-1", "Open", "obdx-1", null);
+        FetchStageDetailEventDTO event = new FetchStageDetailEventDTO("evt-1", "Open", "obdx", "obdx-1",
+                null, List.of());
         FetchStageDetailDTO stage = new FetchStageDetailDTO("s-1", "Stage A", 1000L, 2000L,
                 "Calle Mayor 1", "Organizer", null, List.of(event));
 

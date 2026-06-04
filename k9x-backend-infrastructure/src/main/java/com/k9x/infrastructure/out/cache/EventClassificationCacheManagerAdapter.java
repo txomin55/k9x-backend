@@ -2,8 +2,8 @@ package com.k9x.infrastructure.out.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.k9x.application.events.use_cases.dto.EventClassificationContextDTO;
-import com.k9x.application.events.use_cases.port.EventClassificationCacheManagerPort;
+import com.k9x.application.events.use_case.dto.EventClassificationContextDTO;
+import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
 
 public class EventClassificationCacheManagerAdapter implements EventClassificationCacheManagerPort {
 
