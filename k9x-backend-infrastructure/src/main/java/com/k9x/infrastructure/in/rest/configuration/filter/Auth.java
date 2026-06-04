@@ -4,11 +4,11 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.application.users.use_case.dto.AuthTokenDTO;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
+import com.k9x.infrastructure.configuration.authentication.SecurityProperties;
 import com.k9x.infrastructure.in.rest.configuration.session.AuthorizationExtractor;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -37,13 +37,13 @@ public class Auth implements Filter {
             Cache<String, String> authTokenCache,
             Cache<String, UserInfoDTO> userInfoCache,
             GetUserInfoPersistencePort getUserInfoPort,
-            @Value("${k9x-backend.security.jwt-cache-ttl-minutes}") long ttlMinutes
+            SecurityProperties securityProperties
     ) {
         this.authorizationExtractor = authorizationExtractor;
         this.authTokenCache = authTokenCache;
         this.userInfoCache = userInfoCache;
         this.getUserInfoPort = getUserInfoPort;
-        this.tokenTtl = Duration.ofMinutes(ttlMinutes);
+        this.tokenTtl = Duration.ofMinutes(securityProperties.jwtCacheTtlMinutes());
     }
 
     @Override

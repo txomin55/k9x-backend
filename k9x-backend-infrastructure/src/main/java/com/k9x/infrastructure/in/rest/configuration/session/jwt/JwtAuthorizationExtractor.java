@@ -47,7 +47,6 @@ public class JwtAuthorizationExtractor implements AuthorizationExtractor {
     private Set<String> readAudiences(Object audClaim) {
         return switch (audClaim) {
             case null -> Set.of();
-            case Set<?> audSet -> toStringSet(audSet);
             case Collection<?> audCollection -> toStringSet(audCollection);
             default -> Set.of(audClaim.toString());
         };

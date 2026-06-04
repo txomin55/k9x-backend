@@ -6,3 +6,9 @@ spring:
     driver-class-name: org.postgresql.Driver
   jooq:
     sql-dialect: POSTGRES
+
+k9x-backend:
+  security:
+    refresh-cookie:
+      same-site: "Lax"
+      secure: false

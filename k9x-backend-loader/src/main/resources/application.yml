@@ -17,6 +17,10 @@ k9x-backend:
   security:
     jwt-secret: "change-me-to-a-32-byte-minimum-secret"
     jwt-cache-ttl-minutes: 15
+    jwt-refresh-ttl-days: 30
+    refresh-cookie:
+      same-site: "None"
+      secure: true
   info:
     app:
       name: '@project.artifactId@'

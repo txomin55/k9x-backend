@@ -1,11 +1,6 @@
 package com.k9x.application.users.use_case;
 
-import com.k9x.application.users.port.CreateUserPersistencePort;
-import com.k9x.application.users.port.ExchangeAuthorizationCodePort;
-import com.k9x.application.users.port.GetUserInfoPersistencePort;
-import com.k9x.application.users.port.JwtTokenCacheManagerPort;
-import com.k9x.application.users.port.JwtTokenGeneratorPort;
-import com.k9x.application.users.port.ValidateIdTokenPort;
+import com.k9x.application.users.port.*;
 import com.k9x.application.users.use_case.command.LoginCommand;
 import com.k9x.application.users.use_case.dto.AuthTokenDTO;
 import com.k9x.application.users.use_case.dto.LoginDTO;
@@ -23,7 +18,8 @@ public class LoginServiceCase {
     private final JwtTokenGeneratorPort jwtTokenGeneratorPort;
     private final GetUserInfoPersistencePort getUserInfoPersistencePort;
     private final CreateUserPersistencePort createUserPersistencePort;
-    private final Duration jwtTtl;
+    private final AccessTokenIssuer accessTokenIssuer;
+    private final Duration refreshTtl;
 
     public LoginServiceCase(
             ValidateIdTokenPort validateIdTokenPort,
@@ -32,7 +28,8 @@ public class LoginServiceCase {
             JwtTokenGeneratorPort jwtTokenGeneratorPort,
             GetUserInfoPersistencePort getUserInfoPersistencePort,
             CreateUserPersistencePort createUserPersistencePort,
-            long ttlMinutes
+            AccessTokenIssuer accessTokenIssuer,
+            long refreshTtlDays
     ) {
         this.validateIdTokenPort = validateIdTokenPort;
         this.exchangeAuthorizationCodePort = exchangeAuthorizationCodePort;
@@ -40,7 +37,8 @@ public class LoginServiceCase {
         this.jwtTokenGeneratorPort = jwtTokenGeneratorPort;
         this.getUserInfoPersistencePort = getUserInfoPersistencePort;
         this.createUserPersistencePort = createUserPersistencePort;
-        this.jwtTtl = Duration.ofMinutes(ttlMinutes);
+        this.accessTokenIssuer = accessTokenIssuer;
+        this.refreshTtl = Duration.ofDays(refreshTtlDays);
     }
 
     public LoginDTO login(LoginCommand command) {
@@ -58,17 +56,16 @@ public class LoginServiceCase {
         String userEmail = validatedToken.email();
 
         AuthTokenDTO cachedData = jwtTokenCacheManagerPort.retrieveEntry(userEmail);
-
         int version = cachedData != null ? cachedData.getVersion() + 1 : 0;
-        String jwtToken = jwtTokenGeneratorPort.generate(userEmail, version, jwtTtl);
 
-        jwtTokenCacheManagerPort.overrideEntry(userEmail, jwtToken);
+        String jwtToken = accessTokenIssuer.issue(userEmail, version);
+        String refreshToken = jwtTokenGeneratorPort.generateRefreshToken(userEmail, version, refreshTtl);
 
         if (getUserInfoPersistencePort.findById(userEmail) == null) {
             createUserPersistencePort.createUser(userEmail, validatedToken.image());
         }
 
-        return new LoginDTO(true, jwtToken);
+        return new LoginDTO(jwtToken, refreshToken);
     }
 
 }

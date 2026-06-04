@@ -6,8 +6,12 @@ import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.application.users.port.JwtTokenCacheManagerPort;
 import com.k9x.application.users.port.JwtTokenGeneratorPort;
 import com.k9x.application.users.port.ValidateIdTokenPort;
+import com.k9x.application.users.port.ValidateRefreshTokenPort;
+import com.k9x.application.users.use_case.AccessTokenIssuer;
 import com.k9x.application.users.use_case.LoginServiceCase;
 import com.k9x.application.users.use_case.LogoutServiceCase;
+import com.k9x.application.users.use_case.RefreshServiceCase;
+import com.k9x.infrastructure.configuration.authentication.SecurityProperties;
 import com.k9x.infrastructure.out.rest.authentication.GoogleExchangeAuthorizationCodeAdapter;
 import com.k9x.infrastructure.out.rest.authentication.GoogleValidateIdTokenAdapter;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +47,15 @@ public class AuthenticationUseCaseConfiguration {
     }
 
     @Bean
+    public AccessTokenIssuer accessTokenIssuer(
+            JwtTokenGeneratorPort jwtTokenGeneratorPort,
+            JwtTokenCacheManagerPort jwtTokenCacheManagerPort,
+            SecurityProperties securityProperties
+    ) {
+        return new AccessTokenIssuer(jwtTokenGeneratorPort, jwtTokenCacheManagerPort, securityProperties.jwtCacheTtlMinutes());
+    }
+
+    @Bean
     public LoginServiceCase loginServiceCase(
             ValidateIdTokenPort validateIdTokenPort,
             ExchangeAuthorizationCodePort exchangeAuthorizationCodePort,
@@ -50,7 +63,8 @@ public class AuthenticationUseCaseConfiguration {
             JwtTokenGeneratorPort jwtTokenGeneratorPort,
             GetUserInfoPersistencePort getUserInfoPersistencePort,
             CreateUserPersistencePort createUserPersistencePort,
-            @Value("${k9x-backend.security.jwt-cache-ttl-minutes}") long ttlMinutes
+            AccessTokenIssuer accessTokenIssuer,
+            SecurityProperties securityProperties
     ) {
         return new LoginServiceCase(
                 validateIdTokenPort,
@@ -59,7 +73,21 @@ public class AuthenticationUseCaseConfiguration {
                 jwtTokenGeneratorPort,
                 getUserInfoPersistencePort,
                 createUserPersistencePort,
-                ttlMinutes
+                accessTokenIssuer,
+                securityProperties.jwtRefreshTtlDays()
+        );
+    }
+
+    @Bean
+    public RefreshServiceCase refreshServiceCase(
+            ValidateRefreshTokenPort validateRefreshTokenPort,
+            JwtTokenCacheManagerPort jwtTokenCacheManagerPort,
+            AccessTokenIssuer accessTokenIssuer
+    ) {
+        return new RefreshServiceCase(
+                validateRefreshTokenPort,
+                jwtTokenCacheManagerPort,
+                accessTokenIssuer
         );
     }
 }

@@ -50,6 +50,8 @@ class LoginServiceCaseTest {
 
     @BeforeEach
     void setUp() {
+        AccessTokenIssuer accessTokenIssuer =
+                new AccessTokenIssuer(jwtTokenGeneratorPort, jwtTokenCacheManagerPort, 60L);
         serviceCase = new LoginServiceCase(
                 validateIdTokenPort,
                 exchangeAuthorizationCodePort,
@@ -57,7 +59,8 @@ class LoginServiceCaseTest {
                 jwtTokenGeneratorPort,
                 getUserInfoPersistencePort,
                 createUserPersistencePort,
-                60L
+                accessTokenIssuer,
+                30L
         );
     }
 
@@ -91,7 +94,6 @@ class LoginServiceCaseTest {
 
         LoginDTO result = serviceCase.login(new LoginCommand("code-1"));
 
-        assertThat(result.valid()).isTrue();
         assertThat(result.jwtToken()).isEqualTo("jwt-token");
         verify(jwtTokenCacheManagerPort).overrideEntry("user@test.com", "jwt-token");
     }

@@ -4,7 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
-import org.springframework.beans.factory.annotation.Value;
+import com.k9x.infrastructure.configuration.authentication.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,10 +14,9 @@ import java.util.concurrent.TimeUnit;
 public class AuthTokenCacheConfiguration {
 
     @Bean
-    Cache<String, UserInfoDTO> userInfoCache(
-            @Value("${k9x-backend.security.jwt-cache-ttl-minutes}") long ttlMinutes) {
+    Cache<String, UserInfoDTO> userInfoCache(SecurityProperties securityProperties) {
         return Caffeine.newBuilder()
-                .expireAfterWrite(ttlMinutes, TimeUnit.MINUTES)
+                .expireAfterWrite(securityProperties.jwtCacheTtlMinutes(), TimeUnit.MINUTES)
                 .maximumSize(10_000)
                 .build();
     }
@@ -25,9 +24,9 @@ public class AuthTokenCacheConfiguration {
     @Bean
     Cache<String, String> authTokenCache(
             Cache<String, UserInfoDTO> userInfoCache,
-            @Value("${k9x-backend.security.jwt-cache-ttl-minutes}") long ttlMinutes) {
+            SecurityProperties securityProperties) {
         return Caffeine.newBuilder()
-                .expireAfterWrite(ttlMinutes, TimeUnit.MINUTES)
+                .expireAfterWrite(securityProperties.jwtCacheTtlMinutes(), TimeUnit.MINUTES)
                 .maximumSize(10_000)
                 .removalListener((String key, String _, RemovalCause _) -> userInfoCache.invalidate(key))
                 .build();

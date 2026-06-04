@@ -11,6 +11,8 @@ import java.util.Date;
 public class JwtTokenGeneratorAdapter implements JwtTokenGeneratorPort {
 
     private static final String ISSUER = "k9x-backend";
+    private static final String REFRESH_TOKEN_TYPE = "refresh";
+    private static final String ACCESS_TOKEN_TYPE = "access";
     private final byte[] jwtSecret;
 
     public JwtTokenGeneratorAdapter(String jwtSecret) {
@@ -19,6 +21,15 @@ public class JwtTokenGeneratorAdapter implements JwtTokenGeneratorPort {
 
     @Override
     public String generate(String subject, int version, Duration ttl) {
+        return build(subject, version, ttl, ACCESS_TOKEN_TYPE);
+    }
+
+    @Override
+    public String generateRefreshToken(String subject, int version, Duration ttl) {
+        return build(subject, version, ttl, REFRESH_TOKEN_TYPE);
+    }
+
+    private String build(String subject, int version, Duration ttl, String type) {
         Date issuedAt = new Date();
         Date expiresAt = new Date(issuedAt.getTime() + ttl.toMillis());
         return Jwts.builder()
@@ -29,6 +40,7 @@ public class JwtTokenGeneratorAdapter implements JwtTokenGeneratorPort {
                 .subject(subject)
                 .audience().add(ISSUER).and()
                 .claim("version", version)
+                .claim("type", type)
                 .compact();
     }
 }
