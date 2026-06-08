@@ -3,7 +3,6 @@ package com.k9x.configuration.secured.stages;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.stages.port.CreateStagePersistencePort;
 import com.k9x.application.stages.port.DeleteStagePersistencePort;
-import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.application.stages.port.UpdateStagePersistencePort;
 import com.k9x.application.stages.use_case.CreateStageServiceCase;
 import com.k9x.application.stages.use_case.DeleteStageServiceCase;
@@ -21,16 +20,14 @@ public class SecuredStageUseCaseConfiguration {
     }
 
     @Bean
-    public UpdateStageServiceCase updateStageServiceCase(GetStagePersistencePort getStagePersistencePort,
-                                                         GetCompetitionPersistencePort getCompetitionPersistencePort,
+    public UpdateStageServiceCase updateStageServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                          UpdateStagePersistencePort updateStagePersistencePort) {
-        return new UpdateStageServiceCase(getStagePersistencePort, getCompetitionPersistencePort, updateStagePersistencePort);
+        return new UpdateStageServiceCase(getCompetitionPersistencePort, updateStagePersistencePort);
     }
 
     @Bean
-    public DeleteStageServiceCase deleteStageServiceCase(GetStagePersistencePort getStagePersistencePort,
-                                                         GetCompetitionPersistencePort getCompetitionPersistencePort,
+    public DeleteStageServiceCase deleteStageServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                          DeleteStagePersistencePort deleteStagePersistencePort) {
-        return new DeleteStageServiceCase(getStagePersistencePort, getCompetitionPersistencePort, deleteStagePersistencePort);
+        return new DeleteStageServiceCase(getCompetitionPersistencePort, deleteStagePersistencePort);
     }
 }

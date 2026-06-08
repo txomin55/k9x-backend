@@ -1,13 +1,18 @@
 package com.k9x.application.stages.use_case;
 
+import com.k9x.application.competitions.CompetitionNavigator;
+import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.exceptions.StageHasNoEventsException;
 import com.k9x.application.stages.exceptions.StageNotFoundException;
-import com.k9x.application.stages.port.GetStageDetailPersistencePort;
+import com.k9x.application.stages.use_case.dto.FetchStageDetailCompetitorDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailEventDTO;
+import com.k9x.domain.aggregates.competitions.Competition;
+import com.k9x.domain.aggregates.events.Event;
+import com.k9x.domain.aggregates.stages.Stage;
 import com.k9x.domain.exceptions.DisciplineConfigurationMalformedException;
 
 import java.io.IOException;
@@ -16,17 +21,22 @@ import java.util.stream.Collectors;
 
 public class GetStageServiceCase {
 
-    private final GetStageDetailPersistencePort getStageDetailPersistencePort;
+    private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
 
-    public GetStageServiceCase(GetStageDetailPersistencePort getStageDetailPersistencePort,
+    public GetStageServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
-        this.getStageDetailPersistencePort = getStageDetailPersistencePort;
+        this.getCompetitionPersistencePort = getCompetitionPersistencePort;
         this.getObdxFederationsConfigurationsPort = getObdxFederationsConfigurationsPort;
     }
 
     public FetchStageDetailDTO getStage(String id) {
-        FetchStageDetailDTO stage = getStageDetailPersistencePort.getStage(id);
+        String competitionId = getCompetitionPersistencePort.competitionIdByStage(id);
+        if (competitionId == null) {
+            throw new StageNotFoundException();
+        }
+        Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
+        Stage stage = CompetitionNavigator.findStage(competition, id);
 
         if (stage == null) {
             throw new StageNotFoundException();
@@ -34,19 +44,27 @@ public class GetStageServiceCase {
         if (stage.deletedAt() != null) {
             throw new StageAlreadyDeletedException();
         }
-        if (stage.events().isEmpty()) {
+
+        var events = stage.events() == null ? java.util.List.<Event>of()
+                : stage.events().stream().filter(e -> e.deletedAt() == null).toList();
+        if (events.isEmpty()) {
             throw new StageHasNoEventsException();
         }
 
         Map<String, String> configNameById = buildConfigNameMap();
         return new FetchStageDetailDTO(
                 stage.id(), stage.name(), stage.dateFrom(), stage.dateTo(),
-                stage.address(), stage.organizer(), null,
-                stage.events().stream()
+                competition.address(), competition.organizerName(), null,
+                events.stream()
                         .map(e -> new FetchStageDetailEventDTO(
-                                e.id(), e.name(), e.disciplineId(), e.configurationId(),
+                                e.id(), e.name(), e.discipline(), e.configurationId(),
                                 configNameById.getOrDefault(e.configurationId(), e.configurationId()),
-                                e.competitors()))
+                                e.competitors() == null ? java.util.List.of()
+                                        : e.competitors().stream()
+                                        .map(c -> new FetchStageDetailCompetitorDTO(
+                                                c.dogId(), c.dogName(), c.owner(),
+                                                c.country(), c.team(), c.breed()))
+                                        .toList()))
                         .toList());
     }
 

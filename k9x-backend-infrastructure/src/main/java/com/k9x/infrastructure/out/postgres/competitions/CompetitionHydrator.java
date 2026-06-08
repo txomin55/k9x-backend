@@ -1,0 +1,259 @@
+package com.k9x.infrastructure.out.postgres.competitions;
+
+import com.k9x.domain.aggregates.competitions.Competition;
+import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.aggregates.events.Event;
+import com.k9x.domain.aggregates.events.EventCompetitor;
+import com.k9x.domain.aggregates.events.EventExercise;
+import com.k9x.domain.aggregates.events.EventJudge;
+import com.k9x.domain.aggregates.events.Score;
+import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Dogs;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Judges;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Organizers;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Users;
+import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventCompetitors;
+import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventExercises;
+import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventJudges;
+import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventScores;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Field;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Hydrates the full {@link Competition} root aggregate (stages → events → competitors / exercises /
+ * judges / scores) with a handful of queries stitched in memory. Soft-deleted children are kept so the
+ * aggregate is faithful; read-models filter them as needed and lifecycle status accounts for them.
+ */
+class CompetitionHydrator {
+
+    private final DSLContext dsl;
+
+    CompetitionHydrator(DSLContext dsl) {
+        this.dsl = dsl;
+    }
+
+    List<Competition> hydrate(Condition competitionCondition) {
+        Map<String, CompetitionShell> competitions = fetchCompetitions(competitionCondition);
+        if (competitions.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, List<Stage>> stagesByCompetition = new LinkedHashMap<>();
+        Map<String, List<Event>> eventsByStage = fetchEvents(competitions.keySet());
+
+        fetchStages(competitions.keySet()).forEach(shell -> {
+            Stage stage = new Stage(shell.id, shell.name, shell.competitionId, shell.creator,
+                    shell.dateFrom, shell.dateTo, shell.lastUpdate, shell.createdAt, shell.deletedAt,
+                    eventsByStage.getOrDefault(shell.id, new ArrayList<>()));
+            stagesByCompetition.computeIfAbsent(shell.competitionId, k -> new ArrayList<>()).add(stage);
+        });
+
+        return competitions.values().stream()
+                .map(c -> new Competition(c.id, c.name, c.creator, c.organizerName, c.country,
+                        c.description, c.address, c.coordAlt, c.coordLong, c.lastUpdate, c.createdAt,
+                        c.deletedAt, stagesByCompetition.getOrDefault(c.id, new ArrayList<>())))
+                .toList();
+    }
+
+    private Map<String, CompetitionShell> fetchCompetitions(Condition condition) {
+        var co = Tables.COMPETITIONS;
+        Organizers o = Tables.ORGANIZERS;
+        Field<String> organizerName = o.NAME.as("organizer_name");
+
+        Map<String, CompetitionShell> result = new LinkedHashMap<>();
+        dsl.select(co.ID, co.NAME, co.CREATOR, organizerName, co.COUNTRY, co.DESCRIPTION, co.ADDRESS,
+                        co.COORD_ALT, co.COORD_LONG, co.LAST_UPDATE, co.CREATED_AT, co.DELETED_AT)
+                .from(co)
+                .leftJoin(o).on(o.USER_ID.eq(co.CREATOR))
+                .where(condition)
+                .fetch()
+                .forEach(r -> {
+                    CompetitionShell shell = new CompetitionShell();
+                    shell.id = r.get(co.ID);
+                    shell.name = r.get(co.NAME);
+                    shell.creator = r.get(co.CREATOR);
+                    shell.organizerName = r.get(organizerName);
+                    shell.country = r.get(co.COUNTRY);
+                    shell.description = r.get(co.DESCRIPTION);
+                    shell.address = r.get(co.ADDRESS);
+                    shell.coordAlt = r.get(co.COORD_ALT);
+                    shell.coordLong = r.get(co.COORD_LONG);
+                    shell.lastUpdate = r.get(co.LAST_UPDATE);
+                    shell.createdAt = r.get(co.CREATED_AT);
+                    shell.deletedAt = r.get(co.DELETED_AT);
+                    result.put(shell.id, shell);
+                });
+        return result;
+    }
+
+    private List<StageShell> fetchStages(Iterable<String> competitionIds) {
+        var st = Tables.STAGES;
+        return dsl.select(st.ID, st.NAME, st.COMPETITION_ID, st.CREATOR, st.DATE_FROM, st.DATE_TO,
+                        st.LAST_UPDATE, st.CREATED_AT, st.DELETED_AT)
+                .from(st)
+                .where(st.COMPETITION_ID.in(toList(competitionIds)))
+                .orderBy(st.DATE_FROM.asc())
+                .fetch(r -> {
+                    StageShell shell = new StageShell();
+                    shell.id = r.get(st.ID);
+                    shell.name = r.get(st.NAME);
+                    shell.competitionId = r.get(st.COMPETITION_ID);
+                    shell.creator = r.get(st.CREATOR);
+                    shell.dateFrom = r.get(st.DATE_FROM);
+                    shell.dateTo = r.get(st.DATE_TO);
+                    shell.lastUpdate = r.get(st.LAST_UPDATE);
+                    shell.createdAt = r.get(st.CREATED_AT);
+                    shell.deletedAt = r.get(st.DELETED_AT);
+                    return shell;
+                });
+    }
+
+    private Map<String, List<Event>> fetchEvents(Iterable<String> competitionIds) {
+        var ev = Tables.EVENTS;
+        var st = Tables.STAGES;
+
+        List<EventShell> eventShells = dsl.select(ev.ID, ev.CONFIGURATION_ID, ev.DISCIPLINE, ev.NAME,
+                        ev.STAGE_ID, ev.CREATOR, ev.LAST_UPDATE, ev.CREATED_AT, ev.DELETED_AT, ev.SCORE_CALCULATION)
+                .from(ev)
+                .join(st).on(st.ID.eq(ev.STAGE_ID))
+                .where(st.COMPETITION_ID.in(toList(competitionIds)))
+                .orderBy(ev.CREATED_AT.asc())
+                .fetch(r -> {
+                    EventShell shell = new EventShell();
+                    shell.id = r.get(ev.ID);
+                    shell.configurationId = r.get(ev.CONFIGURATION_ID);
+                    shell.discipline = r.get(ev.DISCIPLINE);
+                    shell.name = r.get(ev.NAME);
+                    shell.stageId = r.get(ev.STAGE_ID);
+                    shell.creator = r.get(ev.CREATOR);
+                    shell.lastUpdate = r.get(ev.LAST_UPDATE);
+                    shell.createdAt = r.get(ev.CREATED_AT);
+                    shell.deletedAt = r.get(ev.DELETED_AT);
+                    shell.scoreCalculation = r.get(ev.SCORE_CALCULATION);
+                    return shell;
+                });
+
+        List<String> eventIds = eventShells.stream().map(s -> s.id).toList();
+        Map<String, List<EventCompetitor>> competitors = fetchCompetitors(eventIds);
+        Map<String, List<EventExercise>> exercises = fetchExercises(eventIds);
+        Map<String, List<EventJudge>> judges = fetchJudges(eventIds);
+        Map<String, List<Score>> scores = fetchScores(eventIds);
+
+        Map<String, List<Event>> eventsByStage = new LinkedHashMap<>();
+        for (EventShell s : eventShells) {
+            Event event = new Event(s.id, s.configurationId, s.discipline, s.name, s.stageId, s.creator,
+                    s.lastUpdate, s.createdAt, s.deletedAt,
+                    s.scoreCalculation == null ? null : ObdxAvgMethod.valueOf(s.scoreCalculation),
+                    competitors.getOrDefault(s.id, new ArrayList<>()),
+                    exercises.getOrDefault(s.id, new ArrayList<>()),
+                    judges.getOrDefault(s.id, new ArrayList<>()),
+                    scores.getOrDefault(s.id, new ArrayList<>()));
+            eventsByStage.computeIfAbsent(s.stageId, k -> new ArrayList<>()).add(event);
+        }
+        return eventsByStage;
+    }
+
+    private Map<String, List<EventCompetitor>> fetchCompetitors(List<String> eventIds) {
+        Map<String, List<EventCompetitor>> result = new LinkedHashMap<>();
+        if (eventIds.isEmpty()) {
+            return result;
+        }
+        EventCompetitors ec = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
+        Dogs d = Tables.DOGS;
+        dsl.select(ec.EVENT_ID, ec.DOG_ID, ec.POSITION, ec.VERIFIED, ec.NOT_COMPETING,
+                        d.NAME, d.OWNER, d.TEAM, d.COUNTRY, d.BREED, d.IDENTITY)
+                .from(ec)
+                .leftJoin(d).on(d.ID.eq(ec.DOG_ID).and(d.DELETED_AT.isNull()))
+                .where(ec.EVENT_ID.in(eventIds))
+                .forEach(r -> result.computeIfAbsent(r.get(ec.EVENT_ID), k -> new ArrayList<>())
+                        .add(new EventCompetitor(
+                                r.get(ec.DOG_ID), r.get(d.NAME), r.get(d.OWNER), r.get(d.TEAM),
+                                r.get(d.COUNTRY), r.get(d.BREED), r.get(d.IDENTITY),
+                                r.get(ec.POSITION), r.get(ec.VERIFIED),
+                                Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)))));
+        return result;
+    }
+
+    private Map<String, List<EventExercise>> fetchExercises(List<String> eventIds) {
+        Map<String, List<EventExercise>> result = new LinkedHashMap<>();
+        if (eventIds.isEmpty()) {
+            return result;
+        }
+        EventExercises ee = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_EXERCISES;
+        dsl.select(ee.EVENT_ID, ee.EXERCISE_ID, ee.POSITION, ee.TAGS)
+                .from(ee)
+                .where(ee.EVENT_ID.in(eventIds))
+                .orderBy(ee.POSITION.asc())
+                .forEach(r -> result.computeIfAbsent(r.get(ee.EVENT_ID), k -> new ArrayList<>())
+                        .add(new EventExercise(
+                                r.get(ee.EXERCISE_ID), r.get(ee.POSITION),
+                                r.get(ee.TAGS) == null ? List.of() : Arrays.stream(r.get(ee.TAGS)).toList())));
+        return result;
+    }
+
+    private Map<String, List<EventJudge>> fetchJudges(List<String> eventIds) {
+        Map<String, List<EventJudge>> result = new LinkedHashMap<>();
+        if (eventIds.isEmpty()) {
+            return result;
+        }
+        EventJudges ej = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_JUDGES;
+        Judges j = Tables.JUDGES;
+        Users u = Tables.USERS;
+        dsl.select(ej.EVENT_ID, ej.JUDGE_ID, j.NAME, u.EMAIL)
+                .from(ej)
+                .join(j).on(j.ID.eq(ej.JUDGE_ID).and(j.DELETED_AT.isNull()))
+                .leftJoin(u).on(u.ID.eq(ej.COLLECTOR_ID))
+                .where(ej.EVENT_ID.in(eventIds))
+                .forEach(r -> result.computeIfAbsent(r.get(ej.EVENT_ID), k -> new ArrayList<>())
+                        .add(new EventJudge(r.get(ej.JUDGE_ID), r.get(j.NAME), r.get(u.EMAIL))));
+        return result;
+    }
+
+    private Map<String, List<Score>> fetchScores(List<String> eventIds) {
+        Map<String, List<Score>> result = new LinkedHashMap<>();
+        if (eventIds.isEmpty()) {
+            return result;
+        }
+        EventScores es = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_SCORES;
+        dsl.select(es.EVENT_ID, es.EXERCISE_ID, es.JUDGE_ID, es.DOG_ID, es.SCORE, es.LAST_UPDATE)
+                .from(es)
+                .where(es.EVENT_ID.in(eventIds))
+                .forEach(r -> result.computeIfAbsent(r.get(es.EVENT_ID), k -> new ArrayList<>())
+                        .add(new Score(r.get(es.EXERCISE_ID), r.get(es.JUDGE_ID), r.get(es.DOG_ID),
+                                r.get(es.SCORE), r.get(es.LAST_UPDATE))));
+        return result;
+    }
+
+    private static List<String> toList(Iterable<String> values) {
+        List<String> list = new ArrayList<>();
+        values.forEach(list::add);
+        return list;
+    }
+
+    private static final class CompetitionShell {
+        String id, name, creator, organizerName, country, description, address;
+        Double coordAlt, coordLong;
+        long lastUpdate, createdAt;
+        Long deletedAt;
+    }
+
+    private static final class StageShell {
+        String id, name, competitionId, creator;
+        long dateFrom, dateTo, lastUpdate, createdAt;
+        Long deletedAt;
+    }
+
+    private static final class EventShell {
+        String id, configurationId, discipline, name, stageId, creator, scoreCalculation;
+        long lastUpdate, createdAt;
+        Long deletedAt;
+    }
+}

@@ -9,10 +9,11 @@ import com.k9x.application.events.obdx.port.GetObdxEventCollectorPersistencePort
 import com.k9x.application.events.obdx.port.UpdateObdxScorePersistencePort;
 import com.k9x.application.events.obdx.port.payload.UpdateObdxScorePersistencePayload;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxScoreCommand;
-import com.k9x.application.events.obdx.use_case.port.GetEventPersistencePort;
+import com.k9x.application.competitions.CompetitionNavigator;
+import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.stages.exceptions.StageExpiredException;
-import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.application.utils.date.DateUtils;
+import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.aggregates.events.Event;
 import com.k9x.domain.aggregates.stages.Stage;
 
@@ -21,28 +22,28 @@ import java.util.List;
 
 public class UpdateObdxScoreServiceCase {
 
-    private final GetEventPersistencePort getEventPersistencePort;
-    private final GetStagePersistencePort getStagePersistencePort;
+    private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final GetObdxEventCollectorPersistencePort getObdxEventCollectorPersistencePort;
     private final GetObdxExerciseAllowedValuesPort getObdxExerciseAllowedValuesPort;
     private final UpdateObdxScorePersistencePort updateObdxScorePersistencePort;
 
-    public UpdateObdxScoreServiceCase(GetEventPersistencePort getEventPersistencePort,
-                                      GetStagePersistencePort getStagePersistencePort,
+    public UpdateObdxScoreServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                       GetObdxEventCollectorPersistencePort getObdxEventCollectorPersistencePort,
                                       GetObdxExerciseAllowedValuesPort getObdxExerciseAllowedValuesPort,
                                       UpdateObdxScorePersistencePort updateObdxScorePersistencePort) {
-        this.getEventPersistencePort = getEventPersistencePort;
-        this.getStagePersistencePort = getStagePersistencePort;
+        this.getCompetitionPersistencePort = getCompetitionPersistencePort;
         this.getObdxEventCollectorPersistencePort = getObdxEventCollectorPersistencePort;
         this.getObdxExerciseAllowedValuesPort = getObdxExerciseAllowedValuesPort;
         this.updateObdxScorePersistencePort = updateObdxScorePersistencePort;
     }
 
     public void updateScore(String eventId, UpdateObdxScoreCommand command, String userEmail) {
-        Event event = getEventPersistencePort.getEvent(eventId);
+        String competitionId = getCompetitionPersistencePort.competitionIdByEvent(eventId);
+        if (competitionId == null) throw new EventNotFoundException();
+        Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
+        Event event = CompetitionNavigator.findEvent(competition, eventId);
         assertEventValidations(event);
-        Stage stage = getStagePersistencePort.getStage(event.stageId());
+        Stage stage = CompetitionNavigator.findStageOfEvent(competition, eventId);
         assertStageNotExpired(stage);
         assertUserIsCollector(eventId, command.judgeId(), userEmail);
         assertScoreAllowed(command.exerciseId(), command.score());

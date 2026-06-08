@@ -5,7 +5,8 @@ import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
-import com.k9x.domain.aggregates.stages.StageStatus;
+import com.k9x.application.utils.date.DateUtils;
+import com.k9x.domain.aggregates.stages.Stage;
 import com.k9x.domain.exceptions.DisciplineConfigurationMalformedException;
 
 import java.io.IOException;
@@ -26,20 +27,29 @@ public class GetStageListServiceCase {
 
     public List<FetchStageListDTO> getStages() {
         Map<String, String> configNameById = buildConfigNameMap();
+        long now = DateUtils.nowUtcMillis();
         return getStageListPersistencePort.getStages().stream()
-                .map(stage -> new FetchStageListDTO(
-                        stage.id(), stage.name(), stage.description(), stage.country(),
-                        stage.address(), stage.coordAlt(), stage.coordLong(),
-                        stage.dateFrom(), stage.dateTo(),
-                        stage.organizer(),
-                        stage.events().stream()
-                                .map(e -> new FetchStageListEventDTO(
-                                        e.id(), e.name(), e.configurationId(),
-                                        configNameById.getOrDefault(e.configurationId(), e.configurationId()),
-                                        e.competitorCount(),
-                                        StageStatus.OPEN.name()))
-                                .toList(),
-                        StageStatus.OPEN.name()))
+                .map(stage -> {
+                    // Global list read-model: events (and their scores) are not hydrated here, so the
+                    // status is computed from the stage dates only. STARTED (driven by event scores) is
+                    // therefore not surfaced in this list; the detailed/root-aggregate views are exact.
+                    String status = new Stage(stage.id(), stage.name(), null, null,
+                            stage.dateFrom(), stage.dateTo(), 0L, 0L, null, List.of())
+                            .status(now).name();
+                    return new FetchStageListDTO(
+                            stage.id(), stage.name(), stage.description(), stage.country(),
+                            stage.address(), stage.coordAlt(), stage.coordLong(),
+                            stage.dateFrom(), stage.dateTo(),
+                            stage.organizer(),
+                            stage.events().stream()
+                                    .map(e -> new FetchStageListEventDTO(
+                                            e.id(), e.name(), e.configurationId(),
+                                            configNameById.getOrDefault(e.configurationId(), e.configurationId()),
+                                            e.competitorCount(),
+                                            status))
+                                    .toList(),
+                            status);
+                })
                 .toList();
     }
 

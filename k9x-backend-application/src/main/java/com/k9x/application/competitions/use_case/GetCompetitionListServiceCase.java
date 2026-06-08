@@ -2,7 +2,12 @@ package com.k9x.application.competitions.use_case;
 
 import com.k9x.application.competitions.port.GetCompetitionListPersistencePort;
 import com.k9x.application.competitions.use_case.dto.FetchCompetitionDTO;
-import com.k9x.domain.aggregates.competitions.CompetitionStatus;
+import com.k9x.application.competitions.use_case.dto.FetchEventDTO;
+import com.k9x.application.competitions.use_case.dto.FetchStageDTO;
+import com.k9x.application.utils.date.DateUtils;
+import com.k9x.domain.aggregates.competitions.Competition;
+import com.k9x.domain.aggregates.events.Event;
+import com.k9x.domain.aggregates.stages.Stage;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 import java.util.List;
@@ -20,9 +25,49 @@ public class GetCompetitionListServiceCase {
             throw new UnauthorizedResourceException();
         }
 
+        long now = DateUtils.nowUtcMillis();
         return getCompetitionListPersistencePort.getCompetitions(userId).stream()
-                .map(c -> new FetchCompetitionDTO(c.id(), c.name(), c.description(), c.country(), c.address(),
-                        CompetitionStatus.ACTIVE.name(), c.stages()))
+                .map(competition -> toDto(competition, now))
+                .toList();
+    }
+
+    private FetchCompetitionDTO toDto(Competition competition, long now) {
+        return new FetchCompetitionDTO(
+                competition.id(),
+                competition.name(),
+                competition.description(),
+                competition.country(),
+                competition.address(),
+                competition.status(now).name(),
+                toStageDtos(competition));
+    }
+
+    private List<FetchStageDTO> toStageDtos(Competition competition) {
+        if (competition.stages() == null) {
+            return List.of();
+        }
+        return competition.stages().stream()
+                .filter(stage -> stage.deletedAt() == null)
+                .map(this::toStageDto)
+                .toList();
+    }
+
+    private FetchStageDTO toStageDto(Stage stage) {
+        return new FetchStageDTO(
+                stage.id(),
+                stage.name(),
+                stage.dateFrom(),
+                stage.dateTo(),
+                toEventDtos(stage));
+    }
+
+    private List<FetchEventDTO> toEventDtos(Stage stage) {
+        if (stage.events() == null) {
+            return List.of();
+        }
+        return stage.events().stream()
+                .filter(event -> event.deletedAt() == null)
+                .map(event -> new FetchEventDTO(event.id(), event.name(), event.discipline()))
                 .toList();
     }
 }

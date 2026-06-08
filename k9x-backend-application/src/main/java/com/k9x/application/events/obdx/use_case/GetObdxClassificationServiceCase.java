@@ -1,6 +1,5 @@
 package com.k9x.application.events.obdx.use_case;
 
-import com.k9x.application.events.obdx.port.GetClassificationPersistencePort;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.dto.*;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
@@ -8,6 +7,10 @@ import com.k9x.domain.aggregates.disciplines.Discipline;
 import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.aggregates.events.ClassificationCompetitorStatus;
 import com.k9x.domain.aggregates.events.Event;
+import com.k9x.domain.aggregates.events.EventCompetitor;
+import com.k9x.domain.aggregates.events.EventExercise;
+import com.k9x.domain.aggregates.events.EventJudge;
+import com.k9x.domain.aggregates.events.Score;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,15 +20,12 @@ public class GetObdxClassificationServiceCase {
 
     private final GetObdxClassificationConfigPort getObdxClassificationConfigPort;
     private final ClassificationCacheManagerPort classificationCacheManagerPort;
-    private final GetClassificationPersistencePort getClassificationPersistencePort;
 
     public GetObdxClassificationServiceCase(
             GetObdxClassificationConfigPort getObdxClassificationConfigPort,
-            ClassificationCacheManagerPort classificationCacheManagerPort,
-            GetClassificationPersistencePort getClassificationPersistencePort) {
+            ClassificationCacheManagerPort classificationCacheManagerPort) {
         this.getObdxClassificationConfigPort = getObdxClassificationConfigPort;
         this.classificationCacheManagerPort = classificationCacheManagerPort;
-        this.getClassificationPersistencePort = getClassificationPersistencePort;
     }
 
     public Discipline discipline() {
@@ -41,11 +41,43 @@ public class GetObdxClassificationServiceCase {
             return cached;
         }
 
-        List<FetchClassificationRawRowDTO> rawRows = getClassificationPersistencePort.getClassification(eventId);
+        List<FetchClassificationRawRowDTO> rawRows = buildRawRows(event);
 
         FetchObdxClassificationDTO dto = aggregateProjection(event, config, rawRows);
         classificationCacheManagerPort.put(eventId, dto);
         return dto;
+    }
+
+    private List<FetchClassificationRawRowDTO> buildRawRows(Event event) {
+        List<EventCompetitor> competitors = event.competitors() == null ? List.of() : event.competitors();
+        List<EventExercise> exercises = event.exercises() == null ? List.of() : event.exercises();
+        List<EventJudge> judges = event.judges() == null ? List.of() : event.judges();
+        List<Score> scores = event.scores() == null ? List.of() : event.scores();
+
+        List<EventExercise> sortedExercises = new ArrayList<>(exercises);
+        sortedExercises.sort(Comparator.comparing(
+                e -> e.position() == null ? Short.MAX_VALUE : e.position()));
+
+        List<FetchClassificationRawRowDTO> rows = new ArrayList<>();
+        for (EventCompetitor c : competitors) {
+            for (EventExercise ex : sortedExercises) {
+                for (EventJudge jd : judges) {
+                    Score s = scores.stream()
+                            .filter(sc -> Objects.equals(sc.exerciseId(), ex.exerciseId())
+                                    && Objects.equals(sc.judgeId(), jd.judgeId())
+                                    && Objects.equals(sc.dogId(), c.dogId()))
+                            .findFirst().orElse(null);
+                    rows.add(new FetchClassificationRawRowDTO(
+                            c.dogId(), c.dogName(), c.owner(), c.team(), c.country(),
+                            ex.exerciseId(), ex.position() == null ? (short) 0 : ex.position(),
+                            ex.tags() == null ? null : ex.tags().toArray(new String[0]),
+                            jd.judgeId(), jd.judgeName(),
+                            s == null ? null : s.score(),
+                            s == null ? null : s.lastUpdate()));
+                }
+            }
+        }
+        return rows;
     }
 
     private FetchObdxClassificationDTO aggregateProjection(Event event,

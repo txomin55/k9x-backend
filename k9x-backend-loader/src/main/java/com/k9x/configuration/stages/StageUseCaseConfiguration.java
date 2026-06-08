@@ -1,7 +1,7 @@
 package com.k9x.configuration.stages;
 
+import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
-import com.k9x.application.stages.port.GetStageDetailPersistencePort;
 import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.GetStageListServiceCase;
 import com.k9x.application.stages.use_case.GetStageServiceCase;
@@ -18,8 +18,8 @@ public class StageUseCaseConfiguration {
     }
 
     @Bean
-    public GetStageServiceCase getStageServiceCase(GetStageDetailPersistencePort getStageDetailPersistencePort,
+    public GetStageServiceCase getStageServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                    GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
-        return new GetStageServiceCase(getStageDetailPersistencePort, getObdxFederationsConfigurationsPort);
+        return new GetStageServiceCase(getCompetitionPersistencePort, getObdxFederationsConfigurationsPort);
     }
 }

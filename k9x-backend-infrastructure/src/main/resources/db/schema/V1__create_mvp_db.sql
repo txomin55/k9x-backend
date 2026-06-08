@@ -93,11 +93,12 @@ CREATE TABLE k9x.events
 CREATE SCHEMA obdx;
 CREATE TABLE obdx.event_competitors
 (
-    event_id    VARCHAR(255) NOT NULL,
-    dog_id      VARCHAR(255) NOT NULL,
-    position    SMALLINT,
-    verified    BOOLEAN,
-    last_update BIGINT       NOT NULL,
+    event_id      VARCHAR(255) NOT NULL,
+    dog_id        VARCHAR(255) NOT NULL,
+    position      SMALLINT,
+    verified      BOOLEAN,
+    last_update   BIGINT       NOT NULL,
+    not_competing BOOLEAN      NOT NULL DEFAULT FALSE,
     CONSTRAINT obdx_event_competitors_pkey PRIMARY KEY (event_id, dog_id),
     CONSTRAINT obdx_event_competitors_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
     CONSTRAINT obdx_event_competitors_dogs_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)

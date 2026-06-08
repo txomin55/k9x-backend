@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
@@ -29,6 +31,11 @@ class CreateStageServiceCaseTest {
     @BeforeEach
     void setUp() {
         serviceCase = new CreateStageServiceCase(getCompetitionPersistencePort, createStagePersistencePort);
+    }
+
+    private Competition competition(String creator, Long deletedAt) {
+        return new Competition("comp-1", "World Cup", creator, "Org", "ES", "desc", "addr",
+                null, null, 0L, 0L, deletedAt, List.of());
     }
 
     @Test
@@ -51,8 +58,7 @@ class CreateStageServiceCaseTest {
 
     @Test
     void throws_exception_when_competition_is_deleted() {
-        Competition deleted = new Competition("comp-1", "World Cup", "user-1", 0L, 0L, 1700000000000L);
-        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(deleted);
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition("user-1", 1700000000000L));
 
         assertThatThrownBy(() -> serviceCase.createStage("stage-1", "Stage 1", "comp-1", 1L, 2L, "user-1", true))
                 .isInstanceOf(CompetitionAlreadyDeletedException.class);
@@ -62,8 +68,7 @@ class CreateStageServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_competition_creator() {
-        Competition competition = new Competition("comp-1", "World Cup", "other-user", 0L, 0L, null);
-        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition("other-user", null));
 
         assertThatThrownBy(() -> serviceCase.createStage("stage-1", "Stage 1", "comp-1", 1L, 2L, "user-1", true))
                 .isInstanceOf(UnauthorizedResourceException.class);
@@ -73,8 +78,7 @@ class CreateStageServiceCaseTest {
 
     @Test
     void creates_stage_when_all_conditions_are_met() {
-        Competition competition = new Competition("comp-1", "World Cup", "user-1", 0L, 0L, null);
-        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition("user-1", null));
 
         serviceCase.createStage("stage-1", "Stage 1", "comp-1", 1L, 2L, "user-1", true);
 

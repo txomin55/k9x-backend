@@ -18,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.mockito.ArgumentCaptor;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
@@ -41,6 +43,11 @@ class UpdateCompetitionServiceCaseTest {
         serviceCase = new UpdateCompetitionServiceCase(getCompetitionPersistencePort, geoCoordinatesPort, updateCompetitionPersistencePort);
     }
 
+    private Competition competition(String creator, Long deletedAt) {
+        return new Competition("comp-1", "World Cup", creator, "Org", "ES", "desc", "addr",
+                null, null, 0L, 0L, deletedAt, List.of());
+    }
+
     @Test
     void throws_exception_when_user_is_not_organizer() {
         assertThatThrownBy(() -> serviceCase.updateCompetition("comp-1", new UpdateCompetitionCommand("Name", "Desc", "ES", "Address"), "user-1", false))
@@ -61,7 +68,7 @@ class UpdateCompetitionServiceCaseTest {
 
     @Test
     void throws_exception_when_competition_is_deleted() {
-        Competition competition = new Competition("comp-1", "World Cup", "user-1", 0L, 0L, 1700000000000L);
+        Competition competition = competition("user-1", 1700000000000L);
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
 
         assertThatThrownBy(() -> serviceCase.updateCompetition("comp-1", new UpdateCompetitionCommand("Name", "Desc", "ES", "Address"), "user-1", true))
@@ -72,7 +79,7 @@ class UpdateCompetitionServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_creator() {
-        Competition competition = new Competition("comp-1", "World Cup", "other-user", 0L, 0L, null);
+        Competition competition = competition("other-user", null);
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
 
         assertThatThrownBy(() -> serviceCase.updateCompetition("comp-1", new UpdateCompetitionCommand("Name", "Desc", "ES", "Address"), "user-1", true))
@@ -83,7 +90,7 @@ class UpdateCompetitionServiceCaseTest {
 
     @Test
     void updates_competition_when_all_validations_pass() {
-        Competition competition = new Competition("comp-1", "World Cup", "user-1", 0L, 0L, null);
+        Competition competition = competition("user-1", null);
         Coordinates coordinates = new Coordinates(40.4168, -3.7038);
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
         when(geoCoordinatesPort.getCoordinates("Address")).thenReturn(coordinates);

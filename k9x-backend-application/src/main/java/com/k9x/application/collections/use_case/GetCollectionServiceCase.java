@@ -5,14 +5,15 @@ import com.k9x.application.collections.obdx.use_case.GetObdxCollectionServiceCas
 import com.k9x.application.collections.obdx.use_case.dto.FetchObdxCollectionDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionDetailDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
+import com.k9x.application.competitions.CompetitionNavigator;
+import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxConfigurationAllowedValuesPort;
 import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.exceptions.ObdxUserNotCollectorException;
-import com.k9x.application.events.obdx.use_case.port.GetEventPersistencePort;
 import com.k9x.application.stages.exceptions.StageExpiredException;
-import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.application.utils.date.DateUtils;
+import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.aggregates.disciplines.Discipline;
 import com.k9x.domain.aggregates.events.Event;
 import com.k9x.domain.aggregates.stages.Stage;
@@ -22,29 +23,29 @@ import java.util.Locale;
 
 public class GetCollectionServiceCase {
 
-    private final GetEventPersistencePort getEventPersistencePort;
-    private final GetStagePersistencePort getStagePersistencePort;
+    private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final GetObdxCollectionEventJudgesPersistencePort getObdxCollectionEventJudgesPersistencePort;
     private final GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort;
     private final GetObdxCollectionServiceCase getObdxCollectionServiceCase;
 
     public GetCollectionServiceCase(
-            GetEventPersistencePort getEventPersistencePort,
-            GetStagePersistencePort getStagePersistencePort,
+            GetCompetitionPersistencePort getCompetitionPersistencePort,
             GetObdxCollectionEventJudgesPersistencePort getObdxCollectionEventJudgesPersistencePort,
             GetObdxConfigurationAllowedValuesPort getObdxConfigurationAllowedValuesPort,
             GetObdxCollectionServiceCase getObdxCollectionServiceCase) {
-        this.getEventPersistencePort = getEventPersistencePort;
-        this.getStagePersistencePort = getStagePersistencePort;
+        this.getCompetitionPersistencePort = getCompetitionPersistencePort;
         this.getObdxCollectionEventJudgesPersistencePort = getObdxCollectionEventJudgesPersistencePort;
         this.getObdxConfigurationAllowedValuesPort = getObdxConfigurationAllowedValuesPort;
         this.getObdxCollectionServiceCase = getObdxCollectionServiceCase;
     }
 
     public FetchCollectionDetailDTO getCollection(String eventId, String userId) {
-        Event event = getEventPersistencePort.getEvent(eventId);
+        String competitionId = getCompetitionPersistencePort.competitionIdByEvent(eventId);
+        if (competitionId == null) throw new EventNotFoundException();
+        Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
+        Event event = CompetitionNavigator.findEvent(competition, eventId);
         assertEventValidations(event);
-        Stage stage = getStagePersistencePort.getStage(event.stageId());
+        Stage stage = CompetitionNavigator.findStageOfEvent(competition, eventId);
         assertStageNotExpired(stage);
 
         List<FetchCollectionJudgeWithCollectorDTO> allJudges =

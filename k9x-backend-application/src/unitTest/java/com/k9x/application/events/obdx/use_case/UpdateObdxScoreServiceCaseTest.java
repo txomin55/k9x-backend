@@ -1,5 +1,6 @@
 package com.k9x.application.events.obdx.use_case;
 
+import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxExerciseAllowedValuesPort;
 import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
@@ -8,9 +9,8 @@ import com.k9x.application.events.obdx.exceptions.ObdxUserNotCollectorException;
 import com.k9x.application.events.obdx.port.GetObdxEventCollectorPersistencePort;
 import com.k9x.application.events.obdx.port.UpdateObdxScorePersistencePort;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxScoreCommand;
-import com.k9x.application.events.obdx.use_case.port.GetEventPersistencePort;
 import com.k9x.application.stages.exceptions.StageExpiredException;
-import com.k9x.application.stages.port.GetStagePersistencePort;
+import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.aggregates.events.Event;
 import com.k9x.domain.aggregates.stages.Stage;
@@ -34,9 +34,7 @@ class UpdateObdxScoreServiceCaseTest {
     private static final UpdateObdxScoreCommand COMMAND = new UpdateObdxScoreCommand(
             "judge-1", "OBDX_FCI_GRADE_3.1_V0", "dog-1", new BigDecimal("7.5"));
     @Mock
-    private GetEventPersistencePort getEventPersistencePort;
-    @Mock
-    private GetStagePersistencePort getStagePersistencePort;
+    private GetCompetitionPersistencePort getCompetitionPersistencePort;
     @Mock
     private GetObdxEventCollectorPersistencePort getObdxEventCollectorPersistencePort;
     @Mock
@@ -47,39 +45,50 @@ class UpdateObdxScoreServiceCaseTest {
 
     @BeforeEach
     void setUp() {
-        serviceCase = new UpdateObdxScoreServiceCase(getEventPersistencePort, getStagePersistencePort,
+        serviceCase = new UpdateObdxScoreServiceCase(getCompetitionPersistencePort,
                 getObdxEventCollectorPersistencePort, getObdxExerciseAllowedValuesPort, updateObdxScorePersistencePort);
+    }
+
+    private Event event(Long deletedAt) {
+        return new Event("event-1", null, null, "Event 1", "stage-1", "user-1", 0L, 0L, deletedAt,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+    }
+
+    private Competition competition(Event event, long dateTo) {
+        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", 0L, dateTo, 0L, 0L, null, List.of(event));
+        return new Competition("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
+                0L, 0L, null, List.of(stage));
     }
 
     @Test
     void throws_exception_when_event_not_found() {
-        when(getEventPersistencePort.getEvent("event-1")).thenReturn(null);
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn(null);
 
         assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
                 .isInstanceOf(EventNotFoundException.class);
 
-        verifyNoInteractions(getStagePersistencePort, getObdxEventCollectorPersistencePort,
+        verifyNoInteractions(getObdxEventCollectorPersistencePort,
                 getObdxExerciseAllowedValuesPort, updateObdxScorePersistencePort);
     }
 
     @Test
     void throws_exception_when_event_is_deleted() {
-        Event event = new Event("event-1", null, null, "Event 1", "stage-1", "user-1", 0L, 0L, 1700000000000L, ObdxAvgMethod.MID_AVG);
-        when(getEventPersistencePort.getEvent("event-1")).thenReturn(event);
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competition(event(1700000000000L), Long.MAX_VALUE));
 
         assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
                 .isInstanceOf(EventAlreadyDeletedException.class);
 
-        verifyNoInteractions(getStagePersistencePort, getObdxEventCollectorPersistencePort,
+        verifyNoInteractions(getObdxEventCollectorPersistencePort,
                 getObdxExerciseAllowedValuesPort, updateObdxScorePersistencePort);
     }
 
     @Test
     void throws_exception_when_stage_is_expired() {
-        Event event = new Event("event-1", null, null, "Event 1", "stage-1", "user-1", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
-        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", 1L, 0L, 0L, null);
-        when(getEventPersistencePort.getEvent("event-1")).thenReturn(event);
-        when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competition(event(null), 1L));
 
         assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
                 .isInstanceOf(StageExpiredException.class);
@@ -134,9 +143,8 @@ class UpdateObdxScoreServiceCaseTest {
     }
 
     private void givenActiveEventAndStage() {
-        Event event = new Event("event-1", null, null, "Event 1", "stage-1", "user-1", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
-        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, null);
-        when(getEventPersistencePort.getEvent("event-1")).thenReturn(event);
-        when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competition(event(null), Long.MAX_VALUE));
     }
 }

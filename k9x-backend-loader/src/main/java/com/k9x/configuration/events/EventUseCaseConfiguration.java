@@ -1,13 +1,11 @@
 package com.k9x.configuration.events;
 
-import com.k9x.application.events.obdx.port.GetClassificationPersistencePort;
+import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
-import com.k9x.application.events.obdx.use_case.port.GetEventPersistencePort;
 import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
 import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
-import com.k9x.application.stages.port.GetStagePersistencePort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,23 +15,19 @@ public class EventUseCaseConfiguration {
     @Bean
     public GetObdxClassificationServiceCase getObdxClassificationServiceCase(
             GetObdxClassificationConfigPort getObdxClassificationConfigPort,
-            ClassificationCacheManagerPort classificationCacheManagerPort,
-            GetClassificationPersistencePort getClassificationPersistencePort) {
+            ClassificationCacheManagerPort classificationCacheManagerPort) {
         return new GetObdxClassificationServiceCase(
                 getObdxClassificationConfigPort,
-                classificationCacheManagerPort,
-                getClassificationPersistencePort);
+                classificationCacheManagerPort);
     }
 
     @Bean
     public GetEventClassificationServiceCase getClassificationServiceCase(
-            GetEventPersistencePort getEventPersistencePort,
-            GetStagePersistencePort getStagePersistencePort,
+            GetCompetitionPersistencePort getCompetitionPersistencePort,
             EventClassificationCacheManagerPort eventClassificationCacheManagerPort,
             GetObdxClassificationServiceCase getObdxClassificationServiceCase) {
         return new GetEventClassificationServiceCase(
-                getEventPersistencePort,
-                getStagePersistencePort,
+                getCompetitionPersistencePort,
                 eventClassificationCacheManagerPort,
                 getObdxClassificationServiceCase);
     }

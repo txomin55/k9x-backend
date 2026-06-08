@@ -21,7 +21,7 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
 
     @Override
     public ResponseEntity<List<DogSummaryResponseDTO>> getDogsSecured(Boolean onlyOwned) {
-        List<DogDTO> dogs = getDogListService.getDogs(userDetails.getEmail(), userDetails.isOrganizer(), onlyOwned);
+        List<DogDTO> dogs = getDogListService.getDogs(userDetails.getEmail(), userDetails.isOrganizer(), onlyOwned != null ? onlyOwned : false);
         List<DogSummaryResponseDTO> mapped = dogs.stream()
                 .map(dog ->
                         new DogSummaryResponseDTO(

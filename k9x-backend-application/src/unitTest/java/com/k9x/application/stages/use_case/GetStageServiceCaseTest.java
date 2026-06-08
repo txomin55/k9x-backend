@@ -1,5 +1,6 @@
 package com.k9x.application.stages.use_case;
 
+import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
@@ -7,9 +8,10 @@ import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
 import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.exceptions.StageHasNoEventsException;
 import com.k9x.application.stages.exceptions.StageNotFoundException;
-import com.k9x.application.stages.port.GetStageDetailPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailDTO;
-import com.k9x.application.stages.use_case.dto.FetchStageDetailEventDTO;
+import com.k9x.domain.aggregates.competitions.Competition;
+import com.k9x.domain.aggregates.events.Event;
+import com.k9x.domain.aggregates.stages.Stage;
 import com.k9x.domain.exceptions.DisciplineConfigurationMalformedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +31,7 @@ import static org.mockito.Mockito.when;
 class GetStageServiceCaseTest {
 
     @Mock
-    private GetStageDetailPersistencePort getStageDetailPersistencePort;
+    private GetCompetitionPersistencePort getCompetitionPersistencePort;
 
     @Mock
     private GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
@@ -38,12 +40,22 @@ class GetStageServiceCaseTest {
 
     @BeforeEach
     void setUp() {
-        serviceCase = new GetStageServiceCase(getStageDetailPersistencePort, getObdxFederationsConfigurationsPort);
+        serviceCase = new GetStageServiceCase(getCompetitionPersistencePort, getObdxFederationsConfigurationsPort);
+    }
+
+    private Event event() {
+        return new Event("evt-1", "obdx-1", "obdx", "Open", "s-1", "user-1",
+                0L, 0L, null, null, List.of(), List.of(), List.of(), List.of());
+    }
+
+    private Competition competition(Stage stage) {
+        return new Competition("comp-1", "World Cup", "user-1", "Organizer", "ES", "desc", "Calle Mayor 1",
+                null, null, 0L, 0L, null, List.of(stage));
     }
 
     @Test
     void throws_exception_when_stage_not_found() {
-        when(getStageDetailPersistencePort.getStage("s-1")).thenReturn(null);
+        when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn(null);
 
         assertThatThrownBy(() -> serviceCase.getStage("s-1"))
                 .isInstanceOf(StageNotFoundException.class);
@@ -53,9 +65,10 @@ class GetStageServiceCaseTest {
 
     @Test
     void throws_exception_when_stage_is_deleted() {
-        FetchStageDetailDTO deleted = new FetchStageDetailDTO("s-1", "Stage A", 1000L, 2000L,
-                "Calle Mayor 1", "Organizer", 9999L, List.of());
-        when(getStageDetailPersistencePort.getStage("s-1")).thenReturn(deleted);
+        Stage deleted = new Stage("s-1", "Stage A", "comp-1", "user-1",
+                1000L, 2000L, 0L, 0L, 9999L, List.of(event()));
+        when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(deleted));
 
         assertThatThrownBy(() -> serviceCase.getStage("s-1"))
                 .isInstanceOf(StageAlreadyDeletedException.class);
@@ -65,9 +78,10 @@ class GetStageServiceCaseTest {
 
     @Test
     void throws_exception_when_stage_has_no_events() {
-        FetchStageDetailDTO noEvents = new FetchStageDetailDTO("s-1", "Stage A", 1000L, 2000L,
-                "Calle Mayor 1", "Organizer", null, List.of());
-        when(getStageDetailPersistencePort.getStage("s-1")).thenReturn(noEvents);
+        Stage noEvents = new Stage("s-1", "Stage A", "comp-1", "user-1",
+                1000L, 2000L, 0L, 0L, null, List.of());
+        when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(noEvents));
 
         assertThatThrownBy(() -> serviceCase.getStage("s-1"))
                 .isInstanceOf(StageHasNoEventsException.class);
@@ -77,16 +91,15 @@ class GetStageServiceCaseTest {
 
     @Test
     void returns_stage_with_resolved_configuration_names() throws IOException {
-        FetchStageDetailEventDTO event = new FetchStageDetailEventDTO("evt-1", "Open", "obdx", "obdx-1",
-                null, List.of());
-        FetchStageDetailDTO stage = new FetchStageDetailDTO("s-1", "Stage A", 1000L, 2000L,
-                "Calle Mayor 1", "Organizer", null, List.of(event));
+        Stage stage = new Stage("s-1", "Stage A", "comp-1", "user-1",
+                1000L, 2000L, 0L, 0L, null, List.of(event()));
 
         ConfigurationDTO config = new ConfigurationDTO("obdx-1", "Obedience", List.of());
         ConfigurationsDTO federation = new ConfigurationsDTO(
                 new FederationInfoDTO("FED", "Federation", "ES"), List.of(config));
 
-        when(getStageDetailPersistencePort.getStage("s-1")).thenReturn(stage);
+        when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(stage));
         when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of(federation));
 
         FetchStageDetailDTO result = serviceCase.getStage("s-1");
@@ -99,12 +112,11 @@ class GetStageServiceCaseTest {
 
     @Test
     void throws_when_configurations_cannot_be_loaded() throws IOException {
-        FetchStageDetailEventDTO event = new FetchStageDetailEventDTO("evt-1", "Open", "obdx", "obdx-1",
-                null, List.of());
-        FetchStageDetailDTO stage = new FetchStageDetailDTO("s-1", "Stage A", 1000L, 2000L,
-                "Calle Mayor 1", "Organizer", null, List.of(event));
+        Stage stage = new Stage("s-1", "Stage A", "comp-1", "user-1",
+                1000L, 2000L, 0L, 0L, null, List.of(event()));
 
-        when(getStageDetailPersistencePort.getStage("s-1")).thenReturn(stage);
+        when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(stage));
         when(getObdxFederationsConfigurationsPort.getConfigurations()).thenThrow(new IOException());
 
         assertThatThrownBy(() -> serviceCase.getStage("s-1"))

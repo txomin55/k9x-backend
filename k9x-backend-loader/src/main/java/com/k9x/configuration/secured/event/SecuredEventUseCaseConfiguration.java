@@ -1,18 +1,16 @@
 package com.k9x.configuration.secured.event;
 
+import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxExerciseAllowedValuesPort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.events.obdx.port.*;
 import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxScoreServiceCase;
 import com.k9x.application.events.obdx.use_case.port.CreateObdxEventPersistencePort;
-import com.k9x.application.events.obdx.use_case.port.GetEventPersistencePort;
-import com.k9x.application.events.obdx.use_case.port.GetObdxEventDataPersistencePort;
 import com.k9x.application.events.use_case.CreateEventServiceCase;
 import com.k9x.application.events.use_case.DeleteEventServiceCase;
 import com.k9x.application.events.use_case.EnrollEventServiceCase;
 import com.k9x.application.events.use_case.GetEventServiceCase;
-import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,50 +19,44 @@ import org.springframework.context.annotation.Configuration;
 public class SecuredEventUseCaseConfiguration {
 
     @Bean
-    public CreateEventServiceCase createEventServiceCase(GetStagePersistencePort getStagePersistencePort,
+    public CreateEventServiceCase createEventServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                          CreateObdxEventPersistencePort createObdxEventPersistencePort) {
-        return new CreateEventServiceCase(getStagePersistencePort, createObdxEventPersistencePort);
+        return new CreateEventServiceCase(getCompetitionPersistencePort, createObdxEventPersistencePort);
     }
 
     @Bean
-    public DeleteEventServiceCase deleteEventServiceCase(GetEventPersistencePort getEventPersistencePort,
-                                                         GetStagePersistencePort getStagePersistencePort,
+    public DeleteEventServiceCase deleteEventServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                          DeleteObdxEventPersistencePort deleteObdxEventPersistencePort) {
-        return new DeleteEventServiceCase(getEventPersistencePort, getStagePersistencePort, deleteObdxEventPersistencePort);
+        return new DeleteEventServiceCase(getCompetitionPersistencePort, deleteObdxEventPersistencePort);
     }
 
     @Bean
-    public UpdateObdxEventServiceCase updateEventServiceCase(GetEventPersistencePort getEventPersistencePort,
+    public UpdateObdxEventServiceCase updateEventServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                              UpdateObdxEventPersistencePort updateObdxEventPersistencePort,
                                                              GetObdxClassificationConfigPort getObdxClassificationConfigPort,
                                                              GetUserInfoPersistencePort getUserInfoPersistencePort) {
-        return new UpdateObdxEventServiceCase(getEventPersistencePort, updateObdxEventPersistencePort,
+        return new UpdateObdxEventServiceCase(getCompetitionPersistencePort, updateObdxEventPersistencePort,
                 getObdxClassificationConfigPort, getUserInfoPersistencePort);
     }
 
     @Bean
-    public EnrollEventServiceCase enrollEventServiceCase(GetEventPersistencePort getEventPersistencePort,
-                                                         GetStagePersistencePort getStagePersistencePort,
+    public EnrollEventServiceCase enrollEventServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                          EnrollObdxEventPersistencePort enrollObdxEventPersistencePort) {
-        return new EnrollEventServiceCase(getEventPersistencePort, getStagePersistencePort, enrollObdxEventPersistencePort);
+        return new EnrollEventServiceCase(getCompetitionPersistencePort, enrollObdxEventPersistencePort);
     }
 
     @Bean
-    public GetEventServiceCase getEventServiceCase(GetEventPersistencePort getEventPersistencePort,
-                                                   GetStagePersistencePort getStagePersistencePort,
-                                                   GetObdxEventDataPersistencePort getObdxEventDataPersistencePort,
+    public GetEventServiceCase getEventServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                    GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
-        return new GetEventServiceCase(getEventPersistencePort, getStagePersistencePort,
-                getObdxEventDataPersistencePort, getObdxFederationsConfigurationsPort);
+        return new GetEventServiceCase(getCompetitionPersistencePort, getObdxFederationsConfigurationsPort);
     }
 
     @Bean
-    public UpdateObdxScoreServiceCase updateScoreServiceCase(GetEventPersistencePort getEventPersistencePort,
-                                                             GetStagePersistencePort getStagePersistencePort,
+    public UpdateObdxScoreServiceCase updateScoreServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                              GetObdxEventCollectorPersistencePort getObdxEventCollectorPersistencePort,
                                                              GetObdxExerciseAllowedValuesPort getObdxExerciseAllowedValuesPort,
                                                              UpdateObdxScorePersistencePort updateObdxScorePersistencePort) {
-        return new UpdateObdxScoreServiceCase(getEventPersistencePort, getStagePersistencePort,
+        return new UpdateObdxScoreServiceCase(getCompetitionPersistencePort,
                 getObdxEventCollectorPersistencePort, getObdxExerciseAllowedValuesPort, updateObdxScorePersistencePort);
     }
 }

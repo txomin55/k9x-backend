@@ -1,11 +1,13 @@
 package com.k9x.application.competitions.use_case;
 
 import com.k9x.application.competitions.exceptions.CompetitionAlreadyDeletedException;
+import com.k9x.application.competitions.exceptions.CompetitionCannotBeDeletedException;
 import com.k9x.application.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.application.competitions.port.DeleteCompetitionPersistencePort;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.aggregates.competitions.Competition;
+import com.k9x.domain.aggregates.competitions.CompetitionStatus;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 public class DeleteCompetitionServiceCase {
@@ -23,6 +25,7 @@ public class DeleteCompetitionServiceCase {
         assertOrganizer(organizer);
         Competition competition = getCompetitionPersistencePort.getCompetition(id);
         assertCompetitionValidations(competition, userId);
+        assertCompetitionCanBeDeleted(competition);
         deleteCompetitionPersistencePort.deleteCompetition(id, DateUtils.nowUtcMillis());
     }
 
@@ -41,6 +44,13 @@ public class DeleteCompetitionServiceCase {
         }
         if (!competition.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
+        }
+    }
+
+    private void assertCompetitionCanBeDeleted(Competition competition) {
+        CompetitionStatus status = competition.status(DateUtils.nowUtcMillis());
+        if (status == CompetitionStatus.STARTED || status == CompetitionStatus.FINISHED) {
+            throw new CompetitionCannotBeDeletedException();
         }
     }
 }

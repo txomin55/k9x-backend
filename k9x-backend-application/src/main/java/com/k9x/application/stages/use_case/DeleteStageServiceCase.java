@@ -1,36 +1,40 @@
 package com.k9x.application.stages.use_case;
 
+import com.k9x.application.competitions.CompetitionNavigator;
 import com.k9x.application.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
+import com.k9x.application.stages.exceptions.StageCannotBeDeletedException;
 import com.k9x.application.stages.exceptions.StageNotFoundException;
 import com.k9x.application.stages.port.DeleteStagePersistencePort;
-import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.domain.aggregates.stages.StageStatus;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 public class DeleteStageServiceCase {
 
-    private final GetStagePersistencePort getStagePersistencePort;
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final DeleteStagePersistencePort deleteStagePersistencePort;
 
-    public DeleteStageServiceCase(GetStagePersistencePort getStagePersistencePort,
-                                  GetCompetitionPersistencePort getCompetitionPersistencePort,
+    public DeleteStageServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                   DeleteStagePersistencePort deleteStagePersistencePort) {
-        this.getStagePersistencePort = getStagePersistencePort;
         this.getCompetitionPersistencePort = getCompetitionPersistencePort;
         this.deleteStagePersistencePort = deleteStagePersistencePort;
     }
 
     public void deleteStage(String stageId, String userId, boolean organizer) {
         assertOrganizer(organizer);
-        Stage stage = getStagePersistencePort.getStage(stageId);
+        String competitionId = getCompetitionPersistencePort.competitionIdByStage(stageId);
+        if (competitionId == null) {
+            throw new StageNotFoundException();
+        }
+        Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
+        Stage stage = CompetitionNavigator.findStage(competition, stageId);
         assertStageValidations(stage, userId);
-        Competition competition = getCompetitionPersistencePort.getCompetition(stage.competitionId());
         assertCompetitionValidations(competition, userId);
+        assertStageIsDeletable(stage);
         deleteStagePersistencePort.deleteStage(stageId, DateUtils.nowUtcMillis());
     }
 
@@ -58,6 +62,13 @@ public class DeleteStageServiceCase {
         }
         if (!competition.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
+        }
+    }
+
+    private void assertStageIsDeletable(Stage stage) {
+        StageStatus status = stage.status(DateUtils.nowUtcMillis());
+        if (status == StageStatus.STARTED || status == StageStatus.FINISHED) {
+            throw new StageCannotBeDeletedException();
         }
     }
 }

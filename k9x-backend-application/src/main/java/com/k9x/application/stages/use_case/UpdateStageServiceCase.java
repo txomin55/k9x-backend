@@ -1,12 +1,12 @@
 package com.k9x.application.stages.use_case;
 
+import com.k9x.application.competitions.CompetitionNavigator;
 import com.k9x.application.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.stages.port.payload.UpdateStagePersistencePayload;
 import com.k9x.application.stages.use_case.command.UpdateStageCommand;
 import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.exceptions.StageNotFoundException;
-import com.k9x.application.stages.port.GetStagePersistencePort;
 import com.k9x.application.stages.port.UpdateStagePersistencePort;
 import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.aggregates.stages.Stage;
@@ -14,23 +14,24 @@ import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 public class UpdateStageServiceCase {
 
-    private final GetStagePersistencePort getStagePersistencePort;
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final UpdateStagePersistencePort updateStagePersistencePort;
 
-    public UpdateStageServiceCase(GetStagePersistencePort getStagePersistencePort,
-                                  GetCompetitionPersistencePort getCompetitionPersistencePort,
+    public UpdateStageServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                   UpdateStagePersistencePort updateStagePersistencePort) {
-        this.getStagePersistencePort = getStagePersistencePort;
         this.getCompetitionPersistencePort = getCompetitionPersistencePort;
         this.updateStagePersistencePort = updateStagePersistencePort;
     }
 
     public void updateStage(String stageId, UpdateStageCommand command, String userId, boolean organizer) {
         assertOrganizer(organizer);
-        Stage stage = getStagePersistencePort.getStage(stageId);
+        String competitionId = getCompetitionPersistencePort.competitionIdByStage(stageId);
+        if (competitionId == null) {
+            throw new StageNotFoundException();
+        }
+        Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
+        Stage stage = CompetitionNavigator.findStage(competition, stageId);
         assertStageValidations(stage, userId);
-        Competition competition = getCompetitionPersistencePort.getCompetition(stage.competitionId());
         assertCompetitionValidations(competition, userId);
         updateStagePersistencePort.updateStage(stageId, UpdateStagePersistencePayload.from(command));
     }

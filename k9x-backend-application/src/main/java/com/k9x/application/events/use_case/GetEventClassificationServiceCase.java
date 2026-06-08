@@ -1,14 +1,15 @@
 package com.k9x.application.events.use_case;
 
+import com.k9x.application.competitions.CompetitionNavigator;
+import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.application.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
-import com.k9x.application.events.obdx.use_case.port.GetEventPersistencePort;
 import com.k9x.application.events.use_case.dto.EventClassificationContextDTO;
 import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
-import com.k9x.application.stages.port.GetStagePersistencePort;
+import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.aggregates.disciplines.Discipline;
 import com.k9x.domain.aggregates.events.Event;
 import com.k9x.domain.aggregates.stages.Stage;
@@ -19,18 +20,15 @@ public class GetEventClassificationServiceCase {
 
     private static final int EVENT_CONTEXT_TTL_SECONDS = 30;
 
-    private final GetEventPersistencePort getEventPersistencePort;
-    private final GetStagePersistencePort getStagePersistencePort;
+    private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final EventClassificationCacheManagerPort eventClassificationCacheManagerPort;
     private final GetObdxClassificationServiceCase getObdxClassificationServiceCase;
 
     public GetEventClassificationServiceCase(
-            GetEventPersistencePort getEventPersistencePort,
-            GetStagePersistencePort getStagePersistencePort,
+            GetCompetitionPersistencePort getCompetitionPersistencePort,
             EventClassificationCacheManagerPort eventClassificationCacheManagerPort,
             GetObdxClassificationServiceCase getObdxClassificationServiceCase) {
-        this.getEventPersistencePort = getEventPersistencePort;
-        this.getStagePersistencePort = getStagePersistencePort;
+        this.getCompetitionPersistencePort = getCompetitionPersistencePort;
         this.eventClassificationCacheManagerPort = eventClassificationCacheManagerPort;
         this.getObdxClassificationServiceCase = getObdxClassificationServiceCase;
     }
@@ -57,11 +55,14 @@ public class GetEventClassificationServiceCase {
             return cached;
         }
 
-        Event event = getEventPersistencePort.getEvent(eventId);
+        String competitionId = getCompetitionPersistencePort.competitionIdByEvent(eventId);
+        if (competitionId == null) throw new EventNotFoundException();
+        Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
+        Event event = CompetitionNavigator.findEvent(competition, eventId);
         if (event == null) throw new EventNotFoundException();
         if (event.deletedAt() != null) throw new EventAlreadyDeletedException();
 
-        Stage stage = getStagePersistencePort.getStage(event.stageId());
+        Stage stage = CompetitionNavigator.findStageOfEvent(competition, eventId);
 
         EventClassificationContextDTO context = new EventClassificationContextDTO(event, stage.name());
         eventClassificationCacheManagerPort.put(eventId, context);

@@ -1,22 +1,20 @@
 package com.k9x.application.events.use_case;
 
+import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
 import com.k9x.application.disciplines.use_case.dto.ExerciseDTO;
 import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
 import com.k9x.application.events.exceptions.EventNotFoundException;
-import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventCompetitorDTO;
-import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventDataDTO;
-import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventExerciseDTO;
-import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventJudgeDTO;
-import com.k9x.application.events.obdx.use_case.port.GetEventPersistencePort;
-import com.k9x.application.events.obdx.use_case.port.GetObdxEventDataPersistencePort;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
-import com.k9x.application.stages.port.GetStagePersistencePort;
+import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.aggregates.events.Event;
+import com.k9x.domain.aggregates.events.EventCompetitor;
+import com.k9x.domain.aggregates.events.EventExercise;
+import com.k9x.domain.aggregates.events.EventJudge;
 import com.k9x.domain.aggregates.stages.Stage;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,11 +35,7 @@ import static org.mockito.Mockito.when;
 class GetEventServiceCaseTest {
 
     @Mock
-    private GetEventPersistencePort getEventPersistencePort;
-    @Mock
-    private GetStagePersistencePort getStagePersistencePort;
-    @Mock
-    private GetObdxEventDataPersistencePort getObdxEventDataPersistencePort;
+    private GetCompetitionPersistencePort getCompetitionPersistencePort;
     @Mock
     private GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
 
@@ -49,8 +43,28 @@ class GetEventServiceCaseTest {
 
     @BeforeEach
     void setUp() {
-        serviceCase = new GetEventServiceCase(getEventPersistencePort, getStagePersistencePort,
-                getObdxEventDataPersistencePort, getObdxFederationsConfigurationsPort);
+        serviceCase = new GetEventServiceCase(getCompetitionPersistencePort, getObdxFederationsConfigurationsPort);
+    }
+
+    private Event event() {
+        return new Event("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+    }
+
+    private Event richEvent() {
+        EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "team", "ES", "breed",
+                "id-1", (short) 1, true, false);
+        EventExercise exercise = new EventExercise("ex-1", (short) 1, List.of("tag-a", "tag-b"));
+        EventJudge judge = new EventJudge("judge-1", "Judge", "collector@k9x.com");
+        return new Event("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(exercise), List.of(judge), List.of());
+    }
+
+    private Competition competition(Event event, String stageCreator, Long stageDeletedAt) {
+        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", stageCreator, 0L, Long.MAX_VALUE, 0L, 0L,
+                stageDeletedAt, List.of(event));
+        return new Competition("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
+                0L, 0L, null, List.of(stage));
     }
 
     @Test
@@ -58,25 +72,24 @@ class GetEventServiceCaseTest {
         assertThatThrownBy(() -> serviceCase.getEvent("event-1", "user-1", false))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
-        verifyNoInteractions(getEventPersistencePort, getStagePersistencePort, getObdxEventDataPersistencePort);
+        verifyNoInteractions(getCompetitionPersistencePort, getObdxFederationsConfigurationsPort);
     }
 
     @Test
     void throws_exception_when_event_not_found() {
-        when(getEventPersistencePort.getEvent("event-1")).thenReturn(null);
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn(null);
 
         assertThatThrownBy(() -> serviceCase.getEvent("event-1", "user-1", true))
                 .isInstanceOf(EventNotFoundException.class);
 
-        verifyNoInteractions(getStagePersistencePort, getObdxEventDataPersistencePort);
+        verifyNoInteractions(getObdxFederationsConfigurationsPort);
     }
 
     @Test
     void throws_exception_when_stage_is_deleted() {
-        Event event = new Event("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
-        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, 1700000000000L);
-        when(getEventPersistencePort.getEvent("event-1")).thenReturn(event);
-        when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competition(event(), "user-1", 1700000000000L));
 
         assertThatThrownBy(() -> serviceCase.getEvent("event-1", "user-1", true))
                 .isInstanceOf(StageAlreadyDeletedException.class);
@@ -84,10 +97,9 @@ class GetEventServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_stage_creator() {
-        Event event = new Event("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
-        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "other-user", Long.MAX_VALUE, 0L, 0L, null);
-        when(getEventPersistencePort.getEvent("event-1")).thenReturn(event);
-        when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competition(event(), "other-user", null));
 
         assertThatThrownBy(() -> serviceCase.getEvent("event-1", "user-1", true))
                 .isInstanceOf(UnauthorizedResourceException.class);
@@ -95,14 +107,9 @@ class GetEventServiceCaseTest {
 
     @Test
     void returns_obdx_event_detail_when_all_validations_pass() throws IOException {
-        Event event = new Event("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", 0L, 0L, null, ObdxAvgMethod.MID_AVG);
-        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, 0L, 0L, null);
-        when(getEventPersistencePort.getEvent("event-1")).thenReturn(event);
-        when(getStagePersistencePort.getStage("stage-1")).thenReturn(stage);
-        when(getObdxEventDataPersistencePort.getEventData("event-1")).thenReturn(new FetchObdxEventDataDTO(
-                List.of(new FetchObdxEventCompetitorDTO("dog-1", "Rex", "id-1", "breed", "owner", "team", "ES", (short) 1, true, null)),
-                List.of(new FetchObdxEventExerciseDTO("ex-1", (short) 1, List.of("tag-a", "tag-b"))),
-                List.of(new FetchObdxEventJudgeDTO("judge-1", "Judge", "collector@k9x.com"))));
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competition(richEvent(), "user-1", null));
         when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of(
                 new ConfigurationsDTO(new FederationInfoDTO("fed-1", "Federation", "ES"),
                         List.of(new ConfigurationDTO("cfg-1", "Config 1", List.of(new ExerciseDTO("ex-1", "Exercise 1")))))));

@@ -55,8 +55,9 @@ class GetStageListServiceCaseTest {
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().events()).hasSize(1);
         assertThat(result.getFirst().events().getFirst().disciplineName()).isEqualTo("Obedience");
-        assertThat(result.getFirst().events().getFirst().status()).isEqualTo("OPEN");
-        assertThat(result.getFirst().status()).isEqualTo("OPEN");
+        // dateTo = 2000L (1970) is strictly before today's UTC day -> FINISHED.
+        assertThat(result.getFirst().events().getFirst().status()).isEqualTo("FINISHED");
+        assertThat(result.getFirst().status()).isEqualTo("FINISHED");
     }
 
     @Test
