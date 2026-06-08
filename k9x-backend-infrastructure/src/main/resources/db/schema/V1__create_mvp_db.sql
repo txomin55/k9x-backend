@@ -76,16 +76,17 @@ CREATE TABLE k9x.stages
 
 CREATE TABLE k9x.events
 (
-    id                VARCHAR(255) NOT NULL,
-    discipline        VARCHAR(50),
-    configuration_id  VARCHAR(50),
-    score_calculation VARCHAR(10)  NOT NULL DEFAULT 'AVG',
-    name              VARCHAR(255) NOT NULL,
-    creator           VARCHAR(50)  NOT NULL,
-    stage_id          VARCHAR(255) NOT NULL,
-    last_update       BIGINT       NOT NULL,
-    created_at        BIGINT       NOT NULL,
-    deleted_at        BIGINT,
+    id                  VARCHAR(255) NOT NULL,
+    discipline          VARCHAR(50),
+    configuration_id    VARCHAR(50),
+    score_calculation   VARCHAR(10)  NOT NULL DEFAULT 'AVG',
+    name                VARCHAR(255) NOT NULL,
+    creator             VARCHAR(50)  NOT NULL,
+    stage_id            VARCHAR(255) NOT NULL,
+    enrollment_deadline BIGINT,
+    last_update         BIGINT       NOT NULL,
+    created_at          BIGINT       NOT NULL,
+    deleted_at          BIGINT,
     CONSTRAINT k9x_events_pkey PRIMARY KEY (id),
     CONSTRAINT k9x_events_fk FOREIGN KEY (stage_id) REFERENCES k9x.stages (id)
 );

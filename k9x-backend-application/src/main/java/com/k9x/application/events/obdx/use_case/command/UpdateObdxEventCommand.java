@@ -5,6 +5,7 @@ import java.util.List;
 public record UpdateObdxEventCommand(
         String name,
         String configurationId,
+        Long enrollmentDeadline,
         List<CompetitorCommand> competitors,
         List<ExerciseCommand> exercises,
         List<JudgeCommand> judges

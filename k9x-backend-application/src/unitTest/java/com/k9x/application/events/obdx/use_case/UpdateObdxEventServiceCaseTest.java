@@ -33,7 +33,7 @@ import static org.mockito.Mockito.*;
 class UpdateObdxEventServiceCaseTest {
 
     private static final UpdateObdxEventCommand VALID_COMMAND = new UpdateObdxEventCommand(
-            "Event 1", "config-1", List.of(), List.of(), List.of()
+            "Event 1", "config-1", 1735689600000L, List.of(), List.of(), List.of()
     );
     @Mock
     private GetCompetitionPersistencePort getCompetitionPersistencePort;
@@ -77,7 +77,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_configuration_id_is_null() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", null, List.of(), List.of(), List.of());
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", null, 1735689600000L, List.of(), List.of(), List.of());
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(EventConfigurationIdRequiredException.class);
@@ -87,7 +87,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_configuration_id_is_blank() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "  ", List.of(), List.of(), List.of());
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "  ", 1735689600000L, List.of(), List.of(), List.of());
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(EventConfigurationIdRequiredException.class);
@@ -127,7 +127,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_collector_email_does_not_exist() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", List.of(), List.of(),
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, List.of(), List.of(),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "missing@k9x.com")));
         givenEvent(event(null, "user-1"));
         when(getUserInfoPersistencePort.findById("missing@k9x.com")).thenReturn(null);
@@ -140,7 +140,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void updates_event_when_collector_email_exists() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", List.of(), List.of(),
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, List.of(), List.of(),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "collector@k9x.com")));
         ObdxClassificationConfigDTO config = new ObdxClassificationConfigDTO(ClassificationCacheEvictStrategy.OBDX, null, Map.of(), List.of(), List.of());
         givenEvent(event(null, "user-1"));

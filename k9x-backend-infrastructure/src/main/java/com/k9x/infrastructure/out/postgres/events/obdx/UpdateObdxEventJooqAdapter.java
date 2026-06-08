@@ -28,6 +28,7 @@ public class UpdateObdxEventJooqAdapter implements UpdateObdxEventPersistencePor
                     .set(EVENTS.NAME, payload.name())
                     .set(EVENTS.CONFIGURATION_ID, payload.configurationId())
                     .set(EVENTS.SCORE_CALCULATION, payload.scoreCalculation().name())
+                    .set(EVENTS.ENROLLMENT_DEADLINE, payload.enrollmentDeadline())
                     .set(EVENTS.LAST_UPDATE, payload.lastUpdate())
                     .where(EVENTS.ID.eq(id))
                     .execute();

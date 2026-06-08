@@ -10,6 +10,7 @@ public record UpdateObdxEventPersistencePayload(
         String name,
         String configurationId,
         ObdxAvgMethod scoreCalculation,
+        Long enrollmentDeadline,
         List<CompetitorItem> competitors,
         List<ExerciseItem> exercises,
         List<JudgeItem> judges,
@@ -20,6 +21,7 @@ public record UpdateObdxEventPersistencePayload(
                 command.name(),
                 command.configurationId(),
                 scoreCalculation,
+                command.enrollmentDeadline(),
                 command.competitors().stream()
                         .map(c -> new CompetitorItem(c.dogId(), c.order().shortValue()))
                         .toList(),

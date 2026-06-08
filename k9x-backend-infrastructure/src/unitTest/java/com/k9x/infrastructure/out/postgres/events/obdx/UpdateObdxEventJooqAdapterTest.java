@@ -38,6 +38,7 @@ class UpdateObdxEventJooqAdapterTest {
                 "Event 1",
                 "config-1",
                 ObdxAvgMethod.MID_AVG,
+                1735689600000L,
                 List.of(new UpdateObdxEventPersistencePayload.CompetitorItem("dog-1", (short) 1)),
                 List.of(new UpdateObdxEventPersistencePayload.ExerciseItem("exercise-1", (short) 1, new String[]{"tag1"})),
                 List.of(new UpdateObdxEventPersistencePayload.JudgeItem("judge-1", "collector@example.com")),
@@ -129,7 +130,7 @@ class UpdateObdxEventJooqAdapterTest {
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
 
         UpdateObdxEventPersistencePayload payload = new UpdateObdxEventPersistencePayload(
-                "Event 1", "config-1", ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), 1700000000000L
+                "Event 1", "config-1", ObdxAvgMethod.MID_AVG, 1735689600000L, List.of(), List.of(), List.of(), 1700000000000L
         );
 
         new UpdateObdxEventJooqAdapter(dsl).updateEvent("event-1", payload);
