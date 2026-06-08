@@ -26,8 +26,7 @@ public class UpdateObdxEventInfo implements SecuredEventsUpdateInfoObdxApiDelega
                 new UpdateObdxEventCommand(
                         body.getName(),
                         body.getConfigurationId(),
-                        // TODO: replace with body.getEnrollmentDeadline() once the OAS stub exposes the field
-                        1735689600000L,
+                        body.getEnrollmentDeadline(),
                         body.getCompetitors() == null ? List.of() : body.getCompetitors().stream()
                                 .map(c -> new UpdateObdxEventCommand.CompetitorCommand(c.getDogId(), c.getPosition()))
                                 .toList(),

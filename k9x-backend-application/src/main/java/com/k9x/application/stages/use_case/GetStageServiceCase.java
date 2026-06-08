@@ -64,7 +64,8 @@ public class GetStageServiceCase {
                                         .map(c -> new FetchStageDetailCompetitorDTO(
                                                 c.dogId(), c.dogName(), c.owner(),
                                                 c.country(), c.team(), c.breed()))
-                                        .toList()))
+                                        .toList(),
+                                e.status().name()))
                         .toList());
     }
 

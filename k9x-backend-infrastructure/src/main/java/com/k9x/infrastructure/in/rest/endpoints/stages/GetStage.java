@@ -37,7 +37,8 @@ public class GetStage implements StagesFetchOneApiDelegate {
                                 e.name(),
                                 resolveDiscipline(e.disciplineId()),
                                 new IdNameDTO(e.configurationName(), e.configurationId()),
-                                mapCompetitors(e.competitors())))
+                                mapCompetitors(e.competitors()),
+                                e.status()))
                         .toList(),
                 List.of(),
                 stage.address(),

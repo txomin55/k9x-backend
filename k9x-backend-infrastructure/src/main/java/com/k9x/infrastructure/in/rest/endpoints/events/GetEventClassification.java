@@ -31,6 +31,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                 new IdNameDTO(dto.eventName(), dto.eventId()),
                 new IdNameDTO(dto.stageName(), dto.stageId()),
                 new IdNameDTO(dto.configurationId(), dto.configurationId()),
+                dto.eventStatus(),
                 dto.scoresLastUpdate(),
                 dto.obdx() == null ? null
                         : new ObdxStageEventClassificationResponseDTO(mapCompetitors(dto.obdx().competitors()))));

@@ -7,6 +7,16 @@ allprojects {
     group = "com.tmanager.k9x-backend"
     version = "0.0.1"
 
+    // SNAPSHOT dependencies (e.g. com.k9x:oas-definition-stubs) are republished in place on
+    // GitHub Packages, which deletes older timestamped jars. Gradle caches SNAPSHOT metadata for
+    // 24h by default, so it can stay pinned to a timestamp whose jar no longer exists. Re-check the
+    // latest snapshot on every build so we always resolve the most recent published artifact.
+    configurations.all {
+        resolutionStrategy {
+            cacheChangingModulesFor(0, "seconds")
+        }
+    }
+
     repositories {
         mavenCentral()
         maven {

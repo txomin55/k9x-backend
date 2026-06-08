@@ -4,5 +4,5 @@ import java.util.List;
 
 public record FetchStageDetailEventDTO(String id, String name, String disciplineId,
                                        String configurationId, String configurationName,
-                                       List<FetchStageDetailCompetitorDTO> competitors) {
+                                       List<FetchStageDetailCompetitorDTO> competitors, String status) {
 }
