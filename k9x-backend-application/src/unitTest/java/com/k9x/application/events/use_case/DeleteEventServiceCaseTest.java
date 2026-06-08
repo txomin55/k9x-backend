@@ -45,7 +45,7 @@ class DeleteEventServiceCaseTest {
 
     private Event event(Long deletedAt, List<EventCompetitor> competitors, List<EventExercise> exercises,
                         List<EventJudge> judges, List<Score> scores) {
-        return new Event("event-1", null, null, "Event 1", "stage-1", "user-1", 0L, 0L, deletedAt,
+        return new Event("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, deletedAt,
                 ObdxAvgMethod.MID_AVG, competitors, exercises, judges, scores);
     }
 

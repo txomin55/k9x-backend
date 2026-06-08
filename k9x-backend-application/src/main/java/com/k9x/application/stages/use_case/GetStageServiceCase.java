@@ -10,6 +10,7 @@ import com.k9x.application.stages.exceptions.StageNotFoundException;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailCompetitorDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailEventDTO;
+import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.aggregates.events.Event;
 import com.k9x.domain.aggregates.stages.Stage;
@@ -52,6 +53,7 @@ public class GetStageServiceCase {
         }
 
         Map<String, String> configNameById = buildConfigNameMap();
+        long now = DateUtils.nowUtcMillis();
         return new FetchStageDetailDTO(
                 stage.id(), stage.name(), stage.dateFrom(), stage.dateTo(),
                 competition.address(), competition.organizerName(), null,
@@ -65,7 +67,8 @@ public class GetStageServiceCase {
                                                 c.dogId(), c.dogName(), c.owner(),
                                                 c.country(), c.team(), c.breed()))
                                         .toList(),
-                                e.status().name()))
+                                e.status().name(),
+                                e.enrollmentOpened(now)))
                         .toList());
     }
 

@@ -40,7 +40,7 @@ class EnrollEventServiceCaseTest {
     }
 
     private Event event(Long deletedAt) {
-        return new Event("event-1", null, null, "Event 1", "stage-1", "user-1", 0L, 0L, deletedAt,
+        return new Event("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, deletedAt,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
     }
 

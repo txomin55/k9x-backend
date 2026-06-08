@@ -52,7 +52,7 @@ class UpdateObdxEventServiceCaseTest {
     }
 
     private Event event(Long deletedAt, String creator) {
-        return new Event("event-1", null, null, "Event 1", "stage-1", creator, 0L, 0L, deletedAt,
+        return new Event("event-1", null, null, "Event 1", "stage-1", creator, null, 0L, 0L, deletedAt,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
     }
 

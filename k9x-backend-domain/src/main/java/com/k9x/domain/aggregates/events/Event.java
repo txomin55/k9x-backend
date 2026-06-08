@@ -13,6 +13,7 @@ public record Event(
         String name,
         String stageId,
         String creator,
+        Long enrollmentDeadline,
         long lastUpdate,
         long createdAt,
         Long deletedAt,
@@ -39,6 +40,14 @@ public record Event(
             return EventStatus.STARTED;
         }
         return EventStatus.CREATED;
+    }
+
+    /**
+     * Whether enrollment is still open: an event with no deadline is always open, otherwise enrollment
+     * stays open until the deadline is reached (compared against the supplied current timestamp).
+     */
+    public boolean enrollmentOpened(long now) {
+        return enrollmentDeadline == null || enrollmentDeadline > now;
     }
 
     private boolean hasAnyScore() {

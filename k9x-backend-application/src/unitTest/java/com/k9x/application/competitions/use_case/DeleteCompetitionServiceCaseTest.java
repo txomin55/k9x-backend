@@ -87,7 +87,7 @@ class DeleteCompetitionServiceCaseTest {
     void throws_exception_when_competition_is_started() {
         // A started event -> started stage -> started competition.
         Event startedEvent = new Event("evt-1", "cfg-1", "obdx", "Open", "stage-1", "user-1",
-                0L, 0L, null, null,
+                null, 0L, 0L, null, null,
                 List.of(), List.of(), List.of(),
                 List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)));
         Stage startedStage = new Stage("stage-1", "Stage 1", "comp-1", "user-1",

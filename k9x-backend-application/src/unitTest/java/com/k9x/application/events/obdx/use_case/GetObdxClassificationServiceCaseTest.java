@@ -84,7 +84,7 @@ class GetObdxClassificationServiceCaseTest {
                 : List.of(new EventExercise("ex-1", (short) 1, null));
 
         return new Event("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1", "stage-1", "creator@test.com",
-                1000L, 1000L, null, ObdxAvgMethod.MID_AVG, competitors, exercises, judges, scores);
+                null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG, competitors, exercises, judges, scores);
     }
 
     private record Row(String dogId, String dogName, String judgeId, BigDecimal score) {}

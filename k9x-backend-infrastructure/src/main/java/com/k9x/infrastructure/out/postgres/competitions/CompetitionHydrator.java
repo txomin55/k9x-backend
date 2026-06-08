@@ -119,7 +119,8 @@ class CompetitionHydrator {
         var st = Tables.STAGES;
 
         List<EventShell> eventShells = dsl.select(ev.ID, ev.CONFIGURATION_ID, ev.DISCIPLINE, ev.NAME,
-                        ev.STAGE_ID, ev.CREATOR, ev.LAST_UPDATE, ev.CREATED_AT, ev.DELETED_AT, ev.SCORE_CALCULATION)
+                        ev.STAGE_ID, ev.CREATOR, ev.ENROLLMENT_DEADLINE, ev.LAST_UPDATE, ev.CREATED_AT,
+                        ev.DELETED_AT, ev.SCORE_CALCULATION)
                 .from(ev)
                 .join(st).on(st.ID.eq(ev.STAGE_ID))
                 .where(st.COMPETITION_ID.in(toList(competitionIds)))
@@ -132,6 +133,7 @@ class CompetitionHydrator {
                     shell.name = r.get(ev.NAME);
                     shell.stageId = r.get(ev.STAGE_ID);
                     shell.creator = r.get(ev.CREATOR);
+                    shell.enrollmentDeadline = r.get(ev.ENROLLMENT_DEADLINE);
                     shell.lastUpdate = r.get(ev.LAST_UPDATE);
                     shell.createdAt = r.get(ev.CREATED_AT);
                     shell.deletedAt = r.get(ev.DELETED_AT);
@@ -148,7 +150,7 @@ class CompetitionHydrator {
         Map<String, List<Event>> eventsByStage = new LinkedHashMap<>();
         for (EventShell s : eventShells) {
             Event event = new Event(s.id, s.configurationId, s.discipline, s.name, s.stageId, s.creator,
-                    s.lastUpdate, s.createdAt, s.deletedAt,
+                    s.enrollmentDeadline, s.lastUpdate, s.createdAt, s.deletedAt,
                     s.scoreCalculation == null ? null : ObdxAvgMethod.valueOf(s.scoreCalculation),
                     competitors.getOrDefault(s.id, new ArrayList<>()),
                     exercises.getOrDefault(s.id, new ArrayList<>()),
@@ -245,6 +247,7 @@ class CompetitionHydrator {
 
     private static final class EventShell {
         String id, configurationId, discipline, name, stageId, creator, scoreCalculation;
+        Long enrollmentDeadline;
         long lastUpdate, createdAt;
         Long deletedAt;
     }

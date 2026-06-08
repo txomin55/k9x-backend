@@ -30,10 +30,10 @@ class GetEventClassificationServiceCaseTest {
 
     private static final Event ACTIVE_EVENT = new Event(
             "evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1", "stage-1", "creator@test.com",
-            1000L, 1000L, null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+            null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
     private static final Event DELETED_EVENT = new Event(
             "evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open", "stage-1", "creator@test.com",
-            1000L, 1000L, 9999L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+            null, 1000L, 1000L, 9999L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
 
     @Mock
     private GetCompetitionPersistencePort getCompetitionPersistencePort;

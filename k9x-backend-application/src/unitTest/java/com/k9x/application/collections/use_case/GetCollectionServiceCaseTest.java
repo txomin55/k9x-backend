@@ -58,7 +58,7 @@ class GetCollectionServiceCaseTest {
     }
 
     private Event event(Long deletedAt) {
-        return new Event("event-1", "config-1", "obdx", "Event A", "stage-1", "creator@test.com", 0L, 0L, deletedAt,
+        return new Event("event-1", "config-1", "obdx", "Event A", "stage-1", "creator@test.com", null, 0L, 0L, deletedAt,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
     }
 

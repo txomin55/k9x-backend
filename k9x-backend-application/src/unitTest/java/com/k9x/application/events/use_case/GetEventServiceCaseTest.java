@@ -47,7 +47,7 @@ class GetEventServiceCaseTest {
     }
 
     private Event event() {
-        return new Event("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", 0L, 0L, null,
+        return new Event("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
     }
 
@@ -56,7 +56,7 @@ class GetEventServiceCaseTest {
                 "id-1", (short) 1, true, false);
         EventExercise exercise = new EventExercise("ex-1", (short) 1, List.of("tag-a", "tag-b"));
         EventJudge judge = new EventJudge("judge-1", "Judge", "collector@k9x.com");
-        return new Event("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", 0L, 0L, null,
+        return new Event("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(exercise), List.of(judge), List.of());
     }
 
