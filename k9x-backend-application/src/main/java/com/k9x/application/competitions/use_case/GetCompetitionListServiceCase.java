@@ -6,7 +6,6 @@ import com.k9x.application.competitions.use_case.dto.FetchEventDTO;
 import com.k9x.application.competitions.use_case.dto.FetchStageDTO;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.events.Event;
 import com.k9x.domain.aggregates.stages.Stage;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 

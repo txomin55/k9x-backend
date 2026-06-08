@@ -2,11 +2,7 @@ package com.k9x.infrastructure.out.postgres.competitions;
 
 import com.k9x.domain.aggregates.competitions.Competition;
 import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.events.EventCompetitor;
-import com.k9x.domain.aggregates.events.EventExercise;
-import com.k9x.domain.aggregates.events.EventJudge;
-import com.k9x.domain.aggregates.events.Score;
+import com.k9x.domain.aggregates.events.*;
 import com.k9x.domain.aggregates.stages.Stage;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Dogs;
@@ -21,11 +17,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Hydrates the full {@link Competition} root aggregate (stages → events → competitors / exercises /
@@ -38,6 +30,12 @@ class CompetitionHydrator {
 
     CompetitionHydrator(DSLContext dsl) {
         this.dsl = dsl;
+    }
+
+    private static List<String> toList(Iterable<String> values) {
+        List<String> list = new ArrayList<>();
+        values.forEach(list::add);
+        return list;
     }
 
     List<Competition> hydrate(Condition competitionCondition) {
@@ -53,7 +51,7 @@ class CompetitionHydrator {
             Stage stage = new Stage(shell.id, shell.name, shell.competitionId, shell.creator,
                     shell.dateFrom, shell.dateTo, shell.lastUpdate, shell.createdAt, shell.deletedAt,
                     eventsByStage.getOrDefault(shell.id, new ArrayList<>()));
-            stagesByCompetition.computeIfAbsent(shell.competitionId, k -> new ArrayList<>()).add(stage);
+            stagesByCompetition.computeIfAbsent(shell.competitionId, _ -> new ArrayList<>()).add(stage);
         });
 
         return competitions.values().stream()
@@ -156,7 +154,7 @@ class CompetitionHydrator {
                     exercises.getOrDefault(s.id, new ArrayList<>()),
                     judges.getOrDefault(s.id, new ArrayList<>()),
                     scores.getOrDefault(s.id, new ArrayList<>()));
-            eventsByStage.computeIfAbsent(s.stageId, k -> new ArrayList<>()).add(event);
+            eventsByStage.computeIfAbsent(s.stageId, _ -> new ArrayList<>()).add(event);
         }
         return eventsByStage;
     }
@@ -173,7 +171,7 @@ class CompetitionHydrator {
                 .from(ec)
                 .leftJoin(d).on(d.ID.eq(ec.DOG_ID).and(d.DELETED_AT.isNull()))
                 .where(ec.EVENT_ID.in(eventIds))
-                .forEach(r -> result.computeIfAbsent(r.get(ec.EVENT_ID), k -> new ArrayList<>())
+                .forEach(r -> result.computeIfAbsent(r.get(ec.EVENT_ID), _ -> new ArrayList<>())
                         .add(new EventCompetitor(
                                 r.get(ec.DOG_ID), r.get(d.NAME), r.get(d.OWNER), r.get(d.TEAM),
                                 r.get(d.COUNTRY), r.get(d.BREED), r.get(d.IDENTITY),
@@ -192,7 +190,7 @@ class CompetitionHydrator {
                 .from(ee)
                 .where(ee.EVENT_ID.in(eventIds))
                 .orderBy(ee.POSITION.asc())
-                .forEach(r -> result.computeIfAbsent(r.get(ee.EVENT_ID), k -> new ArrayList<>())
+                .forEach(r -> result.computeIfAbsent(r.get(ee.EVENT_ID), _ -> new ArrayList<>())
                         .add(new EventExercise(
                                 r.get(ee.EXERCISE_ID), r.get(ee.POSITION),
                                 r.get(ee.TAGS) == null ? List.of() : Arrays.stream(r.get(ee.TAGS)).toList())));
@@ -212,7 +210,7 @@ class CompetitionHydrator {
                 .join(j).on(j.ID.eq(ej.JUDGE_ID).and(j.DELETED_AT.isNull()))
                 .leftJoin(u).on(u.ID.eq(ej.COLLECTOR_ID))
                 .where(ej.EVENT_ID.in(eventIds))
-                .forEach(r -> result.computeIfAbsent(r.get(ej.EVENT_ID), k -> new ArrayList<>())
+                .forEach(r -> result.computeIfAbsent(r.get(ej.EVENT_ID), _ -> new ArrayList<>())
                         .add(new EventJudge(r.get(ej.JUDGE_ID), r.get(j.NAME), r.get(u.EMAIL))));
         return result;
     }
@@ -226,16 +224,10 @@ class CompetitionHydrator {
         dsl.select(es.EVENT_ID, es.EXERCISE_ID, es.JUDGE_ID, es.DOG_ID, es.SCORE, es.LAST_UPDATE)
                 .from(es)
                 .where(es.EVENT_ID.in(eventIds))
-                .forEach(r -> result.computeIfAbsent(r.get(es.EVENT_ID), k -> new ArrayList<>())
+                .forEach(r -> result.computeIfAbsent(r.get(es.EVENT_ID), _ -> new ArrayList<>())
                         .add(new Score(r.get(es.EXERCISE_ID), r.get(es.JUDGE_ID), r.get(es.DOG_ID),
                                 r.get(es.SCORE), r.get(es.LAST_UPDATE))));
         return result;
-    }
-
-    private static List<String> toList(Iterable<String> values) {
-        List<String> list = new ArrayList<>();
-        values.forEach(list::add);
-        return list;
     }
 
     private static final class CompetitionShell {

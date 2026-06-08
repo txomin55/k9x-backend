@@ -51,9 +51,9 @@ class GetCompetitionListServiceCaseTest {
         List<FetchCompetitionDTO> result = serviceCase.getCompetitions("user-1", true);
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).id()).isEqualTo("comp-1");
-        assertThat(result.get(0).status()).isEqualTo("CREATED");
-        assertThat(result.get(0).stages()).isEmpty();
+        assertThat(result.getFirst().id()).isEqualTo("comp-1");
+        assertThat(result.getFirst().status()).isEqualTo("CREATED");
+        assertThat(result.getFirst().stages()).isEmpty();
         verify(getCompetitionListPersistencePort).getCompetitions("user-1");
     }
 
@@ -68,7 +68,7 @@ class GetCompetitionListServiceCaseTest {
         List<FetchCompetitionDTO> result = serviceCase.getCompetitions("user-1", true);
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).status()).isEqualTo("FINISHED");
-        assertThat(result.get(0).stages()).hasSize(1);
+        assertThat(result.getFirst().status()).isEqualTo("FINISHED");
+        assertThat(result.getFirst().stages()).hasSize(1);
     }
 }
