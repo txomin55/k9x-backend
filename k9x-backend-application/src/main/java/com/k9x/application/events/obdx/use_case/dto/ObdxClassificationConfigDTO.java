@@ -1,6 +1,6 @@
 package com.k9x.application.events.obdx.use_case.dto;
 
-import com.k9x.domain.aggregates.disciplines.ClassificationCacheEvictStrategy;
+import com.k9x.domain.disciplines.valueobjects.ClassificationCacheEvictStrategy;
 
 import java.math.BigDecimal;
 import java.util.List;

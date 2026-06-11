@@ -1,18 +1,18 @@
 package com.k9x.application.competitions;
 
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
 
 /**
- * Navigation helpers over the {@link Competition} root aggregate. Children (stages, events) are only
+ * Navigation helpers over the {@link CompetitionSnapshot} root aggregate. Children (stages, events) are only
  * accessed through their root, so every read first hydrates the competition and then locates the node.
  */
 public final class CompetitionNavigator {
 
     private CompetitionNavigator() {}
 
-    public static Stage findStage(Competition competition, String stageId) {
+    public static StageSnapshot findStage(CompetitionSnapshot competition, String stageId) {
         if (competition == null || competition.stages() == null) {
             return null;
         }
@@ -22,7 +22,7 @@ public final class CompetitionNavigator {
                 .orElse(null);
     }
 
-    public static Event findEvent(Competition competition, String eventId) {
+    public static EventSnapshot findEvent(CompetitionSnapshot competition, String eventId) {
         if (competition == null || competition.stages() == null) {
             return null;
         }
@@ -34,7 +34,7 @@ public final class CompetitionNavigator {
                 .orElse(null);
     }
 
-    public static Stage findStageOfEvent(Competition competition, String eventId) {
+    public static StageSnapshot findStageOfEvent(CompetitionSnapshot competition, String eventId) {
         if (competition == null || competition.stages() == null) {
             return null;
         }

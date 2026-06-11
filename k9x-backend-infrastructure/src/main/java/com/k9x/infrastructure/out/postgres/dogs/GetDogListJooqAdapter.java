@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.out.postgres.dogs;
 
 import com.k9x.application.dogs.port.GetDogListPersistencePort;
-import com.k9x.domain.aggregates.dogs.Dog;
+import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;

@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.in.rest.configuration.exception;
 
-import com.k9x.domain.exceptions.DisciplineConfigurationMalformedException;
+import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.exceptions.DomainException;
 import com.k9x.domain.exceptions.NotFoundResourceException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;

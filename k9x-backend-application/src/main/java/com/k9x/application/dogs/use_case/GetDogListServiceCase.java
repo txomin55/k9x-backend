@@ -3,7 +3,7 @@ package com.k9x.application.dogs.use_case;
 import com.k9x.application.dogs.exceptions.OwnerNonProvidedWhenOrganizerException;
 import com.k9x.application.dogs.port.GetDogListPersistencePort;
 import com.k9x.application.dogs.use_case.dto.DogDTO;
-import com.k9x.domain.aggregates.dogs.Dog;
+import com.k9x.domain.dogs.aggregates.Dog;
 
 import java.util.List;
 

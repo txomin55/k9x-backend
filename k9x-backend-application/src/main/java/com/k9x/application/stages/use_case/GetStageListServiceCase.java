@@ -6,8 +6,8 @@ import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
 import com.k9x.application.utils.date.DateUtils;
-import com.k9x.domain.aggregates.stages.Stage;
-import com.k9x.domain.exceptions.DisciplineConfigurationMalformedException;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
+import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,7 +33,7 @@ public class GetStageListServiceCase {
                     // Global list read-model: events (and their scores) are not hydrated here, so the
                     // status is computed from the stage dates only. STARTED (driven by event scores) is
                     // therefore not surfaced in this list; the detailed/root-aggregate views are exact.
-                    String status = new Stage(stage.id(), stage.name(), null, null,
+                    String status = new StageSnapshot(stage.id(), stage.name(), null, null,
                             stage.dateFrom(), stage.dateTo(), 0L, 0L, null, List.of())
                             .status(now).name();
                     return new FetchStageListDTO(

@@ -4,17 +4,17 @@ import com.k9x.application.competitions.CompetitionNavigator;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
-import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
+import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.exceptions.StageHasNoEventsException;
-import com.k9x.application.stages.exceptions.StageNotFoundException;
+import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailCompetitorDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailEventDTO;
 import com.k9x.application.utils.date.DateUtils;
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.stages.Stage;
-import com.k9x.domain.exceptions.DisciplineConfigurationMalformedException;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
+import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 
 import java.io.IOException;
 import java.util.Map;
@@ -36,8 +36,8 @@ public class GetStageServiceCase {
         if (competitionId == null) {
             throw new StageNotFoundException();
         }
-        Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
-        Stage stage = CompetitionNavigator.findStage(competition, id);
+        CompetitionSnapshot competition = getCompetitionPersistencePort.getCompetition(competitionId);
+        StageSnapshot stage = CompetitionNavigator.findStage(competition, id);
 
         if (stage == null) {
             throw new StageNotFoundException();
@@ -46,7 +46,7 @@ public class GetStageServiceCase {
             throw new StageAlreadyDeletedException();
         }
 
-        var events = stage.events() == null ? java.util.List.<Event>of()
+        var events = stage.events() == null ? java.util.List.<EventSnapshot>of()
                 : stage.events().stream().filter(e -> e.deletedAt() == null).toList();
         if (events.isEmpty()) {
             throw new StageHasNoEventsException();
@@ -68,7 +68,8 @@ public class GetStageServiceCase {
                                                 c.country(), c.team(), c.breed()))
                                         .toList(),
                                 e.status().name(),
-                                e.enrollmentOpened(now)))
+                                e.enrollmentOpened(now),
+                                e.enrollmentDeadline()))
                         .toList());
     }
 

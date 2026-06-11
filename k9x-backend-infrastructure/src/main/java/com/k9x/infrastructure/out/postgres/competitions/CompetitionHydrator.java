@@ -1,9 +1,11 @@
 package com.k9x.infrastructure.out.postgres.competitions;
 
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.aggregates.events.*;
-import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.events.aggregates.*;
+import com.k9x.domain.events.valueobjects.*;
+import com.k9x.domain.events.status.*;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Dogs;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Judges;
@@ -20,7 +22,7 @@ import org.jooq.Field;
 import java.util.*;
 
 /**
- * Hydrates the full {@link Competition} root aggregate (stages → events → competitors / exercises /
+ * Hydrates the full {@link CompetitionSnapshot} root aggregate (stages → events → competitors / exercises /
  * judges / scores) with a handful of queries stitched in memory. Soft-deleted children are kept so the
  * aggregate is faithful; read-models filter them as needed and lifecycle status accounts for them.
  */
@@ -38,24 +40,24 @@ class CompetitionHydrator {
         return list;
     }
 
-    List<Competition> hydrate(Condition competitionCondition) {
+    List<CompetitionSnapshot> hydrate(Condition competitionCondition) {
         Map<String, CompetitionShell> competitions = fetchCompetitions(competitionCondition);
         if (competitions.isEmpty()) {
             return List.of();
         }
 
-        Map<String, List<Stage>> stagesByCompetition = new LinkedHashMap<>();
-        Map<String, List<Event>> eventsByStage = fetchEvents(competitions.keySet());
+        Map<String, List<StageSnapshot>> stagesByCompetition = new LinkedHashMap<>();
+        Map<String, List<EventSnapshot>> eventsByStage = fetchEvents(competitions.keySet());
 
         fetchStages(competitions.keySet()).forEach(shell -> {
-            Stage stage = new Stage(shell.id, shell.name, shell.competitionId, shell.creator,
+            StageSnapshot stage = new StageSnapshot(shell.id, shell.name, shell.competitionId, shell.creator,
                     shell.dateFrom, shell.dateTo, shell.lastUpdate, shell.createdAt, shell.deletedAt,
                     eventsByStage.getOrDefault(shell.id, new ArrayList<>()));
             stagesByCompetition.computeIfAbsent(shell.competitionId, _ -> new ArrayList<>()).add(stage);
         });
 
         return competitions.values().stream()
-                .map(c -> new Competition(c.id, c.name, c.creator, c.organizerName, c.country,
+                .map(c -> new CompetitionSnapshot(c.id, c.name, c.creator, c.organizerName, c.country,
                         c.description, c.address, c.coordAlt, c.coordLong, c.lastUpdate, c.createdAt,
                         c.deletedAt, stagesByCompetition.getOrDefault(c.id, new ArrayList<>())))
                 .toList();
@@ -114,7 +116,7 @@ class CompetitionHydrator {
                 });
     }
 
-    private Map<String, List<Event>> fetchEvents(Iterable<String> competitionIds) {
+    private Map<String, List<EventSnapshot>> fetchEvents(Iterable<String> competitionIds) {
         var ev = Tables.EVENTS;
         var st = Tables.STAGES;
 
@@ -147,9 +149,9 @@ class CompetitionHydrator {
         Map<String, List<EventJudge>> judges = fetchJudges(eventIds);
         Map<String, List<Score>> scores = fetchScores(eventIds);
 
-        Map<String, List<Event>> eventsByStage = new LinkedHashMap<>();
+        Map<String, List<EventSnapshot>> eventsByStage = new LinkedHashMap<>();
         for (EventShell s : eventShells) {
-            Event event = new Event(s.id, s.configurationId, s.discipline, s.name, s.stageId, s.creator,
+            EventSnapshot event = new EventSnapshot(s.id, s.configurationId, s.discipline, s.name, s.stageId, s.creator,
                     s.enrollmentDeadline, s.lastUpdate, s.createdAt, s.deletedAt,
                     s.scoreCalculation == null ? null : ObdxAvgMethod.valueOf(s.scoreCalculation),
                     competitors.getOrDefault(s.id, new ArrayList<>()),

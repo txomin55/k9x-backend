@@ -3,7 +3,7 @@ package com.k9x.infrastructure.out.json.disciplines.obdx;
 import com.k9x.application.disciplines.obdx.exceptions.ExerciseConfigurationNotFoundException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.dto.ObdxClassificationConfigDTO;
-import com.k9x.domain.aggregates.disciplines.ClassificationCacheEvictStrategy;
+import com.k9x.domain.disciplines.valueobjects.ClassificationCacheEvictStrategy;
 import com.k9x.infrastructure.out.json.disciplines.obdx.dto.FederationConfigurationFileDTO;
 
 import java.math.BigDecimal;

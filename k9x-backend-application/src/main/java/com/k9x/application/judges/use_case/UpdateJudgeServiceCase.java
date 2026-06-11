@@ -6,7 +6,7 @@ import com.k9x.application.judges.exceptions.JudgeAlreadyDeletedException;
 import com.k9x.application.judges.exceptions.JudgeNotFoundException;
 import com.k9x.application.judges.port.GetJudgePersistencePort;
 import com.k9x.application.judges.port.UpdateJudgePersistencePort;
-import com.k9x.domain.aggregates.judges.Judge;
+import com.k9x.domain.judges.aggregates.Judge;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 public class UpdateJudgeServiceCase {

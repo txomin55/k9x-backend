@@ -1,9 +1,8 @@
 package com.k9x.application.disciplines.use_case;
 
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
-import com.k9x.application.disciplines.use_case.GetDisciplineFederationsConfigurationsServiceCase;
 import com.k9x.application.disciplines.use_case.dto.DisciplineConfigurationsDTO;
-import com.k9x.domain.exceptions.DisciplineConfigurationMalformedException;
+import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

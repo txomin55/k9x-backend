@@ -8,15 +8,15 @@ import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithColl
 import com.k9x.application.competitions.CompetitionNavigator;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxConfigurationAllowedValuesPort;
-import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
-import com.k9x.application.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.exceptions.EventAlreadyDeletedException;
+import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.exceptions.ObdxUserNotCollectorException;
-import com.k9x.application.stages.exceptions.StageExpiredException;
+import com.k9x.domain.stages.exceptions.StageExpiredException;
 import com.k9x.application.utils.date.DateUtils;
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.disciplines.Discipline;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.disciplines.valueobjects.Discipline;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
 
 import java.util.List;
 import java.util.Locale;
@@ -42,10 +42,10 @@ public class GetCollectionServiceCase {
     public FetchCollectionDetailDTO getCollection(String eventId, String userId) {
         String competitionId = getCompetitionPersistencePort.competitionIdByEvent(eventId);
         if (competitionId == null) throw new EventNotFoundException();
-        Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
-        Event event = CompetitionNavigator.findEvent(competition, eventId);
+        CompetitionSnapshot competition = getCompetitionPersistencePort.getCompetition(competitionId);
+        EventSnapshot event = CompetitionNavigator.findEvent(competition, eventId);
         assertEventValidations(event);
-        Stage stage = CompetitionNavigator.findStageOfEvent(competition, eventId);
+        StageSnapshot stage = CompetitionNavigator.findStageOfEvent(competition, eventId);
         assertStageNotExpired(stage);
 
         List<FetchCollectionJudgeWithCollectorDTO> allJudges =
@@ -66,12 +66,12 @@ public class GetCollectionServiceCase {
         );
     }
 
-    private void assertEventValidations(Event event) {
+    private void assertEventValidations(EventSnapshot event) {
         if (event == null) throw new EventNotFoundException();
         if (event.deletedAt() != null) throw new EventAlreadyDeletedException();
     }
 
-    private void assertStageNotExpired(Stage stage) {
+    private void assertStageNotExpired(StageSnapshot stage) {
         if (stage.dateTo() < DateUtils.nowUtcMillis()) throw new StageExpiredException();
     }
 

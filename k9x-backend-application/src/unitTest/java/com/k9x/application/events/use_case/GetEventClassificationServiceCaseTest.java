@@ -1,17 +1,17 @@
 package com.k9x.application.events.use_case;
 
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
-import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
-import com.k9x.application.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.exceptions.EventAlreadyDeletedException;
+import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.use_case.dto.EventClassificationContextDTO;
 import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,10 +28,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class GetEventClassificationServiceCaseTest {
 
-    private static final Event ACTIVE_EVENT = new Event(
+    private static final EventSnapshot ACTIVE_EVENT = new EventSnapshot(
             "evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1", "stage-1", "creator@test.com",
             null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
-    private static final Event DELETED_EVENT = new Event(
+    private static final EventSnapshot DELETED_EVENT = new EventSnapshot(
             "evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open", "stage-1", "creator@test.com",
             null, 1000L, 1000L, 9999L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
 
@@ -51,10 +51,10 @@ class GetEventClassificationServiceCaseTest {
                 eventClassificationCacheManagerPort, getObdxClassificationServiceCase);
     }
 
-    private Competition competition(Event event) {
-        Stage stage = new Stage("stage-1", "Stage A", "comp-1", "user-1", 0L, Long.MAX_VALUE, 1000L, 1000L,
+    private CompetitionSnapshot competition(EventSnapshot event) {
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage A", "comp-1", "user-1", 0L, Long.MAX_VALUE, 1000L, 1000L,
                 null, List.of(event));
-        return new Competition("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
+        return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
                 0L, 0L, null, List.of(stage));
     }
 

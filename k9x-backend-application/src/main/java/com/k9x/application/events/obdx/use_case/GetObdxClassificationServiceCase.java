@@ -3,14 +3,14 @@ package com.k9x.application.events.obdx.use_case;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.dto.*;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
-import com.k9x.domain.aggregates.disciplines.Discipline;
-import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.aggregates.events.ClassificationCompetitorStatus;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.events.EventCompetitor;
-import com.k9x.domain.aggregates.events.EventExercise;
-import com.k9x.domain.aggregates.events.EventJudge;
-import com.k9x.domain.aggregates.events.Score;
+import com.k9x.domain.disciplines.valueobjects.Discipline;
+import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.events.status.ClassificationCompetitorStatus;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.valueobjects.EventCompetitor;
+import com.k9x.domain.events.valueobjects.EventExercise;
+import com.k9x.domain.events.valueobjects.EventJudge;
+import com.k9x.domain.events.valueobjects.Score;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -32,7 +32,7 @@ public class GetObdxClassificationServiceCase {
         return Discipline.OBDX;
     }
 
-    public FetchObdxClassificationDTO getClassification(Event event) {
+    public FetchObdxClassificationDTO getClassification(EventSnapshot event) {
         String eventId = event.id();
         ObdxClassificationConfigDTO config = getObdxClassificationConfigPort.getConfig(event.configurationId());
 
@@ -48,7 +48,7 @@ public class GetObdxClassificationServiceCase {
         return dto;
     }
 
-    private List<FetchClassificationRawRowDTO> buildRawRows(Event event) {
+    private List<FetchClassificationRawRowDTO> buildRawRows(EventSnapshot event) {
         List<EventCompetitor> competitors = event.competitors() == null ? List.of() : event.competitors();
         List<EventExercise> exercises = event.exercises() == null ? List.of() : event.exercises();
         List<EventJudge> judges = event.judges() == null ? List.of() : event.judges();
@@ -80,7 +80,7 @@ public class GetObdxClassificationServiceCase {
         return rows;
     }
 
-    private FetchObdxClassificationDTO aggregateProjection(Event event,
+    private FetchObdxClassificationDTO aggregateProjection(EventSnapshot event,
                                                            ObdxClassificationConfigDTO config,
                                                            List<FetchClassificationRawRowDTO> rawRows) {
         // dogId → exerciseId → list of (judgeId, judgeName, score)

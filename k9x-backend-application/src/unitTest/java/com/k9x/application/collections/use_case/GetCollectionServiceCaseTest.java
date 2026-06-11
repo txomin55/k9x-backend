@@ -7,14 +7,14 @@ import com.k9x.application.collections.use_case.dto.FetchCollectionDetailDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxConfigurationAllowedValuesPort;
-import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
-import com.k9x.application.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.exceptions.EventAlreadyDeletedException;
+import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.exceptions.ObdxUserNotCollectorException;
-import com.k9x.application.stages.exceptions.StageExpiredException;
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.domain.stages.exceptions.StageExpiredException;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,14 +57,14 @@ class GetCollectionServiceCaseTest {
                 getObdxCollectionServiceCase);
     }
 
-    private Event event(Long deletedAt) {
-        return new Event("event-1", "config-1", "obdx", "Event A", "stage-1", "creator@test.com", null, 0L, 0L, deletedAt,
+    private EventSnapshot event(Long deletedAt) {
+        return new EventSnapshot("event-1", "config-1", "obdx", "Event A", "stage-1", "creator@test.com", null, 0L, 0L, deletedAt,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
     }
 
-    private Competition competition(Event event, long dateTo) {
-        Stage stage = new Stage("stage-1", "Stage A", "comp-1", "user-1", 0L, dateTo, 0L, 0L, null, List.of(event));
-        return new Competition("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
+    private CompetitionSnapshot competition(EventSnapshot event, long dateTo) {
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage A", "comp-1", "user-1", 0L, dateTo, 0L, 0L, null, List.of(event));
+        return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
                 0L, 0L, null, List.of(stage));
     }
 

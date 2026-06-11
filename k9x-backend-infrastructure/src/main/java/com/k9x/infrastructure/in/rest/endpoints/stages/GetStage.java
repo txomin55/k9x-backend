@@ -34,7 +34,10 @@ public class GetStage implements StagesFetchOneApiDelegate {
                 stage.events().stream()
                         // TODO: StageEventDetailResponseDTO needs a `boolean enrollmentOpened` field in the OAS
                         //  definition. Once regenerated, pass e.enrollmentOpened() (already computed in the
-                        //  Competition root aggregate against the current timestamp) to the DTO.
+                        //  CompetitionSnapshot root aggregate against the current timestamp) to the DTO.
+                        // TODO: StageEventDetailResponseDTO needs a `Long enrollmentDeadline` field in the OAS
+                        //  definition. Once regenerated, pass e.enrollmentDeadline() (carried through from the
+                        //  EventSnapshot aggregate) to the DTO.
                         .map(e -> new StageEventDetailResponseDTO(
                                 e.id(),
                                 e.name(),

@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.judges;
 
-import com.k9x.domain.aggregates.judges.Judge;
+import com.k9x.domain.judges.aggregates.Judge;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;

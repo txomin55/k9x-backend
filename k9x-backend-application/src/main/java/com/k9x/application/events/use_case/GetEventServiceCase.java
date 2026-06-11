@@ -6,20 +6,20 @@ import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfiguration
 import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
 import com.k9x.application.disciplines.use_case.dto.ExerciseDTO;
-import com.k9x.application.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventJudgeDTO;
 import com.k9x.application.events.use_case.dto.FetchEventConfigurationDTO;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 import com.k9x.application.events.use_case.dto.FetchEventExerciseDTO;
-import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.disciplines.Discipline;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.events.EventCompetitorStatus;
-import com.k9x.domain.aggregates.stages.Stage;
-import com.k9x.domain.exceptions.DisciplineConfigurationMalformedException;
+import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.disciplines.valueobjects.Discipline;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.status.EventCompetitorStatus;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
+import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 import java.io.IOException;
@@ -45,10 +45,10 @@ public class GetEventServiceCase {
         if (competitionId == null) {
             throw new EventNotFoundException();
         }
-        Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
-        Event event = CompetitionNavigator.findEvent(competition, id);
+        CompetitionSnapshot competition = getCompetitionPersistencePort.getCompetition(competitionId);
+        EventSnapshot event = CompetitionNavigator.findEvent(competition, id);
         assertEventExists(event);
-        Stage stage = CompetitionNavigator.findStageOfEvent(competition, id);
+        StageSnapshot stage = CompetitionNavigator.findStageOfEvent(competition, id);
         assertStageValidations(stage, userId);
 
         Discipline discipline = Discipline.valueOf(event.discipline().toUpperCase(Locale.ROOT));
@@ -58,14 +58,14 @@ public class GetEventServiceCase {
         return buildObdxDetail(event, stage);
     }
 
-    private FetchEventDetailDTO buildObdxDetail(Event event, Stage stage) {
+    private FetchEventDetailDTO buildObdxDetail(EventSnapshot event, StageSnapshot stage) {
         FetchObdxEventDTO obdx = new FetchObdxEventDTO(event.id(), event.name(), stage.id(), stage.name(),
                 event.discipline(), event.status().name());
 
         List<FetchObdxEventCompetitorDTO> competitors = event.competitors().stream()
                 .map(c -> new FetchObdxEventCompetitorDTO(c.dogId(), c.dogName(), c.identity(), c.breed(),
                         c.owner(), c.team(), c.country(), c.position(), c.verified(),
-                        EventCompetitorStatus.ENROLLED.name()))
+                        EventCompetitorStatus.ENROLLED.name())) //si es c.verified es ENROLLED, sino PENDING_ENROLL_ACCEPT
                 .toList();
 
         List<FetchObdxEventJudgeDTO> judges = event.judges().stream()
@@ -112,13 +112,13 @@ public class GetEventServiceCase {
         }
     }
 
-    private void assertEventExists(Event event) {
+    private void assertEventExists(EventSnapshot event) {
         if (event == null) {
             throw new EventNotFoundException();
         }
     }
 
-    private void assertStageValidations(Stage stage, String userId) {
+    private void assertStageValidations(StageSnapshot stage, String userId) {
         if (stage.deletedAt() != null) {
             throw new StageAlreadyDeletedException();
         }

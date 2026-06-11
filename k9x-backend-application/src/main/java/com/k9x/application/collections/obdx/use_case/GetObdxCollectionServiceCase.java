@@ -11,8 +11,8 @@ import com.k9x.application.collections.use_case.dto.FetchCollectionCompetitorDTO
 import com.k9x.application.collections.use_case.dto.FetchCollectionExerciseDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionScoreDTO;
-import com.k9x.domain.aggregates.disciplines.Discipline;
-import com.k9x.domain.aggregates.events.EventCompetitorStatus;
+import com.k9x.domain.disciplines.valueobjects.Discipline;
+import com.k9x.domain.events.status.EventCompetitorStatus;
 
 import java.util.List;
 import java.util.Map;

@@ -3,7 +3,7 @@ package com.k9x.application.collections.use_case;
 import com.k9x.application.collections.port.GetCollectionListPersistencePort;
 import com.k9x.application.collections.use_case.dto.FetchCollectionDTO;
 import com.k9x.application.utils.date.DateUtils;
-import com.k9x.domain.aggregates.collections.CollectionStatus;
+import com.k9x.domain.collections.status.CollectionStatus;
 
 import java.util.List;
 

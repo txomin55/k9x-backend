@@ -1,13 +1,7 @@
 package com.k9x.infrastructure.configuration.postgres;
 
-import com.k9x.application.stages.port.CreateStagePersistencePort;
-import com.k9x.application.stages.port.DeleteStagePersistencePort;
 import com.k9x.application.stages.port.GetStageListPersistencePort;
-import com.k9x.application.stages.port.UpdateStagePersistencePort;
-import com.k9x.infrastructure.out.postgres.stages.CreateStageJooqAdapter;
-import com.k9x.infrastructure.out.postgres.stages.DeleteStageJooqAdapter;
 import com.k9x.infrastructure.out.postgres.stages.GetStagesJooqAdapter;
-import com.k9x.infrastructure.out.postgres.stages.UpdateStageJooqAdapter;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,21 +13,6 @@ public class StageJooqAdapterConfiguration {
 
     StageJooqAdapterConfiguration(DSLContext dsl) {
         this.dsl = dsl;
-    }
-
-    @Bean
-    public CreateStagePersistencePort createStagePersistencePort() {
-        return new CreateStageJooqAdapter(dsl);
-    }
-
-    @Bean
-    public UpdateStagePersistencePort updateStagePersistencePort() {
-        return new UpdateStageJooqAdapter(dsl);
-    }
-
-    @Bean
-    public DeleteStagePersistencePort deleteStagePersistencePort() {
-        return new DeleteStageJooqAdapter(dsl);
     }
 
     @Bean

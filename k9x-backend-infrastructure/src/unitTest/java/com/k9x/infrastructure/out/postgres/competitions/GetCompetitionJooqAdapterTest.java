@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.competitions;
 
-import com.k9x.domain.aggregates.competitions.Competition;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -114,7 +114,7 @@ class GetCompetitionJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        Competition competition = new GetCompetitionJooqAdapter(dsl).getCompetition("comp-123");
+        CompetitionSnapshot competition = new GetCompetitionJooqAdapter(dsl).getCompetition("comp-123");
 
         assertThat(competition).isNull();
     }
@@ -160,7 +160,7 @@ class GetCompetitionJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        Competition competition = new GetCompetitionJooqAdapter(dsl).getCompetition("comp-1");
+        CompetitionSnapshot competition = new GetCompetitionJooqAdapter(dsl).getCompetition("comp-1");
 
         assertThat(competition).isNotNull();
         assertThat(competition.id()).isEqualTo("comp-1");

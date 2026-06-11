@@ -1,24 +1,22 @@
 package com.k9x.application.events.use_case;
 
-import com.k9x.application.competitions.CompetitionNavigator;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
-import com.k9x.application.events.obdx.use_case.port.CreateObdxEventPersistencePort;
-import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
-import com.k9x.application.stages.exceptions.StageNotFoundException;
+import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
+import com.k9x.domain.competitions.commands.NewEventData;
+import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 public class CreateEventServiceCase {
 
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
-    private final CreateObdxEventPersistencePort createObdxEventPersistencePort;
+    private final SaveCompetitionPersistencePort saveCompetitionPersistencePort;
 
     public CreateEventServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
-                                  CreateObdxEventPersistencePort createObdxEventPersistencePort) {
+                                  SaveCompetitionPersistencePort saveCompetitionPersistencePort) {
         this.getCompetitionPersistencePort = getCompetitionPersistencePort;
-        this.createObdxEventPersistencePort = createObdxEventPersistencePort;
+        this.saveCompetitionPersistencePort = saveCompetitionPersistencePort;
     }
 
     public void createEvent(String id, String name, String stageId, String disciplineId, String userId, boolean organizer) {
@@ -27,26 +25,14 @@ public class CreateEventServiceCase {
         if (competitionId == null) {
             throw new StageNotFoundException();
         }
-        Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
-        Stage stage = CompetitionNavigator.findStage(competition, stageId);
-        assertStageValidations(stage, userId);
-        createObdxEventPersistencePort.createEvent(id, name, stageId, disciplineId, userId, DateUtils.nowUtcMillis());
+        CompetitionAggregate competition =
+                CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
+        competition.createEvent(new NewEventData(id, name, stageId, disciplineId), userId, DateUtils.nowUtcMillis());
+        saveCompetitionPersistencePort.save(competition);
     }
 
     private void assertOrganizer(boolean organizer) {
         if (!organizer) {
-            throw new UnauthorizedResourceException();
-        }
-    }
-
-    private void assertStageValidations(Stage stage, String userId) {
-        if (stage == null) {
-            throw new StageNotFoundException();
-        }
-        if (stage.deletedAt() != null) {
-            throw new StageAlreadyDeletedException();
-        }
-        if (!stage.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
     }

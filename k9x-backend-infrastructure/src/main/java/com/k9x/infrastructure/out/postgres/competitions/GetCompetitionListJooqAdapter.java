@@ -1,7 +1,7 @@
 package com.k9x.infrastructure.out.postgres.competitions;
 
 import com.k9x.application.competitions.port.GetCompetitionListPersistencePort;
-import com.k9x.domain.aggregates.competitions.Competition;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 
@@ -16,7 +16,7 @@ public class GetCompetitionListJooqAdapter implements GetCompetitionListPersiste
     }
 
     @Override
-    public List<Competition> getCompetitions(String creator) {
+    public List<CompetitionSnapshot> getCompetitions(String creator) {
         return hydrator.hydrate(Tables.COMPETITIONS.CREATOR.eq(creator)
                 .and(Tables.COMPETITIONS.DELETED_AT.isNull()));
     }

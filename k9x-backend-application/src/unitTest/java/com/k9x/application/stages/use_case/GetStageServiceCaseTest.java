@@ -5,14 +5,14 @@ import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfiguration
 import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
 import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
-import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
+import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.application.stages.exceptions.StageHasNoEventsException;
-import com.k9x.application.stages.exceptions.StageNotFoundException;
+import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailDTO;
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.stages.Stage;
-import com.k9x.domain.exceptions.DisciplineConfigurationMalformedException;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
+import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,13 +43,13 @@ class GetStageServiceCaseTest {
         serviceCase = new GetStageServiceCase(getCompetitionPersistencePort, getObdxFederationsConfigurationsPort);
     }
 
-    private Event event() {
-        return new Event("evt-1", "obdx-1", "obdx", "Open", "s-1", "user-1",
+    private EventSnapshot event() {
+        return new EventSnapshot("evt-1", "obdx-1", "obdx", "Open", "s-1", "user-1",
                 null, 0L, 0L, null, null, List.of(), List.of(), List.of(), List.of());
     }
 
-    private Competition competition(Stage stage) {
-        return new Competition("comp-1", "World Cup", "user-1", "Organizer", "ES", "desc", "Calle Mayor 1",
+    private CompetitionSnapshot competition(StageSnapshot stage) {
+        return new CompetitionSnapshot("comp-1", "World Cup", "user-1", "Organizer", "ES", "desc", "Calle Mayor 1",
                 null, null, 0L, 0L, null, List.of(stage));
     }
 
@@ -65,7 +65,7 @@ class GetStageServiceCaseTest {
 
     @Test
     void throws_exception_when_stage_is_deleted() {
-        Stage deleted = new Stage("s-1", "Stage A", "comp-1", "user-1",
+        StageSnapshot deleted = new StageSnapshot("s-1", "Stage A", "comp-1", "user-1",
                 1000L, 2000L, 0L, 0L, 9999L, List.of(event()));
         when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(deleted));
@@ -78,7 +78,7 @@ class GetStageServiceCaseTest {
 
     @Test
     void throws_exception_when_stage_has_no_events() {
-        Stage noEvents = new Stage("s-1", "Stage A", "comp-1", "user-1",
+        StageSnapshot noEvents = new StageSnapshot("s-1", "Stage A", "comp-1", "user-1",
                 1000L, 2000L, 0L, 0L, null, List.of());
         when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(noEvents));
@@ -91,7 +91,7 @@ class GetStageServiceCaseTest {
 
     @Test
     void returns_stage_with_resolved_configuration_names() throws IOException {
-        Stage stage = new Stage("s-1", "Stage A", "comp-1", "user-1",
+        StageSnapshot stage = new StageSnapshot("s-1", "Stage A", "comp-1", "user-1",
                 1000L, 2000L, 0L, 0L, null, List.of(event()));
 
         ConfigurationDTO config = new ConfigurationDTO("obdx-1", "Obedience", List.of());
@@ -112,7 +112,7 @@ class GetStageServiceCaseTest {
 
     @Test
     void throws_when_configurations_cannot_be_loaded() throws IOException {
-        Stage stage = new Stage("s-1", "Stage A", "comp-1", "user-1",
+        StageSnapshot stage = new StageSnapshot("s-1", "Stage A", "comp-1", "user-1",
                 1000L, 2000L, 0L, 0L, null, List.of(event()));
 
         when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn("comp-1");

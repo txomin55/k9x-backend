@@ -5,8 +5,8 @@ import com.k9x.application.competitions.use_case.dto.FetchCompetitionDTO;
 import com.k9x.application.competitions.use_case.dto.FetchEventDTO;
 import com.k9x.application.competitions.use_case.dto.FetchStageDTO;
 import com.k9x.application.utils.date.DateUtils;
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class GetCompetitionListServiceCase {
                 .toList();
     }
 
-    private FetchCompetitionDTO toDto(Competition competition, long now) {
+    private FetchCompetitionDTO toDto(CompetitionSnapshot competition, long now) {
         return new FetchCompetitionDTO(
                 competition.id(),
                 competition.name(),
@@ -41,7 +41,7 @@ public class GetCompetitionListServiceCase {
                 toStageDtos(competition));
     }
 
-    private List<FetchStageDTO> toStageDtos(Competition competition) {
+    private List<FetchStageDTO> toStageDtos(CompetitionSnapshot competition) {
         if (competition.stages() == null) {
             return List.of();
         }
@@ -51,7 +51,7 @@ public class GetCompetitionListServiceCase {
                 .toList();
     }
 
-    private FetchStageDTO toStageDto(Stage stage) {
+    private FetchStageDTO toStageDto(StageSnapshot stage) {
         return new FetchStageDTO(
                 stage.id(),
                 stage.name(),
@@ -60,7 +60,7 @@ public class GetCompetitionListServiceCase {
                 toEventDtos(stage));
     }
 
-    private List<FetchEventDTO> toEventDtos(Stage stage) {
+    private List<FetchEventDTO> toEventDtos(StageSnapshot stage) {
         if (stage.events() == null) {
             return List.of();
         }

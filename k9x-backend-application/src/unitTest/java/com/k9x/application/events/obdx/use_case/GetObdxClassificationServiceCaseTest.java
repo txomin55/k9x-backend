@@ -4,14 +4,14 @@ import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.ObdxClassificationConfigDTO;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
-import com.k9x.domain.aggregates.disciplines.ClassificationCacheEvictStrategy;
-import com.k9x.domain.aggregates.disciplines.Discipline;
-import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.events.EventCompetitor;
-import com.k9x.domain.aggregates.events.EventExercise;
-import com.k9x.domain.aggregates.events.EventJudge;
-import com.k9x.domain.aggregates.events.Score;
+import com.k9x.domain.disciplines.valueobjects.ClassificationCacheEvictStrategy;
+import com.k9x.domain.disciplines.valueobjects.Discipline;
+import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.valueobjects.EventCompetitor;
+import com.k9x.domain.events.valueobjects.EventExercise;
+import com.k9x.domain.events.valueobjects.EventJudge;
+import com.k9x.domain.events.valueobjects.Score;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,16 +52,16 @@ class GetObdxClassificationServiceCaseTest {
                 getObdxClassificationConfigPort, classificationCacheManagerPort);
     }
 
-    private Event emptyEvent() {
+    private EventSnapshot emptyEvent() {
         return event(List.of());
     }
 
     /**
-     * Builds an Event whose competitors/exercises/judges/scores reproduce the same scenario the old test
+     * Builds an EventSnapshot whose competitors/exercises/judges/scores reproduce the same scenario the old test
      * fed through FetchClassificationRawRowDTO rows. Each row is (dogId, dogName, judgeId, score) on the
      * single exercise "ex-1" (position 1, no tags), score lastUpdate 1000L.
      */
-    private Event event(List<Row> rows) {
+    private EventSnapshot event(List<Row> rows) {
         Set<String> dogIds = new LinkedHashSet<>();
         Set<String> judgeIds = new LinkedHashSet<>();
         List<EventCompetitor> competitors = new ArrayList<>();
@@ -83,7 +83,7 @@ class GetObdxClassificationServiceCaseTest {
                 ? List.of()
                 : List.of(new EventExercise("ex-1", (short) 1, null));
 
-        return new Event("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1", "stage-1", "creator@test.com",
+        return new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1", "stage-1", "creator@test.com",
                 null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG, competitors, exercises, judges, scores);
     }
 
@@ -119,7 +119,7 @@ class GetObdxClassificationServiceCaseTest {
 
     @Test
     void applies_avg_multiplied_by_coef_when_fewer_than_4_judges() {
-        Event event = event(List.of(
+        EventSnapshot event = event(List.of(
                 new Row("dog-1", "Rex", "j-1", new BigDecimal("8")),
                 new Row("dog-1", "Rex", "j-2", new BigDecimal("6"))));
 
@@ -140,7 +140,7 @@ class GetObdxClassificationServiceCaseTest {
                 new BigDecimal("10"),
                 Map.of("ex-1", new BigDecimal("2")), List.of(), List.of());
 
-        Event event = event(List.of(
+        EventSnapshot event = event(List.of(
                 new Row("dog-1", "Rex", "j-1", new BigDecimal("5")),
                 new Row("dog-1", "Rex", "j-2", new BigDecimal("7")),
                 new Row("dog-1", "Rex", "j-3", new BigDecimal("9")),
@@ -157,7 +157,7 @@ class GetObdxClassificationServiceCaseTest {
 
     @Test
     void assigns_positions_sorted_by_total_score_descending() {
-        Event event = event(List.of(
+        EventSnapshot event = event(List.of(
                 new Row("dog-1", "Rex", "j-1", new BigDecimal("6")),
                 new Row("dog-2", "Max", "j-1", new BigDecimal("9"))));
 
@@ -180,7 +180,7 @@ class GetObdxClassificationServiceCaseTest {
                 new BigDecimal("10"),
                 Map.of("ex-1", new BigDecimal("1")), List.of(), List.of());
 
-        Event event = event(List.of(
+        EventSnapshot event = event(List.of(
                 new Row("dog-1", "Rex", "j-1", new BigDecimal("7")),
                 new Row("dog-2", "Max", "j-1", new BigDecimal("7"))));
 

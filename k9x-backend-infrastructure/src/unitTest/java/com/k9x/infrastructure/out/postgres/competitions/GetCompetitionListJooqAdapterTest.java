@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.competitions;
 
-import com.k9x.domain.aggregates.competitions.Competition;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -19,7 +19,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@code getCompetitions(creator)} hydrates full {@link Competition} trees through
+ * {@code getCompetitions(creator)} hydrates full {@link CompetitionSnapshot} trees through
  * {@link CompetitionHydrator}, so the {@link MockDataProvider} routes by FROM table, mirroring
  * {@link GetCompetitionJooqAdapterTest}.
  */
@@ -101,7 +101,7 @@ class GetCompetitionListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<Competition> competitions = new GetCompetitionListJooqAdapter(dsl).getCompetitions("creator-1");
+        List<CompetitionSnapshot> competitions = new GetCompetitionListJooqAdapter(dsl).getCompetitions("creator-1");
 
         assertThat(competitions).isEmpty();
     }
@@ -146,10 +146,10 @@ class GetCompetitionListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<Competition> competitions = new GetCompetitionListJooqAdapter(dsl).getCompetitions("creator-1");
+        List<CompetitionSnapshot> competitions = new GetCompetitionListJooqAdapter(dsl).getCompetitions("creator-1");
 
         assertThat(competitions).hasSize(1);
-        Competition competition = competitions.getFirst();
+        CompetitionSnapshot competition = competitions.getFirst();
         assertThat(competition.id()).isEqualTo("comp-1");
         assertThat(competition.name()).isEqualTo("World Cup");
         assertThat(competition.creator()).isEqualTo("creator-1");

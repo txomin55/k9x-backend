@@ -1,20 +1,22 @@
 package com.k9x.application.competitions.use_case;
 
-import com.k9x.application.competitions.port.CreateCompetitionPersistencePort;
+import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
+import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 public class CreateCompetitionServiceCase {
 
-    private final CreateCompetitionPersistencePort createCompetitionPersistencePort;
+    private final SaveCompetitionPersistencePort saveCompetitionPersistencePort;
 
-    public CreateCompetitionServiceCase(CreateCompetitionPersistencePort createCompetitionPersistencePort) {
-        this.createCompetitionPersistencePort = createCompetitionPersistencePort;
+    public CreateCompetitionServiceCase(SaveCompetitionPersistencePort saveCompetitionPersistencePort) {
+        this.saveCompetitionPersistencePort = saveCompetitionPersistencePort;
     }
 
     public void createCompetition(String id, String name, String userId, boolean organizer) {
         assertOrganizer(organizer);
-        createCompetitionPersistencePort.createCompetition(id, name, userId, DateUtils.nowUtcMillis());
+        CompetitionAggregate competition = CompetitionAggregate.createNew(id, name, userId, DateUtils.nowUtcMillis());
+        saveCompetitionPersistencePort.save(competition);
     }
 
     private void assertOrganizer(boolean organizer) {

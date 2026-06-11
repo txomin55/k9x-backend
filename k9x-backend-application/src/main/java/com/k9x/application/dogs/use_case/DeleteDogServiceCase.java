@@ -5,7 +5,7 @@ import com.k9x.application.dogs.exceptions.DogNotFoundException;
 import com.k9x.application.dogs.port.DeleteDogPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
-import com.k9x.domain.aggregates.dogs.Dog;
+import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 public class DeleteDogServiceCase {

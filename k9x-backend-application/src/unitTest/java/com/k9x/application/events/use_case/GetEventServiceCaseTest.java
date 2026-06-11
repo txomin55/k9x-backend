@@ -6,16 +6,16 @@ import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
 import com.k9x.application.disciplines.use_case.dto.ExerciseDTO;
 import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
-import com.k9x.application.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
-import com.k9x.application.stages.exceptions.StageAlreadyDeletedException;
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.events.EventCompetitor;
-import com.k9x.domain.aggregates.events.EventExercise;
-import com.k9x.domain.aggregates.events.EventJudge;
-import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.valueobjects.EventCompetitor;
+import com.k9x.domain.events.valueobjects.EventExercise;
+import com.k9x.domain.events.valueobjects.EventJudge;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,24 +46,24 @@ class GetEventServiceCaseTest {
         serviceCase = new GetEventServiceCase(getCompetitionPersistencePort, getObdxFederationsConfigurationsPort);
     }
 
-    private Event event() {
-        return new Event("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
+    private EventSnapshot event() {
+        return new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
     }
 
-    private Event richEvent() {
+    private EventSnapshot richEvent() {
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "team", "ES", "breed",
                 "id-1", (short) 1, true, false);
         EventExercise exercise = new EventExercise("ex-1", (short) 1, List.of("tag-a", "tag-b"));
         EventJudge judge = new EventJudge("judge-1", "Judge", "collector@k9x.com");
-        return new Event("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
+        return new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(exercise), List.of(judge), List.of());
     }
 
-    private Competition competition(Event event, String stageCreator, Long stageDeletedAt) {
-        Stage stage = new Stage("stage-1", "Stage 1", "comp-1", stageCreator, 0L, Long.MAX_VALUE, 0L, 0L,
+    private CompetitionSnapshot competition(EventSnapshot event, String stageCreator, Long stageDeletedAt) {
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", stageCreator, 0L, Long.MAX_VALUE, 0L, 0L,
                 stageDeletedAt, List.of(event));
-        return new Competition("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
+        return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
                 0L, 0L, null, List.of(stage));
     }
 

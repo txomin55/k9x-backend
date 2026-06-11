@@ -2,17 +2,17 @@ package com.k9x.application.events.use_case;
 
 import com.k9x.application.competitions.CompetitionNavigator;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
-import com.k9x.application.events.exceptions.EventAlreadyDeletedException;
-import com.k9x.application.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.exceptions.EventAlreadyDeletedException;
+import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.use_case.dto.EventClassificationContextDTO;
 import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.disciplines.Discipline;
-import com.k9x.domain.aggregates.events.Event;
-import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.disciplines.valueobjects.Discipline;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
 
 import java.util.Locale;
 
@@ -35,7 +35,7 @@ public class GetEventClassificationServiceCase {
 
     public FetchClassificationDTO getClassification(String eventId) {
         EventClassificationContextDTO context = resolveContext(eventId);
-        Event event = context.event();
+        EventSnapshot event = context.event();
 
         Discipline discipline = Discipline.valueOf(event.discipline().toUpperCase(Locale.ROOT));
         FetchObdxClassificationDTO obdx = discipline == Discipline.OBDX
@@ -57,12 +57,12 @@ public class GetEventClassificationServiceCase {
 
         String competitionId = getCompetitionPersistencePort.competitionIdByEvent(eventId);
         if (competitionId == null) throw new EventNotFoundException();
-        Competition competition = getCompetitionPersistencePort.getCompetition(competitionId);
-        Event event = CompetitionNavigator.findEvent(competition, eventId);
+        CompetitionSnapshot competition = getCompetitionPersistencePort.getCompetition(competitionId);
+        EventSnapshot event = CompetitionNavigator.findEvent(competition, eventId);
         if (event == null) throw new EventNotFoundException();
         if (event.deletedAt() != null) throw new EventAlreadyDeletedException();
 
-        Stage stage = CompetitionNavigator.findStageOfEvent(competition, eventId);
+        StageSnapshot stage = CompetitionNavigator.findStageOfEvent(competition, eventId);
 
         EventClassificationContextDTO context = new EventClassificationContextDTO(event, stage.name());
         eventClassificationCacheManagerPort.put(eventId, context);

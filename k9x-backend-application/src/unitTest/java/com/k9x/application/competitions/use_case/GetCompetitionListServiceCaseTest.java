@@ -2,8 +2,8 @@ package com.k9x.application.competitions.use_case;
 
 import com.k9x.application.competitions.port.GetCompetitionListPersistencePort;
 import com.k9x.application.competitions.use_case.dto.FetchCompetitionDTO;
-import com.k9x.domain.aggregates.competitions.Competition;
-import com.k9x.domain.aggregates.stages.Stage;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +30,8 @@ class GetCompetitionListServiceCaseTest {
         serviceCase = new GetCompetitionListServiceCase(getCompetitionListPersistencePort);
     }
 
-    private Competition competition(String id, List<Stage> stages) {
-        return new Competition(id, "World Cup", "user-1", "Org", "ES", "desc", "Calle Mayor 1",
+    private CompetitionSnapshot competition(String id, List<StageSnapshot> stages) {
+        return new CompetitionSnapshot(id, "World Cup", "user-1", "Org", "ES", "desc", "Calle Mayor 1",
                 null, null, 0L, 0L, null, stages);
     }
 
@@ -58,9 +58,9 @@ class GetCompetitionListServiceCaseTest {
     }
 
     @Test
-    void maps_competition_with_finished_stage_as_finished() {
-        // dateTo = 0L (1970) is strictly before today's UTC day -> FINISHED stage -> FINISHED competition.
-        Stage finishedStage = new Stage("stage-1", "Stage 1", "comp-1", "user-1",
+    void maps_competition_with_finished_stage_as_completed() {
+        // dateTo = 0L (1970) is strictly before today's UTC day -> FINISHED stage -> COMPLETED competition.
+        StageSnapshot finishedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1",
                 0L, 0L, 0L, 0L, null, List.of());
         when(getCompetitionListPersistencePort.getCompetitions("user-1"))
                 .thenReturn(List.of(competition("comp-1", List.of(finishedStage))));
@@ -68,7 +68,7 @@ class GetCompetitionListServiceCaseTest {
         List<FetchCompetitionDTO> result = serviceCase.getCompetitions("user-1", true);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().status()).isEqualTo("FINISHED");
+        assertThat(result.getFirst().status()).isEqualTo("COMPLETED");
         assertThat(result.getFirst().stages()).hasSize(1);
     }
 }

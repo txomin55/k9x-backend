@@ -5,7 +5,7 @@ import com.k9x.application.dogs.exceptions.DogNotFoundException;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
 import com.k9x.application.dogs.use_case.command.UpdateDogCommand;
-import com.k9x.domain.aggregates.dogs.Dog;
+import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
