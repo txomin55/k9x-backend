@@ -69,7 +69,7 @@ public class GetEventServiceCase {
                 .toList();
 
         List<FetchObdxEventJudgeDTO> judges = event.judges().stream()
-                .map(j -> new FetchObdxEventJudgeDTO(j.judgeId(), j.judgeName(), j.collectorEmail(), j.ring()))
+                .map(j -> new FetchObdxEventJudgeDTO(j.judgeId(), j.judgeName(), j.collectorEmail()))
                 .toList();
 
         ConfigurationsDTO federation = resolveFederationConfiguration(event.configurationId());

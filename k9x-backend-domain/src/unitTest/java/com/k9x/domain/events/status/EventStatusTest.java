@@ -30,7 +30,7 @@ class EventStatusTest {
     }
 
     private static EventJudge judge(String id) {
-        return new EventJudge(id, id, null, null);
+        return new EventJudge(id, id, null);
     }
 
     private static Score score(String exerciseId, String judgeId, String dogId, BigDecimal value) {

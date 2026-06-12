@@ -69,8 +69,7 @@ public class UpdateObdxEventServiceCase {
                                 e.tags() == null ? new String[0] : e.tags().toArray(String[]::new)))
                         .toList(),
                 command.judges().stream()
-                        .map(j -> new ObdxJudgeItem(j.judgeId(), j.collectorEmail(),
-                                j.ring() == null ? null : j.ring().shortValue()))
+                        .map(j -> new ObdxJudgeItem(j.judgeId(), j.collectorEmail()))
                         .toList());
     }
 

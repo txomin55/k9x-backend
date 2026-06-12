@@ -148,7 +148,6 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                     .set(EVENT_JUDGES.EVENT_ID, c.eventId())
                     .set(EVENT_JUDGES.JUDGE_ID, judge.judgeId())
                     .set(EVENT_JUDGES.COLLECTOR_ID, judge.collectorId())
-                    .set(EVENT_JUDGES.RING, judge.ring())
                     .set(EVENT_JUDGES.LAST_UPDATE, c.lastUpdate())
                     .execute();
         }

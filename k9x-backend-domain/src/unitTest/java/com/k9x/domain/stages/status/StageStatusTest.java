@@ -32,7 +32,7 @@ class StageStatusTest {
         return new EventSnapshot("e1", "cfg", "obdx", "Event", "s1", "creator", null, 0L, 0L, null, ObdxAvgMethod.AVG,
                 List.of(new EventCompetitor("d1", "d1", "o", "t", "c", "b", "i", (short) 0, true, false)),
                 List.of(new EventExercise("x1", (short) 1, List.of()), new EventExercise("x2", (short) 2, List.of())),
-                List.of(new EventJudge("j1", "j1", null, null)),
+                List.of(new EventJudge("j1", "j1", null)),
                 List.of(new Score("x1", "j1", "d1", new BigDecimal("8.0"), 0L)));
     }
 

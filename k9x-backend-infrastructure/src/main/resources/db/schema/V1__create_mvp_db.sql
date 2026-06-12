@@ -110,7 +110,6 @@ CREATE TABLE obdx.event_judges
     event_id     VARCHAR(255) NOT NULL,
     judge_id     VARCHAR(255) NOT NULL,
     collector_id VARCHAR(255),
-    ring         SMALLINT,
     last_update  BIGINT       NOT NULL,
     CONSTRAINT obdx_event_judges_pkey PRIMARY KEY (event_id, judge_id),
     CONSTRAINT obdx_event_judges_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),

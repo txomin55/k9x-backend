@@ -55,7 +55,7 @@ class GetEventServiceCaseTest {
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "team", "ES", "breed",
                 "id-1", (short) 1, true, false);
         EventExercise exercise = new EventExercise("ex-1", (short) 1, List.of("tag-a", "tag-b"));
-        EventJudge judge = new EventJudge("judge-1", "Judge", "collector@k9x.com", (short) 7);
+        EventJudge judge = new EventJudge("judge-1", "Judge", "collector@k9x.com");
         return new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(exercise), List.of(judge), List.of());
     }
