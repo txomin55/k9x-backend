@@ -156,6 +156,88 @@ class GetObdxClassificationServiceCaseTest {
     }
 
     @Test
+    void averages_only_over_judges_that_score_when_judges_are_split_in_two_rings() {
+        // 4 judges, 2 per ring. dog-1 competes in ring 1 (j-1, j-2); the ring-2 judges
+        // (j-3, j-4) are part of the event but DO NOT score this dog's exercise, so their
+        // score rows are null (as produced by the cartesian product on the persistence side).
+        // The average for ex-1 must be over the present scores only (8, 6) -> 7, NOT diluted
+        // by the absent judges (would be (8+6+0+0)/4 = 3.5 if counted as 0) and NOT trimmed by
+        // MID_AVG (which only triggers with 4+ PRESENT scores).
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Team A", "ES",
+                        "breed", "identity", (short) 0, false, false));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(
+                new EventJudge("j-1", "Judge j-1", null),
+                new EventJudge("j-2", "Judge j-2", null),
+                new EventJudge("j-3", "Judge j-3", null),
+                new EventJudge("j-4", "Judge j-4", null));
+        List<Score> scores = List.of(
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("8"), 1000L),
+                new Score("ex-1", "j-2", "dog-1", new BigDecimal("6"), 1000L),
+                new Score("ex-1", "j-3", "dog-1", null, 1000L),
+                new Score("ex-1", "j-4", "dog-1", null, 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
+                competitors, exercises, judges, scores);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        // avg(8, 6) = 7, * coef(3) = 21.00
+        assertThat(result.competitors()).hasSize(1);
+        assertThat(result.competitors().getFirst().totalScore()).isEqualByComparingTo("21.00");
+        // only the two present judges appear in the exercise breakdown
+        assertThat(result.competitors().getFirst().exercises().getFirst().judgeScores())
+                .extracting("judgeId").containsExactlyInAnyOrder("j-1", "j-2");
+    }
+
+    @Test
+    void each_dog_is_averaged_over_its_own_ring_judges() {
+        // dog-1 judged by ring 1 (j-1, j-2); dog-2 judged by ring 2 (j-3, j-4).
+        // Each dog's average must use only its ring's scores, never the other ring's absent judges.
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Team A", "ES",
+                        "breed", "id-1", (short) 0, false, false),
+                new EventCompetitor("dog-2", "Max", "owner@test.com", "Team B", "ES",
+                        "breed", "id-2", (short) 0, false, false));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(
+                new EventJudge("j-1", "Judge j-1", null),
+                new EventJudge("j-2", "Judge j-2", null),
+                new EventJudge("j-3", "Judge j-3", null),
+                new EventJudge("j-4", "Judge j-4", null));
+        List<Score> scores = List.of(
+                // dog-1 → ring 1 present, ring 2 absent
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("8"), 1000L),
+                new Score("ex-1", "j-2", "dog-1", new BigDecimal("6"), 1000L),
+                new Score("ex-1", "j-3", "dog-1", null, 1000L),
+                new Score("ex-1", "j-4", "dog-1", null, 1000L),
+                // dog-2 → ring 2 present, ring 1 absent
+                new Score("ex-1", "j-1", "dog-2", null, 1000L),
+                new Score("ex-1", "j-2", "dog-2", null, 1000L),
+                new Score("ex-1", "j-3", "dog-2", new BigDecimal("9"), 1000L),
+                new Score("ex-1", "j-4", "dog-2", new BigDecimal("7"), 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
+                competitors, exercises, judges, scores);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        // dog-2: avg(9,7)=8 *3 = 24.00 (1st); dog-1: avg(8,6)=7 *3 = 21.00 (2nd)
+        assertThat(result.competitors()).hasSize(2);
+        assertThat(result.competitors().get(0).dogId()).isEqualTo("dog-2");
+        assertThat(result.competitors().get(0).totalScore()).isEqualByComparingTo("24.00");
+        assertThat(result.competitors().get(1).dogId()).isEqualTo("dog-1");
+        assertThat(result.competitors().get(1).totalScore()).isEqualByComparingTo("21.00");
+    }
+
+    @Test
     void assigns_positions_sorted_by_total_score_descending() {
         EventSnapshot event = event(List.of(
                 new Row("dog-1", "Rex", "j-1", new BigDecimal("6")),

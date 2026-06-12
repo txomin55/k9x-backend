@@ -19,12 +19,9 @@
 [9:10, 8/5/2026] Txomin: Eventos de usuario enviar a atlas
 
 - Terminar push manager
--
 
 ### MVP
 
-- hay que agrupar puntuaciones de jueces por ring, por lo que hay que pensar la logica de estados de si un competidor a
-  terminado o no
 - dorsal de competidor reusado como position?
 
 - Postgresql https://supabase.com/dashboard/project/rivmavaifjpjrifqlzzk
