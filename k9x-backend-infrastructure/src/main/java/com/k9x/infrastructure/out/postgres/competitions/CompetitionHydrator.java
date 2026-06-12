@@ -209,13 +209,13 @@ class CompetitionHydrator {
         EventJudges ej = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_JUDGES;
         Judges j = Tables.JUDGES;
         Users u = Tables.USERS;
-        dsl.select(ej.EVENT_ID, ej.JUDGE_ID, j.NAME, u.EMAIL)
+        dsl.select(ej.EVENT_ID, ej.JUDGE_ID, j.NAME, u.EMAIL, ej.RING)
                 .from(ej)
                 .join(j).on(j.ID.eq(ej.JUDGE_ID).and(j.DELETED_AT.isNull()))
                 .leftJoin(u).on(u.ID.eq(ej.COLLECTOR_ID))
                 .where(ej.EVENT_ID.in(eventIds))
                 .forEach(r -> result.computeIfAbsent(r.get(ej.EVENT_ID), _ -> new ArrayList<>())
-                        .add(new EventJudge(r.get(ej.JUDGE_ID), r.get(j.NAME), r.get(u.EMAIL))));
+                        .add(new EventJudge(r.get(ej.JUDGE_ID), r.get(j.NAME), r.get(u.EMAIL), r.get(ej.RING))));
         return result;
     }
 

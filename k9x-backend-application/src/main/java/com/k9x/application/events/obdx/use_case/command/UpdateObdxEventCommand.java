@@ -16,6 +16,6 @@ public record UpdateObdxEventCommand(
     public record ExerciseCommand(String exerciseId, Integer order, List<String> tags) {
     }
 
-    public record JudgeCommand(String judgeId, String collectorEmail) {
+    public record JudgeCommand(String judgeId, String collectorEmail, Integer ring) {
     }
 }

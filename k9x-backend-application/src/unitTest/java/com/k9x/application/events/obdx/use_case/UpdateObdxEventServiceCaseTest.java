@@ -90,7 +90,7 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_collector_email_does_not_exist() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, List.of(), List.of(),
-                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "missing@k9x.com")));
+                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "missing@k9x.com", 7)));
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getUserInfoPersistencePort.findById("missing@k9x.com")).thenReturn(null);
 

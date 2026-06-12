@@ -52,12 +52,12 @@ INSERT INTO obdx.event_competitors (event_id, dog_id, position, verified, last_u
     ('event-5', 'dog-2', NULL, NULL, 1700000000000, FALSE);
 
 -- event_judges (judge-1 with user-1 as collector in every event) --------
-INSERT INTO obdx.event_judges (event_id, judge_id, collector_id, last_update) VALUES
-    ('event-1', 'judge-1', 'user-1', 1700000000000),
-    ('event-2', 'judge-1', 'user-1', 1700000000000),
-    ('event-3', 'judge-1', 'user-1', 1700000000000),
-    ('event-4', 'judge-1', 'user-1', 1700000000000),
-    ('event-5', 'judge-1', 'user-1', 1700000000000);
+INSERT INTO obdx.event_judges (event_id, judge_id, collector_id, ring, last_update) VALUES
+    ('event-1', 'judge-1', 'user-1', 1, 1700000000000),
+    ('event-2', 'judge-1', 'user-1', 2, 1700000000000),
+    ('event-3', 'judge-1', 'user-1', 3, 1700000000000),
+    ('event-4', 'judge-1', 'user-1', 4, 1700000000000),
+    ('event-5', 'judge-1', 'user-1', 5, 1700000000000);
 
 -- event_exercises (first 4 exercises of each event's configuration) ------
 INSERT INTO obdx.event_exercises (event_id, exercise_id, position, tags, last_update) VALUES

@@ -11,6 +11,9 @@ import java.util.List;
 
 public class UpdateObdxEventInfo implements SecuredEventsUpdateInfoObdxApiDelegate {
 
+    // TODO: valor simulado hasta que el contrato OAS exponga `ring` en cada juez del body.
+    private static final Integer SIMULATED_RING = 1;
+
     private final UpdateObdxEventServiceCase updateObdxEventServiceCase;
     private final UserInfoDTO userDetails;
 
@@ -34,7 +37,12 @@ public class UpdateObdxEventInfo implements SecuredEventsUpdateInfoObdxApiDelega
                                 .map(e -> new UpdateObdxEventCommand.ExerciseCommand(e.getId(), e.getPosition(), e.getTags()))
                                 .toList(),
                         body.getJudges() == null ? List.of() : body.getJudges().stream()
-                                .map(j -> new UpdateObdxEventCommand.JudgeCommand(j.getId(), j.getCollectorEmail()))
+                                // TODO: el `ring` (numérico del 1 al 100) llegará en el body del OAS junto al
+                                //  id del juez y el collector. Mientras el contrato no lo exponga, se simula
+                                //  su recepción con SIMULATED_RING; el resto del stack ya lo persiste en la
+                                //  columna `ring` de obdx.event_judges.
+                                .map(j -> new UpdateObdxEventCommand.JudgeCommand(
+                                        j.getId(), j.getCollectorEmail(), SIMULATED_RING))
                                 .toList()
                 ),
                 userDetails.getEmail(),

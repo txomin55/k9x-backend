@@ -76,6 +76,9 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
     }
 
     private List<EventJudgeDetailResponseDTO> mapJudges(List<FetchObdxEventJudgeDTO> judges) {
+        // TODO: el `ring` (numérico del 1 al 100) ya llega hasta aquí en j.ring(), pero el contrato OAS
+        //  (EventJudgeDetailResponseDTO) todavía no expone el campo. En cuanto se añada al contrato,
+        //  mapear j.ring() en la respuesta.
         return judges.stream()
                 .map(j -> new EventJudgeDetailResponseDTO(j.judgeId(), j.judgeName(), j.collectorEmail()))
                 .toList();

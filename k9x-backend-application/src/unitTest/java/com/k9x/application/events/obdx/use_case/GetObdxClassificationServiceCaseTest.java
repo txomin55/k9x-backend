@@ -74,7 +74,7 @@ class GetObdxClassificationServiceCaseTest {
                         "breed", "identity", (short) 0, false, false));
             }
             if (judgeIds.add(r.judgeId())) {
-                judges.add(new EventJudge(r.judgeId(), "Judge " + r.judgeId(), null));
+                judges.add(new EventJudge(r.judgeId(), "Judge " + r.judgeId(), null, null));
             }
             scores.add(new Score("ex-1", r.judgeId(), r.dogId(), r.score(), 1000L));
         }
