@@ -60,6 +60,8 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                                                         j.scoreRating()))
                                                 .toList()))
                                 .toList(),
+                        // TODO: temporarily exposing the static start order (competitor number) in the
+                        // ranking `startOrder` field until the OAS response gets a dedicated field for it.
                         c.position(),
                         c.totalScore(),
                         c.scoreRating(),

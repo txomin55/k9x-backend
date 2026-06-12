@@ -256,6 +256,41 @@ class GetObdxClassificationServiceCaseTest {
     }
 
     @Test
+    void exposes_static_start_order_per_competitor_independent_of_ranking() {
+        // dog-1 enrolled with start order 5, dog-2 with start order 3. dog-2 scores higher so it
+        // ranks 1st, but each competitor must keep its own static start order regardless of the
+        // dynamic ranking position.
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Team A", "ES",
+                        "breed", "id-1", (short) 5, false, false),
+                new EventCompetitor("dog-2", "Max", "owner@test.com", "Team B", "ES",
+                        "breed", "id-2", (short) 3, false, false));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        List<Score> scores = List.of(
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("6"), 1000L),
+                new Score("ex-1", "j-1", "dog-2", new BigDecimal("9"), 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
+                competitors, exercises, judges, scores);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors()).hasSize(2);
+        // dog-2 ranks 1st but keeps its static start order 3
+        assertThat(result.competitors().get(0).dogId()).isEqualTo("dog-2");
+        assertThat(result.competitors().get(0).position()).isEqualTo(1);
+        assertThat(result.competitors().get(0).startOrder()).isEqualTo((short) 3);
+        // dog-1 ranks 2nd but keeps its static start order 5
+        assertThat(result.competitors().get(1).dogId()).isEqualTo("dog-1");
+        assertThat(result.competitors().get(1).position()).isEqualTo(2);
+        assertThat(result.competitors().get(1).startOrder()).isEqualTo((short) 5);
+    }
+
+    @Test
     void tied_dogs_get_same_position() {
         ObdxClassificationConfigDTO tieConfig = new ObdxClassificationConfigDTO(
                 ClassificationCacheEvictStrategy.OBDX,

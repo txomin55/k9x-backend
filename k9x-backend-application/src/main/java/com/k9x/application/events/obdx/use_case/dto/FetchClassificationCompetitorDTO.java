@@ -5,6 +5,6 @@ import java.util.List;
 
 public record FetchClassificationCompetitorDTO(
         String dogId, String dogName, String owner, String team, String country,
-        int position, BigDecimal totalScore, BigDecimal scoreRating, boolean tied, String status,
+        Short startOrder, int position, BigDecimal totalScore, BigDecimal scoreRating, boolean tied, String status,
         List<FetchClassificationExerciseScoreDTO> exercises) {
 }

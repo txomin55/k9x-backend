@@ -90,6 +90,11 @@ public class GetObdxClassificationServiceCase {
         // exerciseId → position and tags (same for all dogs)
         Map<String, Short> exercisePositions = new LinkedHashMap<>();
         Map<String, List<String>> exerciseTags = new LinkedHashMap<>();
+        // dogId → static start order (competitor number), set on enrollment
+        Map<String, Short> startOrderByDog = new LinkedHashMap<>();
+        for (EventCompetitor competitor : (event.competitors() == null ? List.<EventCompetitor>of() : event.competitors())) {
+            startOrderByDog.put(competitor.dogId(), competitor.position());
+        }
 
         Long scoresLastUpdate = null;
 
@@ -145,7 +150,8 @@ public class GetObdxClassificationServiceCase {
 
             competitors.add(new FetchClassificationCompetitorDTO(
                     dogId, meta.dogName(), meta.dogOwner(), meta.dogTeam(), meta.dogCountry(),
-                    0, totalScore, competitorScoreRating, false, ClassificationCompetitorStatus.LIVE.name(), exercises));
+                    startOrderByDog.get(dogId), 0, totalScore, competitorScoreRating, false,
+                    ClassificationCompetitorStatus.LIVE.name(), exercises));
         }
 
         assignPositions(competitors, config);
@@ -220,6 +226,6 @@ public class GetObdxClassificationServiceCase {
         FetchClassificationCompetitorDTO c = competitors.get(index);
         competitors.set(index, new FetchClassificationCompetitorDTO(
                 c.dogId(), c.dogName(), c.owner(), c.team(), c.country(),
-                position, c.totalScore(), c.scoreRating(), tied, c.status(), c.exercises()));
+                c.startOrder(), position, c.totalScore(), c.scoreRating(), tied, c.status(), c.exercises()));
     }
 }
