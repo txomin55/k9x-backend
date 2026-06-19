@@ -50,6 +50,7 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
             case DogEnrolled c -> insertCompetitor(ctx, c);
             case ObdxEventInfoUpdated c -> updateObdxEventInfo(ctx, c);
             case ScoreUpdated c -> upsertScore(ctx, c);
+            case CompetitorNotCompetingUpdated c -> updateCompetitorNotCompeting(ctx, c);
             default ->
                     throw new UnsupportedOperationException("Unsupported change type: " + change.getClass().getSimpleName());
         }
@@ -170,6 +171,15 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 }
             }
         }
+    }
+
+    private void updateCompetitorNotCompeting(DSLContext ctx, CompetitorNotCompetingUpdated c) {
+        ctx.update(EVENT_COMPETITORS)
+                .set(EVENT_COMPETITORS.NOT_COMPETING, c.notCompeting())
+                .set(EVENT_COMPETITORS.LAST_UPDATE, c.lastUpdate())
+                .where(EVENT_COMPETITORS.EVENT_ID.eq(c.eventId())
+                        .and(EVENT_COMPETITORS.DOG_ID.eq(c.dogId())))
+                .execute();
     }
 
     private void insertCompetition(DSLContext ctx, CompetitionCreated c) {

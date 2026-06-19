@@ -13,6 +13,7 @@ import com.k9x.domain.competitions.commands.ScoreUpdateData;
 import com.k9x.domain.competitions.commands.StageUpdateData;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 
 import java.math.BigDecimal;
@@ -197,6 +198,26 @@ class SaveCompetitionJooqAdapterTest {
                 .contains("insert into \"obdx\".\"event_scores\"")
                 .contains("on conflict")
                 .contains("do nothing");
+    }
+
+    @Test
+    void emits_update_for_competitor_not_competing() {
+        givenCapturingDsl();
+        EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "Owner", "Team", "ES", "Breed", null,
+                (short) 1, true, false);
+        EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", null, NOW, NOW, null,
+                ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of());
+        StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
+                FUTURE_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
+        CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
+                0.0, 0.0, NOW, NOW, null, List.of(stage));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition);
+        aggregate.updateCompetitorNotCompeting("evt-1", "dog-1", true, "user", NOW);
+
+        new SaveCompetitionJooqAdapter(dsl).save(aggregate);
+
+        assertThat(capturedSql).anyMatch(sql ->
+                sql.contains("update \"obdx\".\"event_competitors\"") && sql.contains("\"not_competing\""));
     }
 
     @Test

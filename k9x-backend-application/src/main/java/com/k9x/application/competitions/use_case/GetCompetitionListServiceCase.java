@@ -38,25 +38,26 @@ public class GetCompetitionListServiceCase {
                 competition.country(),
                 competition.address(),
                 competition.status(now).name(),
-                toStageDtos(competition));
+                toStageDtos(competition, now));
     }
 
-    private List<FetchStageDTO> toStageDtos(CompetitionSnapshot competition) {
+    private List<FetchStageDTO> toStageDtos(CompetitionSnapshot competition, long now) {
         if (competition.stages() == null) {
             return List.of();
         }
         return competition.stages().stream()
                 .filter(stage -> stage.deletedAt() == null)
-                .map(this::toStageDto)
+                .map(stage -> toStageDto(stage, now))
                 .toList();
     }
 
-    private FetchStageDTO toStageDto(StageSnapshot stage) {
+    private FetchStageDTO toStageDto(StageSnapshot stage, long now) {
         return new FetchStageDTO(
                 stage.id(),
                 stage.name(),
                 stage.dateFrom(),
                 stage.dateTo(),
+                stage.status(now).name(),
                 toEventDtos(stage));
     }
 

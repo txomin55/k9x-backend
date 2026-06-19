@@ -61,6 +61,7 @@ class GetCompetitionListJooqAdapterTest {
             Tables.EVENTS.NAME,
             Tables.EVENTS.STAGE_ID,
             Tables.EVENTS.CREATOR,
+            Tables.EVENTS.ENROLLMENT_DEADLINE,
             Tables.EVENTS.LAST_UPDATE,
             Tables.EVENTS.CREATED_AT,
             Tables.EVENTS.DELETED_AT,

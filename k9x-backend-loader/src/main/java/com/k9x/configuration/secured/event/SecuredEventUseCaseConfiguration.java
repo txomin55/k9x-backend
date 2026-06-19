@@ -5,6 +5,7 @@ import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxExerciseAllowedValuesPort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.events.obdx.port.*;
+import com.k9x.application.events.obdx.use_case.UpdateNotCompetingServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxScoreServiceCase;
 import com.k9x.application.events.use_case.CreateEventServiceCase;
@@ -58,5 +59,11 @@ public class SecuredEventUseCaseConfiguration {
                                                              SaveCompetitionPersistencePort saveCompetitionPersistencePort) {
         return new UpdateObdxScoreServiceCase(getCompetitionPersistencePort,
                 getObdxEventCollectorPersistencePort, getObdxExerciseAllowedValuesPort, saveCompetitionPersistencePort);
+    }
+
+    @Bean
+    public UpdateNotCompetingServiceCase updateNotCompetingServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
+                                                                       SaveCompetitionPersistencePort saveCompetitionPersistencePort) {
+        return new UpdateNotCompetingServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort);
     }
 }

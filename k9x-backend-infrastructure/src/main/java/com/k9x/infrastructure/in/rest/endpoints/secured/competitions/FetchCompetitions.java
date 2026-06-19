@@ -44,6 +44,7 @@ public class FetchCompetitions implements SecuredCompetitionsFetchAllApiDelegate
                                                 stage.dateTo() != null ? BigDecimal.valueOf(stage.dateTo()) : null,
                                                 stage.id(),
                                                 stage.name(),
+                                                stage.status(),
                                                 stage.events().stream()
                                                         .map(event -> new CompetitionStageEventDetailResponseDTO(
                                                                 event.id(),

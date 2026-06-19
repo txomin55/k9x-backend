@@ -5,6 +5,7 @@ import com.k9x.domain.competitions.status.CompetitionStatus;
 import com.k9x.domain.competitions.commands.*;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.status.EventStatus;
+import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.stages.status.StageStatus;
 import com.k9x.domain.competitions.exceptions.*;
@@ -141,6 +142,24 @@ public final class CompetitionAggregate {
                 data.enrollmentDeadline(), data.competitors(), data.exercises(), data.judges(), now));
     }
 
+    /**
+     * Flags (or clears) a competitor as not competing. A not-competing competitor is treated as settled by
+     * {@link EventSnapshot#status()}, i.e. equivalent to one who has finished competing. Marking a competitor
+     * that is already not competing is rejected with {@link CompetitorAlreadyNotCompetingException}.
+     */
+    public void updateCompetitorNotCompeting(String eventId, String dogId, boolean notCompeting, String userId, long now) {
+        EventSnapshot event = requireActiveEvent(eventId);
+
+        if (!event.creator().equals(userId)) {
+            throw new UnauthorizedResourceException();
+        }
+        EventCompetitor competitor = findCompetitor(event, dogId);
+        if (notCompeting && competitor.notCompeting()) {
+            throw new CompetitorAlreadyNotCompetingException();
+        }
+        changes.add(new CompetitorNotCompetingUpdated(eventId, dogId, notCompeting, now));
+    }
+
     public void updateScore(String eventId, ScoreUpdateData data, long now) {
         requireActiveEvent(eventId);
         StageSnapshot stage = findStageOfEvent(eventId);
@@ -232,6 +251,16 @@ public final class CompetitionAggregate {
                 .filter(e -> e.id().equals(eventId))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private EventCompetitor findCompetitor(EventSnapshot event, String dogId) {
+        if (event.competitors() == null) {
+            throw new CompetitorNotFoundException();
+        }
+        return event.competitors().stream()
+                .filter(c -> c.dogId().equals(dogId))
+                .findFirst()
+                .orElseThrow(CompetitorNotFoundException::new);
     }
 
     private StageSnapshot findStageOfEvent(String eventId) {

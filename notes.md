@@ -22,8 +22,6 @@
 
 ### MVP
 
-- dorsal de competidor reusado como position?
-
 - Postgresql https://supabase.com/dashboard/project/rivmavaifjpjrifqlzzk
     - pass: jx%9!@i*kEw?r9K
     - host: db.rivmavaifjpjrifqlzzk.supabase.co

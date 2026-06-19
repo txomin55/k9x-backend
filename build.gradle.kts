@@ -72,4 +72,10 @@ subprojects {
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
     }
+
+    // The `unitTest` JvmTestSuite is not bound to `check` by default, so `build`/`check` would skip it.
+    // Wire it in so CI and `./gradlew build` run the unit tests.
+    tasks.named("check") {
+        dependsOn(tasks.named("unitTest"))
+    }
 }

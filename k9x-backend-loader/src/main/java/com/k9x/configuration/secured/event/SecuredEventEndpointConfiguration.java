@@ -1,5 +1,6 @@
 package com.k9x.configuration.secured.event;
 
+import com.k9x.application.events.obdx.use_case.UpdateNotCompetingServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxScoreServiceCase;
 import com.k9x.application.events.use_case.CreateEventServiceCase;
@@ -11,6 +12,7 @@ import com.k9x.infrastructure.in.rest.endpoints.secured.events.CreateEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.EnrollEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.GetEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.RemoveEvent;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventNotCompeting;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventInfo;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxScore;
 import org.springframework.context.MessageSource;
@@ -48,5 +50,10 @@ public class SecuredEventEndpointConfiguration {
     @Bean
     public UpdateObdxScore updateObdxScore(UpdateObdxScoreServiceCase updateObdxScoreServiceCase, UserInfoDTO userInfoDTO) {
         return new UpdateObdxScore(updateObdxScoreServiceCase, userInfoDTO);
+    }
+
+    @Bean
+    public UpdateObdxEventNotCompeting updateNotCompeting(UpdateNotCompetingServiceCase updateNotCompetingServiceCase, UserInfoDTO userInfoDTO) {
+        return new UpdateObdxEventNotCompeting(updateNotCompetingServiceCase, userInfoDTO);
     }
 }
