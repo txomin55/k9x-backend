@@ -137,7 +137,7 @@ First execute
 
 To execute this project, you must go to the loader project and execute
 
-`GRADLE_USER_HOME=/tmp/gradle ./gradlew :k9x-backend-loader:bootRun -Dspring.profiles.active=production`
+`GRADLE_USER_HOME=/tmp/gradle ./gradlew :k9x-backend-loader:bootRun -Dspring.profiles.active=develop`
 
 Clean gradle cache k9x
 
