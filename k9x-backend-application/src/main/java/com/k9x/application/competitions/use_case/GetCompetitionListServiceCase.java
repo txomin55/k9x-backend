@@ -67,7 +67,7 @@ public class GetCompetitionListServiceCase {
         }
         return stage.events().stream()
                 .filter(event -> event.deletedAt() == null)
-                .map(event -> new FetchEventDTO(event.id(), event.name(), event.discipline()))
+                .map(event -> new FetchEventDTO(event.id(), event.name(), event.discipline(), event.status().name()))
                 .toList();
     }
 }

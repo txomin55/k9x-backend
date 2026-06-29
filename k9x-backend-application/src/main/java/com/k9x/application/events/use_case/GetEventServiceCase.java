@@ -60,7 +60,7 @@ public class GetEventServiceCase {
 
     private FetchEventDetailDTO buildObdxDetail(EventSnapshot event, StageSnapshot stage) {
         FetchObdxEventDTO obdx = new FetchObdxEventDTO(event.id(), event.name(), stage.id(), stage.name(),
-                event.discipline(), event.status().name());
+                event.discipline(), event.status().name(), event.enrollmentDeadline());
 
         List<FetchObdxEventCompetitorDTO> competitors = event.competitors().stream()
                 .map(c -> new FetchObdxEventCompetitorDTO(c.dogId(), c.dogName(), c.identity(), c.breed(),

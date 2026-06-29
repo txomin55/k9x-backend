@@ -27,7 +27,7 @@ public class GetObdxCollectionEventJudgesJooqAdapter implements GetObdxCollectio
         return dsl.select(ej.JUDGE_ID, j.NAME, u.EMAIL)
                 .from(ej)
                 .join(j).on(j.ID.eq(ej.JUDGE_ID).and(j.DELETED_AT.isNull()))
-                .join(u).on(u.ID.eq(ej.COLLECTOR_ID))
+                .leftJoin(u).on(u.ID.eq(ej.COLLECTOR_ID))
                 .where(ej.EVENT_ID.eq(eventId))
                 .fetch(r -> new FetchCollectionJudgeWithCollectorDTO(
                         r.get(ej.JUDGE_ID),

@@ -19,6 +19,7 @@ import com.k9x.domain.competitions.commands.ObdxEventUpdateData;
 import com.k9x.domain.competitions.commands.ScoreUpdateData;
 import com.k9x.domain.competitions.commands.StageUpdateData;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
@@ -29,6 +30,7 @@ import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.domain.stages.exceptions.StageCannotBeDeletedException;
 import com.k9x.domain.stages.exceptions.StageExpiredException;
+import com.k9x.domain.stages.exceptions.StageNotStartedException;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import org.junit.jupiter.api.Test;
@@ -43,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CompetitionAggregateTest {
 
+    private static final long PAST = Instant.parse("2020-01-01T00:00:00Z").toEpochMilli();
     private static final long NOW = Instant.parse("2024-06-15T12:00:00Z").toEpochMilli();
     private static final long FUTURE = Instant.parse("2030-01-01T00:00:00Z").toEpochMilli();
     private static final String OWNER = "user-1";
@@ -244,7 +247,7 @@ class CompetitionAggregateTest {
     }
 
     private StageSnapshot stageWith(EventSnapshot event, long dateTo) {
-        return new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, dateTo, 0L, 0L, null, List.of(event));
+        return new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, PAST, dateTo, 0L, 0L, null, List.of(event));
     }
 
     @Test
@@ -263,8 +266,16 @@ class CompetitionAggregateTest {
         EventCreated change = assertInstanceOf(EventCreated.class, onlyChange(aggregate));
         assertEquals("evt-new", change.id());
         assertEquals("stage-1", change.stageId());
-        assertEquals("obdx", change.discipline());
+        assertEquals("OBDX", change.discipline());
         assertEquals(OWNER, change.creator());
+    }
+
+    @Test
+    void createEvent_throws_when_discipline_is_unknown() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
+
+        assertThrows(DisciplineConfigurationMalformedException.class,
+                () -> aggregate.createEvent(new NewEventData("evt-new", "E", "stage-1", "nope"), OWNER, NOW));
     }
 
     @Test
@@ -325,6 +336,15 @@ class CompetitionAggregateTest {
         assertEquals("evt-1", change.eventId());
         assertEquals("cfg-1", change.configurationId());
         assertEquals(NOW, change.lastUpdate());
+    }
+
+    @Test
+    void updateScore_throws_when_stage_has_not_started() {
+        StageSnapshot notStarted = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, FUTURE, 0L, 0L, null,
+                List.of(event(null)));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, notStarted));
+        ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-1", "dog-1", BigDecimal.TEN);
+        assertThrows(StageNotStartedException.class, () -> aggregate.updateScore("evt-1", data, NOW));
     }
 
     @Test

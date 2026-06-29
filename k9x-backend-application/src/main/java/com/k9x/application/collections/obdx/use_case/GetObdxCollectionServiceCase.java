@@ -15,7 +15,6 @@ import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.events.status.EventCompetitorStatus;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,10 +39,9 @@ public class GetObdxCollectionServiceCase {
 
     public FetchObdxCollectionDTO getCollection(
             String eventId, List<FetchCollectionJudgeWithCollectorDTO> visibleJudges) {
-        Map<String, String> judgeNames = visibleJudges.stream()
-                .collect(Collectors.toMap(FetchCollectionJudgeWithCollectorDTO::judgeId,
-                        FetchCollectionJudgeWithCollectorDTO::judgeName));
-        Set<String> visibleJudgeIds = judgeNames.keySet();
+        Set<String> visibleJudgeIds = visibleJudges.stream()
+                .map(FetchCollectionJudgeWithCollectorDTO::judgeId)
+                .collect(Collectors.toSet());
 
         List<FetchCollectionCompetitorDTO> competitors =
                 getObdxCollectionCompetitorsPersistencePort.getCompetitors(eventId).stream()
@@ -64,11 +62,16 @@ public class GetObdxCollectionServiceCase {
                                 .map(ex -> new FetchCollectionExerciseScoresDTO(
                                         ex.exerciseId(),
                                         ex.position(),
-                                        scores.stream()
-                                                .filter(s -> s.dogId().equals(comp.dogId())
-                                                        && s.exerciseId().equals(ex.exerciseId()))
-                                                .map(s -> new FetchCollectionJudgeScoreDTO(
-                                                        s.score(), s.judgeId(), judgeNames.get(s.judgeId())))
+                                        visibleJudges.stream()
+                                                .map(judge -> new FetchCollectionJudgeScoreDTO(
+                                                        scores.stream()
+                                                                .filter(s -> s.dogId().equals(comp.dogId())
+                                                                        && s.exerciseId().equals(ex.exerciseId())
+                                                                        && s.judgeId().equals(judge.judgeId()))
+                                                                .findFirst()
+                                                                .map(FetchCollectionScoreDTO::score)
+                                                                .orElse(null),
+                                                        judge.judgeId(), judge.judgeName()))
                                                 .toList()))
                                 .toList()))
                 .toList();

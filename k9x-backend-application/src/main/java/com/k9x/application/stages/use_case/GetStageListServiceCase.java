@@ -6,10 +6,12 @@ import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
 import com.k9x.application.utils.date.DateUtils;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,29 +30,33 @@ public class GetStageListServiceCase {
     public List<FetchStageListDTO> getStages() {
         Map<String, String> configNameById = buildConfigNameMap();
         long now = DateUtils.nowUtcMillis();
-        return getStageListPersistencePort.getStages().stream()
-                .map(stage -> {
-                    // Global list read-model: events (and their scores) are not hydrated here, so the
-                    // status is computed from the stage dates only. STARTED (driven by event scores) is
-                    // therefore not surfaced in this list; the detailed/root-aggregate views are exact.
-                    String status = new StageSnapshot(stage.id(), stage.name(), null, null,
-                            stage.dateFrom(), stage.dateTo(), 0L, 0L, null, List.of())
-                            .status(now).name();
-                    return new FetchStageListDTO(
-                            stage.id(), stage.name(), stage.description(), stage.country(),
-                            stage.address(), stage.coordAlt(), stage.coordLong(),
-                            stage.dateFrom(), stage.dateTo(),
-                            stage.organizer(),
-                            stage.events().stream()
-                                    .map(e -> new FetchStageListEventDTO(
-                                            e.id(), e.name(), e.configurationId(),
-                                            configNameById.getOrDefault(e.configurationId(), e.configurationId()),
-                                            e.competitorCount(),
-                                            status))
-                                    .toList(),
-                            status);
-                })
+        return getStageListPersistencePort.getCompetitions().stream()
+                .flatMap(competition -> competition.stages().stream()
+                        .filter(stage -> stage.deletedAt() == null)
+                        .map(stage -> new CompetitionStage(competition, stage)))
+                .sorted(Comparator.comparingLong(cs -> cs.stage().dateFrom()))
+                .map(cs -> toStageDto(cs.competition(), cs.stage(), now, configNameById))
                 .toList();
+    }
+
+    private FetchStageListDTO toStageDto(CompetitionSnapshot competition, StageSnapshot stage, long now,
+                                         Map<String, String> configNameById) {
+        // The hydrated events carry their scores, so status() resolves the exact lifecycle here: the stage
+        // is STARTED once any of its events holds a score, otherwise it falls back to the date-driven state.
+        return new FetchStageListDTO(
+                stage.id(), stage.name(), competition.description(), competition.country(),
+                competition.address(), competition.coordAlt(), competition.coordLong(),
+                stage.dateFrom(), stage.dateTo(),
+                competition.organizerName(),
+                stage.events().stream()
+                        .filter(event -> event.deletedAt() == null)
+                        .map(event -> new FetchStageListEventDTO(
+                                event.id(), event.name(), event.configurationId(),
+                                configNameById.getOrDefault(event.configurationId(), event.configurationId()),
+                                event.competitors() == null ? 0 : event.competitors().size(),
+                                event.status().name()))
+                        .toList(),
+                stage.status(now).name());
     }
 
     private Map<String, String> buildConfigNameMap() {
@@ -61,5 +67,8 @@ public class GetStageListServiceCase {
         } catch (IOException e) {
             throw new DisciplineConfigurationMalformedException();
         }
+    }
+
+    private record CompetitionStage(CompetitionSnapshot competition, StageSnapshot stage) {
     }
 }

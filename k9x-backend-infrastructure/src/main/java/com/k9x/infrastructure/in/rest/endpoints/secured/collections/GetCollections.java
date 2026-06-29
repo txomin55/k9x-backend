@@ -7,6 +7,8 @@ import com.k9x.oas.stub.model.CollectionsResponseDTO;
 import com.k9x.oas.stub.model.IdNameDTO;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+
+import java.util.Locale;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -48,7 +50,7 @@ public class GetCollections implements SecuredCollectionsFecthAllApiDelegate {
             return null;
         }
         String name = messageSource.getMessage(
-                "discipline." + disciplineId + ".name", null, LocaleContextHolder.getLocale());
+                "discipline." + disciplineId.toUpperCase(Locale.ROOT) + ".name", null, LocaleContextHolder.getLocale());
         return new IdNameDTO(name, disciplineId);
     }
 }

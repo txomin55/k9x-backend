@@ -56,9 +56,10 @@ class GetCollectionListJooqAdapterTest {
                 .contains("join \"k9x\".\"judges\"")
                 .contains("join \"k9x\".\"users\"")
                 .contains("\"k9x\".\"users\".\"email\" = ?")
+                .contains("\"k9x\".\"stages\".\"date_from\" <= ?")
                 .contains("\"k9x\".\"stages\".\"date_to\" >= ?")
                 .contains("\"k9x\".\"events\".\"deleted_at\" is null");
-        assertThat(capturedBindings.get()).containsExactly("collector@test.com", 1000L);
+        assertThat(capturedBindings.get()).containsExactly("collector@test.com", 1000L, 1000L);
     }
 
     @Test

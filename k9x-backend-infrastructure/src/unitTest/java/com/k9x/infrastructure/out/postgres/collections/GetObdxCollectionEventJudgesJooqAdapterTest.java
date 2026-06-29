@@ -52,7 +52,7 @@ class GetObdxCollectionEventJudgesJooqAdapterTest {
         assertThat(capturedSql.get())
                 .contains("from \"obdx\".\"event_judges\"")
                 .contains("join \"k9x\".\"judges\"")
-                .contains("join \"k9x\".\"users\"")
+                .contains("left outer join \"k9x\".\"users\"")
                 .contains("\"obdx\".\"event_judges\".\"event_id\" = ?");
         assertThat(capturedBindings.get()).containsExactly("event-1");
     }
@@ -77,6 +77,27 @@ class GetObdxCollectionEventJudgesJooqAdapterTest {
         assertThat(judges.getFirst().judgeId()).isEqualTo("judge-1");
         assertThat(judges.getFirst().judgeName()).isEqualTo("Judge One");
         assertThat(judges.getFirst().collectorEmail()).isEqualTo("collector@test.com");
+    }
+
+    @Test
+    void maps_judge_without_collector_to_null_email() {
+        MockDataProvider provider = _ -> {
+            DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);
+            Result<Record> result = mockDsl.newResult(SELECT_FIELDS);
+            Record record = mockDsl.newRecord(SELECT_FIELDS);
+            record.set(EJ.JUDGE_ID, "judge-2");
+            record.set(J.NAME, "Judge Two");
+            record.set(U.EMAIL, (String) null);
+            result.add(record);
+            return new MockResult[]{new MockResult(1, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        List<FetchCollectionJudgeWithCollectorDTO> judges = new GetObdxCollectionEventJudgesJooqAdapter(dsl).getJudges("event-1");
+
+        assertThat(judges).hasSize(1);
+        assertThat(judges.getFirst().judgeId()).isEqualTo("judge-2");
+        assertThat(judges.getFirst().collectorEmail()).isNull();
     }
 
     @Test

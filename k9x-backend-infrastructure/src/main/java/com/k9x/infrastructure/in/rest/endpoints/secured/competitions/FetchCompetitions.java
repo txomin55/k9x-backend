@@ -49,7 +49,8 @@ public class FetchCompetitions implements SecuredCompetitionsFetchAllApiDelegate
                                                         .map(event -> new CompetitionStageEventDetailResponseDTO(
                                                                 event.id(),
                                                                 event.name(),
-                                                                resolveDiscipline(event.discipline())))
+                                                                resolveDiscipline(event.discipline()),
+                                                                event.status()))
                                                         .toList()
                                         ))
                                         .toList(),

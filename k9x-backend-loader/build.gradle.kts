@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.flywaydb:flyway-core")
     implementation(project(":k9x-backend-application"))
     implementation(project(":k9x-backend-infrastructure"))
 }

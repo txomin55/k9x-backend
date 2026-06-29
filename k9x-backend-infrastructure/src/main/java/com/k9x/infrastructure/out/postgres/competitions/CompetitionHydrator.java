@@ -26,11 +26,11 @@ import java.util.*;
  * judges / scores) with a handful of queries stitched in memory. Soft-deleted children are kept so the
  * aggregate is faithful; read-models filter them as needed and lifecycle status accounts for them.
  */
-class CompetitionHydrator {
+public class CompetitionHydrator {
 
     private final DSLContext dsl;
 
-    CompetitionHydrator(DSLContext dsl) {
+    public CompetitionHydrator(DSLContext dsl) {
         this.dsl = dsl;
     }
 
@@ -40,7 +40,7 @@ class CompetitionHydrator {
         return list;
     }
 
-    List<CompetitionSnapshot> hydrate(Condition competitionCondition) {
+    public List<CompetitionSnapshot> hydrate(Condition competitionCondition) {
         Map<String, CompetitionShell> competitions = fetchCompetitions(competitionCondition);
         if (competitions.isEmpty()) {
             return List.of();

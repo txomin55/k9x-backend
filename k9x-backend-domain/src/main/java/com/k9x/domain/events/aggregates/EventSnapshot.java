@@ -69,8 +69,27 @@ public record EventSnapshot(
         if (competitors == null || competitors.isEmpty()) {
             return false;
         }
-        int required = (exercises == null ? 0 : exercises.size()) * (judges == null ? 0 : judges.size());
+        int required = requiredScores();
         return competitors.stream().allMatch(c -> isSettled(c, required));
+    }
+
+    /**
+     * Whether the given competitor is settled: flagged {@code notCompeting} or holding a score for every
+     * exercise×judge combination of the event. Unknown dog ids are treated as not settled.
+     */
+    public boolean isCompetitorSettled(String dogId) {
+        if (competitors == null) {
+            return false;
+        }
+        return competitors.stream()
+                .filter(c -> c.dogId().equals(dogId))
+                .findFirst()
+                .map(c -> isSettled(c, requiredScores()))
+                .orElse(false);
+    }
+
+    private int requiredScores() {
+        return (exercises == null ? 0 : exercises.size()) * (judges == null ? 0 : judges.size());
     }
 
     private boolean isSettled(EventCompetitor competitor, int requiredScores) {

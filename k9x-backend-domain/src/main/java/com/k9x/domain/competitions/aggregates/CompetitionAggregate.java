@@ -3,9 +3,12 @@ package com.k9x.domain.competitions.aggregates;
 import com.k9x.domain.competitions.status.CompetitionStatus;
 
 import com.k9x.domain.competitions.commands.*;
+import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
+import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.status.EventStatus;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
+import com.k9x.domain.shared.UtcDates;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.stages.status.StageStatus;
 import com.k9x.domain.competitions.exceptions.*;
@@ -15,6 +18,7 @@ import com.k9x.domain.exceptions.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Write-side root aggregate. Wraps the immutable {@link CompetitionSnapshot} read snapshot and is the single
@@ -105,7 +109,19 @@ public final class CompetitionAggregate {
         StageSnapshot stage = requireActiveStage(data.stageId());
         assertStageOwnedBy(stage, userId);
 
-        changes.add(new EventCreated(data.id(), data.name(), data.stageId(), data.discipline(), userId, now));
+        String discipline = normalizeDiscipline(data.discipline());
+        changes.add(new EventCreated(data.id(), data.name(), data.stageId(), discipline, userId, now));
+    }
+
+    private static String normalizeDiscipline(String disciplineId) {
+        if (disciplineId == null) {
+            throw new DisciplineConfigurationMalformedException();
+        }
+        try {
+            return Discipline.valueOf(disciplineId.toUpperCase(Locale.ROOT)).name();
+        } catch (IllegalArgumentException e) {
+            throw new DisciplineConfigurationMalformedException();
+        }
     }
 
     public void deleteEvent(String eventId, String userId, long now) {
@@ -164,8 +180,10 @@ public final class CompetitionAggregate {
         requireActiveEvent(eventId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
+        if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
+            throw new StageNotStartedException();
+        }
         if (stage.dateTo() < now) {
-
             throw new StageExpiredException();
         }
         changes.add(new ScoreUpdated(eventId, data.judgeId(), data.exerciseId(), data.dogId(), data.score(), now));

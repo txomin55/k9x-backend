@@ -2,9 +2,18 @@ package com.k9x.application.competitions.use_case;
 
 import com.k9x.application.competitions.port.GetCompetitionListPersistencePort;
 import com.k9x.application.competitions.use_case.dto.FetchCompetitionDTO;
+import com.k9x.application.competitions.use_case.dto.FetchEventDTO;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.valueobjects.EventCompetitor;
+import com.k9x.domain.events.valueobjects.EventExercise;
+import com.k9x.domain.events.valueobjects.EventJudge;
+import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
+
+import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,6 +64,37 @@ class GetCompetitionListServiceCaseTest {
         assertThat(result.getFirst().status()).isEqualTo("CREATED");
         assertThat(result.getFirst().stages()).isEmpty();
         verify(getCompetitionListPersistencePort).getCompetitions("user-1");
+    }
+
+    @Test
+    void maps_event_status_from_domain_logic() {
+        // created event: no scores -> CREATED. started event: one recorded score -> STARTED.
+        EventSnapshot createdEvent = event("event-created", List.of(), List.of(), List.of(), List.of());
+        EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "team", "ES", "breed",
+                "id-1", (short) 1, true, false);
+        EventExercise exercise = new EventExercise("ex-1", (short) 1, null);
+        // two judges but only one scored -> a score exists yet the competitor is not settled -> STARTED.
+        List<EventJudge> startedJudges = List.of(new EventJudge("judge-1", "Judge", null),
+                new EventJudge("judge-2", "Judge 2", null));
+        EventSnapshot startedEvent = event("event-started", List.of(competitor), List.of(exercise),
+                startedJudges, List.of(new Score("ex-1", "judge-1", "dog-1", new BigDecimal("8"), 0L)));
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1",
+                0L, Long.MAX_VALUE, 0L, 0L, null, List.of(createdEvent, startedEvent));
+        when(getCompetitionListPersistencePort.getCompetitions("user-1"))
+                .thenReturn(List.of(competition("comp-1", List.of(stage))));
+
+        List<FetchEventDTO> events = serviceCase.getCompetitions("user-1", true)
+                .getFirst().stages().getFirst().events();
+
+        assertThat(events).hasSize(2);
+        assertThat(events.get(0).status()).isEqualTo("CREATED");
+        assertThat(events.get(1).status()).isEqualTo("STARTED");
+    }
+
+    private EventSnapshot event(String id, List<EventCompetitor> competitors, List<EventExercise> exercises,
+                                List<EventJudge> judges, List<Score> scores) {
+        return new EventSnapshot(id, "cfg-1", "OBDX", id, "stage-1", "user-1", null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, competitors, exercises, judges, scores);
     }
 
     @Test

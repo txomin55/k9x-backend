@@ -11,6 +11,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Locale;
 
 public class GetCollection implements SecuredCollectionsFetchOneApiDelegate {
 
@@ -76,7 +77,7 @@ public class GetCollection implements SecuredCollectionsFetchOneApiDelegate {
             return null;
         }
         String name = messageSource.getMessage(
-                "discipline." + disciplineId + ".name", null, LocaleContextHolder.getLocale());
+                "discipline." + disciplineId.toUpperCase(Locale.ROOT) + ".name", null, LocaleContextHolder.getLocale());
         return new IdNameDTO(name, disciplineId);
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Locale;
 
 public class GetEvent implements SecuredEventsFetchOneApiDelegate {
 
@@ -51,7 +52,8 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                 mapCompetitors(event.competitors()),
                 mapExercises(event.exercises()),
                 mapConfiguration(event.configuration()),
-                mapJudges(event.judges())
+                mapJudges(event.judges()),
+                obdx.enrollmentDeadline()
         );
     }
 
@@ -96,7 +98,7 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
             return null;
         }
         String name = messageSource.getMessage(
-                "discipline." + disciplineId + ".name", null, LocaleContextHolder.getLocale());
+                "discipline." + disciplineId.toUpperCase(Locale.ROOT) + ".name", null, LocaleContextHolder.getLocale());
         return new IdNameDTO(name, disciplineId);
     }
 }

@@ -291,6 +291,46 @@ class GetObdxClassificationServiceCaseTest {
     }
 
     @Test
+    void marks_competitor_as_settled_when_all_exercise_judge_scores_present() {
+        // single exercise, single judge, dog scored -> required (1*1) met -> SETTLED.
+        EventSnapshot event = event(List.of(new Row("dog-1", "Rex", "j-1", new BigDecimal("8"))));
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors()).hasSize(1);
+        assertThat(result.competitors().getFirst().status()).isEqualTo("SETTLED");
+    }
+
+    @Test
+    void marks_competitor_as_live_when_scores_still_missing() {
+        // one exercise, two judges, but only j-1 has scored -> required (1*2) not met -> LIVE.
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Team A", "ES",
+                        "breed", "identity", (short) 0, false, false));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(
+                new EventJudge("j-1", "Judge j-1", null),
+                new EventJudge("j-2", "Judge j-2", null));
+        List<Score> scores = List.of(
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("8"), 1000L),
+                new Score("ex-1", "j-2", "dog-1", null, 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
+                competitors, exercises, judges, scores);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors()).hasSize(1);
+        assertThat(result.competitors().getFirst().status()).isEqualTo("LIVE");
+    }
+
+    @Test
     void tied_dogs_get_same_position() {
         ObdxClassificationConfigDTO tieConfig = new ObdxClassificationConfigDTO(
                 ClassificationCacheEvictStrategy.OBDX,

@@ -132,6 +132,22 @@ class GetEventServiceCaseTest {
     }
 
     @Test
+    void exposes_enrollment_deadline_and_domain_status_in_obdx_detail() throws IOException {
+        EventSnapshot event = new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1",
+                1700000000000L, 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competition(event, "user-1", null));
+        when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of());
+
+        FetchEventDetailDTO result = serviceCase.getEvent("event-1", "user-1", true);
+
+        assertThat(result.obdx().enrollmentDeadline()).isEqualTo(1700000000000L);
+        // no scores recorded -> domain-computed status is CREATED
+        assertThat(result.obdx().status()).isEqualTo("CREATED");
+    }
+
+    @Test
     void marks_competitor_as_not_competing_when_flagged() throws IOException {
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "team", "ES", "breed",
                 "id-1", (short) 1, true, true);

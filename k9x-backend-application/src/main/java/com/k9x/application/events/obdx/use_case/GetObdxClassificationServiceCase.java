@@ -148,10 +148,14 @@ public class GetObdxClassificationServiceCase {
             BigDecimal maxPossibleTotal = computeMaxPossibleTotal(config);
             BigDecimal competitorScoreRating = percentageOfMax(totalScore, maxPossibleTotal);
 
+            ClassificationCompetitorStatus status = event.isCompetitorSettled(dogId)
+                    ? ClassificationCompetitorStatus.SETTLED
+                    : ClassificationCompetitorStatus.LIVE;
+
             competitors.add(new FetchClassificationCompetitorDTO(
                     dogId, meta.dogName(), meta.dogOwner(), meta.dogTeam(), meta.dogCountry(),
                     startOrderByDog.get(dogId), 0, totalScore, competitorScoreRating, false,
-                    ClassificationCompetitorStatus.LIVE.name(), exercises));
+                    status.name(), exercises));
         }
 
         assignPositions(competitors, config);
