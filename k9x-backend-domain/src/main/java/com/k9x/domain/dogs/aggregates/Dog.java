@@ -7,6 +7,7 @@ public record Dog(
         String name,
         String image,
         String owner,
+        String handler,
         String creator,
         String country,
         String team,
@@ -29,6 +30,10 @@ public record Dog(
 
     public String getOwner() {
         return this.owner;
+    }
+
+    public String getHandler() {
+        return this.handler;
     }
 
     public String getCreator() {

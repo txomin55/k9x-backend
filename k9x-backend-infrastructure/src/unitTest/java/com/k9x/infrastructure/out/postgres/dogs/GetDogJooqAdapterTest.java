@@ -49,6 +49,7 @@ class GetDogJooqAdapterTest {
             r.set(Tables.DOGS.NAME, "Rex");
             r.set(Tables.DOGS.IMAGE, "img.png");
             r.set(Tables.DOGS.OWNER, "owner-1");
+            r.set(Tables.DOGS.HANDLER, "handler-1");
             r.set(Tables.DOGS.CREATOR, "creator-1");
             r.set(Tables.DOGS.COUNTRY, "ES");
             r.set(Tables.DOGS.TEAM, "team-1");
@@ -69,6 +70,7 @@ class GetDogJooqAdapterTest {
         assertThat(dog.name()).isEqualTo("Rex");
         assertThat(dog.image()).isEqualTo("img.png");
         assertThat(dog.owner()).isEqualTo("owner-1");
+        assertThat(dog.handler()).isEqualTo("handler-1");
         assertThat(dog.creator()).isEqualTo("creator-1");
         assertThat(dog.country()).isEqualTo("ES");
         assertThat(dog.team()).isEqualTo("team-1");

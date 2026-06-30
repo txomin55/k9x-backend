@@ -31,7 +31,7 @@ class CreateDogJooqAdapterTest {
 
         long createdAt = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "creator-1", "team-1", "ES", createdAt);
+        new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", createdAt);
 
         assertThat(capturedSql.get())
                 .contains("insert into \"k9x\".\"dogs\"")
@@ -41,11 +41,12 @@ class CreateDogJooqAdapterTest {
                 .contains("\"breed\"")
                 .contains("\"identity\"")
                 .contains("\"owner\"")
+                .contains("\"handler\"")
                 .contains("\"creator\"")
                 .contains("\"team\"")
                 .contains("\"country\"")
                 .contains("\"created_at\"")
                 .contains("\"last_update\"");
-        assertThat(capturedBindings.get()).contains("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "creator-1", "team-1", "ES", createdAt);
+        assertThat(capturedBindings.get()).contains("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", createdAt);
     }
 }

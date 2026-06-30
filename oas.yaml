@@ -2062,16 +2062,18 @@
             "description": "Dog identifier number"
           },
           "owner": {
-            "type": "string"
+            "type": "string",
+            "description": "Email of the app user that owns the dog."
+          },
+          "handler": {
+            "type": "string",
+            "description": "Free-text label for the person handling the dog (e.g. the handler name)."
           },
           "team": {
             "type": "string"
           },
           "country": {
             "type": "string"
-          },
-          "owned": {
-            "type": "boolean"
           }
         },
         "required": [
@@ -2081,9 +2083,9 @@
           "breed",
           "identifier",
           "owner",
+          "handler",
           "team",
-          "country",
-          "owned"
+          "country"
         ]
       },
       "CreateEventRequestDTO": {
@@ -2263,16 +2265,17 @@
           },
           "owner": {
             "type": "string",
-            "description": "Dog owner"
+            "description": "Email of the app user that owns the dog."
+          },
+          "handler": {
+            "type": "string",
+            "description": "Free-text label for the person handling the dog (e.g. the handler name)."
           },
           "team": {
             "type": "string"
           },
           "country": {
             "type": "string"
-          },
-          "owned": {
-            "type": "boolean"
           }
         },
         "required": [
@@ -2281,9 +2284,9 @@
           "breed",
           "identifier",
           "owner",
+          "handler",
           "team",
-          "country",
-          "owned"
+          "country"
         ]
       },
       "UpdateEventRequestDTO": {
@@ -2388,7 +2391,12 @@
             "type": "string"
           },
           "owner": {
-            "type": "string"
+            "type": "string",
+            "description": "Email of the app user that owns the dog."
+          },
+          "handler": {
+            "type": "string",
+            "description": "Free-text label for the person handling the dog (e.g. the handler name)."
           },
           "identity": {
             "type": "string"
@@ -2403,6 +2411,7 @@
           "country",
           "team",
           "owner",
+          "handler",
           "identity"
         ]
       },

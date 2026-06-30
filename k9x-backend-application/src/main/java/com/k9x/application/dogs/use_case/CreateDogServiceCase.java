@@ -13,9 +13,9 @@ public class CreateDogServiceCase {
     }
 
     public void createDog(String id, String name, String image, String breed, String identity,
-                          String owner, String userId, String team, String country, boolean organizer) {
+                          String owner, String handler, String userId, String team, String country, boolean organizer) {
         assertUserIdMatchesOwnerWhenNoOrganizer(owner, userId, organizer);
-        createDogPersistencePort.createDog(id, name, image, breed, identity, owner, userId, team, country, DateUtils.nowUtcMillis());
+        createDogPersistencePort.createDog(id, name, image, breed, identity, owner, handler, userId, team, country, DateUtils.nowUtcMillis());
     }
 
     private void assertUserIdMatchesOwnerWhenNoOrganizer(String owner, String userId, boolean organizer) {

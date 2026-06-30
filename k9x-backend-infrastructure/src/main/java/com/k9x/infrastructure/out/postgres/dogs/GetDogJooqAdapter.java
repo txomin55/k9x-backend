@@ -25,6 +25,7 @@ public class GetDogJooqAdapter implements GetDogPersistencePort {
                         r.get(Tables.DOGS.NAME),
                         r.get(Tables.DOGS.IMAGE),
                         r.get(Tables.DOGS.OWNER),
+                        r.get(Tables.DOGS.HANDLER),
                         r.get(Tables.DOGS.CREATOR),
                         r.get(Tables.DOGS.COUNTRY),
                         r.get(Tables.DOGS.TEAM),

@@ -39,7 +39,8 @@ class GetDogListJooqAdapterTest {
                         select "k9x"."dogs"."id", "k9x"."dogs"."identity", "k9x"."dogs"."breed", \
                         "k9x"."dogs"."name", "k9x"."dogs"."image", "k9x"."dogs"."owner", \
                         "k9x"."dogs"."creator", "k9x"."dogs"."country", "k9x"."dogs"."team", \
-                        "k9x"."dogs"."last_update", "k9x"."dogs"."created_at", "k9x"."dogs"."deleted_at"\
+                        "k9x"."dogs"."last_update", "k9x"."dogs"."created_at", "k9x"."dogs"."deleted_at", \
+                        "k9x"."dogs"."handler"\
                         """)
                 .contains("from \"k9x\".\"dogs\"")
                 .contains("where ((\"k9x\".\"dogs\".\"owner\" = ? or \"k9x\".\"dogs\".\"creator\" = ?) and \"k9x\".\"dogs\".\"deleted_at\" is null)");
@@ -81,6 +82,7 @@ class GetDogListJooqAdapterTest {
             record.set(Tables.DOGS.NAME, "Rex");
             record.set(Tables.DOGS.IMAGE, "img.png");
             record.set(Tables.DOGS.OWNER, "owner-123");
+            record.set(Tables.DOGS.HANDLER, "handler-1");
             record.set(Tables.DOGS.CREATOR, "creator-1");
             record.set(Tables.DOGS.COUNTRY, "ES");
             record.set(Tables.DOGS.TEAM, "team-1");
@@ -102,6 +104,7 @@ class GetDogListJooqAdapterTest {
         assertThat(dog.name()).isEqualTo("Rex");
         assertThat(dog.image()).isEqualTo("img.png");
         assertThat(dog.owner()).isEqualTo("owner-123");
+        assertThat(dog.handler()).isEqualTo("handler-1");
         assertThat(dog.creator()).isEqualTo("creator-1");
         assertThat(dog.country()).isEqualTo("ES");
         assertThat(dog.team()).isEqualTo("team-1");

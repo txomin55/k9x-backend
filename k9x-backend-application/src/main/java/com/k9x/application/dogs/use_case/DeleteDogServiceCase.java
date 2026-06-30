@@ -29,20 +29,22 @@ public class DeleteDogServiceCase {
         if (dog == null) {
             throw new DogNotFoundException();
         }
+        if (dog.deletedAt() != null) {
+            throw new DogAlreadyDeletedException();
+        }
         if (dog.owner() != null) {
+            // When the dog has an owner, only the owner can delete it (not the organizer nor the creator).
             if (!dog.owner().equals(userId)) {
                 throw new UnauthorizedResourceException();
             }
         } else {
+            // Ownerless dogs can only be deleted by the organizer that created them.
             if (!organizer) {
                 throw new UnauthorizedResourceException();
             }
             if (!dog.creator().equals(userId)) {
                 throw new UnauthorizedResourceException();
             }
-        }
-        if (dog.deletedAt() != null) {
-            throw new DogAlreadyDeletedException();
         }
     }
 }

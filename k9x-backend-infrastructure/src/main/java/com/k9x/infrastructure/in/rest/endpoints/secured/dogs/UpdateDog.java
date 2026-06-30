@@ -21,7 +21,9 @@ public class UpdateDog implements SecuredDogsUpdateApiDelegate {
     public ResponseEntity<String> updateDogSecured(String id, UpdateDogRequestDTO body) {
         updateDogServiceCase.updateDog(id,
                 new UpdateDogCommand(body.getName(), body.getImage(), body.getBreed(), body.getIdentifier(),
-                        body.getOwner(), body.getTeam(), body.getCountry()),
+                        // TODO: replace null with body.getHandler() once the regenerated OAS stubs
+                        //       (with the new `handler` field) are published. The OAS spec is already updated.
+                        body.getOwner(), null, body.getTeam(), body.getCountry()),
                 userDetails.getEmail(), userDetails.isOrganizer());
         return ResponseEntity.ok().build();
     }

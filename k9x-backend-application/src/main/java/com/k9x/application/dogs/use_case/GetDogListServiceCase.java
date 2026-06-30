@@ -32,6 +32,7 @@ public class GetDogListServiceCase {
                                 dog.getCountry(),
                                 dog.getTeam(),
                                 dog.getOwner(),
+                                dog.getHandler(),
                                 dog.getIdentity()
                         )
                 )

@@ -43,7 +43,7 @@ class DeleteDogServiceCaseTest {
 
     @Test
     void throws_exception_when_owner_does_not_match_user() {
-        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "other-user", "creator-1", "ES", "team", 0L, 0L, null);
+        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "other-user", "handler-1", "creator-1", "ES", "team", 0L, 0L, null);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
         assertThatThrownBy(() -> serviceCase.deleteDog("dog-1", "user-1", true))
@@ -54,7 +54,7 @@ class DeleteDogServiceCaseTest {
 
     @Test
     void throws_exception_when_no_owner_and_not_organizer() {
-        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", null, "creator-1", "ES", "team", 0L, 0L, null);
+        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", null, "handler-1", "creator-1", "ES", "team", 0L, 0L, null);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
         assertThatThrownBy(() -> serviceCase.deleteDog("dog-1", "creator-1", false))
@@ -65,7 +65,7 @@ class DeleteDogServiceCaseTest {
 
     @Test
     void throws_exception_when_no_owner_and_user_is_not_creator() {
-        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", null, "creator-1", "ES", "team", 0L, 0L, null);
+        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", null, "handler-1", "creator-1", "ES", "team", 0L, 0L, null);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
         assertThatThrownBy(() -> serviceCase.deleteDog("dog-1", "user-1", true))
@@ -76,7 +76,7 @@ class DeleteDogServiceCaseTest {
 
     @Test
     void throws_exception_when_dog_already_deleted() {
-        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "user-1", "creator-1", "ES", "team", 0L, 0L, 1000L);
+        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "user-1", "handler-1", "creator-1", "ES", "team", 0L, 0L, 1000L);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
         assertThatThrownBy(() -> serviceCase.deleteDog("dog-1", "user-1", true))
@@ -87,7 +87,7 @@ class DeleteDogServiceCaseTest {
 
     @Test
     void deletes_dog_by_owner_when_all_validations_pass() {
-        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "user-1", "creator-1", "ES", "team", 0L, 0L, null);
+        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "user-1", "handler-1", "creator-1", "ES", "team", 0L, 0L, null);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
         serviceCase.deleteDog("dog-1", "user-1", false);
@@ -97,7 +97,7 @@ class DeleteDogServiceCaseTest {
 
     @Test
     void deletes_dog_by_organizer_creator_when_no_owner() {
-        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", null, "user-1", "ES", "team", 0L, 0L, null);
+        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", null, "handler-1", "user-1", "ES", "team", 0L, 0L, null);
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
 
         serviceCase.deleteDog("dog-1", "user-1", true);
