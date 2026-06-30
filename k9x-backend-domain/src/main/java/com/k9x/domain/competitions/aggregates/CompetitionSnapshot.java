@@ -39,7 +39,7 @@ public record CompetitionSnapshot(
             return CompetitionStatus.CREATED;
         }
         if (activeStageStatuses.stream().allMatch(s -> s == StageStatus.FINISHED)) {
-            return CompetitionStatus.COMPLETED;
+            return CompetitionStatus.FINISHED;
         }
         if (activeStageStatuses.stream().anyMatch(s -> s == StageStatus.TO_START || s == StageStatus.STARTED)) {
             return CompetitionStatus.STARTED;

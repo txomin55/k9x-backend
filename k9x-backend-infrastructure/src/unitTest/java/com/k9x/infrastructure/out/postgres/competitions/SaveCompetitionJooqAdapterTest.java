@@ -140,6 +140,20 @@ class SaveCompetitionJooqAdapterTest {
     }
 
     @Test
+    void emits_soft_delete_for_stage_and_its_events_when_stage_deleted() {
+        givenCapturingDsl();
+        CompetitionAggregate competition = aggregateWithActiveEvent();
+        competition.deleteStage("stage-123", "user", NOW);
+
+        new SaveCompetitionJooqAdapter(dsl).save(competition);
+
+        assertThat(capturedSql).anyMatch(sql ->
+                sql.contains("update \"k9x\".\"stages\"") && sql.contains("\"deleted_at\""));
+        assertThat(capturedSql).anyMatch(sql ->
+                sql.contains("update \"k9x\".\"events\"") && sql.contains("\"deleted_at\""));
+    }
+
+    @Test
     void emits_insert_for_event_created() {
         givenCapturingDsl();
         CompetitionAggregate competition = aggregateWithActiveStage();

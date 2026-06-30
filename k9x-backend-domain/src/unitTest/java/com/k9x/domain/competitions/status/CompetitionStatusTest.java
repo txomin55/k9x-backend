@@ -36,7 +36,7 @@ class CompetitionStatusTest {
 
     @Test
     void finished_when_all_active_stages_are_finished() {
-        assertEquals(CompetitionStatus.COMPLETED,
+        assertEquals(CompetitionStatus.FINISHED,
                 competition(null, List.of(stage(YESTERDAY, YESTERDAY, null), stage(YESTERDAY, YESTERDAY, null))).status(NOW));
     }
 

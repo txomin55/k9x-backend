@@ -1,20 +1,21 @@
 package com.k9x.domain.competitions.aggregates;
 
-import com.k9x.domain.competitions.status.CompetitionStatus;
-
 import com.k9x.domain.competitions.commands.*;
+import com.k9x.domain.competitions.exceptions.CompetitionAlreadyDeletedException;
+import com.k9x.domain.competitions.exceptions.CompetitionCannotBeDeletedException;
+import com.k9x.domain.competitions.exceptions.CompetitionNotFoundException;
+import com.k9x.domain.competitions.status.CompetitionStatus;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.exceptions.*;
 import com.k9x.domain.events.status.EventStatus;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
+import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import com.k9x.domain.shared.UtcDates;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
-import com.k9x.domain.stages.status.StageStatus;
-import com.k9x.domain.competitions.exceptions.*;
 import com.k9x.domain.stages.exceptions.*;
-import com.k9x.domain.events.exceptions.*;
-import com.k9x.domain.exceptions.*;
+import com.k9x.domain.stages.status.StageStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,11 +58,22 @@ public final class CompetitionAggregate {
         return aggregate;
     }
 
-    public List<CompetitionChange> pendingChanges() {
-        return List.copyOf(changes);
+    private static String normalizeDiscipline(String disciplineId) {
+        if (disciplineId == null) {
+            throw new DisciplineConfigurationMalformedException();
+        }
+        try {
+            return Discipline.valueOf(disciplineId.toUpperCase(Locale.ROOT)).name();
+        } catch (IllegalArgumentException e) {
+            throw new DisciplineConfigurationMalformedException();
+        }
     }
 
     // ---- CompetitionSnapshot mutations -------------------------------------------------------------------
+
+    public List<CompetitionChange> pendingChanges() {
+        return List.copyOf(changes);
+    }
 
     public void update(CompetitionUpdateData data, String userId, long now) {
         assertCompetitionMutableBy(userId);
@@ -70,14 +82,22 @@ public final class CompetitionAggregate {
                 data.address(), data.coordAlt(), data.coordLong(), now));
     }
 
+    // ---- StageSnapshot mutations -------------------------------------------------------------------------
+
     public void delete(String userId, long now) {
         assertCompetitionMutableBy(userId);
         assertCompetitionDeletable(now);
 
         changes.add(new CompetitionDeleted(snapshot.id(), now));
+        if (snapshot.stages() != null) {
+            snapshot.stages().stream()
+                    .filter(s -> s.deletedAt() == null)
+                    .forEach(s -> {
+                        changes.add(new StageDeleted(s.id(), now));
+                        cascadeDeleteEvents(s, now);
+                    });
+        }
     }
-
-    // ---- StageSnapshot mutations -------------------------------------------------------------------------
 
     public void createStage(NewStageData data, String userId, long now) {
         assertCompetitionMutableBy(userId);
@@ -94,6 +114,8 @@ public final class CompetitionAggregate {
         changes.add(new StageRenamed(stageId, data.name(), data.dateFrom(), data.dateTo(), now));
     }
 
+    // ---- EventSnapshot mutations -------------------------------------------------------------------------
+
     public void deleteStage(String stageId, String userId, long now) {
         StageSnapshot stage = requireActiveStage(stageId);
         assertStageOwnedBy(stage, userId);
@@ -101,9 +123,8 @@ public final class CompetitionAggregate {
         assertStageDeletable(stage, now);
 
         changes.add(new StageDeleted(stageId, now));
+        cascadeDeleteEvents(stage, now);
     }
-
-    // ---- EventSnapshot mutations -------------------------------------------------------------------------
 
     public void createEvent(NewEventData data, String userId, long now) {
         StageSnapshot stage = requireActiveStage(data.stageId());
@@ -111,17 +132,6 @@ public final class CompetitionAggregate {
 
         String discipline = normalizeDiscipline(data.discipline());
         changes.add(new EventCreated(data.id(), data.name(), data.stageId(), discipline, userId, now));
-    }
-
-    private static String normalizeDiscipline(String disciplineId) {
-        if (disciplineId == null) {
-            throw new DisciplineConfigurationMalformedException();
-        }
-        try {
-            return Discipline.valueOf(disciplineId.toUpperCase(Locale.ROOT)).name();
-        } catch (IllegalArgumentException e) {
-            throw new DisciplineConfigurationMalformedException();
-        }
     }
 
     public void deleteEvent(String eventId, String userId, long now) {
@@ -200,9 +210,19 @@ public final class CompetitionAggregate {
         }
     }
 
+    /**
+     * A competition can only be deleted while every one of its (active) stages is still deletable, i.e. each
+     * stage and all of its events are in the CREATED state. Deleting it cascades the soft-delete to those
+     * stages and their events.
+     */
     private void assertCompetitionDeletable(long now) {
         CompetitionStatus status = snapshot.status(now);
-        if (status == CompetitionStatus.STARTED || status == CompetitionStatus.COMPLETED) {
+        if (status == CompetitionStatus.STARTED || status == CompetitionStatus.FINISHED) {
+            throw new CompetitionCannotBeDeletedException();
+        }
+        if (snapshot.stages() != null && !snapshot.stages().stream()
+                .filter(s -> s.deletedAt() == null)
+                .allMatch(s -> isStageDeletable(s, now))) {
             throw new CompetitionCannotBeDeletedException();
         }
     }
@@ -225,10 +245,39 @@ public final class CompetitionAggregate {
     }
 
     private void assertStageDeletable(StageSnapshot stage, long now) {
-        StageStatus status = stage.status(now);
-        if (status == StageStatus.STARTED || status == StageStatus.FINISHED) {
+        if (!isStageDeletable(stage, now)) {
             throw new StageCannotBeDeletedException();
         }
+    }
+
+    /**
+     * A stage is deletable only while it has not started or finished and every one of its (active) events is
+     * still in the CREATED state. Deleting it cascades the soft-delete to those events.
+     */
+    private boolean isStageDeletable(StageSnapshot stage, long now) {
+        StageStatus status = stage.status(now);
+        if (status == StageStatus.STARTED || status == StageStatus.FINISHED) {
+            return false;
+        }
+        if (stage.events() == null) {
+            return true;
+        }
+        return stage.events().stream()
+                .filter(e -> e.deletedAt() == null)
+                .allMatch(e -> e.status() == EventStatus.CREATED);
+    }
+
+    /**
+     * Records an {@link EventDeleted} for every still-active event of the stage, so deleting a stage (or the
+     * whole competition) propagates the soft-delete down to its events.
+     */
+    private void cascadeDeleteEvents(StageSnapshot stage, long now) {
+        if (stage.events() == null) {
+            return;
+        }
+        stage.events().stream()
+                .filter(e -> e.deletedAt() == null)
+                .forEach(e -> changes.add(new EventDeleted(e.id(), now)));
     }
 
     private EventSnapshot requireActiveEvent(String eventId) {

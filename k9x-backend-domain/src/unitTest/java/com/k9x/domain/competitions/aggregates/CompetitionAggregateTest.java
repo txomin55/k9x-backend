@@ -21,6 +21,7 @@ import com.k9x.domain.competitions.commands.StageUpdateData;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.competitions.exceptions.CompetitionAlreadyDeletedException;
@@ -125,14 +126,42 @@ class CompetitionAggregateTest {
     }
 
     @Test
-    void delete_records_competition_deleted() {
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
+    void delete_records_competition_deleted_and_cascades_to_stages_and_events() {
+        StageSnapshot stage = stageWith(event(null), FUTURE);
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stage));
+
+        aggregate.delete(OWNER, NOW);
+
+        List<CompetitionChange> changes = aggregate.pendingChanges();
+        assertEquals(3, changes.size());
+        CompetitionDeleted competitionDeleted = assertInstanceOf(CompetitionDeleted.class, changes.get(0));
+        assertEquals("comp-1", competitionDeleted.id());
+        assertEquals(NOW, competitionDeleted.deletedAt());
+        StageDeleted stageDeleted = assertInstanceOf(StageDeleted.class, changes.get(1));
+        assertEquals("stage-1", stageDeleted.id());
+        assertEquals(NOW, stageDeleted.deletedAt());
+        EventDeleted eventDeleted = assertInstanceOf(EventDeleted.class, changes.get(2));
+        assertEquals("evt-1", eventDeleted.id());
+        assertEquals(NOW, eventDeleted.deletedAt());
+    }
+
+    @Test
+    void delete_throws_when_a_stage_has_a_non_created_event() {
+        EventSnapshot started = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(started, FUTURE)));
+        assertThrows(CompetitionCannotBeDeletedException.class, () -> aggregate.delete(OWNER, NOW));
+    }
+
+    @Test
+    void delete_ignores_already_deleted_stages_when_cascading() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, PAST)));
 
         aggregate.delete(OWNER, NOW);
 
         CompetitionDeleted change = assertInstanceOf(CompetitionDeleted.class, onlyChange(aggregate));
         assertEquals("comp-1", change.id());
-        assertEquals(NOW, change.deletedAt());
     }
 
     // ---- createStage ----------------------------------------------------------------------------
@@ -229,6 +258,16 @@ class CompetitionAggregateTest {
     }
 
     @Test
+    void deleteStage_throws_when_an_event_is_not_created() {
+        EventCompetitor settled = new EventCompetitor("dog-1", "Rex", "Owner", "Team", "ES", "Breed", null,
+                (short) 1, false, true);
+        EventSnapshot finished = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(settled), List.of(), List.of(), List.of());
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(finished, FUTURE)));
+        assertThrows(StageCannotBeDeletedException.class, () -> aggregate.deleteStage("stage-1", OWNER, NOW));
+    }
+
+    @Test
     void deleteStage_records_stage_deleted() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
 
@@ -237,6 +276,21 @@ class CompetitionAggregateTest {
         StageDeleted change = assertInstanceOf(StageDeleted.class, onlyChange(aggregate));
         assertEquals("stage-1", change.id());
         assertEquals(NOW, change.deletedAt());
+    }
+
+    @Test
+    void deleteStage_cascades_soft_delete_to_its_active_events() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+
+        aggregate.deleteStage("stage-1", OWNER, NOW);
+
+        List<CompetitionChange> changes = aggregate.pendingChanges();
+        assertEquals(2, changes.size());
+        StageDeleted stageDeleted = assertInstanceOf(StageDeleted.class, changes.get(0));
+        assertEquals("stage-1", stageDeleted.id());
+        EventDeleted eventDeleted = assertInstanceOf(EventDeleted.class, changes.get(1));
+        assertEquals("evt-1", eventDeleted.id());
+        assertEquals(NOW, eventDeleted.deletedAt());
     }
 
     // ---- events ---------------------------------------------------------------------------------
