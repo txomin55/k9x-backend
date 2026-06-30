@@ -8,6 +8,7 @@ import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
+import com.k9x.domain.shared.SupportUser;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class GetCompetitionListServiceCase {
     }
 
     public List<FetchCompetitionDTO> getCompetitions(String userId, boolean organizer) {
-        if (!organizer) {
+        if (!organizer && !SupportUser.is(userId)) {
             throw new UnauthorizedResourceException();
         }
 

@@ -6,6 +6,7 @@ import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
+import com.k9x.domain.shared.SupportUser;
 
 public class DeleteStageServiceCase {
 
@@ -19,7 +20,7 @@ public class DeleteStageServiceCase {
     }
 
     public void deleteStage(String stageId, String userId, boolean organizer) {
-        assertOrganizer(organizer);
+        assertOrganizer(organizer, userId);
         String competitionId = getCompetitionPersistencePort.competitionIdByStage(stageId);
         if (competitionId == null) {
             throw new StageNotFoundException();
@@ -30,8 +31,8 @@ public class DeleteStageServiceCase {
         saveCompetitionPersistencePort.save(competition);
     }
 
-    private void assertOrganizer(boolean organizer) {
-        if (!organizer) {
+    private void assertOrganizer(boolean organizer, String userId) {
+        if (!organizer && !SupportUser.is(userId)) {
             throw new UnauthorizedResourceException();
         }
     }

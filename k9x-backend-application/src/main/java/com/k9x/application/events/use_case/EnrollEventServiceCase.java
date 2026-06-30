@@ -18,14 +18,14 @@ public class EnrollEventServiceCase {
         this.saveCompetitionPersistencePort = saveCompetitionPersistencePort;
     }
 
-    public void enrollEvent(String eventId, EnrollObdxEventCommand command) {
+    public void enrollEvent(String eventId, EnrollObdxEventCommand command, String userId) {
         String competitionId = getCompetitionPersistencePort.competitionIdByEvent(eventId);
         if (competitionId == null) {
             throw new EventNotFoundException();
         }
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
-        competition.enrollDog(eventId, command.dogId(), DateUtils.nowUtcMillis());
+        competition.enrollDog(eventId, command.dogId(), userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }
 }

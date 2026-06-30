@@ -8,6 +8,7 @@ import com.k9x.application.judges.port.GetJudgePersistencePort;
 import com.k9x.application.judges.port.UpdateJudgePersistencePort;
 import com.k9x.domain.judges.aggregates.Judge;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
+import com.k9x.domain.shared.SupportUser;
 
 public class UpdateJudgeServiceCase {
 
@@ -21,14 +22,14 @@ public class UpdateJudgeServiceCase {
     }
 
     public void updateJudge(String judgeId, UpdateJudgeCommand command, String userId, boolean organizer) {
-        assertOrganizer(organizer);
+        assertOrganizer(organizer, userId);
         Judge judge = getJudgePersistencePort.getJudge(judgeId);
         assertJudgeValidations(judge, userId);
         updateJudgePersistencePort.updateJudge(judgeId, UpdateJudgePersistencePayload.from(command));
     }
 
-    private void assertOrganizer(boolean organizer) {
-        if (!organizer) {
+    private void assertOrganizer(boolean organizer, String userId) {
+        if (!organizer && !SupportUser.is(userId)) {
             throw new UnauthorizedResourceException();
         }
     }
@@ -36,6 +37,9 @@ public class UpdateJudgeServiceCase {
     private void assertJudgeValidations(Judge judge, String userId) {
         if (judge == null) {
             throw new JudgeNotFoundException();
+        }
+        if (SupportUser.is(userId)) {
+            return;
         }
         if (judge.deletedAt() != null) {
             throw new JudgeAlreadyDeletedException();

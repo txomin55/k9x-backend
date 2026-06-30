@@ -28,8 +28,8 @@ public class SecuredEventEndpointConfiguration {
     }
 
     @Bean
-    public EnrollEvent enrollEvent(EnrollEventServiceCase enrollEventServiceCase) {
-        return new EnrollEvent(enrollEventServiceCase);
+    public EnrollEvent enrollEvent(EnrollEventServiceCase enrollEventServiceCase, UserInfoDTO userInfoDTO) {
+        return new EnrollEvent(enrollEventServiceCase, userInfoDTO);
     }
 
     @Bean

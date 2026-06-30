@@ -4,6 +4,7 @@ import com.k9x.application.dogs.exceptions.OwnerNonProvidedWhenOrganizerExceptio
 import com.k9x.application.dogs.port.GetDogListPersistencePort;
 import com.k9x.application.dogs.use_case.dto.DogDTO;
 import com.k9x.domain.dogs.aggregates.Dog;
+import com.k9x.domain.shared.SupportUser;
 
 import java.util.List;
 
@@ -17,9 +18,10 @@ public class GetDogListServiceCase {
 
     public List<DogDTO> getDogs(String userId, boolean organizer, boolean onlyOwned) {
 
-        assertOwnerWhenNoOrganizer(userId, organizer);
+        boolean privileged = organizer || SupportUser.is(userId);
+        assertOwnerWhenNoOrganizer(userId, privileged);
 
-        String dogsByOwner = !organizer || onlyOwned ? userId : null;
+        String dogsByOwner = !privileged || onlyOwned ? userId : null;
         List<Dog> dogs = getDogListPersistencePort.getDogs(dogsByOwner);
 
         return dogs.stream()

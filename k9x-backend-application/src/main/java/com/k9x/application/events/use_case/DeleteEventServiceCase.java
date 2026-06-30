@@ -6,6 +6,7 @@ import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
+import com.k9x.domain.shared.SupportUser;
 
 public class DeleteEventServiceCase {
 
@@ -19,7 +20,7 @@ public class DeleteEventServiceCase {
     }
 
     public void deleteEvent(String id, String userId, boolean organizer) {
-        assertOrganizer(organizer);
+        assertOrganizer(organizer, userId);
         String competitionId = getCompetitionPersistencePort.competitionIdByEvent(id);
         if (competitionId == null) {
             throw new EventNotFoundException();
@@ -30,8 +31,8 @@ public class DeleteEventServiceCase {
         saveCompetitionPersistencePort.save(competition);
     }
 
-    private void assertOrganizer(boolean organizer) {
-        if (!organizer) {
+    private void assertOrganizer(boolean organizer, String userId) {
+        if (!organizer && !SupportUser.is(userId)) {
             throw new UnauthorizedResourceException();
         }
     }

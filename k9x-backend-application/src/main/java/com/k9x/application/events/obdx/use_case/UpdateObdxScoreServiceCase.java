@@ -11,6 +11,7 @@ import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.competitions.commands.ScoreUpdateData;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
+import com.k9x.domain.shared.SupportUser;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -37,13 +38,15 @@ public class UpdateObdxScoreServiceCase {
         if (competitionId == null) {
             throw new EventNotFoundException();
         }
-        assertUserIsCollector(eventId, command.judgeId(), userEmail);
+        if (!SupportUser.is(userEmail)) {
+            assertUserIsCollector(eventId, command.judgeId(), userEmail);
+        }
         assertScoreAllowed(command.exerciseId(), command.score());
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
         competition.updateScore(eventId,
                 new ScoreUpdateData(command.judgeId(), command.exerciseId(), command.dogId(), command.score()),
-                DateUtils.nowUtcMillis());
+                userEmail, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }
 

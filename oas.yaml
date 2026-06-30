@@ -1600,7 +1600,12 @@
             "$ref": "#/components/schemas/IdNameDTO"
           },
           "owner": {
-            "type": "string"
+            "type": "string",
+            "description": "Email of the app user that owns the dog."
+          },
+          "handler": {
+            "type": "string",
+            "description": "Free-text label for the person handling the dog (e.g. the handler name)."
           },
           "country": {
             "type": "string"
@@ -1615,6 +1620,7 @@
         "required": [
           "dog",
           "owner",
+          "handler",
           "country",
           "team",
           "breed"
@@ -2562,7 +2568,12 @@
             "type": "string"
           },
           "owner": {
-            "type": "string"
+            "type": "string",
+            "description": "Email of the app user that owns the dog."
+          },
+          "handler": {
+            "type": "string",
+            "description": "Free-text label for the person handling the dog (e.g. the handler name)."
           },
           "team": {
             "type": "string"
@@ -2599,6 +2610,7 @@
         "required": [
           "country",
           "owner",
+          "handler",
           "team",
           "status",
           "dog",
@@ -2634,7 +2646,11 @@
         "properties": {
           "owner": {
             "type": "string",
-            "description": "Name or identifier of the handler or owner associated with the dog."
+            "description": "Email of the app user that owns the dog."
+          },
+          "handler": {
+            "type": "string",
+            "description": "Free-text label for the person handling the dog (e.g. the handler name)."
           },
           "identity": {
             "type": "string",
@@ -2665,6 +2681,7 @@
         },
         "required": [
           "owner",
+          "handler",
           "identity",
           "team",
           "country",

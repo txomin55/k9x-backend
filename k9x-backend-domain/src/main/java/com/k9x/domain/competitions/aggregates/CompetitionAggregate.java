@@ -12,6 +12,7 @@ import com.k9x.domain.events.exceptions.*;
 import com.k9x.domain.events.status.EventStatus;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
+import com.k9x.domain.shared.SupportUser;
 import com.k9x.domain.shared.UtcDates;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.stages.exceptions.*;
@@ -86,7 +87,9 @@ public final class CompetitionAggregate {
 
     public void delete(String userId, long now) {
         assertCompetitionMutableBy(userId);
-        assertCompetitionDeletable(now);
+        if (!SupportUser.is(userId)) {
+            assertCompetitionDeletable(now);
+        }
 
         changes.add(new CompetitionDeleted(snapshot.id(), now));
         if (snapshot.stages() != null) {
@@ -107,7 +110,7 @@ public final class CompetitionAggregate {
     }
 
     public void renameStage(String stageId, StageUpdateData data, String userId, long now) {
-        StageSnapshot stage = requireActiveStage(stageId);
+        StageSnapshot stage = requireActiveStage(stageId, userId);
         assertStageOwnedBy(stage, userId);
         assertCompetitionMutableBy(userId);
 
@@ -117,17 +120,19 @@ public final class CompetitionAggregate {
     // ---- EventSnapshot mutations -------------------------------------------------------------------------
 
     public void deleteStage(String stageId, String userId, long now) {
-        StageSnapshot stage = requireActiveStage(stageId);
+        StageSnapshot stage = requireActiveStage(stageId, userId);
         assertStageOwnedBy(stage, userId);
         assertCompetitionMutableBy(userId);
-        assertStageDeletable(stage, now);
+        if (!SupportUser.is(userId)) {
+            assertStageDeletable(stage, now);
+        }
 
         changes.add(new StageDeleted(stageId, now));
         cascadeDeleteEvents(stage, now);
     }
 
     public void createEvent(NewEventData data, String userId, long now) {
-        StageSnapshot stage = requireActiveStage(data.stageId());
+        StageSnapshot stage = requireActiveStage(data.stageId(), userId);
         assertStageOwnedBy(stage, userId);
 
         String discipline = normalizeDiscipline(data.discipline());
@@ -135,33 +140,34 @@ public final class CompetitionAggregate {
     }
 
     public void deleteEvent(String eventId, String userId, long now) {
-        EventSnapshot event = requireActiveEvent(eventId);
-        assertEventDeletable(event);
+        EventSnapshot event = requireActiveEvent(eventId, userId);
         StageSnapshot stage = findStageOfEvent(eventId);
-
         assert stage != null;
-        if (stage.deletedAt() != null) {
-            throw new StageAlreadyDeletedException();
+        if (!SupportUser.is(userId)) {
+            assertEventDeletable(event);
+            if (stage.deletedAt() != null) {
+                throw new StageAlreadyDeletedException();
+            }
         }
         assertStageOwnedBy(stage, userId);
         changes.add(new EventDeleted(eventId, now));
     }
 
-    public void enrollDog(String eventId, String dogId, long now) {
-        requireActiveEvent(eventId);
+    public void enrollDog(String eventId, String dogId, String userId, long now) {
+        requireActiveEvent(eventId, userId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
 
-        if (stage.dateTo() < now) {
+        if (!SupportUser.is(userId) && stage.dateTo() < now) {
             throw new StageExpiredException();
         }
         changes.add(new DogEnrolled(eventId, dogId, now));
     }
 
     public void updateObdxEventInfo(String eventId, ObdxEventUpdateData data, String userId, long now) {
-        EventSnapshot event = requireActiveEvent(eventId);
+        EventSnapshot event = requireActiveEvent(eventId, userId);
 
-        if (!event.creator().equals(userId)) {
+        if (!SupportUser.is(userId) && !event.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
         changes.add(new ObdxEventInfoUpdated(eventId, data.name(), data.configurationId(), data.scoreCalculation(),
@@ -174,9 +180,9 @@ public final class CompetitionAggregate {
      * that is already not competing is rejected with {@link CompetitorAlreadyNotCompetingException}.
      */
     public void updateCompetitorNotCompeting(String eventId, String dogId, boolean notCompeting, String userId, long now) {
-        EventSnapshot event = requireActiveEvent(eventId);
+        EventSnapshot event = requireActiveEvent(eventId, userId);
 
-        if (!event.creator().equals(userId)) {
+        if (!SupportUser.is(userId) && !event.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
         EventCompetitor competitor = findCompetitor(event, dogId);
@@ -186,15 +192,17 @@ public final class CompetitionAggregate {
         changes.add(new CompetitorNotCompetingUpdated(eventId, dogId, notCompeting, now));
     }
 
-    public void updateScore(String eventId, ScoreUpdateData data, long now) {
-        requireActiveEvent(eventId);
+    public void updateScore(String eventId, ScoreUpdateData data, String userId, long now) {
+        requireActiveEvent(eventId, userId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
-        if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
-            throw new StageNotStartedException();
-        }
-        if (stage.dateTo() < now) {
-            throw new StageExpiredException();
+        if (!SupportUser.is(userId)) {
+            if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
+                throw new StageNotStartedException();
+            }
+            if (stage.dateTo() < now) {
+                throw new StageExpiredException();
+            }
         }
         changes.add(new ScoreUpdated(eventId, data.judgeId(), data.exerciseId(), data.dogId(), data.score(), now));
     }
@@ -202,6 +210,9 @@ public final class CompetitionAggregate {
     // ---- invariants & navigation -----------------------------------------------------------------
 
     private void assertCompetitionMutableBy(String userId) {
+        if (SupportUser.is(userId)) {
+            return;
+        }
         if (snapshot.deletedAt() != null) {
             throw new CompetitionAlreadyDeletedException();
         }
@@ -227,18 +238,21 @@ public final class CompetitionAggregate {
         }
     }
 
-    private StageSnapshot requireActiveStage(String stageId) {
+    private StageSnapshot requireActiveStage(String stageId, String userId) {
         StageSnapshot stage = findStage(stageId);
         if (stage == null) {
             throw new StageNotFoundException();
         }
-        if (stage.deletedAt() != null) {
+        if (!SupportUser.is(userId) && stage.deletedAt() != null) {
             throw new StageAlreadyDeletedException();
         }
         return stage;
     }
 
     private void assertStageOwnedBy(StageSnapshot stage, String userId) {
+        if (SupportUser.is(userId)) {
+            return;
+        }
         if (!stage.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
@@ -280,12 +294,12 @@ public final class CompetitionAggregate {
                 .forEach(e -> changes.add(new EventDeleted(e.id(), now)));
     }
 
-    private EventSnapshot requireActiveEvent(String eventId) {
+    private EventSnapshot requireActiveEvent(String eventId, String userId) {
         EventSnapshot event = findEvent(eventId);
         if (event == null) {
             throw new EventNotFoundException();
         }
-        if (event.deletedAt() != null) {
+        if (!SupportUser.is(userId) && event.deletedAt() != null) {
             throw new EventAlreadyDeletedException();
         }
         return event;

@@ -51,7 +51,7 @@ class EnrollEventServiceCaseTest {
     void throws_exception_when_event_not_found() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn(null);
 
-        assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1")))
+        assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1"), "user-1"))
                 .isInstanceOf(EventNotFoundException.class);
 
         verifyNoInteractions(saveCompetitionPersistencePort);
@@ -62,7 +62,7 @@ class EnrollEventServiceCaseTest {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
-        serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1"));
+        serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1"), "user-1");
 
         verify(saveCompetitionPersistencePort).save(any());
     }

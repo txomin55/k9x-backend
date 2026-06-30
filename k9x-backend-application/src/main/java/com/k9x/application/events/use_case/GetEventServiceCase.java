@@ -21,6 +21,7 @@ import com.k9x.domain.events.status.EventCompetitorStatus;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
+import com.k9x.domain.shared.SupportUser;
 
 import java.io.IOException;
 import java.util.List;
@@ -40,7 +41,7 @@ public class GetEventServiceCase {
     }
 
     public FetchEventDetailDTO getEvent(String id, String userId, boolean organizer) {
-        assertOrganizer(organizer);
+        assertOrganizer(organizer, userId);
         String competitionId = getCompetitionPersistencePort.competitionIdByEvent(id);
         if (competitionId == null) {
             throw new EventNotFoundException();
@@ -106,8 +107,8 @@ public class GetEventServiceCase {
                 .findFirst().orElse(null);
     }
 
-    private void assertOrganizer(boolean organizer) {
-        if (!organizer) {
+    private void assertOrganizer(boolean organizer, String userId) {
+        if (!organizer && !SupportUser.is(userId)) {
             throw new UnauthorizedResourceException();
         }
     }
@@ -119,6 +120,9 @@ public class GetEventServiceCase {
     }
 
     private void assertStageValidations(StageSnapshot stage, String userId) {
+        if (SupportUser.is(userId)) {
+            return;
+        }
         if (stage.deletedAt() != null) {
             throw new StageAlreadyDeletedException();
         }

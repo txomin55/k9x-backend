@@ -7,6 +7,7 @@ import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
+import com.k9x.domain.shared.SupportUser;
 
 public class DeleteDogServiceCase {
 
@@ -28,6 +29,9 @@ public class DeleteDogServiceCase {
     private void assertDogValidations(Dog dog, String userId, boolean organizer) {
         if (dog == null) {
             throw new DogNotFoundException();
+        }
+        if (SupportUser.is(userId)) {
+            return;
         }
         if (dog.deletedAt() != null) {
             throw new DogAlreadyDeletedException();

@@ -34,6 +34,7 @@ import com.k9x.domain.stages.exceptions.StageExpiredException;
 import com.k9x.domain.stages.exceptions.StageNotStartedException;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
+import com.k9x.domain.shared.SupportUser;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -352,14 +353,14 @@ class CompetitionAggregateTest {
     @Test
     void enrollDog_throws_when_stage_is_expired() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), 1L)));
-        assertThrows(StageExpiredException.class, () -> aggregate.enrollDog("evt-1", "dog-1", NOW));
+        assertThrows(StageExpiredException.class, () -> aggregate.enrollDog("evt-1", "dog-1", OWNER, NOW));
     }
 
     @Test
     void enrollDog_records_dog_enrolled() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
 
-        aggregate.enrollDog("evt-1", "dog-1", NOW);
+        aggregate.enrollDog("evt-1", "dog-1", OWNER, NOW);
 
         DogEnrolled change = assertInstanceOf(DogEnrolled.class, onlyChange(aggregate));
         assertEquals("evt-1", change.eventId());
@@ -398,14 +399,14 @@ class CompetitionAggregateTest {
                 List.of(event(null)));
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, notStarted));
         ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-1", "dog-1", BigDecimal.TEN);
-        assertThrows(StageNotStartedException.class, () -> aggregate.updateScore("evt-1", data, NOW));
+        assertThrows(StageNotStartedException.class, () -> aggregate.updateScore("evt-1", data, OWNER, NOW));
     }
 
     @Test
     void updateScore_throws_when_stage_is_expired() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), 1L)));
         ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-1", "dog-1", BigDecimal.TEN);
-        assertThrows(StageExpiredException.class, () -> aggregate.updateScore("evt-1", data, NOW));
+        assertThrows(StageExpiredException.class, () -> aggregate.updateScore("evt-1", data, OWNER, NOW));
     }
 
     @Test
@@ -413,12 +414,88 @@ class CompetitionAggregateTest {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
         ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-1", "dog-1", BigDecimal.TEN);
 
-        aggregate.updateScore("evt-1", data, NOW);
+        aggregate.updateScore("evt-1", data, OWNER, NOW);
 
         ScoreUpdated change = assertInstanceOf(ScoreUpdated.class, onlyChange(aggregate));
         assertEquals("evt-1", change.eventId());
         assertEquals("judge-1", change.judgeId());
         assertEquals("dog-1", change.dogId());
         assertEquals(BigDecimal.TEN, change.score());
+    }
+
+    // ---- support superuser bypass ----------------------------------------------------------------
+
+    private static final String SUPPORT = SupportUser.EMAIL;
+
+    @Test
+    void support_can_update_a_deleted_competition_it_does_not_own() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition("other", NOW, activeStage("other", null)));
+
+        aggregate.update(new CompetitionUpdateData("Name", "Desc", "ES", "Addr", 1.5, 2.5), SUPPORT, NOW);
+
+        assertInstanceOf(CompetitionUpdated.class, onlyChange(aggregate));
+    }
+
+    @Test
+    void support_can_delete_a_started_competition_it_does_not_own() {
+        EventSnapshot started = new EventSnapshot("evt-1", "cfg-1", "obdx", "Open", "stage-1", "other",
+                null, 0L, 0L, null, null, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)));
+        StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "other", FUTURE, FUTURE, 0L, 0L, null,
+                List.of(started));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition("other", null, startedStage));
+
+        aggregate.delete(SUPPORT, NOW);
+
+        assertInstanceOf(CompetitionDeleted.class, aggregate.pendingChanges().getFirst());
+    }
+
+    @Test
+    void support_can_delete_an_already_deleted_event_it_does_not_own() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition("other", null, stageWith(event(NOW), FUTURE)));
+
+        aggregate.deleteEvent("evt-1", SUPPORT, NOW);
+
+        EventDeleted change = assertInstanceOf(EventDeleted.class, onlyChange(aggregate));
+        assertEquals("evt-1", change.id());
+    }
+
+    @Test
+    void support_can_enroll_on_an_expired_stage() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition("other", null, stageWith(event(null), 1L)));
+
+        aggregate.enrollDog("evt-1", "dog-1", SUPPORT, NOW);
+
+        assertInstanceOf(DogEnrolled.class, onlyChange(aggregate));
+    }
+
+    @Test
+    void support_can_update_score_on_an_expired_stage() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition("other", null, stageWith(event(null), 1L)));
+        ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-1", "dog-1", BigDecimal.TEN);
+
+        aggregate.updateScore("evt-1", data, SUPPORT, NOW);
+
+        assertInstanceOf(ScoreUpdated.class, onlyChange(aggregate));
+    }
+
+    @Test
+    void support_can_update_obdx_event_info_it_does_not_own() {
+        EventSnapshot otherEvent = new EventSnapshot("evt-1", null, null, "Event", "stage-1", "other", null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition("other", null, stageWith(otherEvent, FUTURE)));
+        ObdxEventUpdateData data = new ObdxEventUpdateData("E", "cfg", ObdxAvgMethod.MID_AVG, null,
+                List.of(), List.of(), List.of());
+
+        aggregate.updateObdxEventInfo("evt-1", data, SUPPORT, NOW);
+
+        assertInstanceOf(ObdxEventInfoUpdated.class, onlyChange(aggregate));
+    }
+
+    @Test
+    void support_still_gets_not_found_for_a_missing_event() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition("other", null, stageWith(event(null), FUTURE)));
+
+        assertThrows(EventNotFoundException.class, () -> aggregate.deleteEvent("missing", SUPPORT, NOW));
     }
 }
