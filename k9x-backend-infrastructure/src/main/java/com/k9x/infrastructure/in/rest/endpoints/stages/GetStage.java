@@ -52,6 +52,7 @@ public class GetStage implements StagesFetchOneApiDelegate {
                 .map(c -> new StageEventDetailCompetitorResponseDTO(
                         new IdNameDTO(c.dogName(), c.dogId()),
                         c.owner(),
+                        c.handler(),
                         c.country(),
                         c.team(),
                         c.breed()))

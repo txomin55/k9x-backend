@@ -88,6 +88,15 @@ public record EventSnapshot(
                 .orElse(false);
     }
 
+    /**
+     * Whether the given competitor has started: it holds at least one recorded score. A competitor that
+     * has not started yet is neither {@code LIVE} nor {@code SETTLED} but pending.
+     */
+    public boolean isCompetitorStarted(String dogId) {
+        return scores != null && scores.stream()
+                .anyMatch(s -> s.score() != null && dogId.equals(s.dogId()));
+    }
+
     private int requiredScores() {
         return (exercises == null ? 0 : exercises.size()) * (judges == null ? 0 : judges.size());
     }

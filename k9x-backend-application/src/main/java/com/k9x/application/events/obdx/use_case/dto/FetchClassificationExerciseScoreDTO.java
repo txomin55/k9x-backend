@@ -5,6 +5,6 @@ import java.util.List;
 
 public record FetchClassificationExerciseScoreDTO(
         String exerciseId, short exercisePosition, List<String> tags,
-        BigDecimal rawScore, BigDecimal totalScore, BigDecimal scoreRating,
+        BigDecimal exerciseScore, BigDecimal totalScore, BigDecimal scoreRating,
         List<FetchClassificationJudgeScoreDTO> judgeScores) {
 }

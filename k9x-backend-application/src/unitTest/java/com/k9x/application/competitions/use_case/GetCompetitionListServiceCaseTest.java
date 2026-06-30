@@ -10,16 +10,15 @@ import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.events.valueobjects.EventExercise;
 import com.k9x.domain.events.valueobjects.EventJudge;
 import com.k9x.domain.events.valueobjects.Score;
-import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
-
-import java.math.BigDecimal;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,7 +69,7 @@ class GetCompetitionListServiceCaseTest {
     void maps_event_status_from_domain_logic() {
         // created event: no scores -> CREATED. started event: one recorded score -> STARTED.
         EventSnapshot createdEvent = event("event-created", List.of(), List.of(), List.of(), List.of());
-        EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "team", "ES", "breed",
+        EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "Handler", "team", "ES", "breed",
                 "id-1", (short) 1, true, false);
         EventExercise exercise = new EventExercise("ex-1", (short) 1, null);
         // two judges but only one scored -> a score exists yet the competitor is not settled -> STARTED.
@@ -98,8 +97,8 @@ class GetCompetitionListServiceCaseTest {
     }
 
     @Test
-    void maps_competition_with_finished_stage_as_completed() {
-        // dateTo = 0L (1970) is strictly before today's UTC day -> FINISHED stage -> COMPLETED competition.
+    void maps_competition_with_finished_stage_as_finished() {
+        // dateTo = 0L (1970) is strictly before today's UTC day -> FINISHED stage -> FINISHED competition.
         StageSnapshot finishedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1",
                 0L, 0L, 0L, 0L, null, List.of());
         when(getCompetitionListPersistencePort.getCompetitions("user-1"))
@@ -108,7 +107,7 @@ class GetCompetitionListServiceCaseTest {
         List<FetchCompetitionDTO> result = serviceCase.getCompetitions("user-1", true);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().status()).isEqualTo("COMPLETED");
+        assertThat(result.getFirst().status()).isEqualTo("FINISHED");
         assertThat(result.getFirst().stages()).hasSize(1);
     }
 }

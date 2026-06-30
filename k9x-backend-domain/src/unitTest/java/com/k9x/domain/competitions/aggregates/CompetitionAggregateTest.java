@@ -259,7 +259,7 @@ class CompetitionAggregateTest {
 
     @Test
     void deleteStage_throws_when_an_event_is_not_created() {
-        EventCompetitor settled = new EventCompetitor("dog-1", "Rex", "Owner", "Team", "ES", "Breed", null,
+        EventCompetitor settled = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null,
                 (short) 1, false, true);
         EventSnapshot finished = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(settled), List.of(), List.of(), List.of());

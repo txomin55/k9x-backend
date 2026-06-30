@@ -43,15 +43,18 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                 .map(c -> new StageEventClassificationItemResponseDTO(
                         c.country(),
                         c.owner(),
+                        c.handler(),
                         c.team(),
                         c.status(),
                         new IdNameDTO(c.dogName(), c.dogId()),
                         c.exercises().stream()
                                 .map(e -> new StageEventClassificationExerciseScoresResponseDTO(
                                         new IdNameDTO(resolveExerciseName(e.exerciseId()), e.exerciseId()),
-                                        e.rawScore(),
-                                        e.scoreRating(),
+                                        // OAS exerciseScore carries the achieved weighted score; totalScore carries
+                                        // the exercise maximum (max * coef).
                                         e.totalScore(),
+                                        e.scoreRating(),
+                                        e.exerciseScore(),
                                         e.tags(),
                                         e.judgeScores().stream()
                                                 .map(j -> new StageEventClassificationScoreResponseDTO(

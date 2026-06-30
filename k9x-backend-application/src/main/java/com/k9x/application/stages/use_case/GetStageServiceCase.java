@@ -64,7 +64,7 @@ public class GetStageServiceCase {
                                 e.competitors() == null ? java.util.List.of()
                                         : e.competitors().stream()
                                         .map(c -> new FetchStageDetailCompetitorDTO(
-                                                c.dogId(), c.dogName(), c.owner(),
+                                                c.dogId(), c.dogName(), c.owner(), c.handler(),
                                                 c.country(), c.team(), c.breed()))
                                         .toList(),
                                 e.status().name(),

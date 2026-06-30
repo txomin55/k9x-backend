@@ -152,7 +152,7 @@ class GetStageListServiceCaseTest {
     }
 
     private static EventCompetitor competitor(String dogId, boolean notCompeting) {
-        return new EventCompetitor(dogId, "Rex", "owner", "Team A", "ES", "Border Collie", "ID-001",
+        return new EventCompetitor(dogId, "Rex", "owner", "Handler", "Team A", "ES", "Border Collie", "ID-001",
                 (short) 1, true, notCompeting);
     }
 

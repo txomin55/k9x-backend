@@ -68,7 +68,7 @@ public class GetObdxClassificationServiceCase {
                                     && Objects.equals(sc.dogId(), c.dogId()))
                             .findFirst().orElse(null);
                     rows.add(new FetchClassificationRawRowDTO(
-                            c.dogId(), c.dogName(), c.owner(), c.team(), c.country(),
+                            c.dogId(), c.dogName(), c.owner(), c.handler(), c.team(), c.country(),
                             ex.exerciseId(), ex.position() == null ? (short) 0 : ex.position(),
                             ex.tags() == null ? null : ex.tags().toArray(new String[0]),
                             jd.judgeId(), jd.judgeName(),
@@ -131,29 +131,41 @@ public class GetObdxClassificationServiceCase {
                 List<BigDecimal> scores = judgeEntries.stream().map(FetchClassificationJudgeScoreDTO::score).toList();
 
                 BigDecimal coef = config.coefByExerciseId().getOrDefault(exerciseId, BigDecimal.ONE);
-                BigDecimal rawScore = computeAvg(scores, event.scoreCalculation());
-                BigDecimal weightedScore = rawScore.multiply(coef).setScale(2, RoundingMode.HALF_UP);
-                BigDecimal maxExerciseScore = config.maxAllowedScore().multiply(coef);
-                BigDecimal exerciseScoreRating = percentageOfMax(weightedScore, maxExerciseScore);
+                // exerciseScore is the maximum attainable for this exercise (highest allowed score * coef); it is a
+                // constant reference. totalScore is what the competitor has actually achieved: the judges' average
+                // (or mid-avg) times the coef, which is 0 while the exercise has no scores.
+                BigDecimal maxExerciseScore = config.maxAllowedScore().multiply(coef).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal weightedScore = scores.isEmpty() ? null
+                        : computeAvg(scores, event.scoreCalculation())
+                        .multiply(coef).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal exerciseScoreRating = weightedScore == null ? null
+                        : percentageOfMax(weightedScore, maxExerciseScore);
 
-                totalScore = totalScore.add(weightedScore);
+                if (weightedScore != null) {
+                    totalScore = totalScore.add(weightedScore);
+                }
                 exercises.add(new FetchClassificationExerciseScoreDTO(
                         exerciseId,
                         exercisePositions.getOrDefault(exerciseId, (short) 0),
                         exerciseTags.getOrDefault(exerciseId, List.of()),
-                        rawScore, weightedScore, exerciseScoreRating,
+                        maxExerciseScore, weightedScore, exerciseScoreRating,
                         judgeEntries));
             }
 
-            BigDecimal maxPossibleTotal = computeMaxPossibleTotal(config);
+            BigDecimal maxPossibleTotal = computeMaxPossibleTotal(config, exercisePositions.keySet());
             BigDecimal competitorScoreRating = percentageOfMax(totalScore, maxPossibleTotal);
 
-            ClassificationCompetitorStatus status = event.isCompetitorSettled(dogId)
-                    ? ClassificationCompetitorStatus.SETTLED
-                    : ClassificationCompetitorStatus.LIVE;
+            ClassificationCompetitorStatus status;
+            if (event.isCompetitorSettled(dogId)) {
+                status = ClassificationCompetitorStatus.SETTLED;
+            } else if (event.isCompetitorStarted(dogId)) {
+                status = ClassificationCompetitorStatus.LIVE;
+            } else {
+                status = ClassificationCompetitorStatus.PENDING;
+            }
 
             competitors.add(new FetchClassificationCompetitorDTO(
-                    dogId, meta.dogName(), meta.dogOwner(), meta.dogTeam(), meta.dogCountry(),
+                    dogId, meta.dogName(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
                     startOrderByDog.get(dogId), 0, totalScore, competitorScoreRating, false,
                     status.name(), exercises));
         }
@@ -163,9 +175,15 @@ public class GetObdxClassificationServiceCase {
         return new FetchObdxClassificationDTO(scoresLastUpdate, competitors);
     }
 
-    private BigDecimal computeMaxPossibleTotal(ObdxClassificationConfigDTO config) {
-        return config.coefByExerciseId().values().stream()
-                .map(coef -> config.maxAllowedScore().multiply(coef))
+    /**
+     * Maximum attainable total for the competitor: summed over the exercises that actually belong to the event
+     * (not every exercise defined in the federation config), so it matches the totalScore numerator and yields a
+     * 0-100 rating.
+     */
+    private BigDecimal computeMaxPossibleTotal(ObdxClassificationConfigDTO config, Collection<String> eventExerciseIds) {
+        return eventExerciseIds.stream()
+                .map(id -> config.maxAllowedScore().multiply(
+                        config.coefByExerciseId().getOrDefault(id, BigDecimal.ONE)))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -229,7 +247,7 @@ public class GetObdxClassificationServiceCase {
     private void setPosition(List<FetchClassificationCompetitorDTO> competitors, int index, int position, boolean tied) {
         FetchClassificationCompetitorDTO c = competitors.get(index);
         competitors.set(index, new FetchClassificationCompetitorDTO(
-                c.dogId(), c.dogName(), c.owner(), c.team(), c.country(),
+                c.dogId(), c.dogName(), c.owner(), c.handler(), c.team(), c.country(),
                 c.startOrder(), position, c.totalScore(), c.scoreRating(), tied, c.status(), c.exercises()));
     }
 }

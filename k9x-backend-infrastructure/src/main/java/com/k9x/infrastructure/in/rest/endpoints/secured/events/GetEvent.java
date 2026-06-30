@@ -61,6 +61,7 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
         return competitors.stream()
                 .map(c -> new EventCompetitorResponseDTO(
                         c.owner(),
+                        c.handler(),
                         c.dogIdentity(),
                         c.team(),
                         c.country(),

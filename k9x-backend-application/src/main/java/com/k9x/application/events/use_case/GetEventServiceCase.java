@@ -64,7 +64,7 @@ public class GetEventServiceCase {
 
         List<FetchObdxEventCompetitorDTO> competitors = event.competitors().stream()
                 .map(c -> new FetchObdxEventCompetitorDTO(c.dogId(), c.dogName(), c.identity(), c.breed(),
-                        c.owner(), c.team(), c.country(), c.position(), c.verified(),
+                        c.owner(), c.handler(), c.team(), c.country(), c.position(), c.verified(),
                         EventCompetitorStatus.of(c.notCompeting()).name()))
                 .toList();
 

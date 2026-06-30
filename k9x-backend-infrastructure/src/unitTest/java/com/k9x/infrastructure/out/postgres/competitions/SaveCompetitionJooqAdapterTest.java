@@ -38,6 +38,7 @@ class SaveCompetitionJooqAdapterTest {
     private static final long NOW = 1700000000000L;
     private static final long FUTURE_FROM = 1900000000000L;
     private static final long FUTURE_TO = 1900000086400000L;
+    private static final long PAST_FROM = 1600000000000L;
 
     private List<String> capturedSql;
     private DSLContext dsl;
@@ -65,6 +66,17 @@ class SaveCompetitionJooqAdapterTest {
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 FUTURE_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
+        CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
+                0.0, 0.0, NOW, NOW, null, List.of(stage));
+        return CompetitionAggregate.of(competition);
+    }
+
+    // Stage window [PAST_FROM, FUTURE_TO] contains NOW, so the stage is already started — required for scoring.
+    private CompetitionAggregate aggregateWithStartedEvent() {
+        EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", null, NOW, NOW, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+        StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
+                PAST_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
                 0.0, 0.0, NOW, NOW, null, List.of(stage));
         return CompetitionAggregate.of(competition);
@@ -217,7 +229,7 @@ class SaveCompetitionJooqAdapterTest {
     @Test
     void emits_update_for_competitor_not_competing() {
         givenCapturingDsl();
-        EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "Owner", "Team", "ES", "Breed", null,
+        EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null,
                 (short) 1, true, false);
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", null, NOW, NOW, null,
                 ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of());
@@ -237,7 +249,7 @@ class SaveCompetitionJooqAdapterTest {
     @Test
     void emits_upsert_for_score_updated() {
         givenCapturingDsl();
-        CompetitionAggregate competition = aggregateWithActiveEvent();
+        CompetitionAggregate competition = aggregateWithStartedEvent();
         competition.updateScore("evt-1",
                 new ScoreUpdateData("judge-1", "exercise-1", "dog-1", BigDecimal.TEN), NOW);
 

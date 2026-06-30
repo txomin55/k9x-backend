@@ -1,6 +1,8 @@
 package com.k9x.application.events.obdx.use_case;
 
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationExerciseScoreDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.ObdxClassificationConfigDTO;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
@@ -70,7 +72,7 @@ class GetObdxClassificationServiceCaseTest {
 
         for (Row r : rows) {
             if (dogIds.add(r.dogId())) {
-                competitors.add(new EventCompetitor(r.dogId(), r.dogName(), "owner@test.com", "Team A", "ES",
+                competitors.add(new EventCompetitor(r.dogId(), r.dogName(), "owner@test.com", "Handler", "Team A", "ES",
                         "breed", "identity", (short) 0, false, false));
             }
             if (judgeIds.add(r.judgeId())) {
@@ -164,7 +166,7 @@ class GetObdxClassificationServiceCaseTest {
         // by the absent judges (would be (8+6+0+0)/4 = 3.5 if counted as 0) and NOT trimmed by
         // MID_AVG (which only triggers with 4+ PRESENT scores).
         List<EventCompetitor> competitors = List.of(
-                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Team A", "ES",
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
                         "breed", "identity", (short) 0, false, false));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(
@@ -199,9 +201,9 @@ class GetObdxClassificationServiceCaseTest {
         // dog-1 judged by ring 1 (j-1, j-2); dog-2 judged by ring 2 (j-3, j-4).
         // Each dog's average must use only its ring's scores, never the other ring's absent judges.
         List<EventCompetitor> competitors = List.of(
-                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Team A", "ES",
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
                         "breed", "id-1", (short) 0, false, false),
-                new EventCompetitor("dog-2", "Max", "owner@test.com", "Team B", "ES",
+                new EventCompetitor("dog-2", "Max", "owner@test.com", "Handler", "Team B", "ES",
                         "breed", "id-2", (short) 0, false, false));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(
@@ -261,9 +263,9 @@ class GetObdxClassificationServiceCaseTest {
         // ranks 1st, but each competitor must keep its own static start order regardless of the
         // dynamic ranking position.
         List<EventCompetitor> competitors = List.of(
-                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Team A", "ES",
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
                         "breed", "id-1", (short) 5, false, false),
-                new EventCompetitor("dog-2", "Max", "owner@test.com", "Team B", "ES",
+                new EventCompetitor("dog-2", "Max", "owner@test.com", "Handler", "Team B", "ES",
                         "breed", "id-2", (short) 3, false, false));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
@@ -308,7 +310,7 @@ class GetObdxClassificationServiceCaseTest {
     void marks_competitor_as_live_when_scores_still_missing() {
         // one exercise, two judges, but only j-1 has scored -> required (1*2) not met -> LIVE.
         List<EventCompetitor> competitors = List.of(
-                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Team A", "ES",
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
                         "breed", "identity", (short) 0, false, false));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(
@@ -328,6 +330,69 @@ class GetObdxClassificationServiceCaseTest {
 
         assertThat(result.competitors()).hasSize(1);
         assertThat(result.competitors().getFirst().status()).isEqualTo("LIVE");
+    }
+
+    @Test
+    void marks_competitor_as_pending_with_zero_points_but_exposes_max_per_exercise_when_unscored() {
+        // dog-1 is enrolled but no score has been recorded for it. It must be PENDING (not LIVE) with 0 points,
+        // while each exercise still exposes its maximum: exerciseScore ex-1 -> 10*coef(3)=30, ex-2 -> 10*coef(4)=40.
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Luna", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "identity", (short) 0, false, false));
+        List<EventExercise> exercises = List.of(
+                new EventExercise("ex-1", (short) 1, null),
+                new EventExercise("ex-2", (short) 2, null));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
+                competitors, exercises, judges, List.of());
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors()).hasSize(1);
+        FetchClassificationCompetitorDTO competitor = result.competitors().getFirst();
+        assertThat(competitor.status()).isEqualTo("PENDING");
+        assertThat(competitor.totalScore()).isEqualByComparingTo("0.00");
+        assertThat(competitor.scoreRating()).isEqualByComparingTo("0.00");
+        // each exercise exposes its max (exerciseScore) but a null achieved value (totalScore) while unscored
+        assertThat(competitor.exercises())
+                .extracting(FetchClassificationExerciseScoreDTO::exerciseScore)
+                .usingElementComparator(BigDecimal::compareTo)
+                .containsExactlyInAnyOrder(new BigDecimal("30"), new BigDecimal("40"));
+        assertThat(competitor.exercises())
+                .allSatisfy(e -> {
+                    assertThat(e.totalScore()).isNull();
+                    assertThat(e.scoreRating()).isNull();
+                });
+    }
+
+    @Test
+    void scored_exercise_uses_average_times_coef_while_unscored_one_stays_at_zero() {
+        // dog-1 has been scored on ex-1 (8) but not on ex-2. ex-1 -> avg(8)*coef(3)=24, ex-2 -> 0, total 24.00.
+        // The competitor has started, so it is LIVE (not settled: ex-2 still missing).
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "identity", (short) 0, false, false));
+        List<EventExercise> exercises = List.of(
+                new EventExercise("ex-1", (short) 1, null),
+                new EventExercise("ex-2", (short) 2, null));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        List<Score> scores = List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("8"), 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
+                competitors, exercises, judges, scores);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors()).hasSize(1);
+        assertThat(result.competitors().getFirst().status()).isEqualTo("LIVE");
+        assertThat(result.competitors().getFirst().totalScore()).isEqualByComparingTo("24.00");
     }
 
     @Test

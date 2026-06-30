@@ -53,6 +53,7 @@ public class GetCollection implements SecuredCollectionsFetchOneApiDelegate {
                                 .toList(),
                         new EventCompetitorResponseDTO(
                                 comp.competitor().owner(),
+                                comp.competitor().handler(),
                                 comp.competitor().dogIdentity(),
                                 comp.competitor().team(),
                                 comp.competitor().country(),
