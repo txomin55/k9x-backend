@@ -13,6 +13,7 @@ import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventJudgeDTO;
 import com.k9x.application.events.use_case.dto.FetchEventConfigurationDTO;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 import com.k9x.application.events.use_case.dto.FetchEventExerciseDTO;
+import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
@@ -41,7 +42,7 @@ public class GetEventServiceCase {
     }
 
     public FetchEventDetailDTO getEvent(String id, String userId, boolean organizer) {
-        assertOrganizer(organizer, userId);
+        AuthAssertions.assertOrganizer(organizer, userId);
         String competitionId = getCompetitionPersistencePort.competitionIdByEvent(id);
         if (competitionId == null) {
             throw new EventNotFoundException();
@@ -105,12 +106,6 @@ public class GetEventServiceCase {
         return federations.stream()
                 .filter(f -> f.configurations().stream().anyMatch(c -> c.id().equals(configurationId)))
                 .findFirst().orElse(null);
-    }
-
-    private void assertOrganizer(boolean organizer, String userId) {
-        if (!organizer && !SupportUser.is(userId)) {
-            throw new UnauthorizedResourceException();
-        }
     }
 
     private void assertEventExists(EventSnapshot event) {

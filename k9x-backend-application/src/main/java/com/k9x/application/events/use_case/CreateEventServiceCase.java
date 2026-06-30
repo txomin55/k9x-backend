@@ -6,8 +6,7 @@ import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.competitions.commands.NewEventData;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
-import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
+import com.k9x.application.utils.auth.AuthAssertions;
 
 public class CreateEventServiceCase {
 
@@ -21,7 +20,7 @@ public class CreateEventServiceCase {
     }
 
     public void createEvent(String id, String name, String stageId, String disciplineId, String userId, boolean organizer) {
-        assertOrganizer(organizer, userId);
+        AuthAssertions.assertOrganizer(organizer, userId);
         String competitionId = getCompetitionPersistencePort.competitionIdByStage(stageId);
         if (competitionId == null) {
             throw new StageNotFoundException();
@@ -30,11 +29,5 @@ public class CreateEventServiceCase {
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
         competition.createEvent(new NewEventData(id, name, stageId, disciplineId), userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
-    }
-
-    private void assertOrganizer(boolean organizer, String userId) {
-        if (!organizer && !SupportUser.is(userId)) {
-            throw new UnauthorizedResourceException();
-        }
     }
 }

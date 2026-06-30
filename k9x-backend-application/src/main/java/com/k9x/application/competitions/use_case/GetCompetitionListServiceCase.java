@@ -7,8 +7,7 @@ import com.k9x.application.competitions.use_case.dto.FetchStageDTO;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
-import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
+import com.k9x.application.utils.auth.AuthAssertions;
 
 import java.util.List;
 
@@ -21,9 +20,7 @@ public class GetCompetitionListServiceCase {
     }
 
     public List<FetchCompetitionDTO> getCompetitions(String userId, boolean organizer) {
-        if (!organizer && !SupportUser.is(userId)) {
-            throw new UnauthorizedResourceException();
-        }
+        AuthAssertions.assertOrganizer(organizer, userId);
 
         long now = DateUtils.nowUtcMillis();
         return getCompetitionListPersistencePort.getCompetitions(userId).stream()

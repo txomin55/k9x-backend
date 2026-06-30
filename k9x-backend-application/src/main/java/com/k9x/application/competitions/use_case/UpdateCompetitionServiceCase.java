@@ -7,9 +7,8 @@ import com.k9x.application.competitions.use_case.command.UpdateCompetitionComman
 import com.k9x.application.competitions.use_case.dto.Coordinates;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
+import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.domain.competitions.commands.CompetitionUpdateData;
-import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
 
 public class UpdateCompetitionServiceCase {
 
@@ -26,17 +25,11 @@ public class UpdateCompetitionServiceCase {
     }
 
     public void updateCompetition(String id, UpdateCompetitionCommand command, String userId, boolean organizer) {
-        assertOrganizer(organizer, userId);
+        AuthAssertions.assertOrganizer(organizer, userId);
         Coordinates coordinates = geoCoordinatesPort.getCoordinates(command.address());
         CompetitionAggregate competition = CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(id));
         competition.update(new CompetitionUpdateData(command.name(), command.description(), command.country(),
                 command.address(), coordinates.coordAlt(), coordinates.coordLong()), userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
-    }
-
-    private void assertOrganizer(boolean organizer, String userId) {
-        if (!organizer && !SupportUser.is(userId)) {
-            throw new UnauthorizedResourceException();
-        }
     }
 }

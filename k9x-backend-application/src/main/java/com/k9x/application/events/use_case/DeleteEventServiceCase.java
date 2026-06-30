@@ -5,8 +5,7 @@ import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
-import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
+import com.k9x.application.utils.auth.AuthAssertions;
 
 public class DeleteEventServiceCase {
 
@@ -20,7 +19,7 @@ public class DeleteEventServiceCase {
     }
 
     public void deleteEvent(String id, String userId, boolean organizer) {
-        assertOrganizer(organizer, userId);
+        AuthAssertions.assertOrganizer(organizer, userId);
         String competitionId = getCompetitionPersistencePort.competitionIdByEvent(id);
         if (competitionId == null) {
             throw new EventNotFoundException();
@@ -29,11 +28,5 @@ public class DeleteEventServiceCase {
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
         competition.deleteEvent(id, userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
-    }
-
-    private void assertOrganizer(boolean organizer, String userId) {
-        if (!organizer && !SupportUser.is(userId)) {
-            throw new UnauthorizedResourceException();
-        }
     }
 }

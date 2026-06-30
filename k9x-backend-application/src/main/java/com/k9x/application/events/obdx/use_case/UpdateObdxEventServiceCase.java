@@ -14,9 +14,8 @@ import com.k9x.domain.competitions.commands.ObdxEventUpdateData;
 import com.k9x.domain.competitions.commands.ObdxExerciseItem;
 import com.k9x.domain.competitions.commands.ObdxJudgeItem;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
-import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
 
 public class UpdateObdxEventServiceCase {
 
@@ -36,7 +35,7 @@ public class UpdateObdxEventServiceCase {
     }
 
     public void updateEvent(String id, UpdateObdxEventCommand command, String userId, boolean organizer) {
-        assertOrganizer(organizer, userId);
+        AuthAssertions.assertOrganizer(organizer, userId);
         assertConfigurationId(command.configurationId());
 
         String competitionId = getCompetitionPersistencePort.competitionIdByEvent(id);
@@ -72,12 +71,6 @@ public class UpdateObdxEventServiceCase {
                 command.judges().stream()
                         .map(j -> new ObdxJudgeItem(j.judgeId(), j.collectorEmail()))
                         .toList());
-    }
-
-    private void assertOrganizer(boolean organizer, String userId) {
-        if (!organizer && !SupportUser.is(userId)) {
-            throw new UnauthorizedResourceException();
-        }
     }
 
     private void assertConfigurationId(String configurationId) {

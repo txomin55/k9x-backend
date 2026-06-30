@@ -2,13 +2,9 @@ package com.k9x.application.dogs.use_case;
 
 import com.k9x.application.dogs.port.payload.UpdateDogPersistencePayload;
 import com.k9x.application.dogs.use_case.command.UpdateDogCommand;
-import com.k9x.application.dogs.exceptions.DogAlreadyDeletedException;
-import com.k9x.application.dogs.exceptions.DogNotFoundException;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
 import com.k9x.domain.dogs.aggregates.Dog;
-import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
 
 public class UpdateDogServiceCase {
 
@@ -23,31 +19,7 @@ public class UpdateDogServiceCase {
 
     public void updateDog(String dogId, UpdateDogCommand command, String userId, boolean organizer) {
         Dog dog = getDogPersistencePort.getDog(dogId);
-        assertDogValidations(dog, userId, organizer);
+        DogGuards.assertMutableBy(dog, userId, organizer);
         updateDogPersistencePort.updateDog(dogId, UpdateDogPersistencePayload.from(command));
-    }
-
-    private void assertDogValidations(Dog dog, String userId, boolean organizer) {
-        if (dog == null) {
-            throw new DogNotFoundException();
-        }
-        if (SupportUser.is(userId)) {
-            return;
-        }
-        if (dog.deletedAt() != null) {
-            throw new DogAlreadyDeletedException();
-        }
-        if (dog.owner() != null) {
-            if (!dog.owner().equals(userId)) {
-                throw new UnauthorizedResourceException();
-            }
-        } else {
-            if (!organizer) {
-                throw new UnauthorizedResourceException();
-            }
-            if (!dog.creator().equals(userId)) {
-                throw new UnauthorizedResourceException();
-            }
-        }
     }
 }

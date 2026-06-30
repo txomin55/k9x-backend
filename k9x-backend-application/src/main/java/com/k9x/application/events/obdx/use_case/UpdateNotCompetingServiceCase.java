@@ -5,9 +5,8 @@ import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.events.obdx.use_case.command.UpdateNotCompetingCommand;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
+import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
-import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
 
 public class UpdateNotCompetingServiceCase {
 
@@ -21,9 +20,7 @@ public class UpdateNotCompetingServiceCase {
     }
 
     public void updateNotCompeting(String eventId, UpdateNotCompetingCommand command, String userId, boolean organizer) {
-        if (!organizer && !SupportUser.is(userId)) {
-            throw new UnauthorizedResourceException();
-        }
+        AuthAssertions.assertOrganizer(organizer, userId);
         String competitionId = getCompetitionPersistencePort.competitionIdByEvent(eventId);
         if (competitionId == null) {
             throw new EventNotFoundException();

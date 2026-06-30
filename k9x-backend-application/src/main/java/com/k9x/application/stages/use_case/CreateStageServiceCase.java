@@ -4,9 +4,8 @@ import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
+import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.domain.competitions.commands.NewStageData;
-import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
 
 public class CreateStageServiceCase {
 
@@ -21,7 +20,7 @@ public class CreateStageServiceCase {
 
     public void createStage(String id, String name, String competitionId, Long dateFrom, Long dateTo,
                             String userId, boolean organizer) {
-        assertOrganizer(organizer, userId);
+        AuthAssertions.assertOrganizer(organizer, userId);
 
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
@@ -29,11 +28,5 @@ public class CreateStageServiceCase {
         competition.createStage(new NewStageData(id, name, dateFrom, dateTo), userId, DateUtils.nowUtcMillis());
 
         saveCompetitionPersistencePort.save(competition);
-    }
-
-    private void assertOrganizer(boolean organizer, String userId) {
-        if (!organizer && !SupportUser.is(userId)) {
-            throw new UnauthorizedResourceException();
-        }
     }
 }

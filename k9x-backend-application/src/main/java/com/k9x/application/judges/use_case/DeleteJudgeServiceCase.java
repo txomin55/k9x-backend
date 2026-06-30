@@ -1,13 +1,10 @@
 package com.k9x.application.judges.use_case;
 
-import com.k9x.application.judges.exceptions.JudgeAlreadyDeletedException;
-import com.k9x.application.judges.exceptions.JudgeNotFoundException;
 import com.k9x.application.judges.port.DeleteJudgePersistencePort;
 import com.k9x.application.judges.port.GetJudgePersistencePort;
 import com.k9x.domain.judges.aggregates.Judge;
+import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.application.utils.date.DateUtils;
-import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
 
 public class DeleteJudgeServiceCase {
 
@@ -21,30 +18,9 @@ public class DeleteJudgeServiceCase {
     }
 
     public void deleteJudge(String judgeId, String userId, boolean organizer) {
-        assertOrganizer(organizer, userId);
+        AuthAssertions.assertOrganizer(organizer, userId);
         Judge judge = getJudgePersistencePort.getJudge(judgeId);
-        assertJudgeValidations(judge, userId);
+        JudgeGuards.assertMutableBy(judge, userId);
         deleteJudgePersistencePort.deleteJudge(judgeId, DateUtils.nowUtcMillis());
-    }
-
-    private void assertOrganizer(boolean organizer, String userId) {
-        if (!organizer && !SupportUser.is(userId)) {
-            throw new UnauthorizedResourceException();
-        }
-    }
-
-    private void assertJudgeValidations(Judge judge, String userId) {
-        if (judge == null) {
-            throw new JudgeNotFoundException();
-        }
-        if (SupportUser.is(userId)) {
-            return;
-        }
-        if (!judge.creator().equals(userId)) {
-            throw new UnauthorizedResourceException();
-        }
-        if (judge.deletedAt() != null) {
-            throw new JudgeAlreadyDeletedException();
-        }
     }
 }
