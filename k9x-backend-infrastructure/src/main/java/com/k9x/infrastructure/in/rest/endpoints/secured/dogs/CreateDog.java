@@ -25,9 +25,7 @@ public class CreateDog implements SecuredDogsCreateApiDelegate {
                 body.getBreed(),
                 body.getIdentifier(),
                 body.getOwner(),
-                // TODO: replace null with body.getHandler() once the regenerated OAS stubs
-                //       (with the new `handler` field) are published. The OAS spec is already updated.
-                null,
+                body.getHandler(),
                 userDetails.getEmail(),
                 body.getTeam(),
                 body.getCountry(),

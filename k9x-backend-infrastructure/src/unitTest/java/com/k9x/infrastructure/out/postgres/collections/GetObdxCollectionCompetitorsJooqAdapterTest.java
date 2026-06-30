@@ -26,7 +26,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
 
     private static final Field<?>[] SELECT_FIELDS = {
             EC.DOG_ID, EC.POSITION, EC.VERIFIED, EC.NOT_COMPETING,
-            D.NAME, D.IDENTITY, D.BREED, D.OWNER, D.TEAM, D.COUNTRY
+            D.NAME, D.IDENTITY, D.BREED, D.HANDLER, D.TEAM, D.COUNTRY
     };
 
     private static final Field<?>[] JOIN_FIELDS = Stream.of(
@@ -69,7 +69,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
             record.set(D.NAME, "Rex");
             record.set(D.IDENTITY, "ID-001");
             record.set(D.BREED, "Border Collie");
-            record.set(D.OWNER, "owner@test.com");
+            record.set(D.HANDLER, "Rex Handler");
             record.set(D.TEAM, "Team A");
             record.set(D.COUNTRY, "ES");
             result.add(record);
@@ -85,7 +85,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
         assertThat(comp.dogName()).isEqualTo("Rex");
         assertThat(comp.dogIdentity()).isEqualTo("ID-001");
         assertThat(comp.breed()).isEqualTo("Border Collie");
-        assertThat(comp.owner()).isEqualTo("owner@test.com");
+        assertThat(comp.owner()).isEqualTo("Rex Handler");
         assertThat(comp.team()).isEqualTo("Team A");
         assertThat(comp.country()).isEqualTo("ES");
         assertThat(comp.position()).isEqualTo((short) 1);

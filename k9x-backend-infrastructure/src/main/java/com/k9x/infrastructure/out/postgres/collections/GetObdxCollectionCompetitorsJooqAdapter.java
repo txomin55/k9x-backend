@@ -23,7 +23,7 @@ public class GetObdxCollectionCompetitorsJooqAdapter implements GetObdxCollectio
         Dogs d = Tables.DOGS;
 
         return dsl.select(ec.DOG_ID, ec.POSITION, ec.VERIFIED, ec.NOT_COMPETING,
-                        d.NAME, d.IDENTITY, d.BREED, d.OWNER, d.TEAM, d.COUNTRY)
+                        d.NAME, d.IDENTITY, d.BREED, d.HANDLER, d.TEAM, d.COUNTRY)
                 .from(ec)
                 .join(d).on(d.ID.eq(ec.DOG_ID).and(d.DELETED_AT.isNull()))
                 .where(ec.EVENT_ID.eq(eventId))
@@ -32,7 +32,7 @@ public class GetObdxCollectionCompetitorsJooqAdapter implements GetObdxCollectio
                         r.get(d.NAME),
                         r.get(d.IDENTITY),
                         r.get(d.BREED),
-                        r.get(d.OWNER),
+                        r.get(d.HANDLER),
                         r.get(d.TEAM),
                         r.get(d.COUNTRY),
                         r.get(ec.POSITION),

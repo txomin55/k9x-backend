@@ -33,6 +33,7 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
                                 dog.country(),
                                 dog.team(),
                                 dog.owner(),
+                                dog.handler(),
                                 dog.identity()
                         )
                 )
