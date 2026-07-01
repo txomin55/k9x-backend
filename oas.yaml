@@ -61,7 +61,10 @@
       "name": "Secured/Events/update/not_competing/obdx"
     },
     {
-      "name": "Secured/Events/update/yellow_card"
+      "name": "Secured/Events/update/yellow_card/obdx"
+    },
+    {
+      "name": "Secured/Events/fetch_yellow_cards/obdx"
     },
     {
       "name": "Secured/Judges/create"
@@ -979,7 +982,7 @@
         "description": "",
         "operationId": "registerYellowCard",
         "tags": [
-          "Secured/Events/update/yellow_card"
+          "Secured/Events/update/yellow_card/obdx"
         ],
         "parameters": [
           {
@@ -1010,6 +1013,62 @@
                 "schema": {
                   "type": "string",
                   "description": "Success text"
+                }
+              }
+            },
+            "headers": { }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError",
+            "description": "Missing or invalid bearer token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [ ]
+          }
+        ]
+      }
+    },
+    "/secured/events/{eventId}/{competitorId}/yellow-cards": {
+      "get": {
+        "summary": "List yellow cards of a competitor in an event",
+        "deprecated": false,
+        "description": "",
+        "operationId": "fetchYellowCards",
+        "tags": [
+          "Secured/Events/fetch_yellow_cards/obdx"
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "competitorId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YellowCardResponseDTO"
+                  }
                 }
               }
             },
@@ -1804,6 +1863,12 @@
             "items": {
               "$ref": "#/components/schemas/StageEventClassificationScoreResponseDTO"
             }
+          },
+          "yellowCards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StageEventClassificationYellowCardResponseDTO"
+            }
           }
         },
         "required": [
@@ -1812,7 +1877,24 @@
           "scoreRating",
           "totalScore",
           "tags",
-          "scores"
+          "scores",
+          "yellowCards"
+        ]
+      },
+      "StageEventClassificationYellowCardResponseDTO": {
+        "type": "object",
+        "properties": {
+          "judge": {
+            "$ref": "#/components/schemas/IdNameDTO"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "judge",
+          "timestamp"
         ]
       },
       "StageEventClassificationResponseDTO": {
@@ -2310,6 +2392,26 @@
           "dogId",
           "exerciseId",
           "judgeId"
+        ]
+      },
+      "YellowCardResponseDTO": {
+        "type": "object",
+        "properties": {
+          "exercise": {
+            "$ref": "#/components/schemas/IdNameDTO"
+          },
+          "judge": {
+            "$ref": "#/components/schemas/IdNameDTO"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "exercise",
+          "judge",
+          "timestamp"
         ]
       },
       "UpdateCompetitionRequestDTO": {

@@ -61,6 +61,11 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                                                         new IdNameDTO(j.judgeName(), j.judgeId()),
                                                         j.score(),
                                                         j.scoreRating()))
+                                                .toList(),
+                                        e.yellowCards().stream()
+                                                .map(y -> new StageEventClassificationYellowCardResponseDTO(
+                                                        new IdNameDTO(y.judgeName(), y.judgeId()),
+                                                        y.timestamp()))
                                                 .toList()))
                                 .toList(),
                         c.position(),

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -194,6 +195,36 @@ class GetObdxClassificationServiceCaseTest {
         // only the two present judges appear in the exercise breakdown
         assertThat(result.competitors().getFirst().exercises().getFirst().judgeScores())
                 .extracting("judgeId").containsExactlyInAnyOrder("j-1", "j-2");
+    }
+
+    @Test
+    void exposes_stamped_yellow_cards_per_exercise_with_judge_and_timestamp() {
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "identity", (short) 0, false, false, null));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(
+                new EventJudge("j-1", "Judge j-1", null),
+                new EventJudge("j-2", "Judge j-2", null));
+        List<Score> scores = List.of(
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("8"), 1000L, 5000L, 6000L),
+                new Score("ex-1", "j-2", "dog-1", new BigDecimal("6"), 1000L, 7000L, null));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
+                competitors, exercises, judges, scores);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        // Each stamped slot becomes an item, carrying its judge; empty slots (j-2's second) are skipped.
+        assertThat(result.competitors().getFirst().exercises().getFirst().yellowCards())
+                .extracting("judgeId", "timestamp")
+                .containsExactlyInAnyOrder(
+                        tuple("j-1", 5000L),
+                        tuple("j-1", 6000L),
+                        tuple("j-2", 7000L));
     }
 
     @Test

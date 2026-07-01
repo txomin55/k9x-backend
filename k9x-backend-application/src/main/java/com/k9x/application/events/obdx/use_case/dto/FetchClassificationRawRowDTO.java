@@ -6,5 +6,6 @@ public record FetchClassificationRawRowDTO(
         String dogId, String dogName, String dogOwner, String dogHandler, String dogTeam, String dogCountry,
         String exerciseId, short exercisePosition, String[] exerciseTags,
         String judgeId, String judgeName,
-        BigDecimal score, Long scoreLastUpdate) {
+        BigDecimal score, Long scoreLastUpdate,
+        Long yellowCard1, Long yellowCard2) {
 }
