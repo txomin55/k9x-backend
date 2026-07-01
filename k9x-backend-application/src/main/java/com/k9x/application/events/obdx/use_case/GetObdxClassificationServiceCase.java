@@ -260,6 +260,7 @@ public class GetObdxClassificationServiceCase {
         return competitor.exercises().stream()
                 .filter(e -> exerciseIds.contains(e.exerciseId()))
                 .map(FetchClassificationExerciseScoreDTO::totalScore)
+                .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

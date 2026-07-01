@@ -19,12 +19,9 @@ public class EnrollEvent implements SecuredEventsEnrollApiDelegate {
 
     @Override
     public ResponseEntity<Object> doEnrollSecured(String eventId, EnrollStageEventRequestDTO enrollStageEventRequestDTO) {
-        // TODO: `bih` is already declared in oas.yaml but the published oas-definition-stubs jar does
-        //  not expose getBih() yet. Once the stub is republished, replace the fixed value below with
-        //  Boolean.TRUE.equals(enrollStageEventRequestDTO.getBih()).
-        boolean bih = false;
         enrollEventServiceCase.enrollEvent(eventId,
-                new EnrollObdxEventCommand(enrollStageEventRequestDTO.getDogId(), bih),
+                new EnrollObdxEventCommand(enrollStageEventRequestDTO.getDogId(),
+                        Boolean.TRUE.equals(enrollStageEventRequestDTO.getBih())),
                 userDetails.getEmail());
         return ResponseEntity.ok().build();
     }

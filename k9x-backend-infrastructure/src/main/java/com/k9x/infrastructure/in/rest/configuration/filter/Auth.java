@@ -9,6 +9,8 @@ import com.k9x.infrastructure.in.rest.configuration.session.AuthorizationExtract
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -22,6 +24,8 @@ import java.util.Objects;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class Auth implements Filter {
+
+    private static final Logger log = LoggerFactory.getLogger(Auth.class);
 
     public static final String USER_DETAILS = "USER_DETAILS";
     private static final String AUTHORIZATION_HEADER = "Authorization";
@@ -61,6 +65,7 @@ public class Auth implements Filter {
 
         String authorization = request.getHeader(AUTHORIZATION_HEADER);
         if (authorization == null) {
+            log.warn("Auth 401 [{} {}]: missing Authorization header", request.getMethod(), path);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
@@ -68,6 +73,8 @@ public class Auth implements Filter {
         try {
             AuthTokenDTO userDetails = authorizationExtractor.getDataFromToken(authorization.split(" ")[1]);
             if (!isValidInCache(userDetails)) {
+                log.warn("Auth 401 [{} {}]: token not valid in cache (subject={})",
+                        request.getMethod(), path, userDetails != null ? userDetails.getSubject() : null);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
@@ -81,6 +88,8 @@ public class Auth implements Filter {
             }
 
             if (userInfo == null) {
+                log.warn("Auth 401 [{} {}]: no user found for subject={}",
+                        request.getMethod(), path, userDetails.getSubject());
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
@@ -89,6 +98,7 @@ public class Auth implements Filter {
 
             chain.doFilter(req, res);
         } catch (RuntimeException ex) {
+            log.warn("Auth 401 [{} {}]: {}", request.getMethod(), path, ex.toString());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
