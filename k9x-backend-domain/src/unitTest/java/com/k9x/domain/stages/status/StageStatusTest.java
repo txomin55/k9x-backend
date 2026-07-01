@@ -14,6 +14,8 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StageStatusTest {
 
@@ -34,6 +36,33 @@ class StageStatusTest {
                 List.of(new EventExercise("x1", (short) 1, List.of()), new EventExercise("x2", (short) 2, List.of())),
                 List.of(new EventJudge("j1", "j1", null)),
                 List.of(new Score("x1", "j1", "d1", new BigDecimal("8.0"), 0L)));
+    }
+
+    private static EventSnapshot openEvent() {
+        // no scores -> CREATED, null deadline -> enrollment open on its own
+        return new EventSnapshot("e2", "cfg", "obdx", "Event", "s1", "creator", null, 0L, 0L, null, ObdxAvgMethod.AVG,
+                List.of(), List.of(), List.of(), List.of());
+    }
+
+    @Test
+    void enrollment_closed_when_stage_is_to_start() {
+        StageSnapshot stage = stage(TODAY, NEXT_WEEK, null, List.of(openEvent()));
+        assertEquals(StageStatus.TO_START, stage.status(NOW));
+        assertFalse(stage.enrollmentOpened(openEvent(), NOW));
+    }
+
+    @Test
+    void enrollment_closed_when_stage_is_started() {
+        StageSnapshot stage = stage(TODAY, TOMORROW, null, List.of(startedEvent()));
+        assertEquals(StageStatus.STARTED, stage.status(NOW));
+        assertFalse(stage.enrollmentOpened(openEvent(), NOW));
+    }
+
+    @Test
+    void enrollment_open_when_stage_not_started_and_event_deadline_not_reached() {
+        StageSnapshot stage = stage(NEXT_WEEK, NEXT_WEEK, null, List.of(openEvent()));
+        assertEquals(StageStatus.CREATED, stage.status(NOW));
+        assertTrue(stage.enrollmentOpened(openEvent(), NOW));
     }
 
     @Test

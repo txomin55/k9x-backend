@@ -42,6 +42,19 @@ public record StageSnapshot(
         return StageStatus.CREATED;
     }
 
+    /**
+     * Whether enrollment is open for the given event within this stage. Enrollment closes once the stage
+     * is under way: a TO_START or STARTED stage never accepts enrollments regardless of the event's own
+     * deadline. Otherwise the event's deadline decides.
+     */
+    public boolean enrollmentOpened(EventSnapshot event, long now) {
+        StageStatus status = status(now);
+        if (status == StageStatus.TO_START || status == StageStatus.STARTED) {
+            return false;
+        }
+        return event.enrollmentOpened(now);
+    }
+
     private boolean hasStartedEvent() {
         return events != null && events.stream().anyMatch(e -> e.status() == EventStatus.STARTED);
     }

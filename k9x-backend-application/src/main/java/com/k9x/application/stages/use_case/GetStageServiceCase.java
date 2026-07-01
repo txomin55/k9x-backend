@@ -68,7 +68,7 @@ public class GetStageServiceCase {
                                                 c.country(), c.team(), c.breed()))
                                         .toList(),
                                 e.status().name(),
-                                e.enrollmentOpened(now),
+                                stage.enrollmentOpened(e, now),
                                 e.enrollmentDeadline()))
                         .toList());
     }
