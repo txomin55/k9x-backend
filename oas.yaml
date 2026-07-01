@@ -61,6 +61,9 @@
       "name": "Secured/Events/update/not_competing/obdx"
     },
     {
+      "name": "Secured/Events/update/yellow_card"
+    },
+    {
       "name": "Secured/Judges/create"
     },
     {
@@ -952,6 +955,61 @@
               "application/json": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            },
+            "headers": { }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError",
+            "description": "Missing or invalid bearer token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [ ]
+          }
+        ]
+      }
+    },
+    "/secured/events/{eventId}/yellow-card": {
+      "put": {
+        "summary": "Register a yellow card for a competitor",
+        "deprecated": false,
+        "description": "",
+        "operationId": "registerYellowCard",
+        "tags": [
+          "Secured/Events/update/yellow_card"
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterYellowCardRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "description": "Success text"
                 }
               }
             },
@@ -2233,6 +2291,25 @@
           "judgeId",
           "eventId",
           "score"
+        ]
+      },
+      "RegisterYellowCardRequestDTO": {
+        "type": "object",
+        "properties": {
+          "dogId": {
+            "type": "string"
+          },
+          "exerciseId": {
+            "type": "string"
+          },
+          "judgeId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dogId",
+          "exerciseId",
+          "judgeId"
         ]
       },
       "UpdateCompetitionRequestDTO": {

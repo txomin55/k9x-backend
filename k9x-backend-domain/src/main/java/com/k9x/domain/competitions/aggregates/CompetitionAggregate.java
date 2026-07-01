@@ -207,6 +207,21 @@ public final class CompetitionAggregate {
         changes.add(new ScoreUpdated(eventId, data.judgeId(), data.exerciseId(), data.dogId(), data.score(), now));
     }
 
+    public void registerYellowCard(String eventId, YellowCardData data, String userId, long now) {
+        requireActiveEvent(eventId, userId);
+        StageSnapshot stage = findStageOfEvent(eventId);
+        assert stage != null;
+        if (!SupportUser.is(userId)) {
+            if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
+                throw new StageNotStartedException();
+            }
+            if (stage.dateTo() < now) {
+                throw new StageExpiredException();
+            }
+        }
+        changes.add(new YellowCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogId(), now));
+    }
+
     // ---- invariants & navigation -----------------------------------------------------------------
 
     private void assertCompetitionMutableBy(String userId) {

@@ -9,5 +9,5 @@ public sealed interface CompetitionChange permits
         CompetitionCreated, CompetitionUpdated, CompetitionDeleted,
         StageCreated, StageRenamed, StageDeleted,
         EventCreated, EventDeleted, DogEnrolled,
-        ObdxEventInfoUpdated, ScoreUpdated, CompetitorNotCompetingUpdated {
+        ObdxEventInfoUpdated, ScoreUpdated, CompetitorNotCompetingUpdated, YellowCardRegistered {
 }

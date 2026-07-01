@@ -1,5 +1,6 @@
 package com.k9x.configuration.secured.event;
 
+import com.k9x.application.events.obdx.use_case.RegisterObdxYellowCardServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateNotCompetingServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxScoreServiceCase;
@@ -12,6 +13,7 @@ import com.k9x.infrastructure.in.rest.endpoints.secured.events.CreateEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.EnrollEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.GetEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.RemoveEvent;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.RegisterObdxYellowCard;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventNotCompeting;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventInfo;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxScore;
@@ -55,5 +57,10 @@ public class SecuredEventEndpointConfiguration {
     @Bean
     public UpdateObdxEventNotCompeting updateNotCompeting(UpdateNotCompetingServiceCase updateNotCompetingServiceCase, UserInfoDTO userInfoDTO) {
         return new UpdateObdxEventNotCompeting(updateNotCompetingServiceCase, userInfoDTO);
+    }
+
+    @Bean
+    public RegisterObdxYellowCard registerYellowCard(RegisterObdxYellowCardServiceCase registerObdxYellowCardServiceCase, UserInfoDTO userInfoDTO) {
+        return new RegisterObdxYellowCard(registerObdxYellowCardServiceCase, userInfoDTO);
     }
 }

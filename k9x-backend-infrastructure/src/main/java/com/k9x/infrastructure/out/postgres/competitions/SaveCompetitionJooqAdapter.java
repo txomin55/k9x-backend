@@ -50,6 +50,7 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
             case DogEnrolled c -> insertCompetitor(ctx, c);
             case ObdxEventInfoUpdated c -> updateObdxEventInfo(ctx, c);
             case ScoreUpdated c -> upsertScore(ctx, c);
+            case YellowCardRegistered c -> registerYellowCard(ctx, c);
             case CompetitorNotCompetingUpdated c -> updateCompetitorNotCompeting(ctx, c);
             default ->
                     throw new UnsupportedOperationException("Unsupported change type: " + change.getClass().getSimpleName());
@@ -98,6 +99,29 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 .doUpdate()
                 .set(EVENT_SCORES.SCORE, c.score())
                 .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
+                .execute();
+    }
+
+    /**
+     * Stamps the yellow card timestamp into the first free slot of the score row keyed by
+     * (event, exercise, judge, dog): {@code yellow_card_1} if empty, otherwise {@code yellow_card_2}.
+     * Once both slots are set the row is left untouched. A single CASE-based UPDATE keeps the slot
+     * selection atomic against the row's current values.
+     */
+    private void registerYellowCard(DSLContext ctx, YellowCardRegistered c) {
+        ctx.update(EVENT_SCORES)
+                .set(EVENT_SCORES.YELLOW_CARD_1,
+                        DSL.when(EVENT_SCORES.YELLOW_CARD_1.isNull(), DSL.val(c.lastUpdate()))
+                                .otherwise(EVENT_SCORES.YELLOW_CARD_1))
+                .set(EVENT_SCORES.YELLOW_CARD_2,
+                        DSL.when(EVENT_SCORES.YELLOW_CARD_1.isNotNull().and(EVENT_SCORES.YELLOW_CARD_2.isNull()),
+                                        DSL.val(c.lastUpdate()))
+                                .otherwise(EVENT_SCORES.YELLOW_CARD_2))
+                .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
+                .where(EVENT_SCORES.EVENT_ID.eq(c.eventId())
+                        .and(EVENT_SCORES.EXERCISE_ID.eq(c.exerciseId()))
+                        .and(EVENT_SCORES.JUDGE_ID.eq(c.judgeId()))
+                        .and(EVENT_SCORES.DOG_ID.eq(c.dogId())))
                 .execute();
     }
 
