@@ -92,8 +92,11 @@ public class GetObdxClassificationServiceCase {
         Map<String, List<String>> exerciseTags = new LinkedHashMap<>();
         // dogId → static start order (competitor number), set on enrollment
         Map<String, Short> startOrderByDog = new LinkedHashMap<>();
+        // dogId → manually set final score; when present it overrides the computed totalScore
+        Map<String, BigDecimal> finalScoreByDog = new LinkedHashMap<>();
         for (EventCompetitor competitor : (event.competitors() == null ? List.<EventCompetitor>of() : event.competitors())) {
             startOrderByDog.put(competitor.dogId(), competitor.position());
+            finalScoreByDog.put(competitor.dogId(), competitor.finalScore());
         }
 
         Long scoresLastUpdate = null;
@@ -122,7 +125,7 @@ public class GetObdxClassificationServiceCase {
                 : judgeScoresByDogExercise.entrySet()) {
             String dogId = dogEntry.getKey();
             FetchClassificationRawRowDTO meta = dogMeta.get(dogId);
-            BigDecimal totalScore = BigDecimal.ZERO;
+            BigDecimal computedTotal = BigDecimal.ZERO;
             List<FetchClassificationExerciseScoreDTO> exercises = new ArrayList<>();
 
             for (Map.Entry<String, List<FetchClassificationJudgeScoreDTO>> exEntry : dogEntry.getValue().entrySet()) {
@@ -142,7 +145,7 @@ public class GetObdxClassificationServiceCase {
                         : percentageOfMax(weightedScore, maxExerciseScore);
 
                 if (weightedScore != null) {
-                    totalScore = totalScore.add(weightedScore);
+                    computedTotal = computedTotal.add(weightedScore);
                 }
                 exercises.add(new FetchClassificationExerciseScoreDTO(
                         exerciseId,
@@ -151,6 +154,11 @@ public class GetObdxClassificationServiceCase {
                         maxExerciseScore, weightedScore, exerciseScoreRating,
                         judgeEntries));
             }
+
+            // A manually set final score takes precedence over the computed sum of exercise scores.
+            BigDecimal manualFinalScore = finalScoreByDog.get(dogId);
+            BigDecimal totalScore = manualFinalScore != null
+                    ? manualFinalScore.setScale(2, RoundingMode.HALF_UP) : computedTotal;
 
             BigDecimal maxPossibleTotal = computeMaxPossibleTotal(config, exercisePositions.keySet());
             BigDecimal competitorScoreRating = percentageOfMax(totalScore, maxPossibleTotal);

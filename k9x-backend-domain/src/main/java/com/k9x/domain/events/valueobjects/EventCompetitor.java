@@ -1,5 +1,7 @@
 package com.k9x.domain.events.valueobjects;
 
+import java.math.BigDecimal;
+
 public record EventCompetitor(
         String dogId,
         String dogName,
@@ -11,6 +13,7 @@ public record EventCompetitor(
         String identity,
         Short position,
         Boolean verified,
-        boolean notCompeting
+        boolean notCompeting,
+        BigDecimal finalScore
 ) {
 }
