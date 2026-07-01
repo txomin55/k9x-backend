@@ -18,7 +18,11 @@ public class CreateJudge implements SecuredJudgesCreateApiDelegate {
 
     @Override
     public ResponseEntity<String> createJudgeSecured(IdNameDTO body) {
-        createJudgeServiceCase.createJudge(body.getId(), body.getName(), userDetails.getEmail(), userDetails.isOrganizer());
+        // TODO: `country` is declared for judge create in oas.yaml (CreateJudgeRequestDTO) but the published
+        //  oas-definition-stubs jar still maps this endpoint to IdNameDTO, which has no country. Once the stub
+        //  is republished, switch the body type to CreateJudgeRequestDTO and use body.getCountry().
+        String country = "";
+        createJudgeServiceCase.createJudge(body.getId(), body.getName(), country, userDetails.getEmail(), userDetails.isOrganizer());
         return ResponseEntity.ok().build();
     }
 }

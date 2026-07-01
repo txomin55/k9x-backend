@@ -153,7 +153,7 @@ public final class CompetitionAggregate {
         changes.add(new EventDeleted(eventId, now));
     }
 
-    public void enrollDog(String eventId, String dogId, String userId, long now) {
+    public void enrollDog(String eventId, String dogId, boolean bih, String userId, long now) {
         requireActiveEvent(eventId, userId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
@@ -161,7 +161,7 @@ public final class CompetitionAggregate {
         if (!SupportUser.is(userId) && stage.dateTo() < now) {
             throw new StageExpiredException();
         }
-        changes.add(new DogEnrolled(eventId, dogId, now));
+        changes.add(new DogEnrolled(eventId, dogId, bih, now));
     }
 
     public void updateObdxEventInfo(String eventId, ObdxEventUpdateData data, String userId, long now) {

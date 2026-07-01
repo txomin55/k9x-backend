@@ -26,6 +26,9 @@ public class GetStage implements StagesFetchOneApiDelegate {
     @Override
     public ResponseEntity<StageDetailResponseDTO> fetchStage(String id) {
         var stage = getStageServiceCase.getStage(id);
+        // TODO: the stage lifecycle status is now computed and available as stage.status() (see oas.yaml
+        //  StageDetailResponseDTO.status), but the published oas-definition-stubs jar does not expose the
+        //  status field on StageDetailResponseDTO yet. Once the stub is republished, pass stage.status() here.
         return ResponseEntity.ok(new StageDetailResponseDTO(
                 stage.id(),
                 stage.name(),

@@ -192,7 +192,7 @@ class SaveCompetitionJooqAdapterTest {
     void emits_insert_for_dog_enrolled() {
         givenCapturingDsl();
         CompetitionAggregate competition = aggregateWithActiveEvent();
-        competition.enrollDog("evt-1", "dog-1", "user-1", NOW);
+        competition.enrollDog("evt-1", "dog-1", false, "user-1", NOW);
 
         new SaveCompetitionJooqAdapter(dsl).save(competition);
 

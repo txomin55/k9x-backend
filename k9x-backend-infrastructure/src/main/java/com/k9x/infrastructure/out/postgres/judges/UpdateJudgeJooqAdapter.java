@@ -17,6 +17,7 @@ public class UpdateJudgeJooqAdapter implements UpdateJudgePersistencePort {
     public void updateJudge(String id, UpdateJudgePersistencePayload payload) {
         dsl.update(Tables.JUDGES)
                 .set(Tables.JUDGES.NAME, payload.name())
+                .set(Tables.JUDGES.COUNTRY, payload.country())
                 .set(Tables.JUDGES.LAST_UPDATE, payload.lastUpdate())
                 .where(Tables.JUDGES.ID.eq(id))
                 .execute();

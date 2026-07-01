@@ -26,7 +26,7 @@ class CreateJudgeServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_organizer() {
-        assertThatThrownBy(() -> serviceCase.createJudge("judge-1", "Rex", "user-1", false))
+        assertThatThrownBy(() -> serviceCase.createJudge("judge-1", "Rex", "ES", "user-1", false))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(createJudgePersistencePort);
@@ -34,8 +34,8 @@ class CreateJudgeServiceCaseTest {
 
     @Test
     void creates_judge_when_user_is_organizer() {
-        serviceCase.createJudge("judge-1", "Rex", "user-1", true);
+        serviceCase.createJudge("judge-1", "Rex", "ES", "user-1", true);
 
-        verify(createJudgePersistencePort).createJudge(eq("judge-1"), eq("Rex"), eq("user-1"), anyLong());
+        verify(createJudgePersistencePort).createJudge(eq("judge-1"), eq("Rex"), eq("ES"), eq("user-1"), anyLong());
     }
 }

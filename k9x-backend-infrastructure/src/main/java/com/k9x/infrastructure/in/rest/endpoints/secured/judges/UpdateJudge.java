@@ -19,7 +19,11 @@ public class UpdateJudge implements SecuredJudgesUpdateApiDelegate {
 
     @Override
     public ResponseEntity<String> updateJudgeSecured(String id, UpdateJudgeRequestDTO body) {
-        updateJudgeServiceCase.updateJudge(id, new UpdateJudgeCommand(body.getName()), userDetails.getEmail(), userDetails.isOrganizer());
+        // TODO: `country` is declared for judge update in oas.yaml (UpdateJudgeRequestDTO) but the published
+        //  oas-definition-stubs jar does not expose getCountry() yet. Once the stub is republished, replace
+        //  the fixed value below with body.getCountry().
+        String country = "";
+        updateJudgeServiceCase.updateJudge(id, new UpdateJudgeCommand(body.getName(), country), userDetails.getEmail(), userDetails.isOrganizer());
         return ResponseEntity.ok().build();
     }
 }

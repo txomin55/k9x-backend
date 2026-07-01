@@ -48,6 +48,7 @@ class GetJudgeJooqAdapterTest {
             record.set(Tables.JUDGES.ID, "judge-123");
             record.set(Tables.JUDGES.NAME, "Rex");
             record.set(Tables.JUDGES.CREATOR, "user-1");
+            record.set(Tables.JUDGES.COUNTRY, "ES");
             record.set(Tables.JUDGES.LAST_UPDATE, 1000L);
             record.set(Tables.JUDGES.CREATED_AT, 2000L);
             record.set(Tables.JUDGES.DELETED_AT, null);
@@ -61,6 +62,7 @@ class GetJudgeJooqAdapterTest {
         assertThat(judge.id()).isEqualTo("judge-123");
         assertThat(judge.name()).isEqualTo("Rex");
         assertThat(judge.creator()).isEqualTo("user-1");
+        assertThat(judge.country()).isEqualTo("ES");
         assertThat(judge.deletedAt()).isNull();
     }
 

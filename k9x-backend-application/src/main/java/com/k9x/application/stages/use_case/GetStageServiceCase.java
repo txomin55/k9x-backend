@@ -56,7 +56,7 @@ public class GetStageServiceCase {
         long now = DateUtils.nowUtcMillis();
         return new FetchStageDetailDTO(
                 stage.id(), stage.name(), stage.dateFrom(), stage.dateTo(),
-                competition.address(), competition.organizerName(), null,
+                competition.address(), competition.organizerName(), stage.status(now).name(), null,
                 events.stream()
                         .map(e -> new FetchStageDetailEventDTO(
                                 e.id(), e.name(), e.discipline(), e.configurationId(),

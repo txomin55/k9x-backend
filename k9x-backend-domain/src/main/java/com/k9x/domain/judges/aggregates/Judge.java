@@ -4,6 +4,7 @@ public record Judge(
         String id,
         String name,
         String creator,
+        String country,
         long lastUpdate,
         long createdAt,
         Long deletedAt
@@ -19,5 +20,9 @@ public record Judge(
 
     public String getCreator() {
         return this.creator;
+    }
+
+    public String getCountry() {
+        return this.country;
     }
 }

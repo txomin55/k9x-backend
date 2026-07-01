@@ -20,6 +20,9 @@ public class FetchJudges implements SecuredJudgesFetchAllApiDelegate {
 
     @Override
     public ResponseEntity<List<IdNameDTO>> fetchJudgesSecured() {
+        // TODO: judge.country() is now available from the service, but the published oas-definition-stubs jar
+        //  still returns IdNameDTO here (no country). Once the stub is republished, return JudgeResponseDTO
+        //  (name, id, country) as declared in oas.yaml and map judge.country().
         return ResponseEntity.ok(
                 getJudgeListServiceCase.getJudges(userDetails.getEmail(), userDetails.isOrganizer()).stream()
                         .map(judge -> new IdNameDTO(judge.name(), judge.id()))

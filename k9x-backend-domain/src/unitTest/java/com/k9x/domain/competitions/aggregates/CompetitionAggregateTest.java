@@ -44,6 +44,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CompetitionAggregateTest {
 
@@ -353,18 +354,19 @@ class CompetitionAggregateTest {
     @Test
     void enrollDog_throws_when_stage_is_expired() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), 1L)));
-        assertThrows(StageExpiredException.class, () -> aggregate.enrollDog("evt-1", "dog-1", OWNER, NOW));
+        assertThrows(StageExpiredException.class, () -> aggregate.enrollDog("evt-1", "dog-1", false, OWNER, NOW));
     }
 
     @Test
     void enrollDog_records_dog_enrolled() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
 
-        aggregate.enrollDog("evt-1", "dog-1", OWNER, NOW);
+        aggregate.enrollDog("evt-1", "dog-1", true, OWNER, NOW);
 
         DogEnrolled change = assertInstanceOf(DogEnrolled.class, onlyChange(aggregate));
         assertEquals("evt-1", change.eventId());
         assertEquals("dog-1", change.dogId());
+        assertTrue(change.bih());
         assertEquals(NOW, change.lastUpdate());
     }
 
@@ -464,7 +466,7 @@ class CompetitionAggregateTest {
     void support_can_enroll_on_an_expired_stage() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition("other", null, stageWith(event(null), 1L)));
 
-        aggregate.enrollDog("evt-1", "dog-1", SUPPORT, NOW);
+        aggregate.enrollDog("evt-1", "dog-1", false, SUPPORT, NOW);
 
         assertInstanceOf(DogEnrolled.class, onlyChange(aggregate));
     }

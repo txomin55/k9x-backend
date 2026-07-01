@@ -12,8 +12,8 @@ public class CreateJudgeServiceCase {
         this.createJudgePersistencePort = createJudgePersistencePort;
     }
 
-    public void createJudge(String id, String name, String userId, boolean organizer) {
+    public void createJudge(String id, String name, String country, String userId, boolean organizer) {
         AuthAssertions.assertOrganizer(organizer, userId);
-        createJudgePersistencePort.createJudge(id, name, userId, DateUtils.nowUtcMillis());
+        createJudgePersistencePort.createJudge(id, name, country, userId, DateUtils.nowUtcMillis());
     }
 }

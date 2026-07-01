@@ -31,15 +31,16 @@ class CreateJudgeJooqAdapterTest {
 
         long createdAt = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new CreateJudgeJooqAdapter(dsl).createJudge("judge-123", "Rex", "user-1", createdAt);
+        new CreateJudgeJooqAdapter(dsl).createJudge("judge-123", "Rex", "ES", "user-1", createdAt);
 
         assertThat(capturedSql.get())
                 .contains("insert into \"k9x\".\"judges\"")
                 .contains("\"id\"")
                 .contains("\"name\"")
+                .contains("\"country\"")
                 .contains("\"creator\"")
                 .contains("\"created_at\"")
                 .contains("\"last_update\"");
-        assertThat(capturedBindings.get()).contains("judge-123", "Rex", "user-1", createdAt);
+        assertThat(capturedBindings.get()).contains("judge-123", "Rex", "ES", "user-1", createdAt);
     }
 }

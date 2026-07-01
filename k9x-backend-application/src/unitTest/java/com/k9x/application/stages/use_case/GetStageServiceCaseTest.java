@@ -106,6 +106,7 @@ class GetStageServiceCaseTest {
 
         assertThat(result.id()).isEqualTo("s-1");
         assertThat(result.deletedAt()).isNull();
+        assertThat(result.status()).isEqualTo("FINISHED");
         assertThat(result.events()).hasSize(1);
         assertThat(result.events().getFirst().configurationName()).isEqualTo("Obedience");
     }

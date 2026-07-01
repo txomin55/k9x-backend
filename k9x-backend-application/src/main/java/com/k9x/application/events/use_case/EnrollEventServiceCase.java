@@ -25,7 +25,7 @@ public class EnrollEventServiceCase {
         }
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
-        competition.enrollDog(eventId, command.dogId(), userId, DateUtils.nowUtcMillis());
+        competition.enrollDog(eventId, command.dogId(), command.bih(), userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }
 }

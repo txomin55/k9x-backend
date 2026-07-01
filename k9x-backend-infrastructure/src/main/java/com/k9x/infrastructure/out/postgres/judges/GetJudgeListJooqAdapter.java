@@ -25,6 +25,7 @@ public class GetJudgeListJooqAdapter implements GetJudgeListPersistencePort {
                         r.get(Tables.JUDGES.ID),
                         r.get(Tables.JUDGES.NAME),
                         r.get(Tables.JUDGES.CREATOR),
+                        r.get(Tables.JUDGES.COUNTRY),
                         r.get(Tables.JUDGES.LAST_UPDATE),
                         r.get(Tables.JUDGES.CREATED_AT),
                         r.get(Tables.JUDGES.DELETED_AT)

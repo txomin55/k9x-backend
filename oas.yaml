@@ -983,7 +983,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/IdNameDTO"
+                "$ref": "#/components/schemas/CreateJudgeRequestDTO"
               }
             }
           },
@@ -1031,7 +1031,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/IdNameDTO"
+                    "$ref": "#/components/schemas/JudgeResponseDTO"
                   }
                 }
               }
@@ -1952,6 +1952,10 @@
           },
           "organizer": {
             "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "estado"
           }
         },
         "required": [
@@ -1962,7 +1966,8 @@
           "events",
           "notifications",
           "address",
-          "organizer"
+          "organizer",
+          "status"
         ]
       },
       "StageSummaryResponseDTO": {
@@ -2160,6 +2165,9 @@
           },
           "eventId": {
             "type": "string"
+          },
+          "bih": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -2342,10 +2350,59 @@
           "name": {
             "type": "string",
             "description": "Display name of the judge."
+          },
+          "country": {
+            "type": "string",
+            "description": "Country of the judge."
           }
         },
         "required": [
-          "name"
+          "name",
+          "country"
+        ]
+      },
+      "CreateJudgeRequestDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the judge."
+          },
+          "id": {
+            "type": "string",
+            "description": "Identifier of the judge."
+          },
+          "country": {
+            "type": "string",
+            "description": "Country of the judge."
+          }
+        },
+        "required": [
+          "name",
+          "id",
+          "country"
+        ]
+      },
+      "JudgeResponseDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the judge."
+          },
+          "id": {
+            "type": "string",
+            "description": "Identifier of the judge."
+          },
+          "country": {
+            "type": "string",
+            "description": "Country of the judge."
+          }
+        },
+        "required": [
+          "name",
+          "id",
+          "country"
         ]
       },
       "UpdateStageRequestDTO": {
@@ -3035,12 +3092,17 @@
           },
           "accepted": {
             "type": "boolean"
+          },
+          "bih": {
+            "type": "boolean",
+            "description": "Best in show flag"
           }
         },
         "required": [
           "dogId",
           "position",
-          "accepted"
+          "accepted",
+          "bih"
         ]
       },
       "EventJudgeDetailRequestDTO": {

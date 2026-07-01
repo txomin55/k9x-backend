@@ -17,7 +17,7 @@ public class GetJudgeListServiceCase {
     public List<JudgeDTO> getJudges(String userId, boolean organizer) {
         AuthAssertions.assertOrganizer(organizer, userId);
         return getJudgeListPersistencePort.getJudges(userId).stream()
-                .map(judge -> new JudgeDTO(judge.getId(), judge.getName()))
+                .map(judge -> new JudgeDTO(judge.getId(), judge.getName(), judge.getCountry()))
                 .toList();
     }
 }

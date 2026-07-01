@@ -51,7 +51,7 @@ class DeleteJudgeServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_creator() {
-        Judge judge = new Judge("judge-1", "Rex", "other-user", 0L, 0L, null);
+        Judge judge = new Judge("judge-1", "Rex", "other-user", "ES", 0L, 0L, null);
         when(getJudgePersistencePort.getJudge("judge-1")).thenReturn(judge);
 
         assertThatThrownBy(() -> serviceCase.deleteJudge("judge-1", "user-1", true))
@@ -62,7 +62,7 @@ class DeleteJudgeServiceCaseTest {
 
     @Test
     void throws_exception_when_judge_already_deleted() {
-        Judge judge = new Judge("judge-1", "Rex", "user-1", 0L, 0L, 1000L);
+        Judge judge = new Judge("judge-1", "Rex", "user-1", "ES", 0L, 0L, 1000L);
         when(getJudgePersistencePort.getJudge("judge-1")).thenReturn(judge);
 
         assertThatThrownBy(() -> serviceCase.deleteJudge("judge-1", "user-1", true))
@@ -73,7 +73,7 @@ class DeleteJudgeServiceCaseTest {
 
     @Test
     void deletes_judge_when_all_validations_pass() {
-        Judge judge = new Judge("judge-1", "Rex", "user-1", 0L, 0L, null);
+        Judge judge = new Judge("judge-1", "Rex", "user-1", "ES", 0L, 0L, null);
         when(getJudgePersistencePort.getJudge("judge-1")).thenReturn(judge);
 
         serviceCase.deleteJudge("judge-1", "user-1", true);

@@ -33,13 +33,14 @@ class UpdateJudgeJooqAdapterTest {
         long lastUpdate = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
         new UpdateJudgeJooqAdapter(dsl).updateJudge("judge-123",
-                new UpdateJudgePersistencePayload("NewName", lastUpdate));
+                new UpdateJudgePersistencePayload("NewName", "ES", lastUpdate));
 
         assertThat(capturedSql.get())
                 .contains("update \"k9x\".\"judges\"")
                 .contains("\"name\" = ?")
+                .contains("\"country\" = ?")
                 .contains("\"last_update\" = ?")
                 .contains("where \"k9x\".\"judges\".\"id\" = ?");
-        assertThat(capturedBindings.get()).contains("NewName", lastUpdate, "judge-123");
+        assertThat(capturedBindings.get()).contains("NewName", "ES", lastUpdate, "judge-123");
     }
 }
