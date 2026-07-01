@@ -34,7 +34,9 @@ public class GetStageListServiceCase {
                 .flatMap(competition -> competition.stages().stream()
                         .filter(stage -> stage.deletedAt() == null)
                         .map(stage -> new CompetitionStage(competition, stage)))
-                .sorted(Comparator.comparingLong(cs -> cs.stage().dateFrom()))
+                .sorted(Comparator
+                        .comparing((CompetitionStage cs) -> cs.stage().dateFrom() < now)
+                        .thenComparingLong(cs -> cs.stage().dateFrom()))
                 .map(cs -> toStageDto(cs.competition(), cs.stage(), now, configNameById))
                 .toList();
     }
