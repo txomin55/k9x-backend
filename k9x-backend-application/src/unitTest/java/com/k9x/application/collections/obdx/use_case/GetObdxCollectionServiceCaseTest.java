@@ -181,4 +181,22 @@ class GetObdxCollectionServiceCaseTest {
         assertThat(result.competitors()).hasSize(1);
         assertThat(result.competitors().getFirst().competitor().status()).isEqualTo("NOT_COMPETING");
     }
+
+    @Test
+    void sets_pending_enroll_accept_status_when_not_verified() {
+        List<FetchCollectionJudgeWithCollectorDTO> visibleJudges = List.of(
+                new FetchCollectionJudgeWithCollectorDTO("judge-1", "Judge One", "collector@test.com")
+        );
+        List<FetchCollectionCompetitorDTO> rawCompetitors = List.of(
+                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, false, false, null)
+        );
+        when(getObdxCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(rawCompetitors);
+        when(getObdxCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());
+        when(getObdxCollectionScoresPersistencePort.getScores("event-1")).thenReturn(List.of());
+
+        FetchObdxCollectionDTO result = serviceCase.getCollection("event-1", visibleJudges);
+
+        assertThat(result.competitors()).hasSize(1);
+        assertThat(result.competitors().getFirst().competitor().status()).isEqualTo("PENDING_ENROLL_ACCEPT");
+    }
 }

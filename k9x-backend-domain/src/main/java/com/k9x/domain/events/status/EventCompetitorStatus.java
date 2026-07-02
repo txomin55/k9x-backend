@@ -5,7 +5,10 @@ public enum EventCompetitorStatus {
     PENDING_ENROLL_ACCEPT,
     NOT_COMPETING;
 
-    public static EventCompetitorStatus of(boolean notCompeting) {
-        return notCompeting ? NOT_COMPETING : ENROLLED;
+    public static EventCompetitorStatus of(boolean notCompeting, Boolean verified) {
+        if (notCompeting) {
+            return NOT_COMPETING;
+        }
+        return Boolean.TRUE.equals(verified) ? ENROLLED : PENDING_ENROLL_ACCEPT;
     }
 }

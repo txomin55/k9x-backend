@@ -163,4 +163,21 @@ class GetEventServiceCaseTest {
         assertThat(result.competitors()).hasSize(1);
         assertThat(result.competitors().getFirst().status()).isEqualTo("NOT_COMPETING");
     }
+
+    @Test
+    void marks_competitor_as_pending_enroll_accept_when_not_verified() throws IOException {
+        EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "Handler", "team", "ES", "breed",
+                "id-1", (short) 1, false, false, null);
+        EventSnapshot event = new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L,
+                0L, null, ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of());
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competition(event, "user-1", null));
+        when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of());
+
+        FetchEventDetailDTO result = serviceCase.getEvent("event-1", "user-1", true);
+
+        assertThat(result.competitors()).hasSize(1);
+        assertThat(result.competitors().getFirst().status()).isEqualTo("PENDING_ENROLL_ACCEPT");
+    }
 }
