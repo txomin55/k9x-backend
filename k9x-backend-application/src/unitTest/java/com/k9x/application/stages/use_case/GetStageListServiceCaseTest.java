@@ -1,13 +1,8 @@
 package com.k9x.application.stages.use_case;
 
-import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
-import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
-import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
-import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
 import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
-import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
@@ -21,12 +16,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,31 +31,26 @@ class GetStageListServiceCaseTest {
     @Mock
     private GetStageListPersistencePort getStageListPersistencePort;
 
-    @Mock
-    private GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
-
     private GetStageListServiceCase serviceCase;
 
     @BeforeEach
     void setUp() {
-        serviceCase = new GetStageListServiceCase(getStageListPersistencePort, getObdxFederationsConfigurationsPort);
+        serviceCase = new GetStageListServiceCase(getStageListPersistencePort);
     }
 
     @Test
-    void resolves_discipline_name_and_computes_finished_stage_and_event_when_unscored() throws IOException {
+    void surfaces_discipline_id_and_computes_finished_stage_and_event_when_unscored() {
         EventSnapshot event = event("evt-1", "obdx-1", null, List.of(competitor("dog-1", false)),
                 List.of(exercise("ex-1")), List.of(judge("j-1")), List.of());
         CompetitionSnapshot competition = competition(stage("s-1", FAR_PAST, FAR_PAST, List.of(event)));
 
         when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
-        when(getObdxFederationsConfigurationsPort.getConfigurations())
-                .thenReturn(List.of(federation(new ConfigurationDTO("obdx-1", "Obedience", List.of()))));
 
         List<FetchStageListDTO> result = serviceCase.getStages();
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().events()).hasSize(1);
-        assertThat(result.getFirst().events().getFirst().disciplineName()).isEqualTo("Obedience");
+        assertThat(result.getFirst().events().getFirst().disciplineId()).isEqualTo("OBDX");
         assertThat(result.getFirst().events().getFirst().competitorCount()).isEqualTo(1);
         // dateTo in 1970 is before today's UTC day -> stage and its events are FINISHED, even unscored.
         assertThat(result.getFirst().events().getFirst().status()).isEqualTo("FINISHED");
@@ -70,7 +58,7 @@ class GetStageListServiceCaseTest {
     }
 
     @Test
-    void surfaces_started_status_when_an_event_holds_a_score() throws IOException {
+    void surfaces_started_status_when_an_event_holds_a_score() {
         // 2 exercises x 1 judge = 2 required scores, only 1 recorded -> competitor not settled (not FINISHED),
         // but a score exists -> event STARTED. dateTo in the far future rules out the date-driven FINISHED.
         EventSnapshot event = event("evt-1", "obdx-1", null, List.of(competitor("dog-1", false)),
@@ -79,8 +67,6 @@ class GetStageListServiceCaseTest {
         CompetitionSnapshot competition = competition(stage("s-1", FAR_PAST, FAR_FUTURE, List.of(event)));
 
         when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
-        when(getObdxFederationsConfigurationsPort.getConfigurations())
-                .thenReturn(List.of(federation(new ConfigurationDTO("obdx-1", "Obedience", List.of()))));
 
         List<FetchStageListDTO> result = serviceCase.getStages();
 
@@ -89,20 +75,7 @@ class GetStageListServiceCaseTest {
     }
 
     @Test
-    void uses_configuration_id_as_fallback_when_discipline_not_found() throws IOException {
-        EventSnapshot event = event("evt-1", "unknown-id", null, List.of(), List.of(), List.of(), List.of());
-        CompetitionSnapshot competition = competition(stage("s-1", FAR_PAST, FAR_PAST, List.of(event)));
-
-        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
-        when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of());
-
-        List<FetchStageListDTO> result = serviceCase.getStages();
-
-        assertThat(result.getFirst().events().getFirst().disciplineName()).isEqualTo("unknown-id");
-    }
-
-    @Test
-    void skips_deleted_stages_and_deleted_events() throws IOException {
+    void skips_deleted_stages_and_deleted_events() {
         EventSnapshot liveEvent = event("evt-1", "obdx-1", null, List.of(), List.of(), List.of(), List.of());
         EventSnapshot deletedEvent = event("evt-2", "obdx-1", 999L, List.of(), List.of(), List.of(), List.of());
         StageSnapshot liveStage = stage("s-1", FAR_PAST, FAR_PAST, List.of(liveEvent, deletedEvent));
@@ -111,25 +84,12 @@ class GetStageListServiceCaseTest {
         CompetitionSnapshot competition = competition(List.of(liveStage, deletedStage));
 
         when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
-        when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of());
 
         List<FetchStageListDTO> result = serviceCase.getStages();
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().id()).isEqualTo("s-1");
         assertThat(result.getFirst().events()).extracting(e -> e.id()).containsExactly("evt-1");
-    }
-
-    @Test
-    void throws_when_configurations_cannot_be_loaded() throws IOException {
-        when(getObdxFederationsConfigurationsPort.getConfigurations()).thenThrow(new IOException());
-
-        assertThatThrownBy(() -> serviceCase.getStages())
-                .isInstanceOf(DisciplineConfigurationMalformedException.class);
-    }
-
-    private static ConfigurationsDTO federation(ConfigurationDTO config) {
-        return new ConfigurationsDTO(new FederationInfoDTO("FED", "Federation", "ES"), List.of(config));
     }
 
     private static CompetitionSnapshot competition(StageSnapshot stage) {

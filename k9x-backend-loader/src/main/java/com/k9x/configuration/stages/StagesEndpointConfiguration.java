@@ -17,7 +17,7 @@ public class StagesEndpointConfiguration {
     }
 
     @Bean
-    public GetStages getStages(GetStageListServiceCase getStageListServiceCase) {
-        return new GetStages(getStageListServiceCase);
+    public GetStages getStages(GetStageListServiceCase getStageListServiceCase, MessageSource messageSource) {
+        return new GetStages(getStageListServiceCase, messageSource);
     }
 }

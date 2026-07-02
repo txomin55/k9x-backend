@@ -1,7 +1,5 @@
 package com.k9x.application.stages.use_case;
 
-import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
-import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
@@ -9,27 +7,19 @@ import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.shared.UtcDates;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
-import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class GetStageListServiceCase {
 
     private final GetStageListPersistencePort getStageListPersistencePort;
-    private final GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
 
-    public GetStageListServiceCase(GetStageListPersistencePort getStageListPersistencePort,
-                                   GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
+    public GetStageListServiceCase(GetStageListPersistencePort getStageListPersistencePort) {
         this.getStageListPersistencePort = getStageListPersistencePort;
-        this.getObdxFederationsConfigurationsPort = getObdxFederationsConfigurationsPort;
     }
 
     public List<FetchStageListDTO> getStages() {
-        Map<String, String> configNameById = buildConfigNameMap();
         long now = DateUtils.nowUtcMillis();
         return getStageListPersistencePort.getCompetitions().stream()
                 .flatMap(competition -> competition.stages().stream()
@@ -38,12 +28,11 @@ public class GetStageListServiceCase {
                 .sorted(Comparator
                         .comparing((CompetitionStage cs) -> UtcDates.isBeforeUtcDay(cs.stage().dateFrom(), now))
                         .thenComparingLong(cs -> cs.stage().dateFrom()))
-                .map(cs -> toStageDto(cs.competition(), cs.stage(), now, configNameById))
+                .map(cs -> toStageDto(cs.competition(), cs.stage(), now))
                 .toList();
     }
 
-    private FetchStageListDTO toStageDto(CompetitionSnapshot competition, StageSnapshot stage, long now,
-                                         Map<String, String> configNameById) {
+    private FetchStageListDTO toStageDto(CompetitionSnapshot competition, StageSnapshot stage, long now) {
         // The hydrated events carry their scores, so status() resolves the exact lifecycle here: the stage
         // is STARTED once any of its events holds a score, otherwise it falls back to the date-driven state.
         return new FetchStageListDTO(
@@ -54,22 +43,11 @@ public class GetStageListServiceCase {
                 stage.events().stream()
                         .filter(event -> event.deletedAt() == null)
                         .map(event -> new FetchStageListEventDTO(
-                                event.id(), event.name(), event.configurationId(),
-                                configNameById.getOrDefault(event.configurationId(), event.configurationId()),
+                                event.id(), event.name(), event.discipline(),
                                 event.competitors() == null ? 0 : event.competitors().size(),
                                 event.status(now, stage.dateTo()).name()))
                         .toList(),
                 stage.status(now).name());
-    }
-
-    private Map<String, String> buildConfigNameMap() {
-        try {
-            return getObdxFederationsConfigurationsPort.getConfigurations().stream()
-                    .flatMap(f -> f.configurations().stream())
-                    .collect(Collectors.toMap(ConfigurationDTO::id, ConfigurationDTO::name, (a, _) -> a));
-        } catch (IOException e) {
-            throw new DisciplineConfigurationMalformedException();
-        }
     }
 
     private record CompetitionStage(CompetitionSnapshot competition, StageSnapshot stage) {
