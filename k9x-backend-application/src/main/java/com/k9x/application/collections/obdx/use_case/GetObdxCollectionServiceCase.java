@@ -43,16 +43,18 @@ public class GetObdxCollectionServiceCase {
                 .map(FetchCollectionJudgeWithCollectorDTO::judgeId)
                 .collect(Collectors.toSet());
 
+        List<FetchCollectionScoreDTO> allScores = getObdxCollectionScoresPersistencePort.getScores(eventId);
+
         List<FetchCollectionCompetitorDTO> competitors =
                 getObdxCollectionCompetitorsPersistencePort.getCompetitors(eventId).stream()
                         .map(c -> new FetchCollectionCompetitorDTO(c.dogId(), c.dogName(), c.dogIdentity(),
                                 c.breed(), c.owner(), c.handler(), c.team(), c.country(), c.position(), c.verified(),
                                 c.notCompeting(), EventCompetitorStatus.of(c.notCompeting(), c.verified()).name(),
-                                c.bih()))
+                                c.bih(), scoresAllowed(c.dogId(), c.notCompeting(), allScores)))
                         .toList();
         List<FetchCollectionExerciseDTO> exercises =
                 getObdxCollectionExercisesPersistencePort.getExercises(eventId);
-        List<FetchCollectionScoreDTO> scores = getObdxCollectionScoresPersistencePort.getScores(eventId).stream()
+        List<FetchCollectionScoreDTO> scores = allScores.stream()
                 .filter(s -> visibleJudgeIds.contains(s.judgeId()))
                 .toList();
 
@@ -78,5 +80,20 @@ public class GetObdxCollectionServiceCase {
                 .toList();
 
         return new FetchObdxCollectionDTO(competitorScores);
+    }
+
+    /**
+     * A competitor can no longer receive scores once it holds a second yellow card, a red card, or is
+     * flagged as not competing.
+     */
+    private boolean scoresAllowed(String dogId, boolean notCompeting, List<FetchCollectionScoreDTO> scores) {
+        if (notCompeting) {
+            return false;
+        }
+        long yellowCardCount = scores.stream()
+                .filter(s -> dogId.equals(s.dogId()) && s.yellowCard() != null)
+                .count();
+        boolean hasRedCard = scores.stream().anyMatch(s -> dogId.equals(s.dogId()) && s.redCard() != null);
+        return yellowCardCount < 2 && !hasRedCard;
     }
 }

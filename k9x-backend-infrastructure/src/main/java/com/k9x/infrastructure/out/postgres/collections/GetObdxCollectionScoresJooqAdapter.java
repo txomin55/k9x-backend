@@ -18,14 +18,17 @@ public class GetObdxCollectionScoresJooqAdapter implements GetObdxCollectionScor
     @Override
     public List<FetchCollectionScoreDTO> getScores(String eventId) {
         return dsl.select(Tables.EVENT_SCORES.DOG_ID, Tables.EVENT_SCORES.EXERCISE_ID,
-                        Tables.EVENT_SCORES.JUDGE_ID, Tables.EVENT_SCORES.SCORE)
+                        Tables.EVENT_SCORES.JUDGE_ID, Tables.EVENT_SCORES.SCORE,
+                        Tables.EVENT_SCORES.YELLOW_CARD, Tables.EVENT_SCORES.RED_CARD)
                 .from(Tables.EVENT_SCORES)
                 .where(Tables.EVENT_SCORES.EVENT_ID.eq(eventId))
                 .fetch(r -> new FetchCollectionScoreDTO(
                         r.get(Tables.EVENT_SCORES.DOG_ID),
                         r.get(Tables.EVENT_SCORES.EXERCISE_ID),
                         r.get(Tables.EVENT_SCORES.JUDGE_ID),
-                        r.get(Tables.EVENT_SCORES.SCORE)
+                        r.get(Tables.EVENT_SCORES.SCORE),
+                        r.get(Tables.EVENT_SCORES.YELLOW_CARD),
+                        r.get(Tables.EVENT_SCORES.RED_CARD)
                 ));
     }
 }

@@ -135,6 +135,20 @@ public record EventSnapshot(
         return yellowCardCount(dogId) >= 2 || hasRedCard(dogId);
     }
 
+    /**
+     * Whether the competitor has been flagged as not competing. Unknown dog ids are treated as competing.
+     */
+    public boolean isNotCompeting(String dogId) {
+        if (competitors == null) {
+            return false;
+        }
+        return competitors.stream()
+                .filter(c -> c.dogId().equals(dogId))
+                .findFirst()
+                .map(EventCompetitor::notCompeting)
+                .orElse(false);
+    }
+
     private int requiredScores() {
         return (exercises == null ? 0 : exercises.size()) * (judges == null ? 0 : judges.size());
     }

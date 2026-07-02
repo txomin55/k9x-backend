@@ -40,7 +40,8 @@ public class GetObdxCollectionCompetitorsJooqAdapter implements GetObdxCollectio
                         r.get(ec.VERIFIED),
                         Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)),
                         null,
-                        r.get(ec.BIH)
+                        r.get(ec.BIH),
+                        true
                 ));
     }
 }

@@ -3107,6 +3107,10 @@
           "notCompeting": {
             "type": "boolean",
             "description": "Whether the competitor has been flagged as not competing"
+          },
+          "scoresAllowed": {
+            "type": "boolean",
+            "description": "Whether the competitor can still receive scores: false when it holds 2 yellow cards, a red card, or is flagged as not competing"
           }
         },
         "required": [

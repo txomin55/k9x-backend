@@ -32,6 +32,7 @@ import com.k9x.domain.competitions.exceptions.CompetitionAlreadyDeletedException
 import com.k9x.domain.competitions.exceptions.CompetitionCannotBeDeletedException;
 import com.k9x.domain.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.domain.events.exceptions.CompetitorDisqualifiedException;
+import com.k9x.domain.events.exceptions.CompetitorNotCompetingException;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.domain.events.exceptions.YellowCardAlreadyRegisteredException;
 import com.k9x.domain.events.exceptions.RedCardAlreadyRegisteredException;
@@ -458,6 +459,18 @@ class CompetitionAggregateTest {
         ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-3", "dog-1", BigDecimal.TEN);
 
         assertThrows(CompetitorDisqualifiedException.class, () -> aggregate.updateScore("evt-1", data, OWNER, NOW));
+    }
+
+    @Test
+    void updateScore_throws_when_competitor_is_not_competing() {
+        EventCompetitor notCompeting = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed",
+                null, (short) 1, true, true, null, null);
+        EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(notCompeting), List.of(), List.of(), List.of());
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event, FUTURE)));
+        ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-1", "dog-1", BigDecimal.TEN);
+
+        assertThrows(CompetitorNotCompetingException.class, () -> aggregate.updateScore("evt-1", data, OWNER, NOW));
     }
 
     @Test
