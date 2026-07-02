@@ -7,5 +7,6 @@ public record FetchClassificationExerciseScoreDTO(
         String exerciseId, short exercisePosition, List<String> tags,
         BigDecimal exerciseScore, BigDecimal totalScore, BigDecimal scoreRating,
         List<FetchClassificationJudgeScoreDTO> judgeScores,
-        List<FetchClassificationYellowCardDTO> yellowCards) {
+        List<FetchClassificationYellowCardDTO> yellowCards,
+        FetchClassificationRedCardDTO redCard) {
 }

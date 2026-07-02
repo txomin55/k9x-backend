@@ -4,6 +4,7 @@ import com.k9x.application.collections.obdx.port.GetObdxCollectionCompetitorsPer
 import com.k9x.application.collections.obdx.port.GetObdxCollectionEventJudgesPersistencePort;
 import com.k9x.application.collections.obdx.port.GetObdxCollectionExercisesPersistencePort;
 import com.k9x.application.collections.obdx.port.GetObdxCollectionScoresPersistencePort;
+import com.k9x.application.collections.obdx.port.GetObdxRedCardPersistencePort;
 import com.k9x.application.collections.obdx.port.GetObdxYellowCardsPersistencePort;
 import com.k9x.application.collections.port.GetCollectionListPersistencePort;
 import com.k9x.infrastructure.out.postgres.collections.*;
@@ -48,5 +49,10 @@ public class CollectionJooqAdapterConfiguration {
     @Bean
     public GetObdxYellowCardsPersistencePort getYellowCardsPersistencePort() {
         return new GetObdxYellowCardsJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetObdxRedCardPersistencePort getRedCardPersistencePort() {
+        return new GetObdxRedCardJooqAdapter(dsl);
     }
 }

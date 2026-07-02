@@ -243,6 +243,33 @@ public final class CompetitionAggregate {
             throw new YellowCardAlreadyRegisteredException();
         }
         changes.add(new YellowCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogId(), now));
+
+        /*
+         * A second yellow card disqualifies the competitor exactly like a red card (see
+         * EventSnapshot#isDisqualified), so it stamps one automatically in the same exercise/judge as the
+         * card that triggered it, unless one is already registered.
+         */
+        if (event.yellowCardCount(data.dogId()) + 1 >= 2 && !event.hasRedCard(data.dogId())) {
+            changes.add(new RedCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogId(), now));
+        }
+    }
+
+    public void registerRedCard(String eventId, RedCardData data, String userId, long now) {
+        EventSnapshot event = requireActiveEvent(eventId, userId);
+        StageSnapshot stage = findStageOfEvent(eventId);
+        assert stage != null;
+        if (!SupportUser.is(userId)) {
+            if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
+                throw new StageNotStartedException();
+            }
+            if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
+                throw new StageExpiredException();
+            }
+        }
+        if (event.hasRedCard(data.dogId())) {
+            throw new RedCardAlreadyRegisteredException();
+        }
+        changes.add(new RedCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogId(), now));
     }
 
     private boolean hasYellowCard(EventSnapshot event, YellowCardData data) {

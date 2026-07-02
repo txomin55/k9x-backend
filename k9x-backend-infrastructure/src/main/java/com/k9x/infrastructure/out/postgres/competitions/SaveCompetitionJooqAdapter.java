@@ -51,6 +51,7 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
             case ObdxEventInfoUpdated c -> updateObdxEventInfo(ctx, c);
             case ScoreUpdated c -> upsertScore(ctx, c);
             case YellowCardRegistered c -> registerYellowCard(ctx, c);
+            case RedCardRegistered c -> registerRedCard(ctx, c);
             case CompetitorNotCompetingUpdated c -> updateCompetitorNotCompeting(ctx, c);
             default ->
                     throw new UnsupportedOperationException("Unsupported change type: " + change.getClass().getSimpleName());
@@ -121,6 +122,28 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 .onConflict(EVENT_SCORES.EVENT_ID, EVENT_SCORES.EXERCISE_ID, EVENT_SCORES.JUDGE_ID, EVENT_SCORES.DOG_ID)
                 .doUpdate()
                 .set(EVENT_SCORES.YELLOW_CARD, c.lastUpdate())
+                .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
+                .execute();
+    }
+
+    /**
+     * A red card can be registered before any score exists for that exercise×judge×dog, so this is an
+     * upsert: inserts a scoreless row stamped with the card if none exists yet, otherwise just stamps the
+     * card (and last_update) onto the existing row without touching its score.
+     */
+    private void registerRedCard(DSLContext ctx, RedCardRegistered c) {
+        ctx.insertInto(EVENT_SCORES)
+                .set(EVENT_SCORES.EVENT_ID, c.eventId())
+                .set(EVENT_SCORES.EXERCISE_ID, c.exerciseId())
+                .set(EVENT_SCORES.JUDGE_ID, c.judgeId())
+                .set(EVENT_SCORES.DOG_ID, c.dogId())
+                .set(EVENT_SCORES.SCORE, (BigDecimal) null)
+                .set(EVENT_SCORES.RED_CARD, c.lastUpdate())
+                .set(EVENT_SCORES.CREATED_AT, c.lastUpdate())
+                .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
+                .onConflict(EVENT_SCORES.EVENT_ID, EVENT_SCORES.EXERCISE_ID, EVENT_SCORES.JUDGE_ID, EVENT_SCORES.DOG_ID)
+                .doUpdate()
+                .set(EVENT_SCORES.RED_CARD, c.lastUpdate())
                 .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
                 .execute();
     }

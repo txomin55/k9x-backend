@@ -116,11 +116,23 @@ public record EventSnapshot(
     }
 
     /**
-     * A competitor that accumulates a second yellow card is disqualified: its participation is over and it
-     * can no longer receive scores, so it is treated as settled regardless of remaining exercises.
+     * Whether the competitor already holds a red card. Only one red card can ever exist per dog in an
+     * event, so this is a plain existence check rather than a count.
+     */
+    public boolean hasRedCard(String dogId) {
+        if (scores == null) {
+            return false;
+        }
+        return scores.stream().anyMatch(s -> s.redCard() != null && dogId.equals(s.dogId()));
+    }
+
+    /**
+     * A competitor that accumulates a second yellow card, or that holds a red card, is disqualified: its
+     * participation is over and it can no longer receive scores, so it is treated as settled regardless of
+     * remaining exercises.
      */
     public boolean isDisqualified(String dogId) {
-        return yellowCardCount(dogId) >= 2;
+        return yellowCardCount(dogId) >= 2 || hasRedCard(dogId);
     }
 
     private int requiredScores() {

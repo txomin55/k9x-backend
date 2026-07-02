@@ -228,6 +228,29 @@ class GetObdxClassificationServiceCaseTest {
     }
 
     @Test
+    void exposes_the_stamped_red_card_of_an_exercise_with_judge_and_timestamp() {
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "identity", (short) 0, false, false, null));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        List<Score> scores = List.of(
+                new Score("ex-1", "j-1", "dog-1", null, 1000L, null, 5000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
+                competitors, exercises, judges, scores);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors().getFirst().exercises().getFirst().redCard())
+                .extracting("judgeId", "timestamp")
+                .containsExactly("j-1", 5000L);
+    }
+
+    @Test
     void each_dog_is_averaged_over_its_own_ring_judges() {
         // dog-1 judged by ring 1 (j-1, j-2); dog-2 judged by ring 2 (j-3, j-4).
         // Each dog's average must use only its ring's scores, never the other ring's absent judges.

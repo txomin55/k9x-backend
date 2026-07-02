@@ -76,7 +76,8 @@ public class GetObdxClassificationServiceCase {
                             jd.judgeId(), jd.judgeName(),
                             s == null ? null : s.score(),
                             s == null ? null : s.lastUpdate(),
-                            s == null ? null : s.yellowCard()));
+                            s == null ? null : s.yellowCard(),
+                            s == null ? null : s.redCard()));
                 }
             }
         }
@@ -90,6 +91,8 @@ public class GetObdxClassificationServiceCase {
         Map<String, Map<String, List<FetchClassificationJudgeScoreDTO>>> judgeScoresByDogExercise = new LinkedHashMap<>();
         // dogId → exerciseId → list of yellow cards stamped for that exercise (one per stamped slot, across judges)
         Map<String, Map<String, List<FetchClassificationYellowCardDTO>>> yellowCardsByDogExercise = new LinkedHashMap<>();
+        // dogId → exerciseId → the red card stamped there, if any (only one can ever exist per dog in the event)
+        Map<String, Map<String, FetchClassificationRedCardDTO>> redCardByDogExercise = new LinkedHashMap<>();
         // dog metadata keyed by dogId (first row wins)
         Map<String, FetchClassificationRawRowDTO> dogMeta = new LinkedHashMap<>();
         // exerciseId → position and tags (same for all dogs)
@@ -124,6 +127,12 @@ public class GetObdxClassificationServiceCase {
                         new FetchClassificationYellowCardDTO(row.judgeId(), row.judgeName(), row.yellowCard()));
             }
 
+            if (row.redCard() != null) {
+                redCardByDogExercise
+                        .computeIfAbsent(row.dogId(), _ -> new LinkedHashMap<>())
+                        .put(row.exerciseId(), new FetchClassificationRedCardDTO(row.judgeId(), row.judgeName(), row.redCard()));
+            }
+
             if (row.score() != null) {
                 BigDecimal judgeScoreRating = percentageOfMax(row.score(), config.maxAllowedScore());
                 List<FetchClassificationJudgeScoreDTO> exerciseScores = judgeScoresByDogExercise.get(row.dogId()).get(row.exerciseId());
@@ -149,6 +158,8 @@ public class GetObdxClassificationServiceCase {
                 BigDecimal coef = config.coefByExerciseId().getOrDefault(exerciseId, BigDecimal.ONE);
                 List<FetchClassificationYellowCardDTO> exerciseYellowCards = yellowCardsByDogExercise
                         .getOrDefault(dogId, Map.of()).getOrDefault(exerciseId, List.of());
+                FetchClassificationRedCardDTO exerciseRedCard = redCardByDogExercise
+                        .getOrDefault(dogId, Map.of()).get(exerciseId);
                 // exerciseScore is the maximum attainable for this exercise (highest allowed score * coef); it is a
                 // constant reference. totalScore is what the competitor has actually achieved: the judges' average
                 // (or mid-avg) times the coef, which is 0 while the exercise has no scores, minus a flat penalty
@@ -171,7 +182,7 @@ public class GetObdxClassificationServiceCase {
                         exercisePositions.getOrDefault(exerciseId, (short) 0),
                         exerciseTags.getOrDefault(exerciseId, List.of()),
                         maxExerciseScore, weightedScore, exerciseScoreRating,
-                        judgeEntries, exerciseYellowCards));
+                        judgeEntries, exerciseYellowCards, exerciseRedCard));
             }
 
             // A manually set final score takes precedence over the computed sum of exercise scores.

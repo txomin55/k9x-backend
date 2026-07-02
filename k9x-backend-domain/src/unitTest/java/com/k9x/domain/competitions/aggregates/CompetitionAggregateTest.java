@@ -20,6 +20,8 @@ import com.k9x.domain.competitions.commands.ScoreUpdateData;
 import com.k9x.domain.competitions.commands.StageUpdateData;
 import com.k9x.domain.competitions.commands.YellowCardData;
 import com.k9x.domain.competitions.commands.YellowCardRegistered;
+import com.k9x.domain.competitions.commands.RedCardData;
+import com.k9x.domain.competitions.commands.RedCardRegistered;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.events.aggregates.EventSnapshot;
@@ -32,6 +34,7 @@ import com.k9x.domain.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.domain.events.exceptions.CompetitorDisqualifiedException;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.domain.events.exceptions.YellowCardAlreadyRegisteredException;
+import com.k9x.domain.events.exceptions.RedCardAlreadyRegisteredException;
 import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.domain.stages.exceptions.StageCannotBeDeletedException;
 import com.k9x.domain.stages.exceptions.StageExpiredException;
@@ -481,6 +484,65 @@ class CompetitionAggregateTest {
 
         assertThrows(YellowCardAlreadyRegisteredException.class,
                 () -> aggregate.registerYellowCard("evt-1", data, OWNER, NOW));
+    }
+
+    @Test
+    void registerYellowCard_also_registers_red_card_when_it_is_the_second_yellow_card() {
+        EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L)));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event, FUTURE)));
+        YellowCardData data = new YellowCardData("judge-2", "ex-2", "dog-1");
+
+        aggregate.registerYellowCard("evt-1", data, OWNER, NOW);
+
+        assertEquals(2, aggregate.pendingChanges().size());
+        assertInstanceOf(YellowCardRegistered.class, aggregate.pendingChanges().get(0));
+        RedCardRegistered redCard = assertInstanceOf(RedCardRegistered.class, aggregate.pendingChanges().get(1));
+        assertEquals("evt-1", redCard.eventId());
+        assertEquals("judge-2", redCard.judgeId());
+        assertEquals("ex-2", redCard.exerciseId());
+        assertEquals("dog-1", redCard.dogId());
+    }
+
+    @Test
+    void registerYellowCard_does_not_duplicate_red_card_when_already_registered() {
+        EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L, null),
+                        new Score("ex-1", "judge-1", "dog-1", null, 0L, null, 500L)));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event, FUTURE)));
+        YellowCardData data = new YellowCardData("judge-2", "ex-2", "dog-1");
+
+        aggregate.registerYellowCard("evt-1", data, OWNER, NOW);
+
+        assertInstanceOf(YellowCardRegistered.class, onlyChange(aggregate));
+    }
+
+    @Test
+    void registerRedCard_records_red_card_registered() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+        RedCardData data = new RedCardData("judge-1", "ex-1", "dog-1");
+
+        aggregate.registerRedCard("evt-1", data, OWNER, NOW);
+
+        RedCardRegistered change = assertInstanceOf(RedCardRegistered.class, onlyChange(aggregate));
+        assertEquals("evt-1", change.eventId());
+        assertEquals("judge-1", change.judgeId());
+        assertEquals("ex-1", change.exerciseId());
+        assertEquals("dog-1", change.dogId());
+    }
+
+    @Test
+    void registerRedCard_throws_when_already_registered() {
+        EventSnapshot carded = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, null, 1000L)));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(carded, FUTURE)));
+        RedCardData data = new RedCardData("judge-2", "ex-2", "dog-1");
+
+        assertThrows(RedCardAlreadyRegisteredException.class,
+                () -> aggregate.registerRedCard("evt-1", data, OWNER, NOW));
     }
 
     // ---- support superuser bypass ----------------------------------------------------------------

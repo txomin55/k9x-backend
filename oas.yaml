@@ -67,6 +67,12 @@
       "name": "Secured/Events/fetch_yellow_cards/obdx"
     },
     {
+      "name": "Secured/Events/update/red_card/obdx"
+    },
+    {
+      "name": "Secured/Events/fetch_red_card/obdx"
+    },
+    {
       "name": "Secured/Judges/create"
     },
     {
@@ -1086,6 +1092,114 @@
         ]
       }
     },
+    "/secured/events/{eventId}/red-card": {
+      "put": {
+        "summary": "Register a red card for a competitor",
+        "deprecated": false,
+        "description": "",
+        "operationId": "registerRedCard",
+        "tags": [
+          "Secured/Events/update/red_card/obdx"
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRedCardRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "description": "Success text"
+                }
+              }
+            },
+            "headers": { }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError",
+            "description": "Missing or invalid bearer token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [ ]
+          }
+        ]
+      }
+    },
+    "/secured/events/{eventId}/{competitorId}/red-card": {
+      "get": {
+        "summary": "Get the red card of a competitor in an event, if any",
+        "deprecated": false,
+        "description": "",
+        "operationId": "fetchRedCard",
+        "tags": [
+          "Secured/Events/fetch_red_card/obdx"
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "competitorId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedCardResponseDTO"
+                }
+              }
+            },
+            "headers": { }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError",
+            "description": "Missing or invalid bearer token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [ ]
+          }
+        ]
+      }
+    },
     "/secured/judges": {
       "post": {
         "summary": "Create judge",
@@ -1869,6 +1983,9 @@
             "items": {
               "$ref": "#/components/schemas/StageEventClassificationYellowCardResponseDTO"
             }
+          },
+          "redCard": {
+            "$ref": "#/components/schemas/StageEventClassificationRedCardResponseDTO"
           }
         },
         "required": [
@@ -1882,6 +1999,22 @@
         ]
       },
       "StageEventClassificationYellowCardResponseDTO": {
+        "type": "object",
+        "properties": {
+          "judge": {
+            "$ref": "#/components/schemas/IdNameDTO"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "judge",
+          "timestamp"
+        ]
+      },
+      "StageEventClassificationRedCardResponseDTO": {
         "type": "object",
         "properties": {
           "judge": {
@@ -2395,6 +2528,45 @@
         ]
       },
       "YellowCardResponseDTO": {
+        "type": "object",
+        "properties": {
+          "exercise": {
+            "$ref": "#/components/schemas/IdNameDTO"
+          },
+          "judge": {
+            "$ref": "#/components/schemas/IdNameDTO"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "exercise",
+          "judge",
+          "timestamp"
+        ]
+      },
+      "RegisterRedCardRequestDTO": {
+        "type": "object",
+        "properties": {
+          "dogId": {
+            "type": "string"
+          },
+          "exerciseId": {
+            "type": "string"
+          },
+          "judgeId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dogId",
+          "exerciseId",
+          "judgeId"
+        ]
+      },
+      "RedCardResponseDTO": {
         "type": "object",
         "properties": {
           "exercise": {

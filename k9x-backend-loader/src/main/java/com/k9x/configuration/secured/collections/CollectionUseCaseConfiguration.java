@@ -4,9 +4,12 @@ import com.k9x.application.collections.obdx.port.GetObdxCollectionCompetitorsPer
 import com.k9x.application.collections.obdx.port.GetObdxCollectionEventJudgesPersistencePort;
 import com.k9x.application.collections.obdx.port.GetObdxCollectionExercisesPersistencePort;
 import com.k9x.application.collections.obdx.port.GetObdxCollectionScoresPersistencePort;
+import com.k9x.application.collections.obdx.port.GetObdxRedCardPersistencePort;
 import com.k9x.application.collections.obdx.port.GetObdxYellowCardsPersistencePort;
 import com.k9x.application.collections.obdx.use_case.GetObdxCollectionServiceCase;
+import com.k9x.application.collections.obdx.use_case.GetObdxRedCardServiceCase;
 import com.k9x.application.collections.obdx.use_case.GetObdxYellowCardsServiceCase;
+import com.k9x.application.collections.obdx.use_case.RegisterObdxRedCardServiceCase;
 import com.k9x.application.collections.obdx.use_case.RegisterObdxYellowCardServiceCase;
 import com.k9x.application.collections.port.GetCollectionListPersistencePort;
 import com.k9x.application.collections.use_case.GetCollectionListServiceCase;
@@ -61,5 +64,18 @@ public class CollectionUseCaseConfiguration {
     @Bean
     public GetObdxYellowCardsServiceCase getYellowCardsServiceCase(GetObdxYellowCardsPersistencePort getObdxYellowCardsPersistencePort) {
         return new GetObdxYellowCardsServiceCase(getObdxYellowCardsPersistencePort);
+    }
+
+    @Bean
+    public RegisterObdxRedCardServiceCase registerRedCardServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
+                                                                      GetObdxEventCollectorPersistencePort getObdxEventCollectorPersistencePort,
+                                                                      SaveCompetitionPersistencePort saveCompetitionPersistencePort) {
+        return new RegisterObdxRedCardServiceCase(getCompetitionPersistencePort,
+                getObdxEventCollectorPersistencePort, saveCompetitionPersistencePort);
+    }
+
+    @Bean
+    public GetObdxRedCardServiceCase getRedCardServiceCase(GetObdxRedCardPersistencePort getObdxRedCardPersistencePort) {
+        return new GetObdxRedCardServiceCase(getObdxRedCardPersistencePort);
     }
 }
