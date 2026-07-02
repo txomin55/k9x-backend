@@ -68,7 +68,8 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                         c.position() != null ? c.position().intValue() : null,
                         c.status(),
                         c.breed(),
-                        new IdNameDTO(c.dogName(), c.dogId())))
+                        new IdNameDTO(c.dogName(), c.dogId()),
+                        c.bih()))
                 .toList();
     }
 

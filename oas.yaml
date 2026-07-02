@@ -3090,6 +3090,10 @@
           },
           "dog": {
             "$ref": "#/components/schemas/IdNameDTO"
+          },
+          "bih": {
+            "type": "boolean",
+            "description": "Best in show flag"
           }
         },
         "required": [

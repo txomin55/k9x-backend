@@ -47,7 +47,7 @@ class GetObdxCollectionServiceCaseTest {
                 new FetchCollectionJudgeWithCollectorDTO("judge-2", "Judge Two", "collector2@test.com")
         );
         List<FetchCollectionCompetitorDTO> competitors = List.of(
-                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, false, null)
+                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, false, null, null)
         );
         List<FetchCollectionExerciseDTO> exercises = List.of(new FetchCollectionExerciseDTO("ex-1", (short) 1));
         List<FetchCollectionScoreDTO> scores = List.of(
@@ -72,7 +72,7 @@ class GetObdxCollectionServiceCaseTest {
                 new FetchCollectionJudgeWithCollectorDTO("judge-1", "Judge One", "collector@test.com")
         );
         List<FetchCollectionCompetitorDTO> competitors = List.of(
-                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, false, null)
+                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, false, null, null)
         );
         List<FetchCollectionExerciseDTO> exercises = List.of(new FetchCollectionExerciseDTO("ex-1", (short) 1));
         List<FetchCollectionScoreDTO> scores = List.of(
@@ -98,7 +98,7 @@ class GetObdxCollectionServiceCaseTest {
                 new FetchCollectionJudgeWithCollectorDTO("judge-2", "Judge Two", null)
         );
         List<FetchCollectionCompetitorDTO> competitors = List.of(
-                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, false, null)
+                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, false, null, null)
         );
         List<FetchCollectionExerciseDTO> exercises = List.of(new FetchCollectionExerciseDTO("ex-1", (short) 1));
         List<FetchCollectionScoreDTO> scores = List.of(
@@ -127,7 +127,7 @@ class GetObdxCollectionServiceCaseTest {
                 new FetchCollectionJudgeWithCollectorDTO("judge-1", "Judge One", "collector@test.com")
         );
         List<FetchCollectionCompetitorDTO> competitors = List.of(
-                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, false, null)
+                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, false, null, null)
         );
         List<FetchCollectionExerciseDTO> exercises = List.of(new FetchCollectionExerciseDTO("ex-1", (short) 1));
         List<FetchCollectionScoreDTO> scores = List.of(
@@ -151,7 +151,7 @@ class GetObdxCollectionServiceCaseTest {
                 new FetchCollectionJudgeWithCollectorDTO("judge-1", "Judge One", "collector@test.com")
         );
         List<FetchCollectionCompetitorDTO> rawCompetitors = List.of(
-                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, false, null)
+                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, false, null, null)
         );
         when(getObdxCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(rawCompetitors);
         when(getObdxCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());
@@ -170,7 +170,7 @@ class GetObdxCollectionServiceCaseTest {
                 new FetchCollectionJudgeWithCollectorDTO("judge-1", "Judge One", "collector@test.com")
         );
         List<FetchCollectionCompetitorDTO> rawCompetitors = List.of(
-                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, true, null)
+                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, true, true, null, null)
         );
         when(getObdxCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(rawCompetitors);
         when(getObdxCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());
@@ -188,7 +188,7 @@ class GetObdxCollectionServiceCaseTest {
                 new FetchCollectionJudgeWithCollectorDTO("judge-1", "Judge One", "collector@test.com")
         );
         List<FetchCollectionCompetitorDTO> rawCompetitors = List.of(
-                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, false, false, null)
+                new FetchCollectionCompetitorDTO("dog-1", "Rex", "ID-001", "Border Collie", "owner@test.com", "Handler", "Team A", "ES", (short) 1, false, false, null, null)
         );
         when(getObdxCollectionCompetitorsPersistencePort.getCompetitors("event-1")).thenReturn(rawCompetitors);
         when(getObdxCollectionExercisesPersistencePort.getExercises("event-1")).thenReturn(List.of());

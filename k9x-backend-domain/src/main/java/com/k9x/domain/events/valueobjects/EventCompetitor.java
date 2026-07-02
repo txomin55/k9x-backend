@@ -14,6 +14,7 @@ public record EventCompetitor(
         Short position,
         Boolean verified,
         boolean notCompeting,
-        BigDecimal finalScore
+        BigDecimal finalScore,
+        Boolean bih
 ) {
 }

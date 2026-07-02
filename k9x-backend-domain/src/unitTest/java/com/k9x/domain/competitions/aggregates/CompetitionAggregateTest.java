@@ -269,7 +269,7 @@ class CompetitionAggregateTest {
     @Test
     void deleteStage_throws_when_an_event_is_not_created() {
         EventCompetitor settled = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null,
-                (short) 1, false, true, null);
+                (short) 1, false, true, null, null);
         EventSnapshot finished = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(settled), List.of(), List.of(), List.of());
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(finished, FUTURE)));
@@ -381,7 +381,7 @@ class CompetitionAggregateTest {
     @Test
     void enrollDog_assigns_next_position_after_last_enrolled_competitor() {
         EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i",
-                (short) 3, true, false, null);
+                (short) 3, true, false, null, null);
         EventSnapshot eventWithCompetitors = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null,
                 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of());
         CompetitionAggregate aggregate =

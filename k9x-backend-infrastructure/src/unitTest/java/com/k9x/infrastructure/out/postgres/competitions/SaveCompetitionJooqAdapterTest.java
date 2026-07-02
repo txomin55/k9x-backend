@@ -230,7 +230,7 @@ class SaveCompetitionJooqAdapterTest {
     void emits_update_for_competitor_not_competing() {
         givenCapturingDsl();
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null,
-                (short) 1, true, false, null);
+                (short) 1, true, false, null, null);
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", null, NOW, NOW, null,
                 ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of());
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",

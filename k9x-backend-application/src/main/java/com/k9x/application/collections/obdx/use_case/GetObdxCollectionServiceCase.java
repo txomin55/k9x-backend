@@ -47,7 +47,8 @@ public class GetObdxCollectionServiceCase {
                 getObdxCollectionCompetitorsPersistencePort.getCompetitors(eventId).stream()
                         .map(c -> new FetchCollectionCompetitorDTO(c.dogId(), c.dogName(), c.dogIdentity(),
                                 c.breed(), c.owner(), c.handler(), c.team(), c.country(), c.position(), c.verified(),
-                                c.notCompeting(), EventCompetitorStatus.of(c.notCompeting(), c.verified()).name()))
+                                c.notCompeting(), EventCompetitorStatus.of(c.notCompeting(), c.verified()).name(),
+                                c.bih()))
                         .toList();
         List<FetchCollectionExerciseDTO> exercises =
                 getObdxCollectionExercisesPersistencePort.getExercises(eventId);
