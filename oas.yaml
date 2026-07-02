@@ -3017,6 +3017,10 @@
           },
           "startOrder": {
             "type": "integer"
+          },
+          "bih": {
+            "type": "boolean",
+            "description": "Best in show flag"
           }
         },
         "required": [
@@ -3032,7 +3036,8 @@
           "totalScore",
           "scoreRating",
           "tied",
-          "startOrder"
+          "startOrder",
+          "bih"
         ]
       },
       "StageEventClassificationScoreResponseDTO": {
