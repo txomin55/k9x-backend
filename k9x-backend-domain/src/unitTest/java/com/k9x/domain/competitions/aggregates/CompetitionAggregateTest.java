@@ -605,6 +605,18 @@ class CompetitionAggregateTest {
     }
 
     @Test
+    void support_cannot_update_score_of_a_disqualified_competitor() {
+        EventSnapshot disqualified = new EventSnapshot("evt-1", null, null, "Event", "stage-1", "other", null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L),
+                        new Score("ex-2", "judge-1", "dog-1", null, 0L, 2000L)));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition("other", null, stageWith(disqualified, FUTURE)));
+        ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-3", "dog-1", BigDecimal.TEN);
+
+        assertThrows(CompetitorDisqualifiedException.class, () -> aggregate.updateScore("evt-1", data, SUPPORT, NOW));
+    }
+
+    @Test
     void support_can_update_score_on_an_expired_stage() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition("other", null, stageWith(event(null), 1L)));
         ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-1", "dog-1", BigDecimal.TEN);

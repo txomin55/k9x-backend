@@ -256,7 +256,8 @@ public class GetObdxClassificationServiceCase {
     private void assignPositions(List<FetchClassificationCompetitorDTO> competitors,
                                  ObdxClassificationConfigDTO config) {
         Comparator<FetchClassificationCompetitorDTO> comparator =
-                Comparator.comparing(FetchClassificationCompetitorDTO::totalScore).reversed()
+                Comparator.comparing(this::rankingTier)
+                        .thenComparing(Comparator.comparing(FetchClassificationCompetitorDTO::totalScore).reversed())
                         .thenComparing(c -> tieScore(c, config.breakTie()), Comparator.reverseOrder())
                         .thenComparing(c -> tieScore(c, config.breakTieTie()), Comparator.reverseOrder());
 
@@ -273,6 +274,24 @@ public class GetObdxClassificationServiceCase {
         }
     }
 
+    /**
+     * Ranking tier used as the primary sort key: regular competitors first, then red-carded (disqualified)
+     * competitors ordered by score among themselves, then not-competing competitors last.
+     */
+    private int rankingTier(FetchClassificationCompetitorDTO competitor) {
+        if (competitor.notCompeting()) {
+            return 2;
+        }
+        if (hasRedCard(competitor)) {
+            return 1;
+        }
+        return 0;
+    }
+
+    private boolean hasRedCard(FetchClassificationCompetitorDTO competitor) {
+        return competitor.exercises().stream().anyMatch(e -> e.redCard() != null);
+    }
+
     private BigDecimal tieScore(FetchClassificationCompetitorDTO competitor, List<String> exerciseIds) {
         if (exerciseIds == null || exerciseIds.isEmpty()) return BigDecimal.ZERO;
         return competitor.exercises().stream()
@@ -284,7 +303,8 @@ public class GetObdxClassificationServiceCase {
 
     private boolean isTied(FetchClassificationCompetitorDTO a, FetchClassificationCompetitorDTO b,
                            ObdxClassificationConfigDTO config) {
-        return a.totalScore().compareTo(b.totalScore()) == 0
+        return rankingTier(a) == rankingTier(b)
+                && a.totalScore().compareTo(b.totalScore()) == 0
                 && tieScore(a, config.breakTie()).compareTo(tieScore(b, config.breakTie())) == 0
                 && tieScore(a, config.breakTieTie()).compareTo(tieScore(b, config.breakTieTie())) == 0;
     }

@@ -220,12 +220,12 @@ public final class CompetitionAggregate {
             if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
                 throw new StageExpiredException();
             }
-            if (event.isDisqualified(data.dogId())) {
-                throw new CompetitorDisqualifiedException();
-            }
-            if (event.isNotCompeting(data.dogId())) {
-                throw new CompetitorNotCompetingException();
-            }
+        }
+        if (event.isDisqualified(data.dogId())) {
+            throw new CompetitorDisqualifiedException();
+        }
+        if (event.isNotCompeting(data.dogId())) {
+            throw new CompetitorNotCompetingException();
         }
         changes.add(new ScoreUpdated(eventId, data.judgeId(), data.exerciseId(), data.dogId(), data.score(), now));
     }

@@ -204,7 +204,7 @@ class SaveCompetitionJooqAdapterTest {
         givenCapturingDsl();
         CompetitionAggregate competition = aggregateWithActiveEvent();
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "config-1", ObdxAvgMethod.MID_AVG, 1735689600000L,
-                List.of(new ObdxCompetitorItem("dog-1", (short) 1)),
+                List.of(new ObdxCompetitorItem("dog-1", (short) 1, true)),
                 List.of(new ObdxExerciseItem("exercise-1", (short) 1, new String[]{"tag1"})),
                 List.of(new ObdxJudgeItem("judge-1", "collector@example.com")));
         competition.updateObdxEventInfo("evt-1", data, "user", NOW);

@@ -312,6 +312,36 @@ class GetObdxClassificationServiceCaseTest {
     }
 
     @Test
+    void ranks_red_carded_competitors_after_regular_ones_and_not_competing_last() {
+        // dog-1: regular, low score. dog-2: highest score but red-carded, so it must rank after dog-1
+        // despite the higher score. dog-3: not competing, ranked last regardless of score.
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "id-1", (short) 1, false, false, null, null),
+                new EventCompetitor("dog-2", "Max", "owner@test.com", "Handler", "Team B", "ES",
+                        "breed", "id-2", (short) 2, false, false, null, null),
+                new EventCompetitor("dog-3", "Fido", "owner@test.com", "Handler", "Team C", "ES",
+                        "breed", "id-3", (short) 3, false, true, null, null));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        List<Score> scores = List.of(
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("6"), 1000L),
+                new Score("ex-1", "j-1", "dog-2", new BigDecimal("9"), 1000L, null, 5000L),
+                new Score("ex-1", "j-1", "dog-3", new BigDecimal("7"), 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
+                competitors, exercises, judges, scores);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors()).extracting(FetchClassificationCompetitorDTO::dogId)
+                .containsExactly("dog-1", "dog-2", "dog-3");
+    }
+
+    @Test
     void exposes_static_start_order_per_competitor_independent_of_ranking() {
         // dog-1 enrolled with start order 5, dog-2 with start order 3. dog-2 scores higher so it
         // ranks 1st, but each competitor must keep its own static start order regardless of the
