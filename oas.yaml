@@ -3021,6 +3021,10 @@
           "bih": {
             "type": "boolean",
             "description": "Best in show flag"
+          },
+          "notCompeting": {
+            "type": "boolean",
+            "description": "Whether the competitor has been flagged as not competing"
           }
         },
         "required": [
@@ -3099,6 +3103,10 @@
           "bih": {
             "type": "boolean",
             "description": "Best in show flag"
+          },
+          "notCompeting": {
+            "type": "boolean",
+            "description": "Whether the competitor has been flagged as not competing"
           }
         },
         "required": [
