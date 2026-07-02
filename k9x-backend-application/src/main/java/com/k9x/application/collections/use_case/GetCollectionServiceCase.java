@@ -16,6 +16,7 @@ import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.shared.UtcDates;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 
 import java.util.List;
@@ -72,7 +73,7 @@ public class GetCollectionServiceCase {
     }
 
     private void assertStageNotExpired(StageSnapshot stage) {
-        if (stage.dateTo() < DateUtils.nowUtcMillis()) throw new StageExpiredException();
+        if (UtcDates.isAfterUtcDay(DateUtils.nowUtcMillis(), stage.dateTo())) throw new StageExpiredException();
     }
 
     private List<FetchCollectionJudgeWithCollectorDTO> resolveVisibleJudges(

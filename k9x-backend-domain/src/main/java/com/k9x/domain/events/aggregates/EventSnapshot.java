@@ -57,10 +57,10 @@ public record EventSnapshot(
      * stays open until the deadline is reached (compared against the supplied current timestamp).
      */
     public boolean enrollmentOpened(long now) {
-        return enrollmentDeadline == null || enrollmentDeadline > now;
+        return enrollmentDeadline == null || !UtcDates.isAfterUtcDay(now, enrollmentDeadline);
     }
 
-    private boolean hasAnyScore() {
+    public boolean hasAnyScore() {
         return scores != null && scores.stream().anyMatch(s -> s.score() != null);
     }
 

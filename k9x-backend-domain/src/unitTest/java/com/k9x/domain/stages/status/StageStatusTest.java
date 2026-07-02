@@ -86,6 +86,11 @@ class StageStatusTest {
     }
 
     @Test
+    void to_start_when_today_is_within_a_multi_day_stage_range_and_no_score_recorded() {
+        assertEquals(StageStatus.TO_START, stage(YESTERDAY, TOMORROW, null, List.of()).status(NOW));
+    }
+
+    @Test
     void created_when_date_from_is_a_future_day() {
         assertEquals(StageStatus.CREATED, stage(NEXT_WEEK, NEXT_WEEK, null, List.of()).status(NOW));
     }

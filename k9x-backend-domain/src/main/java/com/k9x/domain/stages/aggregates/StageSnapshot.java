@@ -3,7 +3,6 @@ package com.k9x.domain.stages.aggregates;
 import com.k9x.domain.stages.status.StageStatus;
 
 import com.k9x.domain.events.aggregates.EventSnapshot;
-import com.k9x.domain.events.status.EventStatus;
 import com.k9x.domain.shared.UtcDates;
 
 import java.util.List;
@@ -22,9 +21,10 @@ public record StageSnapshot(
 ) {
 
     /**
-     * Lifecycle status based on the UTC calendar day and the status of its events:
-     * FINISHED once the day after {@code dateTo} has arrived, STARTED while any event is started,
-     * TO_START on the {@code dateFrom} day, otherwise CREATED.
+     * Lifecycle status based on the UTC calendar day and the scores recorded on its events:
+     * FINISHED once the day after {@code dateTo} has arrived, STARTED once any competitor has a score,
+     * TO_START while {@code now} falls within [{@code dateFrom}, {@code dateTo}] and no score has been
+     * recorded yet, otherwise CREATED.
      */
     public StageStatus status(long now) {
         if (deletedAt != null) {
@@ -33,10 +33,10 @@ public record StageSnapshot(
         if (UtcDates.isAfterUtcDay(now, dateTo)) {
             return StageStatus.FINISHED;
         }
-        if (hasStartedEvent(now)) {
+        if (hasAnyScore()) {
             return StageStatus.STARTED;
         }
-        if (UtcDates.isSameUtcDay(now, dateFrom)) {
+        if (!UtcDates.isBeforeUtcDay(now, dateFrom)) {
             return StageStatus.TO_START;
         }
         return StageStatus.CREATED;
@@ -55,7 +55,7 @@ public record StageSnapshot(
         return event.enrollmentOpened(now);
     }
 
-    private boolean hasStartedEvent(long now) {
-        return events != null && events.stream().anyMatch(e -> e.status(now, dateTo) == EventStatus.STARTED);
+    private boolean hasAnyScore() {
+        return events != null && events.stream().anyMatch(EventSnapshot::hasAnyScore);
     }
 }

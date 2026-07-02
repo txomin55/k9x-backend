@@ -159,7 +159,7 @@ public final class CompetitionAggregate {
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
 
-        if (!SupportUser.is(userId) && stage.dateTo() < now) {
+        if (!SupportUser.is(userId) && UtcDates.isAfterUtcDay(now, stage.dateTo())) {
             throw new StageExpiredException();
         }
         changes.add(new DogEnrolled(eventId, dogId, bih, nextPosition(event), now));
@@ -217,7 +217,7 @@ public final class CompetitionAggregate {
             if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
                 throw new StageNotStartedException();
             }
-            if (stage.dateTo() < now) {
+            if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
                 throw new StageExpiredException();
             }
         }
@@ -232,7 +232,7 @@ public final class CompetitionAggregate {
             if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
                 throw new StageNotStartedException();
             }
-            if (stage.dateTo() < now) {
+            if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
                 throw new StageExpiredException();
             }
         }

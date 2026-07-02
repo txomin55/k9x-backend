@@ -7,6 +7,7 @@ import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.shared.UtcDates;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 
@@ -35,7 +36,7 @@ public class GetStageListServiceCase {
                         .filter(stage -> stage.deletedAt() == null)
                         .map(stage -> new CompetitionStage(competition, stage)))
                 .sorted(Comparator
-                        .comparing((CompetitionStage cs) -> cs.stage().dateFrom() < now)
+                        .comparing((CompetitionStage cs) -> UtcDates.isBeforeUtcDay(cs.stage().dateFrom(), now))
                         .thenComparingLong(cs -> cs.stage().dateFrom()))
                 .map(cs -> toStageDto(cs.competition(), cs.stage(), now, configNameById))
                 .toList();
