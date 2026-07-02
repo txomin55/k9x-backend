@@ -8,6 +8,7 @@ import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.competitions.commands.StageUpdateData;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.application.utils.auth.AuthAssertions;
+import com.k9x.domain.shared.UtcDates;
 
 public class UpdateStageServiceCase {
 
@@ -28,7 +29,9 @@ public class UpdateStageServiceCase {
         }
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
-        competition.renameStage(stageId, new StageUpdateData(command.name(), command.dateFrom(), command.dateTo()),
+        competition.renameStage(stageId,
+                new StageUpdateData(command.name(), UtcDates.startOfUtcDay(command.dateFrom()),
+                        UtcDates.endOfUtcDay(command.dateTo())),
                 userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }

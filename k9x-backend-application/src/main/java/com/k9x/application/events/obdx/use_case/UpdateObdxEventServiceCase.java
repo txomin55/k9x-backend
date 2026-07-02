@@ -16,6 +16,7 @@ import com.k9x.domain.competitions.commands.ObdxJudgeItem;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
+import com.k9x.domain.shared.UtcDates;
 
 public class UpdateObdxEventServiceCase {
 
@@ -60,7 +61,7 @@ public class UpdateObdxEventServiceCase {
                 command.name(),
                 command.configurationId(),
                 scoreCalculation,
-                command.enrollmentDeadline(),
+                command.enrollmentDeadline() == null ? null : UtcDates.endOfUtcDay(command.enrollmentDeadline()),
                 command.competitors().stream()
                         .map(c -> new ObdxCompetitorItem(c.dogId(), c.order().shortValue()))
                         .toList(),

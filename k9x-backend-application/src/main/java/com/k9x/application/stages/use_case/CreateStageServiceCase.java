@@ -6,6 +6,7 @@ import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.domain.competitions.commands.NewStageData;
+import com.k9x.domain.shared.UtcDates;
 
 public class CreateStageServiceCase {
 
@@ -25,7 +26,9 @@ public class CreateStageServiceCase {
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
 
-        competition.createStage(new NewStageData(id, name, dateFrom, dateTo), userId, DateUtils.nowUtcMillis());
+        competition.createStage(
+                new NewStageData(id, name, UtcDates.startOfUtcDay(dateFrom), UtcDates.endOfUtcDay(dateTo)),
+                userId, DateUtils.nowUtcMillis());
 
         saveCompetitionPersistencePort.save(competition);
     }

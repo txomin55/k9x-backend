@@ -31,9 +31,9 @@ VALUES ('comp-1', 'Copa Brincan 2026', 'ES', 'Competición de obediencia OBDX', 
 
 -- stages ----------------------------------------------------------------
 INSERT INTO k9x.stages (id, name, competition_id, date_from, date_to, creator, last_update, created_at, deleted_at)
-VALUES ('stage-1', 'Jornada 1', 'comp-1', 1782864000000, 1782950400000, 'k9x.support@gmail.com', 1700000000000,
+VALUES ('stage-1', 'Jornada 1', 'comp-1', 1782864000000, 1783036799999, 'k9x.support@gmail.com', 1700000000000,
         1700000000000, NULL),
-       ('stage-2', 'Jornada 2', 'comp-1', 1784073600000, 1784160000000, 'k9x.support@gmail.com', 1700000000000,
+       ('stage-2', 'Jornada 2', 'comp-1', 1784073600000, 1784246399999, 'k9x.support@gmail.com', 1700000000000,
         1700000000000, NULL);
 
 -- events ----------------------------------------------------------------
@@ -41,29 +41,29 @@ VALUES ('stage-1', 'Jornada 1', 'comp-1', 1782864000000, 1782950400000, 'k9x.sup
 -- stage-2: COBS + FCI grades 1, 2, 3
 INSERT INTO k9x.events (id, discipline, configuration_id, score_calculation, name, creator, stage_id,
                         enrollment_deadline, last_update, created_at, deleted_at)
-VALUES ('event-1', 'OBDX', 'OBDX_RSCE_DEBUTANTE_V0', 'AVG', 'RSCE Debutante', 'k9x.support@gmail.com', 'stage-1', NULL,
+VALUES ('event-1', 'OBDX', 'OBDX_RSCE_DEBUTANTE_V0', 'AVG', 'RSCE Debutante', 'k9x.support@gmail.com', 'stage-1',
+        1782863999999, 1700000000000, 1700000000000, NULL),
+       ('event-2', 'OBDX', 'CPC_COBS_V0', 'AVG', 'COBS', 'k9x.support@gmail.com', 'stage-2', 1784073599999,
         1700000000000, 1700000000000, NULL),
-       ('event-2', 'OBDX', 'CPC_COBS_V0', 'AVG', 'COBS', 'k9x.support@gmail.com', 'stage-2', NULL, 1700000000000,
-        1700000000000, NULL),
-       ('event-3', 'OBDX', 'OBDX_FCI_GRADE_1_V0', 'AVG', 'FCI Grado 1', 'k9x.support@gmail.com', 'stage-2', NULL,
-        1700000000000, 1700000000000, NULL),
-       ('event-4', 'OBDX', 'OBDX_FCI_GRADE_2_V0', 'AVG', 'FCI Grado 2', 'k9x.support@gmail.com', 'stage-2', NULL,
-        1700000000000, 1700000000000, NULL),
-       ('event-5', 'OBDX', 'OBDX_FCI_GRADE_3.V0', 'AVG', 'FCI Grado 3', 'k9x.support@gmail.com', 'stage-2', NULL,
-        1700000000000, 1700000000000, NULL);
+       ('event-3', 'OBDX', 'OBDX_FCI_GRADE_1_V0', 'AVG', 'FCI Grado 1', 'k9x.support@gmail.com', 'stage-2',
+        1784073599999, 1700000000000, 1700000000000, NULL),
+       ('event-4', 'OBDX', 'OBDX_FCI_GRADE_2_V0', 'AVG', 'FCI Grado 2', 'k9x.support@gmail.com', 'stage-2',
+        1784073599999, 1700000000000, 1700000000000, NULL),
+       ('event-5', 'OBDX', 'OBDX_FCI_GRADE_3.V0', 'AVG', 'FCI Grado 3', 'k9x.support@gmail.com', 'stage-2',
+        1784073599999, 1700000000000, 1700000000000, NULL);
 
 -- event_competitors (both dogs in every event) --------------------------
 INSERT INTO obdx.event_competitors (event_id, dog_id, position, verified, last_update, not_competing)
-VALUES ('event-1', 'dog-1', NULL, NULL, 1700000000000, FALSE),
-       ('event-1', 'dog-2', NULL, NULL, 1700000000000, FALSE),
-       ('event-2', 'dog-1', NULL, NULL, 1700000000000, FALSE),
-       ('event-2', 'dog-2', NULL, NULL, 1700000000000, FALSE),
-       ('event-3', 'dog-1', NULL, NULL, 1700000000000, FALSE),
-       ('event-3', 'dog-2', NULL, NULL, 1700000000000, FALSE),
-       ('event-4', 'dog-1', NULL, NULL, 1700000000000, FALSE),
-       ('event-4', 'dog-2', NULL, NULL, 1700000000000, FALSE),
-       ('event-5', 'dog-1', NULL, NULL, 1700000000000, FALSE),
-       ('event-5', 'dog-2', NULL, NULL, 1700000000000, FALSE);
+VALUES ('event-1', 'dog-1', 1, TRUE, 1700000000000, FALSE),
+       ('event-1', 'dog-2', 2, TRUE, 1700000000000, FALSE),
+       ('event-2', 'dog-1', 1, TRUE, 1700000000000, FALSE),
+       ('event-2', 'dog-2', 2, TRUE, 1700000000000, FALSE),
+       ('event-3', 'dog-1', 1, TRUE, 1700000000000, FALSE),
+       ('event-3', 'dog-2', 2, TRUE, 1700000000000, FALSE),
+       ('event-4', 'dog-1', 1, TRUE, 1700000000000, FALSE),
+       ('event-4', 'dog-2', 2, TRUE, 1700000000000, FALSE),
+       ('event-5', 'dog-1', 1, TRUE, 1700000000000, FALSE),
+       ('event-5', 'dog-2', 2, TRUE, 1700000000000, FALSE);
 
 -- event_judges (judge-1 with k9x.support@gmail.com as collector in every event) --------
 INSERT INTO obdx.event_judges (event_id, judge_id, collector_id, last_update)

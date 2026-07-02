@@ -2,6 +2,7 @@ package com.k9x.domain.shared;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 
 /**
@@ -16,6 +17,16 @@ public final class UtcDates {
 
     public static LocalDate utcDay(long epochMillis) {
         return Instant.ofEpochMilli(epochMillis).atZone(UTC).toLocalDate();
+    }
+
+    /** The given instant's UTC calendar day at 00:00:00.000. */
+    public static long startOfUtcDay(long epochMillis) {
+        return utcDay(epochMillis).atStartOfDay(UTC).toInstant().toEpochMilli();
+    }
+
+    /** The given instant's UTC calendar day at 23:59:59.999. */
+    public static long endOfUtcDay(long epochMillis) {
+        return utcDay(epochMillis).atTime(LocalTime.MAX).atZone(UTC).toInstant().toEpochMilli();
     }
 
     public static boolean isSameUtcDay(long epochMillisA, long epochMillisB) {
