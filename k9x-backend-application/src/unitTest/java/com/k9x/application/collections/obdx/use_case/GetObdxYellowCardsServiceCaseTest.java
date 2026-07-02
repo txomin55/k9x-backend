@@ -1,7 +1,7 @@
-package com.k9x.application.events.obdx.use_case;
+package com.k9x.application.collections.obdx.use_case;
 
-import com.k9x.application.events.obdx.port.GetObdxYellowCardsPersistencePort;
-import com.k9x.application.events.obdx.use_case.dto.FetchObdxYellowCardDTO;
+import com.k9x.application.collections.obdx.port.GetObdxYellowCardsPersistencePort;
+import com.k9x.application.collections.obdx.use_case.dto.FetchObdxYellowCardDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

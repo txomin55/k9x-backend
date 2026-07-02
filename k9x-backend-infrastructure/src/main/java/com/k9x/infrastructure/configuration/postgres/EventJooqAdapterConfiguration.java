@@ -19,9 +19,4 @@ public class EventJooqAdapterConfiguration {
     public GetObdxEventCollectorPersistencePort getEventCollectorPersistencePort() {
         return new GetObdxEventCollectorJooqAdapter(dsl);
     }
-
-    @Bean
-    public GetObdxYellowCardsPersistencePort getYellowCardsPersistencePort() {
-        return new GetObdxYellowCardsJooqAdapter(dsl);
-    }
 }

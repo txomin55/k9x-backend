@@ -1,6 +1,6 @@
-package com.k9x.application.events.obdx.port;
+package com.k9x.application.collections.obdx.port;
 
-import com.k9x.application.events.obdx.use_case.dto.FetchObdxYellowCardDTO;
+import com.k9x.application.collections.obdx.use_case.dto.FetchObdxYellowCardDTO;
 
 import java.util.List;
 

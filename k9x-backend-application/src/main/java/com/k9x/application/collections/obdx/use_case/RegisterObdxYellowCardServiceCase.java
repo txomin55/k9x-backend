@@ -1,10 +1,10 @@
-package com.k9x.application.events.obdx.use_case;
+package com.k9x.application.collections.obdx.use_case;
 
+import com.k9x.application.collections.obdx.use_case.command.RegisterObdxYellowCardCommand;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.events.obdx.exceptions.ObdxUserNotCollectorException;
 import com.k9x.application.events.obdx.port.GetObdxEventCollectorPersistencePort;
-import com.k9x.application.events.obdx.use_case.command.RegisterObdxYellowCardCommand;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.competitions.commands.YellowCardData;

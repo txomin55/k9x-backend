@@ -1,7 +1,7 @@
-package com.k9x.infrastructure.out.postgres.events.obdx;
+package com.k9x.infrastructure.out.postgres.collections;
 
-import com.k9x.application.events.obdx.port.GetObdxYellowCardsPersistencePort;
-import com.k9x.application.events.obdx.use_case.dto.FetchObdxYellowCardDTO;
+import com.k9x.application.collections.obdx.port.GetObdxYellowCardsPersistencePort;
+import com.k9x.application.collections.obdx.use_case.dto.FetchObdxYellowCardDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Judges;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventScores;
 import org.jooq.DSLContext;

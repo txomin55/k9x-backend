@@ -1,7 +1,7 @@
-package com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx;
+package com.k9x.infrastructure.in.rest.endpoints.secured.collections.obdx;
 
-import com.k9x.application.events.obdx.use_case.GetObdxYellowCardsServiceCase;
-import com.k9x.application.events.obdx.use_case.dto.FetchObdxYellowCardDTO;
+import com.k9x.application.collections.obdx.use_case.GetObdxYellowCardsServiceCase;
+import com.k9x.application.collections.obdx.use_case.dto.FetchObdxYellowCardDTO;
 import com.k9x.oas.stub.api.SecuredEventsFetchYellowCardsObdxApiDelegate;
 import com.k9x.oas.stub.model.IdNameDTO;
 import com.k9x.oas.stub.model.YellowCardResponseDTO;

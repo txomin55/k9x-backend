@@ -5,8 +5,6 @@ import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxExerciseAllowedValuesPort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.events.obdx.port.*;
-import com.k9x.application.events.obdx.use_case.GetObdxYellowCardsServiceCase;
-import com.k9x.application.events.obdx.use_case.RegisterObdxYellowCardServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateNotCompetingServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.UpdateObdxScoreServiceCase;
@@ -67,18 +65,5 @@ public class SecuredEventUseCaseConfiguration {
     public UpdateNotCompetingServiceCase updateNotCompetingServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                                        SaveCompetitionPersistencePort saveCompetitionPersistencePort) {
         return new UpdateNotCompetingServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort);
-    }
-
-    @Bean
-    public RegisterObdxYellowCardServiceCase registerYellowCardServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
-                                                                           GetObdxEventCollectorPersistencePort getObdxEventCollectorPersistencePort,
-                                                                           SaveCompetitionPersistencePort saveCompetitionPersistencePort) {
-        return new RegisterObdxYellowCardServiceCase(getCompetitionPersistencePort,
-                getObdxEventCollectorPersistencePort, saveCompetitionPersistencePort);
-    }
-
-    @Bean
-    public GetObdxYellowCardsServiceCase getYellowCardsServiceCase(GetObdxYellowCardsPersistencePort getObdxYellowCardsPersistencePort) {
-        return new GetObdxYellowCardsServiceCase(getObdxYellowCardsPersistencePort);
     }
 }
