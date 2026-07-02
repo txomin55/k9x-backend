@@ -145,7 +145,7 @@ public final class CompetitionAggregate {
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
         if (!SupportUser.is(userId)) {
-            assertEventDeletable(event);
+            assertEventDeletable(event, stage, now);
             if (stage.deletedAt() != null) {
                 throw new StageAlreadyDeletedException();
             }
@@ -310,7 +310,7 @@ public final class CompetitionAggregate {
         }
         return stage.events().stream()
                 .filter(e -> e.deletedAt() == null)
-                .allMatch(e -> e.status() == EventStatus.CREATED);
+                .allMatch(e -> e.status(now, stage.dateTo()) == EventStatus.CREATED);
     }
 
     /**
@@ -337,8 +337,8 @@ public final class CompetitionAggregate {
         return event;
     }
 
-    private void assertEventDeletable(EventSnapshot event) {
-        EventStatus status = event.status();
+    private void assertEventDeletable(EventSnapshot event, StageSnapshot stage, long now) {
+        EventStatus status = event.status(now, stage.dateTo());
         if (status == EventStatus.STARTED || status == EventStatus.FINISHED) {
             throw new EventCannotBeDeletedException();
         }

@@ -56,7 +56,7 @@ public class GetStageListServiceCase {
                                 event.id(), event.name(), event.configurationId(),
                                 configNameById.getOrDefault(event.configurationId(), event.configurationId()),
                                 event.competitors() == null ? 0 : event.competitors().size(),
-                                event.status().name()))
+                                event.status(now, stage.dateTo()).name()))
                         .toList(),
                 stage.status(now).name());
     }

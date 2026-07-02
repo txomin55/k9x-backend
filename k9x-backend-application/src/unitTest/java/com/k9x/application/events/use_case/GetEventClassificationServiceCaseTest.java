@@ -95,14 +95,14 @@ class GetEventClassificationServiceCaseTest {
         assertThat(result.stageName()).isEqualTo("Stage A");
         assertThat(result.obdx()).isSameAs(obdx);
         verify(eventClassificationCacheManagerPort)
-                .put("evt-1", new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A"));
+                .put("evt-1", new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE));
     }
 
     @Test
     void uses_cached_context_without_hitting_db_on_cache_hit() {
         FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(5000L, List.of());
         when(eventClassificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt()))
-                .thenReturn(new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A"));
+                .thenReturn(new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE));
         when(getObdxClassificationServiceCase.getClassification(ACTIVE_EVENT)).thenReturn(obdx);
 
         FetchClassificationDTO result = serviceCase.getClassification("evt-1");

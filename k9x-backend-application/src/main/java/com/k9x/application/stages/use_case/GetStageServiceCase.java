@@ -67,7 +67,7 @@ public class GetStageServiceCase {
                                                 c.dogId(), c.dogName(), c.owner(), c.handler(),
                                                 c.country(), c.team(), c.breed()))
                                         .toList(),
-                                e.status().name(),
+                                e.status(now, stage.dateTo()).name(),
                                 stage.enrollmentOpened(e, now),
                                 e.enrollmentDeadline()))
                         .toList());

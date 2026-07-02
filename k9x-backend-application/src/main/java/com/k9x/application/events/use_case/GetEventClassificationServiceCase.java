@@ -9,6 +9,7 @@ import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.use_case.dto.EventClassificationContextDTO;
 import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
+import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.events.aggregates.EventSnapshot;
@@ -44,8 +45,9 @@ public class GetEventClassificationServiceCase {
 
         Long scoresLastUpdate = obdx == null ? null : obdx.scoresLastUpdate();
 
-        return new FetchClassificationDTO(eventId, event.name(), event.status().name(), event.stageId(),
-                context.stageName(), event.configurationId(), scoresLastUpdate, obdx);
+        long now = DateUtils.nowUtcMillis();
+        return new FetchClassificationDTO(eventId, event.name(), event.status(now, context.stageDateTo()).name(),
+                event.stageId(), context.stageName(), event.configurationId(), scoresLastUpdate, obdx);
     }
 
     private EventClassificationContextDTO resolveContext(String eventId) {
@@ -64,7 +66,7 @@ public class GetEventClassificationServiceCase {
 
         StageSnapshot stage = CompetitionNavigator.findStageOfEvent(competition, eventId);
 
-        EventClassificationContextDTO context = new EventClassificationContextDTO(event, stage.name());
+        EventClassificationContextDTO context = new EventClassificationContextDTO(event, stage.name(), stage.dateTo());
         eventClassificationCacheManagerPort.put(eventId, context);
         return context;
     }

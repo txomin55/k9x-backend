@@ -5,6 +5,7 @@ import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.events.valueobjects.EventExercise;
 import com.k9x.domain.events.valueobjects.EventJudge;
 import com.k9x.domain.events.valueobjects.Score;
+import com.k9x.domain.shared.UtcDates;
 
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 
@@ -32,12 +33,15 @@ public record EventSnapshot(
 
     /**
      * Lifecycle status. "Pooling" is only a front-end label, so the backend derives the status from the
-     * recorded scores: an event is FINISHED once every competitor is settled, STARTED once any score has
-     * been taken, otherwise CREATED.
+     * recorded scores: an event is FINISHED once every competitor is settled or once its stage's
+     * {@code dateTo} day has passed, STARTED once any score has been taken, otherwise CREATED.
      */
-    public EventStatus status() {
+    public EventStatus status(long now, long stageDateTo) {
         if (deletedAt != null) {
             return EventStatus.DELETED;
+        }
+        if (UtcDates.isAfterUtcDay(now, stageDateTo)) {
+            return EventStatus.FINISHED;
         }
         if (allCompetitorsSettled()) {
             return EventStatus.FINISHED;

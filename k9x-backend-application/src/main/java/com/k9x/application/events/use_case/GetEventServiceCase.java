@@ -6,6 +6,7 @@ import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfiguration
 import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
 import com.k9x.application.disciplines.use_case.dto.ExerciseDTO;
+import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventDTO;
@@ -61,8 +62,9 @@ public class GetEventServiceCase {
     }
 
     private FetchEventDetailDTO buildObdxDetail(EventSnapshot event, StageSnapshot stage) {
+        long now = DateUtils.nowUtcMillis();
         FetchObdxEventDTO obdx = new FetchObdxEventDTO(event.id(), event.name(), stage.id(), stage.name(),
-                event.discipline(), event.status().name(), event.enrollmentDeadline());
+                event.discipline(), event.status(now, stage.dateTo()).name(), event.enrollmentDeadline());
 
         List<FetchObdxEventCompetitorDTO> competitors = event.competitors().stream()
                 .map(c -> new FetchObdxEventCompetitorDTO(c.dogId(), c.dogName(), c.identity(), c.breed(),

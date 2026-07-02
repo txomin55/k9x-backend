@@ -49,7 +49,7 @@ class GetStageListServiceCaseTest {
     }
 
     @Test
-    void resolves_discipline_name_and_computes_finished_stage_with_unscored_event() throws IOException {
+    void resolves_discipline_name_and_computes_finished_stage_and_event_when_unscored() throws IOException {
         EventSnapshot event = event("evt-1", "obdx-1", null, List.of(competitor("dog-1", false)),
                 List.of(exercise("ex-1")), List.of(judge("j-1")), List.of());
         CompetitionSnapshot competition = competition(stage("s-1", FAR_PAST, FAR_PAST, List.of(event)));
@@ -64,8 +64,8 @@ class GetStageListServiceCaseTest {
         assertThat(result.getFirst().events()).hasSize(1);
         assertThat(result.getFirst().events().getFirst().disciplineName()).isEqualTo("Obedience");
         assertThat(result.getFirst().events().getFirst().competitorCount()).isEqualTo(1);
-        // No scores -> event CREATED; dateTo in 1970 is before today's UTC day -> stage FINISHED.
-        assertThat(result.getFirst().events().getFirst().status()).isEqualTo("CREATED");
+        // dateTo in 1970 is before today's UTC day -> stage and its events are FINISHED, even unscored.
+        assertThat(result.getFirst().events().getFirst().status()).isEqualTo("FINISHED");
         assertThat(result.getFirst().status()).isEqualTo("FINISHED");
     }
 

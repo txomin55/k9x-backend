@@ -56,16 +56,17 @@ public class GetCompetitionListServiceCase {
                 stage.dateFrom(),
                 stage.dateTo(),
                 stage.status(now).name(),
-                toEventDtos(stage));
+                toEventDtos(stage, now));
     }
 
-    private List<FetchEventDTO> toEventDtos(StageSnapshot stage) {
+    private List<FetchEventDTO> toEventDtos(StageSnapshot stage, long now) {
         if (stage.events() == null) {
             return List.of();
         }
         return stage.events().stream()
                 .filter(event -> event.deletedAt() == null)
-                .map(event -> new FetchEventDTO(event.id(), event.name(), event.discipline(), event.status().name()))
+                .map(event -> new FetchEventDTO(event.id(), event.name(), event.discipline(),
+                        event.status(now, stage.dateTo()).name()))
                 .toList();
     }
 }

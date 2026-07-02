@@ -33,7 +33,7 @@ public record StageSnapshot(
         if (UtcDates.isAfterUtcDay(now, dateTo)) {
             return StageStatus.FINISHED;
         }
-        if (hasStartedEvent()) {
+        if (hasStartedEvent(now)) {
             return StageStatus.STARTED;
         }
         if (UtcDates.isSameUtcDay(now, dateFrom)) {
@@ -55,7 +55,7 @@ public record StageSnapshot(
         return event.enrollmentOpened(now);
     }
 
-    private boolean hasStartedEvent() {
-        return events != null && events.stream().anyMatch(e -> e.status() == EventStatus.STARTED);
+    private boolean hasStartedEvent(long now) {
+        return events != null && events.stream().anyMatch(e -> e.status(now, dateTo) == EventStatus.STARTED);
     }
 }
