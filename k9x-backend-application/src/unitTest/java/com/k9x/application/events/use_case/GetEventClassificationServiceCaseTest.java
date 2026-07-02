@@ -1,6 +1,9 @@
 package com.k9x.application.events.use_case;
 
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
+import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
+import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
+import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
 import com.k9x.domain.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
@@ -18,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,6 +45,8 @@ class GetEventClassificationServiceCaseTest {
     private EventClassificationCacheManagerPort eventClassificationCacheManagerPort;
     @Mock
     private GetObdxClassificationServiceCase getObdxClassificationServiceCase;
+    @Mock
+    private GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
 
     private GetEventClassificationServiceCase serviceCase;
 
@@ -48,7 +54,8 @@ class GetEventClassificationServiceCaseTest {
     void setUp() {
         serviceCase = new GetEventClassificationServiceCase(
                 getCompetitionPersistencePort,
-                eventClassificationCacheManagerPort, getObdxClassificationServiceCase);
+                eventClassificationCacheManagerPort, getObdxClassificationServiceCase,
+                getObdxFederationsConfigurationsPort);
     }
 
     private CompetitionSnapshot competition(EventSnapshot event) {
@@ -82,28 +89,34 @@ class GetEventClassificationServiceCaseTest {
     }
 
     @Test
-    void fetches_from_db_and_caches_context_on_cache_miss() {
+    void fetches_from_db_and_caches_context_on_cache_miss() throws IOException {
         FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(5000L, List.of());
         when(eventClassificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
         when(getCompetitionPersistencePort.competitionIdByEvent("evt-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(ACTIVE_EVENT));
         when(getObdxClassificationServiceCase.getClassification(ACTIVE_EVENT)).thenReturn(obdx);
+        when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of(
+                new ConfigurationsDTO(null, List.of(new ConfigurationDTO("OBDX_RSCE_GRADE_1_V0", "Grade 1", List.of())))));
 
         FetchClassificationDTO result = serviceCase.getClassification("evt-1");
 
         assertThat(result.eventId()).isEqualTo("evt-1");
         assertThat(result.stageName()).isEqualTo("Stage A");
+        assertThat(result.disciplineId()).isEqualTo("obdx");
+        assertThat(result.configurationId()).isEqualTo("OBDX_RSCE_GRADE_1_V0");
+        assertThat(result.configurationName()).isEqualTo("Grade 1");
         assertThat(result.obdx()).isSameAs(obdx);
         verify(eventClassificationCacheManagerPort)
                 .put("evt-1", new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE));
     }
 
     @Test
-    void uses_cached_context_without_hitting_db_on_cache_hit() {
+    void uses_cached_context_without_hitting_db_on_cache_hit() throws IOException {
         FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(5000L, List.of());
         when(eventClassificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt()))
                 .thenReturn(new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE));
         when(getObdxClassificationServiceCase.getClassification(ACTIVE_EVENT)).thenReturn(obdx);
+        when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of());
 
         FetchClassificationDTO result = serviceCase.getClassification("evt-1");
 

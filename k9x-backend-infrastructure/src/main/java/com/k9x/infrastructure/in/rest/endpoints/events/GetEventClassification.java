@@ -27,10 +27,10 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
         FetchClassificationDTO dto = getClassificationServiceCase.getClassification(eventId);
 
         return ResponseEntity.ok(new StageEventClassificationResponseDTO(
-                new IdNameDTO(dto.configurationId(), dto.configurationId()),
+                resolveDiscipline(dto.disciplineId()),
                 new IdNameDTO(dto.eventName(), dto.eventId()),
                 new IdNameDTO(dto.stageName(), dto.stageId()),
-                new IdNameDTO(dto.configurationId(), dto.configurationId()),
+                new IdNameDTO(dto.configurationName(), dto.configurationId()),
                 dto.eventStatus(),
                 dto.scoresLastUpdate(),
                 dto.obdx() == null ? null
@@ -81,5 +81,14 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
             return null;
         }
         return messageSource.getMessage(exerciseId, null, exerciseId, LocaleContextHolder.getLocale());
+    }
+
+    private IdNameDTO resolveDiscipline(String disciplineId) {
+        if (disciplineId == null) {
+            return null;
+        }
+        String name = messageSource.getMessage(
+                "discipline." + disciplineId + ".name", null, LocaleContextHolder.getLocale());
+        return new IdNameDTO(name, disciplineId);
     }
 }

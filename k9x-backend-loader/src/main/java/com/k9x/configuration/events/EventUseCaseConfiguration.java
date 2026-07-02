@@ -1,6 +1,7 @@
 package com.k9x.configuration.events;
 
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
+import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
@@ -25,10 +26,12 @@ public class EventUseCaseConfiguration {
     public GetEventClassificationServiceCase getClassificationServiceCase(
             GetCompetitionPersistencePort getCompetitionPersistencePort,
             EventClassificationCacheManagerPort eventClassificationCacheManagerPort,
-            GetObdxClassificationServiceCase getObdxClassificationServiceCase) {
+            GetObdxClassificationServiceCase getObdxClassificationServiceCase,
+            GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
         return new GetEventClassificationServiceCase(
                 getCompetitionPersistencePort,
                 eventClassificationCacheManagerPort,
-                getObdxClassificationServiceCase);
+                getObdxClassificationServiceCase,
+                getObdxFederationsConfigurationsPort);
     }
 }

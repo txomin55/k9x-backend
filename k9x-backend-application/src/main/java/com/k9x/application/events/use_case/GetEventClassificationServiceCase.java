@@ -2,6 +2,9 @@ package com.k9x.application.events.use_case;
 
 import com.k9x.application.competitions.CompetitionNavigator;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
+import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
+import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
+import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
@@ -15,7 +18,10 @@ import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 
+import java.io.IOException;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GetEventClassificationServiceCase {
 
@@ -24,14 +30,17 @@ public class GetEventClassificationServiceCase {
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final EventClassificationCacheManagerPort eventClassificationCacheManagerPort;
     private final GetObdxClassificationServiceCase getObdxClassificationServiceCase;
+    private final GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
 
     public GetEventClassificationServiceCase(
             GetCompetitionPersistencePort getCompetitionPersistencePort,
             EventClassificationCacheManagerPort eventClassificationCacheManagerPort,
-            GetObdxClassificationServiceCase getObdxClassificationServiceCase) {
+            GetObdxClassificationServiceCase getObdxClassificationServiceCase,
+            GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
         this.getCompetitionPersistencePort = getCompetitionPersistencePort;
         this.eventClassificationCacheManagerPort = eventClassificationCacheManagerPort;
         this.getObdxClassificationServiceCase = getObdxClassificationServiceCase;
+        this.getObdxFederationsConfigurationsPort = getObdxFederationsConfigurationsPort;
     }
 
     public FetchClassificationDTO getClassification(String eventId) {
@@ -45,9 +54,23 @@ public class GetEventClassificationServiceCase {
 
         Long scoresLastUpdate = obdx == null ? null : obdx.scoresLastUpdate();
 
+        Map<String, String> configNameById = buildConfigNameMap();
+        String configurationName = configNameById.getOrDefault(event.configurationId(), event.configurationId());
+
         long now = DateUtils.nowUtcMillis();
         return new FetchClassificationDTO(eventId, event.name(), event.status(now, context.stageDateTo()).name(),
-                event.stageId(), context.stageName(), event.configurationId(), scoresLastUpdate, obdx);
+                event.stageId(), context.stageName(), event.discipline(), event.configurationId(), configurationName,
+                scoresLastUpdate, obdx);
+    }
+
+    private Map<String, String> buildConfigNameMap() {
+        try {
+            return getObdxFederationsConfigurationsPort.getConfigurations().stream()
+                    .flatMap(f -> f.configurations().stream())
+                    .collect(Collectors.toMap(ConfigurationDTO::id, ConfigurationDTO::name, (a, _) -> a));
+        } catch (IOException e) {
+            throw new DisciplineConfigurationMalformedException();
+        }
     }
 
     private EventClassificationContextDTO resolveContext(String eventId) {
