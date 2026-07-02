@@ -226,13 +226,13 @@ public class CompetitionHydrator {
         }
         EventScores es = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_SCORES;
         dsl.select(es.EVENT_ID, es.EXERCISE_ID, es.JUDGE_ID, es.DOG_ID, es.SCORE, es.LAST_UPDATE,
-                        es.YELLOW_CARD_1, es.YELLOW_CARD_2)
+                        es.YELLOW_CARD)
                 .from(es)
                 .where(es.EVENT_ID.in(eventIds))
                 .forEach(r -> result.computeIfAbsent(r.get(es.EVENT_ID), _ -> new ArrayList<>())
                         .add(new Score(r.get(es.EXERCISE_ID), r.get(es.JUDGE_ID), r.get(es.DOG_ID),
                                 r.get(es.SCORE), r.get(es.LAST_UPDATE),
-                                r.get(es.YELLOW_CARD_1), r.get(es.YELLOW_CARD_2))));
+                                r.get(es.YELLOW_CARD))));
         return result;
     }
 

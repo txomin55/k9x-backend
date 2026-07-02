@@ -9,6 +9,8 @@ import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.exceptions.YellowCardAlreadyRegisteredException;
+import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +55,16 @@ class RegisterObdxYellowCardServiceCaseTest {
                 0L, 0L, null, List.of(stage));
     }
 
+    private CompetitionSnapshot competitionWithYellowCardAlreadyRegistered() {
+        EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                List.of(new Score("OBDX_FCI_GRADE_3.1_V0", "judge-1", "dog-1", null, 0L, 1000L)));
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
+                List.of(event));
+        return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
+                0L, 0L, null, List.of(stage));
+    }
+
     @Test
     void throws_exception_when_event_not_found() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn(null);
@@ -70,6 +82,19 @@ class RegisterObdxYellowCardServiceCaseTest {
 
         assertThatThrownBy(() -> serviceCase.registerYellowCard("event-1", COMMAND, "user@k9x.io"))
                 .isInstanceOf(ObdxUserNotCollectorException.class);
+
+        verifyNoInteractions(saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_yellow_card_already_registered() {
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("user@k9x.io");
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competitionWithYellowCardAlreadyRegistered());
+
+        assertThatThrownBy(() -> serviceCase.registerYellowCard("event-1", COMMAND, "user@k9x.io"))
+                .isInstanceOf(YellowCardAlreadyRegisteredException.class);
 
         verifyNoInteractions(saveCompetitionPersistencePort);
     }

@@ -21,6 +21,8 @@ public class GetObdxClassificationServiceCase {
     private final GetObdxClassificationConfigPort getObdxClassificationConfigPort;
     private final ClassificationCacheManagerPort classificationCacheManagerPort;
 
+    private static final BigDecimal YELLOW_CARD_PENALTY = BigDecimal.TEN;
+
     public GetObdxClassificationServiceCase(
             GetObdxClassificationConfigPort getObdxClassificationConfigPort,
             ClassificationCacheManagerPort classificationCacheManagerPort) {
@@ -74,8 +76,7 @@ public class GetObdxClassificationServiceCase {
                             jd.judgeId(), jd.judgeName(),
                             s == null ? null : s.score(),
                             s == null ? null : s.lastUpdate(),
-                            s == null ? null : s.yellowCard1(),
-                            s == null ? null : s.yellowCard2()));
+                            s == null ? null : s.yellowCard()));
                 }
             }
         }
@@ -118,13 +119,9 @@ public class GetObdxClassificationServiceCase {
                     .computeIfAbsent(row.dogId(), _ -> new LinkedHashMap<>())
                     .computeIfAbsent(row.exerciseId(), _ -> new ArrayList<>());
 
-            if (row.yellowCard1() != null) {
+            if (row.yellowCard() != null) {
                 exerciseYellowCards.add(
-                        new FetchClassificationYellowCardDTO(row.judgeId(), row.judgeName(), row.yellowCard1()));
-            }
-            if (row.yellowCard2() != null) {
-                exerciseYellowCards.add(
-                        new FetchClassificationYellowCardDTO(row.judgeId(), row.judgeName(), row.yellowCard2()));
+                        new FetchClassificationYellowCardDTO(row.judgeId(), row.judgeName(), row.yellowCard()));
             }
 
             if (row.score() != null) {
@@ -150,13 +147,19 @@ public class GetObdxClassificationServiceCase {
                 List<BigDecimal> scores = judgeEntries.stream().map(FetchClassificationJudgeScoreDTO::score).toList();
 
                 BigDecimal coef = config.coefByExerciseId().getOrDefault(exerciseId, BigDecimal.ONE);
+                List<FetchClassificationYellowCardDTO> exerciseYellowCards = yellowCardsByDogExercise
+                        .getOrDefault(dogId, Map.of()).getOrDefault(exerciseId, List.of());
                 // exerciseScore is the maximum attainable for this exercise (highest allowed score * coef); it is a
                 // constant reference. totalScore is what the competitor has actually achieved: the judges' average
-                // (or mid-avg) times the coef, which is 0 while the exercise has no scores.
+                // (or mid-avg) times the coef, which is 0 while the exercise has no scores, minus a flat penalty
+                // if a yellow card was stamped for this exercise (never below zero).
                 BigDecimal maxExerciseScore = config.maxAllowedScore().multiply(coef).setScale(2, RoundingMode.HALF_UP);
                 BigDecimal weightedScore = scores.isEmpty() ? null
                         : computeAvg(scores, event.scoreCalculation())
                         .multiply(coef).setScale(2, RoundingMode.HALF_UP);
+                if (weightedScore != null && !exerciseYellowCards.isEmpty()) {
+                    weightedScore = weightedScore.subtract(YELLOW_CARD_PENALTY).max(BigDecimal.ZERO);
+                }
                 BigDecimal exerciseScoreRating = weightedScore == null ? null
                         : percentageOfMax(weightedScore, maxExerciseScore);
 
@@ -168,9 +171,7 @@ public class GetObdxClassificationServiceCase {
                         exercisePositions.getOrDefault(exerciseId, (short) 0),
                         exerciseTags.getOrDefault(exerciseId, List.of()),
                         maxExerciseScore, weightedScore, exerciseScoreRating,
-                        judgeEntries,
-                        yellowCardsByDogExercise.getOrDefault(dogId, Map.of())
-                                .getOrDefault(exerciseId, List.of())));
+                        judgeEntries, exerciseYellowCards));
             }
 
             // A manually set final score takes precedence over the computed sum of exercise scores.

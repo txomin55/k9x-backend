@@ -210,7 +210,7 @@ public final class CompetitionAggregate {
     }
 
     public void updateScore(String eventId, ScoreUpdateData data, String userId, long now) {
-        requireActiveEvent(eventId, userId);
+        EventSnapshot event = requireActiveEvent(eventId, userId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
         if (!SupportUser.is(userId)) {
@@ -219,13 +219,16 @@ public final class CompetitionAggregate {
             }
             if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
                 throw new StageExpiredException();
+            }
+            if (event.isDisqualified(data.dogId())) {
+                throw new CompetitorDisqualifiedException();
             }
         }
         changes.add(new ScoreUpdated(eventId, data.judgeId(), data.exerciseId(), data.dogId(), data.score(), now));
     }
 
     public void registerYellowCard(String eventId, YellowCardData data, String userId, long now) {
-        requireActiveEvent(eventId, userId);
+        EventSnapshot event = requireActiveEvent(eventId, userId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
         if (!SupportUser.is(userId)) {
@@ -236,7 +239,21 @@ public final class CompetitionAggregate {
                 throw new StageExpiredException();
             }
         }
+        if (hasYellowCard(event, data)) {
+            throw new YellowCardAlreadyRegisteredException();
+        }
         changes.add(new YellowCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogId(), now));
+    }
+
+    private boolean hasYellowCard(EventSnapshot event, YellowCardData data) {
+        if (event.scores() == null) {
+            return false;
+        }
+        return event.scores().stream()
+                .anyMatch(s -> s.yellowCard() != null
+                        && s.judgeId().equals(data.judgeId())
+                        && s.exerciseId().equals(data.exerciseId())
+                        && s.dogId().equals(data.dogId()));
     }
 
     // ---- invariants & navigation -----------------------------------------------------------------

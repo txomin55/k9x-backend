@@ -23,6 +23,8 @@ public enum ErrorEnum {
     EVENT_CONFIGURATION_ID_REQUIRED("error.event_configuration_id_required"),
     COMPETITOR_NOT_FOUND("error.competitor_not_found"),
     COMPETITOR_ALREADY_NOT_COMPETING("error.competitor_already_not_competing"),
+    YELLOW_CARD_ALREADY_REGISTERED("error.yellow_card_already_registered"),
+    COMPETITOR_DISQUALIFIED("error.competitor_disqualified"),
     SCORE_NOT_ALLOWED("error.score_not_allowed"),
     USER_NOT_COLLECTOR("error.user_not_collector"),
     COLLECTOR_NOT_FOUND("error.collector_not_found"),

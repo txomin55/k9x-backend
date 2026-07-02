@@ -207,8 +207,8 @@ class GetObdxClassificationServiceCaseTest {
                 new EventJudge("j-1", "Judge j-1", null),
                 new EventJudge("j-2", "Judge j-2", null));
         List<Score> scores = List.of(
-                new Score("ex-1", "j-1", "dog-1", new BigDecimal("8"), 1000L, 5000L, 6000L),
-                new Score("ex-1", "j-2", "dog-1", new BigDecimal("6"), 1000L, 7000L, null));
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("8"), 1000L, 5000L),
+                new Score("ex-1", "j-2", "dog-1", new BigDecimal("6"), 1000L, null));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
                 competitors, exercises, judges, scores);
@@ -218,13 +218,13 @@ class GetObdxClassificationServiceCaseTest {
 
         FetchObdxClassificationDTO result = serviceCase.getClassification(event);
 
-        // Each stamped slot becomes an item, carrying its judge; empty slots (j-2's second) are skipped.
+        // Each stamped row becomes an item, carrying its judge; rows without a card (j-2) are skipped.
         assertThat(result.competitors().getFirst().exercises().getFirst().yellowCards())
                 .extracting("judgeId", "timestamp")
-                .containsExactlyInAnyOrder(
-                        tuple("j-1", 5000L),
-                        tuple("j-1", 6000L),
-                        tuple("j-2", 7000L));
+                .containsExactlyInAnyOrder(tuple("j-1", 5000L));
+        // avg(8, 6) = 7, * coef(3) = 21.00, minus the 10-point yellow card penalty = 11.00
+        assertThat(result.competitors().getFirst().exercises().getFirst().totalScore())
+                .isEqualByComparingTo("11.00");
     }
 
     @Test

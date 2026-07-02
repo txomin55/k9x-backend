@@ -10,7 +10,9 @@ import com.k9x.application.events.obdx.use_case.command.UpdateObdxScoreCommand;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
+import com.k9x.domain.events.exceptions.CompetitorDisqualifiedException;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,6 +60,17 @@ class UpdateObdxScoreServiceCaseTest {
                 0L, 0L, null, List.of(stage));
     }
 
+    private CompetitionSnapshot competitionWithDisqualifiedDog() {
+        EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L),
+                        new Score("ex-2", "judge-1", "dog-1", null, 0L, 2000L)));
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
+                List.of(event));
+        return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
+                0L, 0L, null, List.of(stage));
+    }
+
     @Test
     void throws_exception_when_event_not_found() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn(null);
@@ -89,6 +102,20 @@ class UpdateObdxScoreServiceCaseTest {
 
         assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
                 .isInstanceOf(ObdxScoreNotAllowedException.class);
+
+        verifyNoInteractions(saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_competitor_is_disqualified() {
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("user@k9x.io");
+        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX_FCI_GRADE_3.1_V0"))
+                .thenReturn(List.of(new BigDecimal("7.5")));
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionWithDisqualifiedDog());
+
+        assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
+                .isInstanceOf(CompetitorDisqualifiedException.class);
 
         verifyNoInteractions(saveCompetitionPersistencePort);
     }

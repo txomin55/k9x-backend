@@ -18,6 +18,8 @@ import com.k9x.domain.competitions.commands.NewStageData;
 import com.k9x.domain.competitions.commands.ObdxEventUpdateData;
 import com.k9x.domain.competitions.commands.ScoreUpdateData;
 import com.k9x.domain.competitions.commands.StageUpdateData;
+import com.k9x.domain.competitions.commands.YellowCardData;
+import com.k9x.domain.competitions.commands.YellowCardRegistered;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.events.aggregates.EventSnapshot;
@@ -27,7 +29,9 @@ import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.domain.competitions.exceptions.CompetitionCannotBeDeletedException;
 import com.k9x.domain.competitions.exceptions.CompetitionNotFoundException;
+import com.k9x.domain.events.exceptions.CompetitorDisqualifiedException;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.exceptions.YellowCardAlreadyRegisteredException;
 import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.domain.stages.exceptions.StageCannotBeDeletedException;
 import com.k9x.domain.stages.exceptions.StageExpiredException;
@@ -439,6 +443,44 @@ class CompetitionAggregateTest {
         assertEquals("judge-1", change.judgeId());
         assertEquals("dog-1", change.dogId());
         assertEquals(BigDecimal.TEN, change.score());
+    }
+
+    @Test
+    void updateScore_throws_when_competitor_is_disqualified() {
+        EventSnapshot disqualified = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L),
+                        new Score("ex-2", "judge-1", "dog-1", null, 0L, 2000L)));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(disqualified, FUTURE)));
+        ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-3", "dog-1", BigDecimal.TEN);
+
+        assertThrows(CompetitorDisqualifiedException.class, () -> aggregate.updateScore("evt-1", data, OWNER, NOW));
+    }
+
+    @Test
+    void registerYellowCard_records_yellow_card_registered() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+        YellowCardData data = new YellowCardData("judge-1", "ex-1", "dog-1");
+
+        aggregate.registerYellowCard("evt-1", data, OWNER, NOW);
+
+        YellowCardRegistered change = assertInstanceOf(YellowCardRegistered.class, onlyChange(aggregate));
+        assertEquals("evt-1", change.eventId());
+        assertEquals("judge-1", change.judgeId());
+        assertEquals("ex-1", change.exerciseId());
+        assertEquals("dog-1", change.dogId());
+    }
+
+    @Test
+    void registerYellowCard_throws_when_already_registered_for_judge_exercise_and_dog() {
+        EventSnapshot carded = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L)));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(carded, FUTURE)));
+        YellowCardData data = new YellowCardData("judge-1", "ex-1", "dog-1");
+
+        assertThrows(YellowCardAlreadyRegisteredException.class,
+                () -> aggregate.registerYellowCard("evt-1", data, OWNER, NOW));
     }
 
     // ---- support superuser bypass ----------------------------------------------------------------

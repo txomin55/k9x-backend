@@ -8,10 +8,9 @@ public record Score(
         String dogId,
         BigDecimal score,
         long lastUpdate,
-        Long yellowCard1,
-        Long yellowCard2
+        Long yellowCard
 ) {
     public Score(String exerciseId, String judgeId, String dogId, BigDecimal score, long lastUpdate) {
-        this(exerciseId, judgeId, dogId, score, lastUpdate, null, null);
+        this(exerciseId, judgeId, dogId, score, lastUpdate, null);
     }
 }

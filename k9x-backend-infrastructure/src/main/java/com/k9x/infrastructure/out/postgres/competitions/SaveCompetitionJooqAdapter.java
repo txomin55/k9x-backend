@@ -104,25 +104,24 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
     }
 
     /**
-     * Stamps the yellow card timestamp into the first free slot of the score row keyed by
-     * (event, exercise, judge, dog): {@code yellow_card_1} if empty, otherwise {@code yellow_card_2}.
-     * Once both slots are set the row is left untouched. A single CASE-based UPDATE keeps the slot
-     * selection atomic against the row's current values.
+     * A yellow card can be registered before any score exists for that exercise×judge×dog, so this is an
+     * upsert: inserts a scoreless row stamped with the card if none exists yet, otherwise just stamps the
+     * card (and last_update) onto the existing row without touching its score.
      */
     private void registerYellowCard(DSLContext ctx, YellowCardRegistered c) {
-        ctx.update(EVENT_SCORES)
-                .set(EVENT_SCORES.YELLOW_CARD_1,
-                        DSL.when(EVENT_SCORES.YELLOW_CARD_1.isNull(), DSL.val(c.lastUpdate()))
-                                .otherwise(EVENT_SCORES.YELLOW_CARD_1))
-                .set(EVENT_SCORES.YELLOW_CARD_2,
-                        DSL.when(EVENT_SCORES.YELLOW_CARD_1.isNotNull().and(EVENT_SCORES.YELLOW_CARD_2.isNull()),
-                                        DSL.val(c.lastUpdate()))
-                                .otherwise(EVENT_SCORES.YELLOW_CARD_2))
+        ctx.insertInto(EVENT_SCORES)
+                .set(EVENT_SCORES.EVENT_ID, c.eventId())
+                .set(EVENT_SCORES.EXERCISE_ID, c.exerciseId())
+                .set(EVENT_SCORES.JUDGE_ID, c.judgeId())
+                .set(EVENT_SCORES.DOG_ID, c.dogId())
+                .set(EVENT_SCORES.SCORE, (BigDecimal) null)
+                .set(EVENT_SCORES.YELLOW_CARD, c.lastUpdate())
+                .set(EVENT_SCORES.CREATED_AT, c.lastUpdate())
                 .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
-                .where(EVENT_SCORES.EVENT_ID.eq(c.eventId())
-                        .and(EVENT_SCORES.EXERCISE_ID.eq(c.exerciseId()))
-                        .and(EVENT_SCORES.JUDGE_ID.eq(c.judgeId()))
-                        .and(EVENT_SCORES.DOG_ID.eq(c.dogId())))
+                .onConflict(EVENT_SCORES.EVENT_ID, EVENT_SCORES.EXERCISE_ID, EVENT_SCORES.JUDGE_ID, EVENT_SCORES.DOG_ID)
+                .doUpdate()
+                .set(EVENT_SCORES.YELLOW_CARD, c.lastUpdate())
+                .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
                 .execute();
     }
 

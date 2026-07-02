@@ -101,12 +101,34 @@ public record EventSnapshot(
                 .anyMatch(s -> s.score() != null && dogId.equals(s.dogId()));
     }
 
+    /**
+     * Number of yellow cards stamped for the competitor across every exercise×judge combination. Since a
+     * given exercise×judge×dog can only ever hold one yellow card, this equals the number of score rows for
+     * the dog with a stamped card.
+     */
+    public long yellowCardCount(String dogId) {
+        if (scores == null) {
+            return 0;
+        }
+        return scores.stream()
+                .filter(s -> s.yellowCard() != null && dogId.equals(s.dogId()))
+                .count();
+    }
+
+    /**
+     * A competitor that accumulates a second yellow card is disqualified: its participation is over and it
+     * can no longer receive scores, so it is treated as settled regardless of remaining exercises.
+     */
+    public boolean isDisqualified(String dogId) {
+        return yellowCardCount(dogId) >= 2;
+    }
+
     private int requiredScores() {
         return (exercises == null ? 0 : exercises.size()) * (judges == null ? 0 : judges.size());
     }
 
     private boolean isSettled(EventCompetitor competitor, int requiredScores) {
-        if (competitor.notCompeting()) {
+        if (competitor.notCompeting() || isDisqualified(competitor.dogId())) {
             return true;
         }
         if (requiredScores == 0) {

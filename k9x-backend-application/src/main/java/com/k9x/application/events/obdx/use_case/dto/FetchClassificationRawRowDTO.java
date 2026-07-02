@@ -7,5 +7,5 @@ public record FetchClassificationRawRowDTO(
         String exerciseId, short exercisePosition, String[] exerciseTags,
         String judgeId, String judgeName,
         BigDecimal score, Long scoreLastUpdate,
-        Long yellowCard1, Long yellowCard2) {
+        Long yellowCard) {
 }
