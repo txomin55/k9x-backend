@@ -193,8 +193,8 @@ public final class CompetitionAggregate {
 
     /**
      * Flags (or clears) a competitor as not competing. A not-competing competitor is treated as settled by
-     * {@link EventSnapshot#status()}, i.e. equivalent to one who has finished competing. Marking a competitor
-     * that is already not competing is rejected with {@link CompetitorAlreadyNotCompetingException}.
+     * {@link EventSnapshot#status(long, long)}, i.e. equivalent to one who has finished competing. Marking a
+     * competitor that is already not competing is rejected with {@link CompetitorAlreadyNotCompetingException}.
      */
     public void updateCompetitorNotCompeting(String eventId, String dogId, boolean notCompeting, String userId, long now) {
         EventSnapshot event = requireActiveEvent(eventId, userId);
