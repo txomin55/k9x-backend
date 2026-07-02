@@ -367,7 +367,23 @@ class CompetitionAggregateTest {
         assertEquals("evt-1", change.eventId());
         assertEquals("dog-1", change.dogId());
         assertTrue(change.bih());
+        assertEquals((short) 1, change.position());
         assertEquals(NOW, change.lastUpdate());
+    }
+
+    @Test
+    void enrollDog_assigns_next_position_after_last_enrolled_competitor() {
+        EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i",
+                (short) 3, true, false, null);
+        EventSnapshot eventWithCompetitors = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null,
+                0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of());
+        CompetitionAggregate aggregate =
+                CompetitionAggregate.of(competition(OWNER, null, stageWith(eventWithCompetitors, FUTURE)));
+
+        aggregate.enrollDog("evt-1", "dog-2", false, OWNER, NOW);
+
+        DogEnrolled change = assertInstanceOf(DogEnrolled.class, onlyChange(aggregate));
+        assertEquals((short) 4, change.position());
     }
 
     @Test

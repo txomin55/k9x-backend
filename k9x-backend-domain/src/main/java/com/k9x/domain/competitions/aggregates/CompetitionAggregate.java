@@ -21,6 +21,7 @@ import com.k9x.domain.stages.status.StageStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Write-side root aggregate. Wraps the immutable {@link CompetitionSnapshot} read snapshot and is the single
@@ -154,14 +155,30 @@ public final class CompetitionAggregate {
     }
 
     public void enrollDog(String eventId, String dogId, boolean bih, String userId, long now) {
-        requireActiveEvent(eventId, userId);
+        EventSnapshot event = requireActiveEvent(eventId, userId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
 
         if (!SupportUser.is(userId) && stage.dateTo() < now) {
             throw new StageExpiredException();
         }
-        changes.add(new DogEnrolled(eventId, dogId, bih, now));
+        changes.add(new DogEnrolled(eventId, dogId, bih, nextPosition(event), now));
+    }
+
+    /**
+     * New enrollments are appended after every already-enrolled competitor, so a dog always joins at the
+     * back of the line rather than defaulting to position 0/null.
+     */
+    private short nextPosition(EventSnapshot event) {
+        if (event.competitors() == null || event.competitors().isEmpty()) {
+            return 1;
+        }
+        return (short) (event.competitors().stream()
+                .map(EventCompetitor::position)
+                .filter(Objects::nonNull)
+                .mapToInt(Short::intValue)
+                .max()
+                .orElse(0) + 1);
     }
 
     public void updateObdxEventInfo(String eventId, ObdxEventUpdateData data, String userId, long now) {
