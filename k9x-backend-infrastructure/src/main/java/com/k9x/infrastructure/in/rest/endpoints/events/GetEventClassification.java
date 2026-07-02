@@ -40,17 +40,13 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
     private List<StageEventClassificationItemResponseDTO> mapCompetitors(
             List<FetchClassificationCompetitorDTO> competitors) {
         return competitors.stream()
-                // TODO: c.breed(), c.bih() and c.notCompeting() are available here but cannot be mapped yet — the
-                // published com.k9x:oas-definition-stubs StageEventClassificationItemResponseDTO has no breed/bih/
-                // notCompeting fields. Add "breed", "bih" and "notCompeting" to StageEventClassificationItemResponseDTO
-                // in k9x-oas-definition's openapi.yaml, republish the stub, then wire c.breed()/c.bih()/
-                // c.notCompeting() into the constructor call below.
                 .map(c -> new StageEventClassificationItemResponseDTO(
                         c.country(),
                         c.owner(),
                         c.handler(),
                         c.team(),
                         c.status(),
+                        c.breed(),
                         new IdNameDTO(c.dogName(), c.dogId()),
                         c.exercises().stream()
                                 .map(e -> new StageEventClassificationExerciseScoresResponseDTO(
@@ -81,7 +77,9 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                         c.totalScore(),
                         c.scoreRating(),
                         c.tied(),
-                        c.startOrder() != null ? c.startOrder().intValue() : null))
+                        c.startOrder() != null ? c.startOrder().intValue() : null,
+                        c.bih(),
+                        c.notCompeting()))
                 .toList();
     }
 
