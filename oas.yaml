@@ -2990,6 +2990,10 @@
             "type": "string",
             "description": "estado"
           },
+          "breed": {
+            "type": "string",
+            "description": "Dog breed"
+          },
           "dog": {
             "$ref": "#/components/schemas/IdNameDTO"
           },
@@ -3021,6 +3025,7 @@
           "handler",
           "team",
           "status",
+          "breed",
           "dog",
           "exercises",
           "position",

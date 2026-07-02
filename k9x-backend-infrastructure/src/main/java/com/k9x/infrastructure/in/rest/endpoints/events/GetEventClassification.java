@@ -40,6 +40,10 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
     private List<StageEventClassificationItemResponseDTO> mapCompetitors(
             List<FetchClassificationCompetitorDTO> competitors) {
         return competitors.stream()
+                // TODO: c.breed() is available here but cannot be mapped yet — the published
+                // com.k9x:oas-definition-stubs StageEventClassificationItemResponseDTO has no breed field.
+                // Add "breed" to StageEventClassificationItemResponseDTO in k9x-oas-definition's openapi.yaml,
+                // republish the stub, then wire c.breed() into the constructor call below.
                 .map(c -> new StageEventClassificationItemResponseDTO(
                         c.country(),
                         c.owner(),

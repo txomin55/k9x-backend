@@ -70,7 +70,7 @@ public class GetObdxClassificationServiceCase {
                                     && Objects.equals(sc.dogId(), c.dogId()))
                             .findFirst().orElse(null);
                     rows.add(new FetchClassificationRawRowDTO(
-                            c.dogId(), c.dogName(), c.owner(), c.handler(), c.team(), c.country(),
+                            c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
                             ex.exerciseId(), ex.position() == null ? (short) 0 : ex.position(),
                             ex.tags() == null ? null : ex.tags().toArray(new String[0]),
                             jd.judgeId(), jd.judgeName(),
@@ -203,7 +203,7 @@ public class GetObdxClassificationServiceCase {
             }
 
             competitors.add(new FetchClassificationCompetitorDTO(
-                    dogId, meta.dogName(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
+                    dogId, meta.dogName(), meta.dogBreed(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
                     startOrderByDog.get(dogId), 0, totalScore, competitorScoreRating, false,
                     status.name(), exercises));
         }
@@ -286,7 +286,7 @@ public class GetObdxClassificationServiceCase {
     private void setPosition(List<FetchClassificationCompetitorDTO> competitors, int index, int position, boolean tied) {
         FetchClassificationCompetitorDTO c = competitors.get(index);
         competitors.set(index, new FetchClassificationCompetitorDTO(
-                c.dogId(), c.dogName(), c.owner(), c.handler(), c.team(), c.country(),
+                c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
                 c.startOrder(), position, c.totalScore(), c.scoreRating(), tied, c.status(), c.exercises()));
     }
 }
