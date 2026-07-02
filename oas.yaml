@@ -2341,9 +2341,9 @@
             "type": "string",
             "description": "Dog breed"
           },
-          "identifier": {
+          "identity": {
             "type": "string",
-            "description": "Dog identifier number"
+            "description": "Dog identity"
           },
           "owner": {
             "type": "string",
@@ -2365,7 +2365,7 @@
           "name",
           "image",
           "breed",
-          "identifier",
+          "identity",
           "owner",
           "handler",
           "team",
@@ -2624,9 +2624,9 @@
             "type": "string",
             "description": "Dog breed"
           },
-          "identifier": {
+          "identity": {
             "type": "string",
-            "description": "Dog identifier number"
+            "description": "Dog identity"
           },
           "owner": {
             "type": "string",
@@ -2647,7 +2647,7 @@
           "name",
           "image",
           "breed",
-          "identifier",
+          "identity",
           "owner",
           "handler",
           "team",

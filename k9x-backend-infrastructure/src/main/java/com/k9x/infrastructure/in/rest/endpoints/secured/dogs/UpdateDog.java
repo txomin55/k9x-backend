@@ -20,7 +20,7 @@ public class UpdateDog implements SecuredDogsUpdateApiDelegate {
     @Override
     public ResponseEntity<String> updateDogSecured(String id, UpdateDogRequestDTO body) {
         updateDogServiceCase.updateDog(id,
-                new UpdateDogCommand(body.getName(), body.getImage(), body.getBreed(), body.getIdentifier(),
+                new UpdateDogCommand(body.getName(), body.getImage(), body.getBreed(), body.getIdentity(),
                         body.getOwner(), body.getHandler(), body.getTeam(), body.getCountry()),
                 userDetails.getEmail(), userDetails.isOrganizer());
         return ResponseEntity.ok().build();
