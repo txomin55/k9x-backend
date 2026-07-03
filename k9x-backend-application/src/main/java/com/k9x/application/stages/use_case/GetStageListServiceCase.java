@@ -45,7 +45,9 @@ public class GetStageListServiceCase {
                         .map(event -> new FetchStageListEventDTO(
                                 event.id(), event.name(), event.discipline(),
                                 event.competitors() == null ? 0 : event.competitors().size(),
-                                event.status(now, stage.dateTo()).name()))
+                                event.status(now, stage.dateTo()).name(),
+                                stage.enrollmentOpened(event, now),
+                                event.enrollmentDeadline()))
                         .toList(),
                 stage.status(now).name());
     }

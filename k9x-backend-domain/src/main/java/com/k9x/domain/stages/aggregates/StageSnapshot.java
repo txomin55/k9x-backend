@@ -3,6 +3,7 @@ package com.k9x.domain.stages.aggregates;
 import com.k9x.domain.stages.status.StageStatus;
 
 import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.status.EventStatus;
 import com.k9x.domain.shared.UtcDates;
 
 import java.util.List;
@@ -22,15 +23,18 @@ public record StageSnapshot(
 
     /**
      * Lifecycle status based on the UTC calendar day and the scores recorded on its events:
-     * FINISHED once the day after {@code dateTo} has arrived, STARTED once any competitor has a score,
-     * TO_START while {@code now} falls within [{@code dateFrom}, {@code dateTo}] and no score has been
-     * recorded yet, otherwise CREATED.
+     * FINISHED once the day after {@code dateTo} has arrived, or once every event is itself
+     * FINISHED; STARTED once any competitor has a score; TO_START while {@code now} falls within
+     * [{@code dateFrom}, {@code dateTo}] and no score has been recorded yet, otherwise CREATED.
      */
     public StageStatus status(long now) {
         if (deletedAt != null) {
             return StageStatus.DELETED;
         }
         if (UtcDates.isAfterUtcDay(now, dateTo)) {
+            return StageStatus.FINISHED;
+        }
+        if (allEventsFinished(now)) {
             return StageStatus.FINISHED;
         }
         if (hasAnyScore()) {
@@ -57,5 +61,10 @@ public record StageSnapshot(
 
     private boolean hasAnyScore() {
         return events != null && events.stream().anyMatch(EventSnapshot::hasAnyScore);
+    }
+
+    private boolean allEventsFinished(long now) {
+        return events != null && !events.isEmpty()
+                && events.stream().allMatch(event -> event.status(now, dateTo) == EventStatus.FINISHED);
     }
 }

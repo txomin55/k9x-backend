@@ -44,7 +44,9 @@ public class GetStages implements StagesFetchAllApiDelegate {
                                                 e.name(),
                                                 resolveDiscipline(e.disciplineId()),
                                                 e.competitorCount(),
-                                                e.status()))
+                                                e.status(),
+                                                e.enrollmentOpened(),
+                                                e.enrollmentDeadline()))
                                         .toList(),
                                 stage.status(),
                                 stage.organizer()))

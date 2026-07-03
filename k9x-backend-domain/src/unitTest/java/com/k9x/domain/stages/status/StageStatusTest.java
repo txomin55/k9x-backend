@@ -44,6 +44,13 @@ class StageStatusTest {
                 List.of(), List.of(), List.of(), List.of());
     }
 
+    private static EventSnapshot finishedEvent() {
+        // single competitor flagged notCompeting -> settled -> FINISHED regardless of dateTo
+        return new EventSnapshot("e3", "cfg", "obdx", "Event", "s1", "creator", null, 0L, 0L, null, ObdxAvgMethod.AVG,
+                List.of(new EventCompetitor("d1", "d1", "o", "h", "t", "c", "b", "i", (short) 0, true, true, null, null)),
+                List.of(), List.of(), List.of());
+    }
+
     @Test
     void enrollment_closed_when_stage_is_to_start() {
         StageSnapshot stage = stage(TODAY, NEXT_WEEK, null, List.of(openEvent()));
@@ -98,5 +105,16 @@ class StageStatusTest {
     @Test
     void finished_takes_precedence_over_started_events_once_the_day_passed() {
         assertEquals(StageStatus.FINISHED, stage(YESTERDAY, YESTERDAY, null, List.of(startedEvent())).status(NOW));
+    }
+
+    @Test
+    void finished_when_all_events_are_finished_even_if_date_to_has_not_passed() {
+        assertEquals(StageStatus.FINISHED, stage(TODAY, TOMORROW, null, List.of(finishedEvent())).status(NOW));
+    }
+
+    @Test
+    void not_finished_when_only_some_events_are_finished() {
+        assertEquals(StageStatus.STARTED,
+                stage(TODAY, TOMORROW, null, List.of(finishedEvent(), startedEvent())).status(NOW));
     }
 }
