@@ -2,6 +2,7 @@ package com.k9x.configuration.secured.event;
 
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
+import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxExerciseAllowedValuesPort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.events.obdx.port.*;
@@ -35,15 +36,17 @@ public class SecuredEventUseCaseConfiguration {
     public UpdateObdxEventServiceCase updateEventServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                              SaveCompetitionPersistencePort saveCompetitionPersistencePort,
                                                              GetObdxClassificationConfigPort getObdxClassificationConfigPort,
-                                                             GetUserInfoPersistencePort getUserInfoPersistencePort) {
+                                                             GetUserInfoPersistencePort getUserInfoPersistencePort,
+                                                             GetDogPersistencePort getDogPersistencePort) {
         return new UpdateObdxEventServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort,
-                getObdxClassificationConfigPort, getUserInfoPersistencePort);
+                getObdxClassificationConfigPort, getUserInfoPersistencePort, getDogPersistencePort);
     }
 
     @Bean
     public EnrollEventServiceCase enrollEventServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
-                                                         SaveCompetitionPersistencePort saveCompetitionPersistencePort) {
-        return new EnrollEventServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort);
+                                                         SaveCompetitionPersistencePort saveCompetitionPersistencePort,
+                                                         GetDogPersistencePort getDogPersistencePort) {
+        return new EnrollEventServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort, getDogPersistencePort);
     }
 
     @Bean

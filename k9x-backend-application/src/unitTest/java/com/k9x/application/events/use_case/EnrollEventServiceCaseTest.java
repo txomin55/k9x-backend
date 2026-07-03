@@ -2,9 +2,13 @@ package com.k9x.application.events.use_case;
 
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
+import com.k9x.application.dogs.port.GetDogPersistencePort;
+import com.k9x.application.events.obdx.exceptions.BihNotAllowedForSexException;
 import com.k9x.application.events.obdx.use_case.command.EnrollObdxEventCommand;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.dogs.aggregates.Dog;
+import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
@@ -31,11 +35,14 @@ class EnrollEventServiceCaseTest {
     @Mock
     private SaveCompetitionPersistencePort saveCompetitionPersistencePort;
 
+    @Mock
+    private GetDogPersistencePort getDogPersistencePort;
+
     private EnrollEventServiceCase serviceCase;
 
     @BeforeEach
     void setUp() {
-        serviceCase = new EnrollEventServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort);
+        serviceCase = new EnrollEventServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort, getDogPersistencePort);
     }
 
     private CompetitionSnapshot competition() {
@@ -63,6 +70,32 @@ class EnrollEventServiceCaseTest {
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
         serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false), "user-1");
+
+        verify(saveCompetitionPersistencePort).save(any());
+    }
+
+    @Test
+    void throws_exception_when_bih_true_for_male_dog() {
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getDogPersistencePort.getDog("dog-1"))
+                .thenReturn(new Dog("dog-1", "id", "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
+                        Sex.MALE, 55, 0L, 0L, null));
+
+        assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", true), "user-1"))
+                .isInstanceOf(BihNotAllowedForSexException.class);
+
+        verifyNoInteractions(saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void saves_aggregate_when_bih_true_for_female_dog() {
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
+        when(getDogPersistencePort.getDog("dog-1"))
+                .thenReturn(new Dog("dog-1", "id", "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
+                        Sex.FEMALE, 55, 0L, 0L, null));
+
+        serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", true), "user-1");
 
         verify(saveCompetitionPersistencePort).save(any());
     }

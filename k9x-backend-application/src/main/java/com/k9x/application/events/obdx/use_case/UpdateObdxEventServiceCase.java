@@ -2,6 +2,7 @@ package com.k9x.application.events.obdx.use_case;
 
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
+import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.events.exceptions.EventConfigurationIdRequiredException;
 import com.k9x.application.events.obdx.exceptions.ObdxCollectorNotFoundException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
@@ -24,15 +25,18 @@ public class UpdateObdxEventServiceCase {
     private final SaveCompetitionPersistencePort saveCompetitionPersistencePort;
     private final GetObdxClassificationConfigPort getObdxClassificationConfigPort;
     private final GetUserInfoPersistencePort getUserInfoPersistencePort;
+    private final GetDogPersistencePort getDogPersistencePort;
 
     public UpdateObdxEventServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                       SaveCompetitionPersistencePort saveCompetitionPersistencePort,
                                       GetObdxClassificationConfigPort getObdxClassificationConfigPort,
-                                      GetUserInfoPersistencePort getUserInfoPersistencePort) {
+                                      GetUserInfoPersistencePort getUserInfoPersistencePort,
+                                      GetDogPersistencePort getDogPersistencePort) {
         this.getCompetitionPersistencePort = getCompetitionPersistencePort;
         this.saveCompetitionPersistencePort = saveCompetitionPersistencePort;
         this.getObdxClassificationConfigPort = getObdxClassificationConfigPort;
         this.getUserInfoPersistencePort = getUserInfoPersistencePort;
+        this.getDogPersistencePort = getDogPersistencePort;
     }
 
     public void updateEvent(String id, UpdateObdxEventCommand command, String userId, boolean organizer) {
@@ -44,6 +48,7 @@ public class UpdateObdxEventServiceCase {
             throw new EventNotFoundException();
         }
         assertCollectorsExist(command);
+        assertBihAllowedForSex(command);
 
         ObdxAvgMethod scoreCalculation = getObdxClassificationConfigPort
                 .getConfig(command.configurationId())
@@ -78,6 +83,11 @@ public class UpdateObdxEventServiceCase {
         if (configurationId == null || configurationId.isBlank()) {
             throw new EventConfigurationIdRequiredException();
         }
+    }
+
+    private void assertBihAllowedForSex(UpdateObdxEventCommand command) {
+        command.competitors().forEach(c ->
+                BihGuards.assertBihAllowedForSex(c.bih(), getDogPersistencePort.getDog(c.dogId())));
     }
 
     private void assertCollectorsExist(UpdateObdxEventCommand command) {

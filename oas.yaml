@@ -2438,6 +2438,14 @@
           },
           "country": {
             "type": "string"
+          },
+          "sex": {
+            "type": "string",
+            "description": "Biological sex of the dog. One of MALE or FEMALE."
+          },
+          "withersCm": {
+            "type": "integer",
+            "description": "Height at the withers, in centimeters."
           }
         },
         "required": [
@@ -2449,7 +2457,9 @@
           "owner",
           "handler",
           "team",
-          "country"
+          "country",
+          "sex",
+          "withersCm"
         ]
       },
       "CreateEventRequestDTO": {
@@ -2721,6 +2731,14 @@
           },
           "country": {
             "type": "string"
+          },
+          "sex": {
+            "type": "string",
+            "description": "Biological sex of the dog. One of MALE or FEMALE."
+          },
+          "withersCm": {
+            "type": "integer",
+            "description": "Height at the withers, in centimeters."
           }
         },
         "required": [
@@ -2731,7 +2749,9 @@
           "owner",
           "handler",
           "team",
-          "country"
+          "country",
+          "sex",
+          "withersCm"
         ]
       },
       "UpdateEventRequestDTO": {
@@ -2897,6 +2917,14 @@
           },
           "breed": {
             "type": "string"
+          },
+          "sex": {
+            "type": "string",
+            "description": "Biological sex of the dog. One of MALE or FEMALE."
+          },
+          "withersCm": {
+            "type": "integer",
+            "description": "Height at the withers, in centimeters."
           }
         },
         "required": [
@@ -2910,7 +2938,9 @@
           "owner",
           "handler",
           "identity",
-          "breed"
+          "breed",
+          "sex",
+          "withersCm"
         ]
       },
       "DisciplineFederationConfigurationResponseDTO": {

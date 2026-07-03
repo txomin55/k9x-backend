@@ -2,7 +2,9 @@ package com.k9x.application.events.obdx.use_case;
 
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
+import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.events.exceptions.EventConfigurationIdRequiredException;
+import com.k9x.application.events.obdx.exceptions.BihNotAllowedForSexException;
 import com.k9x.application.events.obdx.exceptions.ObdxCollectorNotFoundException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
@@ -11,6 +13,8 @@ import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.disciplines.valueobjects.ClassificationCacheEvictStrategy;
+import com.k9x.domain.dogs.aggregates.Dog;
+import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
@@ -42,12 +46,14 @@ class UpdateObdxEventServiceCaseTest {
     private GetObdxClassificationConfigPort getObdxClassificationConfigPort;
     @Mock
     private GetUserInfoPersistencePort getUserInfoPersistencePort;
+    @Mock
+    private GetDogPersistencePort getDogPersistencePort;
     private UpdateObdxEventServiceCase serviceCase;
 
     @BeforeEach
     void setUp() {
         serviceCase = new UpdateObdxEventServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort,
-                getObdxClassificationConfigPort, getUserInfoPersistencePort);
+                getObdxClassificationConfigPort, getUserInfoPersistencePort, getDogPersistencePort);
     }
 
     private CompetitionSnapshot competition() {
@@ -110,5 +116,20 @@ class UpdateObdxEventServiceCaseTest {
         serviceCase.updateEvent("event-1", VALID_COMMAND, "user-1", true);
 
         verify(saveCompetitionPersistencePort).save(any());
+    }
+
+    @Test
+    void throws_exception_when_bih_true_for_male_dog() {
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L,
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, true)), List.of(), List.of());
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getDogPersistencePort.getDog("dog-1"))
+                .thenReturn(new Dog("dog-1", "id", "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
+                        Sex.MALE, 55, 0L, 0L, null));
+
+        assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
+                .isInstanceOf(BihNotAllowedForSexException.class);
+
+        verifyNoInteractions(saveCompetitionPersistencePort);
     }
 }

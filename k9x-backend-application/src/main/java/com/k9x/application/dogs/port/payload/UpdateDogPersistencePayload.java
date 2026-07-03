@@ -2,13 +2,16 @@ package com.k9x.application.dogs.port.payload;
 
 import com.k9x.application.dogs.use_case.command.UpdateDogCommand;
 import com.k9x.application.utils.date.DateUtils;
+import com.k9x.domain.dogs.aggregates.Sex;
 
 public record UpdateDogPersistencePayload(String name, String image, String breed, String identity,
-                                          String owner, String handler, String team, String country, long lastUpdate) {
+                                          String owner, String handler, String team, String country,
+                                          Sex sex, Integer withersCm, long lastUpdate) {
 
     public static UpdateDogPersistencePayload from(UpdateDogCommand command) {
         return new UpdateDogPersistencePayload(
                 command.name(), command.image(), command.breed(), command.identity(),
-                command.owner(), command.handler(), command.team(), command.country(), DateUtils.nowUtcMillis());
+                command.owner(), command.handler(), command.team(), command.country(),
+                command.sex(), command.withersCm(), DateUtils.nowUtcMillis());
     }
 }

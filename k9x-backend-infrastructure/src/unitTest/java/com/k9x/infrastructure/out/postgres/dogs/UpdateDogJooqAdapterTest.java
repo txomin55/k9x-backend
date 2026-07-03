@@ -1,6 +1,7 @@
 package com.k9x.infrastructure.out.postgres.dogs;
 
 import com.k9x.application.dogs.port.payload.UpdateDogPersistencePayload;
+import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -33,7 +34,7 @@ class UpdateDogJooqAdapterTest {
         long lastUpdate = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
         new UpdateDogJooqAdapter(dsl).updateDog("dog-123",
-                new UpdateDogPersistencePayload("Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "team-1", "ES", lastUpdate));
+                new UpdateDogPersistencePayload("Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "team-1", "ES", Sex.FEMALE, 55, lastUpdate));
 
         assertThat(capturedSql.get())
                 .contains("update \"k9x\".\"dogs\"")
@@ -45,8 +46,10 @@ class UpdateDogJooqAdapterTest {
                 .contains("\"handler\" = ?")
                 .contains("\"team\" = ?")
                 .contains("\"country\" = ?")
+                .contains("\"sex\" = ?")
+                .contains("\"withers_cm\" = ?")
                 .contains("\"last_update\" = ?")
                 .contains("where \"k9x\".\"dogs\".\"id\" = ?");
-        assertThat(capturedBindings.get()).contains("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "team-1", "ES", lastUpdate);
+        assertThat(capturedBindings.get()).contains("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "team-1", "ES", "FEMALE", 55, lastUpdate);
     }
 }

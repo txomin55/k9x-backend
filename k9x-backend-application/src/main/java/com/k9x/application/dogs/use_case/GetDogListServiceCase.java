@@ -36,7 +36,9 @@ public class GetDogListServiceCase {
                                 dog.getOwner(),
                                 dog.getHandler(),
                                 dog.getIdentity(),
-                                dog.breed()
+                                dog.breed(),
+                                dog.getSex(),
+                                dog.getWithersCm()
                         )
                 )
                 .toList();

@@ -11,6 +11,8 @@ public record Dog(
         String creator,
         String country,
         String team,
+        Sex sex,
+        Integer withersCm,
         long lastUpdate,
         long createdAt,
         Long deletedAt
@@ -50,5 +52,13 @@ public record Dog(
 
     public String getIdentity() {
         return this.identity;
+    }
+
+    public Sex getSex() {
+        return this.sex;
+    }
+
+    public Integer getWithersCm() {
+        return this.withersCm;
     }
 }

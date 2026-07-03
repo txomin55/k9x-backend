@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.out.postgres.dogs;
 
+import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -31,7 +32,7 @@ class CreateDogJooqAdapterTest {
 
         long createdAt = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", createdAt);
+        new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", Sex.FEMALE, 55, createdAt);
 
         assertThat(capturedSql.get())
                 .contains("insert into \"k9x\".\"dogs\"")
@@ -45,8 +46,10 @@ class CreateDogJooqAdapterTest {
                 .contains("\"creator\"")
                 .contains("\"team\"")
                 .contains("\"country\"")
+                .contains("\"sex\"")
+                .contains("\"withers_cm\"")
                 .contains("\"created_at\"")
                 .contains("\"last_update\"");
-        assertThat(capturedBindings.get()).contains("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", createdAt);
+        assertThat(capturedBindings.get()).contains("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", "FEMALE", 55, createdAt);
     }
 }

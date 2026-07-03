@@ -65,8 +65,8 @@ class GetDogListServiceCaseTest {
 
     @Test
     void maps_dog_to_dto_with_owned_flag() {
-        Dog ownDog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-1", "handler-1", "creator-1", "ES", "team-1", 0L, 0L, null);
-        Dog othersDog = new Dog("id-2", "ident-2", "breed", "Max", "img2.png", "user-2", "handler-1", "creator-2", "FR", "team-2", 0L, 0L, null);
+        Dog ownDog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-1", "handler-1", "creator-1", "ES", "team-1", null, null, 0L, 0L, null);
+        Dog othersDog = new Dog("id-2", "ident-2", "breed", "Max", "img2.png", "user-2", "handler-1", "creator-2", "FR", "team-2", null, null, 0L, 0L, null);
         when(getDogListPersistencePort.getDogs(null)).thenReturn(List.of(ownDog, othersDog));
 
         List<DogDTO> result = serviceCase.getDogs("user-1", true, false);
@@ -78,7 +78,7 @@ class GetDogListServiceCaseTest {
 
     @Test
     void maps_dog_fields_to_dto_correctly() {
-        Dog dog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-1", "handler-1", "creator-1", "ES", "team-1", 0L, 0L, null);
+        Dog dog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-1", "handler-1", "creator-1", "ES", "team-1", null, null, 0L, 0L, null);
         when(getDogListPersistencePort.getDogs("user-1")).thenReturn(List.of(dog));
 
         List<DogDTO> result = serviceCase.getDogs("user-1", false, false);

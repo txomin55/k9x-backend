@@ -1,6 +1,7 @@
 package com.k9x.infrastructure.out.postgres.dogs;
 
 import com.k9x.domain.dogs.aggregates.Dog;
+import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -53,6 +54,8 @@ class GetDogJooqAdapterTest {
             r.set(Tables.DOGS.CREATOR, "creator-1");
             r.set(Tables.DOGS.COUNTRY, "ES");
             r.set(Tables.DOGS.TEAM, "team-1");
+            r.set(Tables.DOGS.SEX, "FEMALE");
+            r.set(Tables.DOGS.WITHERS_CM, 55);
             r.set(Tables.DOGS.LAST_UPDATE, 1000L);
             r.set(Tables.DOGS.CREATED_AT, 500L);
             r.set(Tables.DOGS.DELETED_AT, null);
@@ -74,6 +77,8 @@ class GetDogJooqAdapterTest {
         assertThat(dog.creator()).isEqualTo("creator-1");
         assertThat(dog.country()).isEqualTo("ES");
         assertThat(dog.team()).isEqualTo("team-1");
+        assertThat(dog.getSex()).isEqualTo(Sex.FEMALE);
+        assertThat(dog.getWithersCm()).isEqualTo(55);
         assertThat(dog.lastUpdate()).isEqualTo(1000L);
         assertThat(dog.createdAt()).isEqualTo(500L);
         assertThat(dog.deletedAt()).isNull();

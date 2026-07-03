@@ -30,7 +30,8 @@ public enum ErrorEnum {
     SCORE_NOT_ALLOWED("error.score_not_allowed"),
     USER_NOT_COLLECTOR("error.user_not_collector"),
     COLLECTOR_NOT_FOUND("error.collector_not_found"),
-    EXERCISE_CONFIGURATION_NOT_FOUND("error.exercise_configuration_not_found");
+    EXERCISE_CONFIGURATION_NOT_FOUND("error.exercise_configuration_not_found"),
+    BIH_NOT_ALLOWED_FOR_SEX("error.bih_not_allowed_for_sex");
 
     private final String id;
 

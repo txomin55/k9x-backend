@@ -24,6 +24,8 @@ public class UpdateDogJooqAdapter implements UpdateDogPersistencePort {
                 .set(Tables.DOGS.HANDLER, payload.handler())
                 .set(Tables.DOGS.TEAM, payload.team())
                 .set(Tables.DOGS.COUNTRY, payload.country())
+                .set(Tables.DOGS.SEX, payload.sex() == null ? null : payload.sex().name())
+                .set(Tables.DOGS.WITHERS_CM, payload.withersCm())
                 .set(Tables.DOGS.LAST_UPDATE, payload.lastUpdate())
                 .where(Tables.DOGS.ID.eq(id))
                 .execute();
