@@ -35,11 +35,10 @@ public class SecuredEventUseCaseConfiguration {
     @Bean
     public UpdateObdxEventServiceCase updateEventServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                              SaveCompetitionPersistencePort saveCompetitionPersistencePort,
-                                                             GetObdxClassificationConfigPort getObdxClassificationConfigPort,
                                                              GetUserInfoPersistencePort getUserInfoPersistencePort,
                                                              GetDogPersistencePort getDogPersistencePort) {
         return new UpdateObdxEventServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort,
-                getObdxClassificationConfigPort, getUserInfoPersistencePort, getDogPersistencePort);
+                getUserInfoPersistencePort, getDogPersistencePort);
     }
 
     @Bean

@@ -119,6 +119,7 @@ class GetEventServiceCaseTest {
         assertThat(result.obdx()).isNotNull();
         assertThat(result.obdx().id()).isEqualTo("event-1");
         assertThat(result.obdx().discipline()).isEqualTo("OBDX");
+        assertThat(result.obdx().scoreCalculation()).isEqualTo(ObdxAvgMethod.MID_AVG);
         assertThat(result.competitors()).hasSize(1);
         assertThat(result.competitors().getFirst().status()).isEqualTo("ENROLLED");
         assertThat(result.judges()).hasSize(1);

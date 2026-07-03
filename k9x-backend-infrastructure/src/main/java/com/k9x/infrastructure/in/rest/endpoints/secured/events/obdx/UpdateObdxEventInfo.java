@@ -3,6 +3,7 @@ package com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx;
 import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
+import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.oas.stub.api.SecuredEventsUpdateInfoObdxApiDelegate;
 import com.k9x.oas.stub.model.UpdateEventRequestDTO;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,7 @@ public class UpdateObdxEventInfo implements SecuredEventsUpdateInfoObdxApiDelega
                         body.getName(),
                         body.getConfigurationId(),
                         body.getEnrollmentDeadline(),
+                        ObdxAvgMethod.valueOf(body.getScoreCalculation()),
                         body.getCompetitors() == null ? List.of() : body.getCompetitors().stream()
                                 .map(c -> new UpdateObdxEventCommand.CompetitorCommand(c.getDogId(), c.getPosition(),
                                         Boolean.TRUE.equals(c.getBih())))

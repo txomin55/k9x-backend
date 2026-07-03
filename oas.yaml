@@ -2784,6 +2784,10 @@
           "enrollmentDeadline": {
             "type": "integer",
             "format": "int64"
+          },
+          "scoreCalculation": {
+            "type": "string",
+            "description": "Method used to calculate the average score for the event. One of: AVG, MID_AVG."
           }
         },
         "required": [
@@ -2792,7 +2796,8 @@
           "exercises",
           "configurationId",
           "judges",
-          "enrollmentDeadline"
+          "enrollmentDeadline",
+          "scoreCalculation"
         ]
       },
       "UpdateJudgeRequestDTO": {
@@ -3455,6 +3460,10 @@
           "enrollmentDeadline": {
             "type": "integer",
             "format": "int64"
+          },
+          "scoreCalculation": {
+            "type": "string",
+            "description": "Method used to calculate the average score for the event. One of: AVG, MID_AVG."
           }
         },
         "required": [
@@ -3467,7 +3476,8 @@
           "exercises",
           "configuration",
           "judges",
-          "enrollmentDeadline"
+          "enrollmentDeadline",
+          "scoreCalculation"
         ]
       },
       "EventExerciseDetailResponseDTO": {

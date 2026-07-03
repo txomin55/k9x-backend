@@ -53,7 +53,8 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                 mapExercises(event.exercises()),
                 mapConfiguration(event.configuration()),
                 mapJudges(event.judges()),
-                obdx.enrollmentDeadline()
+                obdx.enrollmentDeadline(),
+                obdx.scoreCalculation() == null ? null : obdx.scoreCalculation().name()
         );
     }
 
