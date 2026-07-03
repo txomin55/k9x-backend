@@ -7,6 +7,9 @@
   },
   "tags": [
     {
+      "name": "Secured/Breeds/fetch_all"
+    },
+    {
       "name": "Secured/Collections/fecth_all"
     },
     {
@@ -23,6 +26,9 @@
     },
     {
       "name": "Secured/Competitions/update"
+    },
+    {
+      "name": "Secured/Countries/fetch_all"
     },
     {
       "name": "Secured/Disciplines/fetch_all_by_discipline"
@@ -119,6 +125,43 @@
     }
   ],
   "paths": {
+    "/secured/breeds": {
+      "get": {
+        "summary": "List breeds",
+        "deprecated": false,
+        "description": "",
+        "operationId": "fetchBreedsSecured",
+        "tags": [
+          "Secured/Breeds/fetch_all"
+        ],
+        "parameters": [ ],
+        "responses": {
+          "200": {
+            "description": "Breed list returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IdNameDTO"
+                  }
+                }
+              }
+            },
+            "headers": { }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError",
+            "description": "Missing or invalid bearer token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [ ]
+          }
+        ]
+      }
+    },
     "/secured/collections": {
       "get": {
         "summary": "List collections",
@@ -366,6 +409,43 @@
                   "description": "Identifier of the updated competition"
                 },
                 "example": "competition_01HZX8J6Q7Y2A4B5C6D7E8F9G0"
+              }
+            },
+            "headers": { }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError",
+            "description": "Missing or invalid bearer token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [ ]
+          }
+        ]
+      }
+    },
+    "/secured/countries": {
+      "get": {
+        "summary": "List countries",
+        "deprecated": false,
+        "description": "",
+        "operationId": "fetchCountriesSecured",
+        "tags": [
+          "Secured/Countries/fetch_all"
+        ],
+        "parameters": [ ],
+        "responses": {
+          "200": {
+            "description": "Country list returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IdNameDTO"
+                  }
+                }
               }
             },
             "headers": { }

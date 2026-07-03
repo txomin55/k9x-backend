@@ -1,0 +1,14 @@
+package com.k9x.infrastructure.out.enums.breeds;
+
+public enum Breed {
+    BORDER_COLLIE,
+    GERMAN_SHEPHERD,
+    LABRADOR_RETRIEVER,
+    GOLDEN_RETRIEVER,
+    BELGIAN_MALINOIS,
+    JACK_RUSSELL_TERRIER,
+    POODLE,
+    AUSTRALIAN_SHEPHERD,
+    SHETLAND_SHEEPDOG,
+    COCKER_SPANIEL
+}
