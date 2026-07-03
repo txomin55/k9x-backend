@@ -1,58 +1,26 @@
 package com.k9x.domain.competitions.aggregates;
 
-import com.k9x.domain.competitions.commands.CompetitionChange;
-import com.k9x.domain.competitions.commands.CompetitionCreated;
-import com.k9x.domain.competitions.commands.CompetitionDeleted;
-import com.k9x.domain.competitions.commands.CompetitionUpdated;
-import com.k9x.domain.competitions.commands.DogEnrolled;
-import com.k9x.domain.competitions.commands.EventCreated;
-import com.k9x.domain.competitions.commands.EventDeleted;
-import com.k9x.domain.competitions.commands.ObdxEventInfoUpdated;
-import com.k9x.domain.competitions.commands.ScoreUpdated;
-import com.k9x.domain.competitions.commands.StageCreated;
-import com.k9x.domain.competitions.commands.StageDeleted;
-import com.k9x.domain.competitions.commands.StageRenamed;
-import com.k9x.domain.competitions.commands.CompetitionUpdateData;
-import com.k9x.domain.competitions.commands.NewEventData;
-import com.k9x.domain.competitions.commands.NewStageData;
-import com.k9x.domain.competitions.commands.ObdxEventUpdateData;
-import com.k9x.domain.competitions.commands.ScoreUpdateData;
-import com.k9x.domain.competitions.commands.StageUpdateData;
-import com.k9x.domain.competitions.commands.YellowCardData;
-import com.k9x.domain.competitions.commands.YellowCardRegistered;
-import com.k9x.domain.competitions.commands.RedCardData;
-import com.k9x.domain.competitions.commands.RedCardRegistered;
-import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
-import com.k9x.domain.events.aggregates.EventSnapshot;
-import com.k9x.domain.events.valueobjects.EventCompetitor;
-import com.k9x.domain.events.valueobjects.Score;
-import com.k9x.domain.stages.aggregates.StageSnapshot;
+import com.k9x.domain.competitions.commands.*;
 import com.k9x.domain.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.domain.competitions.exceptions.CompetitionCannotBeDeletedException;
 import com.k9x.domain.competitions.exceptions.CompetitionNotFoundException;
-import com.k9x.domain.events.exceptions.CompetitorDisqualifiedException;
-import com.k9x.domain.events.exceptions.CompetitorNotCompetingException;
-import com.k9x.domain.events.exceptions.EventNotFoundException;
-import com.k9x.domain.events.exceptions.YellowCardAlreadyRegisteredException;
-import com.k9x.domain.events.exceptions.RedCardAlreadyRegisteredException;
-import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
-import com.k9x.domain.stages.exceptions.StageCannotBeDeletedException;
-import com.k9x.domain.stages.exceptions.StageExpiredException;
-import com.k9x.domain.stages.exceptions.StageNotStartedException;
-import com.k9x.domain.stages.exceptions.StageNotFoundException;
+import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
+import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.exceptions.*;
+import com.k9x.domain.events.valueobjects.EventCompetitor;
+import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import com.k9x.domain.shared.SupportUser;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
+import com.k9x.domain.stages.exceptions.*;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CompetitionAggregateTest {
 
@@ -60,6 +28,7 @@ class CompetitionAggregateTest {
     private static final long NOW = Instant.parse("2024-06-15T12:00:00Z").toEpochMilli();
     private static final long FUTURE = Instant.parse("2030-01-01T00:00:00Z").toEpochMilli();
     private static final String OWNER = "user-1";
+    private static final String SUPPORT = SupportUser.EMAIL;
 
     private StageSnapshot activeStage(String creator, Long deletedAt) {
         return new StageSnapshot("stage-1", "Stage 1", "comp-1", creator, FUTURE, FUTURE, 0L, 0L, deletedAt, List.of());
@@ -70,19 +39,19 @@ class CompetitionAggregateTest {
                 null, null, 0L, 0L, deletedAt, List.of(stage));
     }
 
+    // ---- of -------------------------------------------------------------------------------------
+
     private CompetitionChange onlyChange(CompetitionAggregate aggregate) {
         assertEquals(1, aggregate.pendingChanges().size());
         return aggregate.pendingChanges().getFirst();
     }
 
-    // ---- of -------------------------------------------------------------------------------------
+    // ---- createNew / update / delete ------------------------------------------------------------
 
     @Test
     void of_throws_when_competition_does_not_exist() {
         assertThrows(CompetitionNotFoundException.class, () -> CompetitionAggregate.of(null));
     }
-
-    // ---- createNew / update / delete ------------------------------------------------------------
 
     @Test
     void createNew_records_competition_created() {
@@ -144,7 +113,7 @@ class CompetitionAggregateTest {
 
         List<CompetitionChange> changes = aggregate.pendingChanges();
         assertEquals(3, changes.size());
-        CompetitionDeleted competitionDeleted = assertInstanceOf(CompetitionDeleted.class, changes.get(0));
+        CompetitionDeleted competitionDeleted = assertInstanceOf(CompetitionDeleted.class, changes.getFirst());
         assertEquals("comp-1", competitionDeleted.id());
         assertEquals(NOW, competitionDeleted.deletedAt());
         StageDeleted stageDeleted = assertInstanceOf(StageDeleted.class, changes.get(1));
@@ -164,6 +133,8 @@ class CompetitionAggregateTest {
         assertThrows(CompetitionCannotBeDeletedException.class, () -> aggregate.delete(OWNER, NOW));
     }
 
+    // ---- createStage ----------------------------------------------------------------------------
+
     @Test
     void delete_ignores_already_deleted_stages_when_cascading() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, PAST)));
@@ -173,8 +144,6 @@ class CompetitionAggregateTest {
         CompetitionDeleted change = assertInstanceOf(CompetitionDeleted.class, onlyChange(aggregate));
         assertEquals("comp-1", change.id());
     }
-
-    // ---- createStage ----------------------------------------------------------------------------
 
     @Test
     void createStage_throws_when_competition_is_deleted() {
@@ -190,6 +159,8 @@ class CompetitionAggregateTest {
                 () -> aggregate.createStage(new NewStageData("s", "S", FUTURE, FUTURE), OWNER, NOW));
     }
 
+    // ---- renameStage ----------------------------------------------------------------------------
+
     @Test
     void createStage_records_stage_created() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
@@ -202,8 +173,6 @@ class CompetitionAggregateTest {
         assertEquals(OWNER, change.creator());
         assertEquals(NOW, change.createdAt());
     }
-
-    // ---- renameStage ----------------------------------------------------------------------------
 
     @Test
     void renameStage_throws_when_stage_not_found() {
@@ -226,6 +195,8 @@ class CompetitionAggregateTest {
                 () -> aggregate.renameStage("stage-1", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
     }
 
+    // ---- deleteStage ----------------------------------------------------------------------------
+
     @Test
     void renameStage_records_stage_renamed() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
@@ -239,8 +210,6 @@ class CompetitionAggregateTest {
         assertEquals(20L, change.dateTo());
         assertEquals(NOW, change.lastUpdate());
     }
-
-    // ---- deleteStage ----------------------------------------------------------------------------
 
     @Test
     void deleteStage_throws_when_competition_is_deleted() {
@@ -288,6 +257,8 @@ class CompetitionAggregateTest {
         assertEquals(NOW, change.deletedAt());
     }
 
+    // ---- events ---------------------------------------------------------------------------------
+
     @Test
     void deleteStage_cascades_soft_delete_to_its_active_events() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
@@ -303,15 +274,26 @@ class CompetitionAggregateTest {
         assertEquals(NOW, eventDeleted.deletedAt());
     }
 
-    // ---- events ---------------------------------------------------------------------------------
-
     private EventSnapshot event(Long deletedAt) {
         return new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, deletedAt,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
     }
 
+    private EventSnapshot eventWithEnrollmentDeadline(Long enrollmentDeadline) {
+        return new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, enrollmentDeadline, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+    }
+
     private StageSnapshot stageWith(EventSnapshot event, long dateTo) {
         return new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, PAST, dateTo, 0L, 0L, null, List.of(event));
+    }
+
+    /**
+     * A stage not yet under way (dateFrom in the future), so enrollment is governed solely by the
+     * event's own deadline rather than being force-closed by stage status.
+     */
+    private StageSnapshot openEnrollmentStage(EventSnapshot event) {
+        return new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, FUTURE, 0L, 0L, null, List.of(event));
     }
 
     @Test
@@ -366,8 +348,25 @@ class CompetitionAggregateTest {
     }
 
     @Test
+    void enrollDog_throws_when_event_has_no_enrollment_deadline() {
+        CompetitionAggregate aggregate =
+                CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(event(null))));
+
+        assertThrows(EnrollmentClosedException.class, () -> aggregate.enrollDog("evt-1", "dog-1", false, OWNER, NOW));
+    }
+
+    @Test
+    void enrollDog_throws_when_enrollment_deadline_has_passed() {
+        CompetitionAggregate aggregate =
+                CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(eventWithEnrollmentDeadline(PAST))));
+
+        assertThrows(EnrollmentClosedException.class, () -> aggregate.enrollDog("evt-1", "dog-1", false, OWNER, NOW));
+    }
+
+    @Test
     void enrollDog_records_dog_enrolled() {
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+        CompetitionAggregate aggregate =
+                CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(eventWithEnrollmentDeadline(FUTURE))));
 
         aggregate.enrollDog("evt-1", "dog-1", true, OWNER, NOW);
 
@@ -383,10 +382,10 @@ class CompetitionAggregateTest {
     void enrollDog_assigns_next_position_after_last_enrolled_competitor() {
         EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i",
                 (short) 3, true, false, null, null);
-        EventSnapshot eventWithCompetitors = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null,
+        EventSnapshot eventWithCompetitors = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, FUTURE,
                 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of());
         CompetitionAggregate aggregate =
-                CompetitionAggregate.of(competition(OWNER, null, stageWith(eventWithCompetitors, FUTURE)));
+                CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(eventWithCompetitors)));
 
         aggregate.enrollDog("evt-1", "dog-2", false, OWNER, NOW);
 
@@ -546,6 +545,8 @@ class CompetitionAggregateTest {
         assertEquals("dog-1", change.dogId());
     }
 
+    // ---- support superuser bypass ----------------------------------------------------------------
+
     @Test
     void registerRedCard_throws_when_already_registered() {
         EventSnapshot carded = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
@@ -557,10 +558,6 @@ class CompetitionAggregateTest {
         assertThrows(RedCardAlreadyRegisteredException.class,
                 () -> aggregate.registerRedCard("evt-1", data, OWNER, NOW));
     }
-
-    // ---- support superuser bypass ----------------------------------------------------------------
-
-    private static final String SUPPORT = SupportUser.EMAIL;
 
     @Test
     void support_can_update_a_deleted_competition_it_does_not_own() {

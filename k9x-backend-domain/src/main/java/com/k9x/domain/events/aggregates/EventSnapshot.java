@@ -53,11 +53,12 @@ public record EventSnapshot(
     }
 
     /**
-     * Whether enrollment is still open: an event with no deadline is always open, otherwise enrollment
-     * stays open until the deadline is reached (compared against the supplied current timestamp).
+     * Whether enrollment is still open: an event with no deadline set never accepts enrollments (a
+     * deadline must be configured first), otherwise enrollment stays open until the deadline is reached
+     * (compared against the supplied current timestamp).
      */
     public boolean enrollmentOpened(long now) {
-        return enrollmentDeadline == null || !UtcDates.isAfterUtcDay(now, enrollmentDeadline);
+        return enrollmentDeadline != null && !UtcDates.isAfterUtcDay(now, enrollmentDeadline);
     }
 
     public boolean hasAnyScore() {

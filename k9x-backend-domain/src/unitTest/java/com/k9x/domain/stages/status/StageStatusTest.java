@@ -39,8 +39,14 @@ class StageStatusTest {
     }
 
     private static EventSnapshot openEvent() {
-        // no scores -> CREATED, null deadline -> enrollment open on its own
-        return new EventSnapshot("e2", "cfg", "obdx", "Event", "s1", "creator", null, 0L, 0L, null, ObdxAvgMethod.AVG,
+        // no scores -> CREATED, deadline not yet reached -> enrollment open on its own
+        return new EventSnapshot("e2", "cfg", "obdx", "Event", "s1", "creator", NEXT_WEEK, 0L, 0L, null,
+                ObdxAvgMethod.AVG, List.of(), List.of(), List.of(), List.of());
+    }
+
+    private static EventSnapshot noDeadlineEvent() {
+        // no scores -> CREATED, no deadline set -> enrollment never open
+        return new EventSnapshot("e4", "cfg", "obdx", "Event", "s1", "creator", null, 0L, 0L, null, ObdxAvgMethod.AVG,
                 List.of(), List.of(), List.of(), List.of());
     }
 
@@ -70,6 +76,13 @@ class StageStatusTest {
         StageSnapshot stage = stage(NEXT_WEEK, NEXT_WEEK, null, List.of(openEvent()));
         assertEquals(StageStatus.CREATED, stage.status(NOW));
         assertTrue(stage.enrollmentOpened(openEvent(), NOW));
+    }
+
+    @Test
+    void enrollment_closed_when_event_has_no_deadline() {
+        StageSnapshot stage = stage(NEXT_WEEK, NEXT_WEEK, null, List.of(noDeadlineEvent()));
+        assertEquals(StageStatus.CREATED, stage.status(NOW));
+        assertFalse(stage.enrollmentOpened(noDeadlineEvent(), NOW));
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.k9x.application.stages.use_case;
 
 import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
+import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
@@ -32,6 +33,38 @@ class GetStageListServiceCaseTest {
     private GetStageListPersistencePort getStageListPersistencePort;
 
     private GetStageListServiceCase serviceCase;
+
+    private static CompetitionSnapshot competition(StageSnapshot stage) {
+        return competition(List.of(stage));
+    }
+
+    private static CompetitionSnapshot competition(List<StageSnapshot> stages) {
+        return new CompetitionSnapshot("comp", "Comp", "creator", "Organizer Name", "ES",
+                "desc", "Calle Mayor 1", 40.4, -3.7, 0L, 0L, null, stages);
+    }
+
+    private static StageSnapshot stage(String id, long from, long to, List<EventSnapshot> events) {
+        return new StageSnapshot(id, "Stage " + id, "comp", "creator", from, to, 0L, 0L, null, events);
+    }
+
+    private static EventSnapshot event(String id, String configId, Long deletedAt, List<EventCompetitor> competitors,
+                                       List<EventExercise> exercises, List<EventJudge> judges, List<Score> scores) {
+        return new EventSnapshot(id, configId, "OBDX", "Event " + id, "s-1", "creator",
+                null, 0L, 0L, deletedAt, ObdxAvgMethod.AVG, competitors, exercises, judges, scores);
+    }
+
+    private static EventCompetitor competitor(String dogId, boolean notCompeting) {
+        return new EventCompetitor(dogId, "Rex", "owner", "Handler", "Team A", "ES", "Border Collie", "ID-001",
+                (short) 1, true, notCompeting, null, null);
+    }
+
+    private static EventExercise exercise(String id) {
+        return new EventExercise(id, (short) 1, List.of());
+    }
+
+    private static EventJudge judge(String id) {
+        return new EventJudge(id, "Judge " + id, "collector@test.com");
+    }
 
     @BeforeEach
     void setUp() {
@@ -75,6 +108,19 @@ class GetStageListServiceCaseTest {
     }
 
     @Test
+    void enrollment_is_closed_when_event_has_no_deadline() {
+        EventSnapshot event = event("evt-1", "obdx-1", null, List.of(), List.of(), List.of(), List.of());
+        CompetitionSnapshot competition = competition(stage("s-1", FAR_FUTURE, FAR_FUTURE, List.of(event)));
+
+        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
+
+        List<FetchStageListDTO> result = serviceCase.getStages();
+
+        assertThat(result.getFirst().events().getFirst().enrollmentOpened()).isFalse();
+        assertThat(result.getFirst().events().getFirst().enrollmentDeadline()).isNull();
+    }
+
+    @Test
     void skips_deleted_stages_and_deleted_events() {
         EventSnapshot liveEvent = event("evt-1", "obdx-1", null, List.of(), List.of(), List.of(), List.of());
         EventSnapshot deletedEvent = event("evt-2", "obdx-1", 999L, List.of(), List.of(), List.of(), List.of());
@@ -89,38 +135,6 @@ class GetStageListServiceCaseTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().id()).isEqualTo("s-1");
-        assertThat(result.getFirst().events()).extracting(e -> e.id()).containsExactly("evt-1");
-    }
-
-    private static CompetitionSnapshot competition(StageSnapshot stage) {
-        return competition(List.of(stage));
-    }
-
-    private static CompetitionSnapshot competition(List<StageSnapshot> stages) {
-        return new CompetitionSnapshot("comp", "Comp", "creator", "Organizer Name", "ES",
-                "desc", "Calle Mayor 1", 40.4, -3.7, 0L, 0L, null, stages);
-    }
-
-    private static StageSnapshot stage(String id, long from, long to, List<EventSnapshot> events) {
-        return new StageSnapshot(id, "Stage " + id, "comp", "creator", from, to, 0L, 0L, null, events);
-    }
-
-    private static EventSnapshot event(String id, String configId, Long deletedAt, List<EventCompetitor> competitors,
-                                       List<EventExercise> exercises, List<EventJudge> judges, List<Score> scores) {
-        return new EventSnapshot(id, configId, "OBDX", "Event " + id, "s-1", "creator",
-                null, 0L, 0L, deletedAt, ObdxAvgMethod.AVG, competitors, exercises, judges, scores);
-    }
-
-    private static EventCompetitor competitor(String dogId, boolean notCompeting) {
-        return new EventCompetitor(dogId, "Rex", "owner", "Handler", "Team A", "ES", "Border Collie", "ID-001",
-                (short) 1, true, notCompeting, null, null);
-    }
-
-    private static EventExercise exercise(String id) {
-        return new EventExercise(id, (short) 1, List.of());
-    }
-
-    private static EventJudge judge(String id) {
-        return new EventJudge(id, "Judge " + id, "collector@test.com");
+        assertThat(result.getFirst().events()).extracting(FetchStageListEventDTO::id).containsExactly("evt-1");
     }
 }

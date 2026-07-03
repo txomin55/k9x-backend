@@ -112,6 +112,25 @@ class GetStageServiceCaseTest {
     }
 
     @Test
+    void enrollment_is_closed_when_event_has_no_deadline() throws IOException {
+        StageSnapshot stage = new StageSnapshot("s-1", "Stage A", "comp-1", "user-1",
+                1000L, 2000L, 0L, 0L, null, List.of(event()));
+
+        ConfigurationDTO config = new ConfigurationDTO("obdx-1", "Obedience", List.of());
+        ConfigurationsDTO federation = new ConfigurationsDTO(
+                new FederationInfoDTO("FED", "Federation", "ES"), List.of(config));
+
+        when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(stage));
+        when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of(federation));
+
+        FetchStageDetailDTO result = serviceCase.getStage("s-1");
+
+        assertThat(result.events().getFirst().enrollmentOpened()).isFalse();
+        assertThat(result.events().getFirst().enrollmentDeadline()).isNull();
+    }
+
+    @Test
     void throws_when_configurations_cannot_be_loaded() throws IOException {
         StageSnapshot stage = new StageSnapshot("s-1", "Stage A", "comp-1", "user-1",
                 1000L, 2000L, 0L, 0L, null, List.of(event()));

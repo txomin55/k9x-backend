@@ -11,6 +11,7 @@ import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
+import com.k9x.domain.events.exceptions.EnrollmentClosedException;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,10 +47,10 @@ class EnrollEventServiceCaseTest {
     }
 
     private CompetitionSnapshot competition() {
-        EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
-        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
-                List.of(event));
+        EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1",
+                Long.MAX_VALUE, 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE,
+                Long.MAX_VALUE, 0L, 0L, null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
                 0L, 0L, null, List.of(stage));
     }
@@ -83,6 +84,23 @@ class EnrollEventServiceCaseTest {
 
         assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", true), "user-1"))
                 .isInstanceOf(BihNotAllowedForSexException.class);
+
+        verifyNoInteractions(saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_event_has_no_enrollment_deadline() {
+        EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L,
+                null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE,
+                Long.MAX_VALUE, 0L, 0L, null, List.of(event));
+        CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null,
+                null, null, 0L, 0L, null, List.of(stage));
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
+
+        assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false), "user-1"))
+                .isInstanceOf(EnrollmentClosedException.class);
 
         verifyNoInteractions(saveCompetitionPersistencePort);
     }
