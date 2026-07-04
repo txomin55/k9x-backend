@@ -1,5 +1,6 @@
 package com.k9x.application.events.obdx.use_case;
 
+import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.dto.*;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
@@ -87,6 +88,7 @@ public class GetObdxClassificationServiceCase {
     private FetchObdxClassificationDTO aggregateProjection(EventSnapshot event,
                                                            ObdxClassificationConfigDTO config,
                                                            List<FetchClassificationRawRowDTO> rawRows) {
+        int judgeCount = event.judges() == null ? 0 : event.judges().size();
         // dogId → exerciseId → list of (judgeId, judgeName, score)
         Map<String, Map<String, List<FetchClassificationJudgeScoreDTO>>> judgeScoresByDogExercise = new LinkedHashMap<>();
         // dogId → exerciseId → list of yellow cards stamped for that exercise (one per stamped slot, across judges)
@@ -172,7 +174,7 @@ public class GetObdxClassificationServiceCase {
                 // if a yellow card was stamped for this exercise (never below zero).
                 BigDecimal maxExerciseScore = config.maxAllowedScore().multiply(coef).setScale(2, RoundingMode.HALF_UP);
                 BigDecimal weightedScore = scores.isEmpty() ? null
-                        : computeAvg(scores, event.scoreCalculation())
+                        : computeAvg(scores, event.scoreCalculation(), judgeCount)
                         .multiply(coef).setScale(2, RoundingMode.HALF_UP);
                 if (weightedScore != null && !exerciseYellowCards.isEmpty()) {
                     weightedScore = weightedScore.subtract(YELLOW_CARD_PENALTY).max(BigDecimal.ZERO);
@@ -237,13 +239,16 @@ public class GetObdxClassificationServiceCase {
                 .multiply(new BigDecimal("100")).setScale(2, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal computeAvg(List<BigDecimal> scores, ObdxAvgMethod method) {
+    private BigDecimal computeAvg(List<BigDecimal> scores, ObdxAvgMethod method, int judgeCount) {
         if (scores.isEmpty()) return BigDecimal.ZERO;
-        if (method == ObdxAvgMethod.MID_AVG && scores.size() >= 4) {
-            List<BigDecimal> trimmed = new ArrayList<>(scores);
-            trimmed.remove(Collections.min(trimmed));
-            trimmed.remove(Collections.max(trimmed));
-            return average(trimmed);
+        if (method == ObdxAvgMethod.MID_AVG) {
+            if (judgeCount < 4) throw new ObdxNotEnoughJudgesException();
+            if (scores.size() >= 4) {
+                List<BigDecimal> trimmed = new ArrayList<>(scores);
+                trimmed.remove(Collections.min(trimmed));
+                trimmed.remove(Collections.max(trimmed));
+                return average(trimmed);
+            }
         }
         return average(scores);
     }

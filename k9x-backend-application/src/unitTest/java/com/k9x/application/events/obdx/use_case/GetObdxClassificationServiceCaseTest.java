@@ -1,5 +1,6 @@
 package com.k9x.application.events.obdx.use_case;
 
+import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationExerciseScoreDTO;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -121,7 +123,7 @@ class GetObdxClassificationServiceCaseTest {
     }
 
     @Test
-    void applies_avg_multiplied_by_coef_when_fewer_than_4_judges() {
+    void throws_exception_when_mid_avg_and_event_has_fewer_than_4_judges() {
         EventSnapshot event = event(List.of(
                 new Row("dog-1", "Rex", "j-1", new BigDecimal("8")),
                 new Row("dog-1", "Rex", "j-2", new BigDecimal("6"))));
@@ -129,11 +131,8 @@ class GetObdxClassificationServiceCaseTest {
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
 
-        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
-
-        // avg(8,6) = 7, * coef(3) = 21
-        assertThat(result.competitors()).hasSize(1);
-        assertThat(result.competitors().getFirst().totalScore()).isEqualByComparingTo("21.00");
+        assertThatThrownBy(() -> serviceCase.getClassification(event))
+                .isInstanceOf(ObdxNotEnoughJudgesException.class);
     }
 
     @Test
