@@ -3,6 +3,7 @@ package com.k9x.domain.competitions.aggregates;
 import com.k9x.domain.competitions.commands.*;
 import com.k9x.domain.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.domain.competitions.exceptions.CompetitionCannotBeDeletedException;
+import com.k9x.domain.competitions.exceptions.CompetitionCannotBeUpdatedException;
 import com.k9x.domain.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
@@ -75,6 +76,14 @@ class CompetitionAggregateTest {
     void update_throws_when_user_is_not_creator() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition("other", null, activeStage("other", null)));
         assertThrows(UnauthorizedResourceException.class,
+                () -> aggregate.update(new CompetitionUpdateData("N", "D", "ES", "A", 1.0, 2.0), OWNER, NOW));
+    }
+
+    @Test
+    void update_throws_when_competition_is_finished() {
+        StageSnapshot finishedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, 0L, 0L, 0L, 0L, null, List.of());
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, finishedStage));
+        assertThrows(CompetitionCannotBeUpdatedException.class,
                 () -> aggregate.update(new CompetitionUpdateData("N", "D", "ES", "A", 1.0, 2.0), OWNER, NOW));
     }
 
@@ -192,6 +201,14 @@ class CompetitionAggregateTest {
     void renameStage_throws_when_user_is_not_stage_creator() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage("other", null)));
         assertThrows(UnauthorizedResourceException.class,
+                () -> aggregate.renameStage("stage-1", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
+    }
+
+    @Test
+    void renameStage_throws_when_stage_is_finished() {
+        StageSnapshot finishedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, 0L, 0L, 0L, 0L, null, List.of());
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, finishedStage));
+        assertThrows(StageCannotBeUpdatedException.class,
                 () -> aggregate.renameStage("stage-1", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
     }
 
@@ -401,6 +418,15 @@ class CompetitionAggregateTest {
         ObdxEventUpdateData data = new ObdxEventUpdateData("E", "cfg", ObdxAvgMethod.MID_AVG, null,
                 List.of(), List.of(), List.of(), List.of());
         assertThrows(UnauthorizedResourceException.class,
+                () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
+    }
+
+    @Test
+    void updateObdxEventInfo_throws_when_stage_date_to_has_passed() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), PAST)));
+        ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,
+                List.of(), List.of(), List.of(), List.of());
+        assertThrows(EventCannotBeUpdatedException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
 

@@ -3,6 +3,7 @@ package com.k9x.domain.competitions.aggregates;
 import com.k9x.domain.competitions.commands.*;
 import com.k9x.domain.competitions.exceptions.CompetitionAlreadyDeletedException;
 import com.k9x.domain.competitions.exceptions.CompetitionCannotBeDeletedException;
+import com.k9x.domain.competitions.exceptions.CompetitionCannotBeUpdatedException;
 import com.k9x.domain.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.domain.competitions.status.CompetitionStatus;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
@@ -79,6 +80,9 @@ public final class CompetitionAggregate {
 
     public void update(CompetitionUpdateData data, String userId, long now) {
         assertCompetitionMutableBy(userId);
+        if (!SupportUser.is(userId)) {
+            assertCompetitionUpdatable(now);
+        }
 
         changes.add(new CompetitionUpdated(snapshot.id(), data.name(), data.description(), data.country(),
                 data.address(), data.coordAlt(), data.coordLong(), now));
@@ -114,6 +118,9 @@ public final class CompetitionAggregate {
         StageSnapshot stage = requireActiveStage(stageId, userId);
         assertStageOwnedBy(stage, userId);
         assertCompetitionMutableBy(userId);
+        if (!SupportUser.is(userId)) {
+            assertStageUpdatable(stage, now);
+        }
 
         changes.add(new StageRenamed(stageId, data.name(), data.dateFrom(), data.dateTo(), now));
     }
@@ -191,6 +198,11 @@ public final class CompetitionAggregate {
 
         if (!SupportUser.is(userId) && !event.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
+        }
+        if (!SupportUser.is(userId)) {
+            StageSnapshot stage = findStageOfEvent(eventId);
+            assert stage != null;
+            assertEventUpdatable(stage, now);
         }
         changes.add(new ObdxEventInfoUpdated(eventId, data.name(), data.configurationId(), data.scoreCalculation(),
                 data.enrollmentDeadline(), data.competitors(), data.exercises(), data.judges(), now, data.awards()));
@@ -306,6 +318,16 @@ public final class CompetitionAggregate {
     }
 
     /**
+     * A finished competition can no longer be edited, matching the read-only state its stages/events settle
+     * into once they are all done.
+     */
+    private void assertCompetitionUpdatable(long now) {
+        if (snapshot.status(now) == CompetitionStatus.FINISHED) {
+            throw new CompetitionCannotBeUpdatedException();
+        }
+    }
+
+    /**
      * A competition can only be deleted while every one of its (active) stages is still deletable, i.e. each
      * stage and all of its events are in the CREATED state. Deleting it cascades the soft-delete to those
      * stages and their events.
@@ -345,6 +367,15 @@ public final class CompetitionAggregate {
     private void assertStageDeletable(StageSnapshot stage, long now) {
         if (!isStageDeletable(stage, now)) {
             throw new StageCannotBeDeletedException();
+        }
+    }
+
+    /**
+     * A finished stage can no longer be edited.
+     */
+    private void assertStageUpdatable(StageSnapshot stage, long now) {
+        if (stage.status(now) == StageStatus.FINISHED) {
+            throw new StageCannotBeUpdatedException();
         }
     }
 
@@ -393,6 +424,16 @@ public final class CompetitionAggregate {
         EventStatus status = event.status(now, stage.dateTo());
         if (status == EventStatus.STARTED || status == EventStatus.FINISHED) {
             throw new EventCannotBeDeletedException();
+        }
+    }
+
+    /**
+     * An event can no longer be edited once its stage's {@code dateTo} day has passed, regardless of the
+     * event's own status.
+     */
+    private void assertEventUpdatable(StageSnapshot stage, long now) {
+        if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
+            throw new EventCannotBeUpdatedException();
         }
     }
 
