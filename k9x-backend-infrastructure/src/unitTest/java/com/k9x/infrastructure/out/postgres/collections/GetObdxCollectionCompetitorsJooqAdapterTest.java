@@ -25,7 +25,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
     private static final Dogs D = Tables.DOGS;
 
     private static final Field<?>[] SELECT_FIELDS = {
-            EC.DOG_ID, EC.POSITION, EC.VERIFIED, EC.NOT_COMPETING,
+            EC.DOG_ID, EC.POSITION, EC.VERIFIED, EC.NOT_COMPETING, EC.BIH,
             D.NAME, D.IDENTITY, D.BREED, D.OWNER, D.HANDLER, D.TEAM, D.COUNTRY
     };
 
@@ -66,6 +66,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
             record.set(EC.POSITION, (short) 1);
             record.set(EC.VERIFIED, true);
             record.set(EC.NOT_COMPETING, true);
+            record.set(EC.BIH, true);
             record.set(D.NAME, "Rex");
             record.set(D.IDENTITY, "ID-001");
             record.set(D.BREED, "Border Collie");
@@ -93,6 +94,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
         assertThat(comp.position()).isEqualTo((short) 1);
         assertThat(comp.verified()).isTrue();
         assertThat(comp.notCompeting()).isTrue();
+        assertThat(comp.bih()).isTrue();
         assertThat(comp.status()).isNull();
     }
 

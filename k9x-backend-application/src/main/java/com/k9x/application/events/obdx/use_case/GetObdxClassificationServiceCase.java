@@ -148,7 +148,7 @@ public class GetObdxClassificationServiceCase {
             if (row.score() != null) {
                 BigDecimal judgeScoreRating = percentageOfMax(row.score(), config.maxAllowedScore());
                 List<FetchClassificationJudgeScoreDTO> exerciseScores = judgeScoresByDogExercise.get(row.dogId()).get(row.exerciseId());
-                exerciseScores.add(new FetchClassificationJudgeScoreDTO(row.judgeId(), row.judgeName(), row.score(), judgeScoreRating));
+                exerciseScores.add(new FetchClassificationJudgeScoreDTO(row.judgeId(), row.judgeName(), row.score(), judgeScoreRating, true));
                 scoresLastUpdate = scoresLastUpdate == null
                         ? row.scoreLastUpdate() : Math.max(scoresLastUpdate, row.scoreLastUpdate());
             }
@@ -164,7 +164,8 @@ public class GetObdxClassificationServiceCase {
 
             for (Map.Entry<String, List<FetchClassificationJudgeScoreDTO>> exEntry : dogEntry.getValue().entrySet()) {
                 String exerciseId = exEntry.getKey();
-                List<FetchClassificationJudgeScoreDTO> judgeEntries = exEntry.getValue();
+                List<FetchClassificationJudgeScoreDTO> judgeEntries =
+                        withApplies(exEntry.getValue(), event.scoreCalculation());
                 List<BigDecimal> scores = judgeEntries.stream().map(FetchClassificationJudgeScoreDTO::score).toList();
 
                 BigDecimal coef = config.coefByExerciseId().getOrDefault(exerciseId, BigDecimal.ONE);
@@ -315,6 +316,52 @@ public class GetObdxClassificationServiceCase {
     private BigDecimal average(List<BigDecimal> values) {
         BigDecimal sum = values.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
         return sum.divide(BigDecimal.valueOf(values.size()), 4, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Flags each judge score with whether it actually applied to {@link #computeAvg}: under MID_AVG the single
+     * highest and single lowest score are dropped regardless of how many judges have scored so far (a tie at
+     * an extreme only excludes one occurrence, matching {@link #computeAvg}'s removal once it does trim at 4+
+     * scores); everything else — including every score under AVG — applies.
+     */
+    private List<FetchClassificationJudgeScoreDTO> withApplies(List<FetchClassificationJudgeScoreDTO> judgeEntries,
+                                                                ObdxAvgMethod method) {
+        Set<Integer> excluded = excludedJudgeIndexes(
+                judgeEntries.stream().map(FetchClassificationJudgeScoreDTO::score).toList(), method);
+        if (excluded.isEmpty()) {
+            return judgeEntries;
+        }
+        List<FetchClassificationJudgeScoreDTO> result = new ArrayList<>();
+        for (int i = 0; i < judgeEntries.size(); i++) {
+            FetchClassificationJudgeScoreDTO j = judgeEntries.get(i);
+            result.add(new FetchClassificationJudgeScoreDTO(j.judgeId(), j.judgeName(), j.score(), j.scoreRating(),
+                    !excluded.contains(i)));
+        }
+        return result;
+    }
+
+    private Set<Integer> excludedJudgeIndexes(List<BigDecimal> scores, ObdxAvgMethod method) {
+        if (method != ObdxAvgMethod.MID_AVG || scores.isEmpty()) {
+            return Set.of();
+        }
+        List<BigDecimal> working = new ArrayList<>(scores);
+        List<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < scores.size(); i++) {
+            indices.add(i);
+        }
+
+        int minPos = working.indexOf(Collections.min(working));
+        int minOriginalIndex = indices.remove(minPos);
+        working.remove(minPos);
+
+        if (working.isEmpty()) {
+            return Set.of(minOriginalIndex);
+        }
+
+        int maxPos = working.indexOf(Collections.max(working));
+        int maxOriginalIndex = indices.remove(maxPos);
+
+        return new HashSet<>(List.of(minOriginalIndex, maxOriginalIndex));
     }
 
     private void assignPositions(List<FetchClassificationCompetitorDTO> competitors,

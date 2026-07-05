@@ -4,6 +4,7 @@ import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationExerciseScoreDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationJudgeScoreDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.ObdxClassificationConfigDTO;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
@@ -155,6 +156,79 @@ class GetObdxClassificationServiceCaseTest {
 
         // remove min(3) and max(9), avg(5,7) = 6, * coef(2) = 12
         assertThat(result.competitors().getFirst().totalScore()).isEqualByComparingTo("12.00");
+        assertThat(judgeScores(result))
+                .extracting(FetchClassificationJudgeScoreDTO::judgeId, FetchClassificationJudgeScoreDTO::applies)
+                .containsExactlyInAnyOrder(
+                        tuple("j-1", true), tuple("j-2", true), tuple("j-3", false), tuple("j-4", false));
+    }
+
+    @Test
+    void applies_is_true_for_every_score_under_avg_regardless_of_spread() {
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                List.of(new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "id-1", (short) 1, false, false, null, null, null)),
+                List.of(new EventExercise("ex-1", (short) 1, null)),
+                List.of(new EventJudge("j-1", "Judge j-1", null), new EventJudge("j-2", "Judge j-2", null)),
+                List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("2"), 1000L),
+                        new Score("ex-1", "j-2", "dog-1", new BigDecimal("9"), 1000L)),
+                List.of());
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(judgeScores(result)).allSatisfy(j -> assertThat(j.applies()).isTrue());
+    }
+
+    @Test
+    void applies_excludes_the_single_score_under_mid_avg_with_only_one_judge_scored() {
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
+                List.of(new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "id-1", (short) 1, false, false, null, null, null)),
+                List.of(new EventExercise("ex-1", (short) 1, null)),
+                List.of(new EventJudge("j-1", "Judge j-1", null), new EventJudge("j-2", "Judge j-2", null),
+                        new EventJudge("j-3", "Judge j-3", null), new EventJudge("j-4", "Judge j-4", null)),
+                List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("8"), 1000L)),
+                List.of());
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(judgeScores(result))
+                .extracting(FetchClassificationJudgeScoreDTO::judgeId, FetchClassificationJudgeScoreDTO::applies)
+                .containsExactly(tuple("j-1", false));
+    }
+
+    @Test
+    void applies_excludes_both_scores_under_mid_avg_with_only_two_judges_scored() {
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
+                List.of(new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "id-1", (short) 1, false, false, null, null, null)),
+                List.of(new EventExercise("ex-1", (short) 1, null)),
+                List.of(new EventJudge("j-1", "Judge j-1", null), new EventJudge("j-2", "Judge j-2", null),
+                        new EventJudge("j-3", "Judge j-3", null), new EventJudge("j-4", "Judge j-4", null)),
+                List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("8"), 1000L),
+                        new Score("ex-1", "j-2", "dog-1", new BigDecimal("6"), 1000L)),
+                List.of());
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(judgeScores(result))
+                .extracting(FetchClassificationJudgeScoreDTO::judgeId, FetchClassificationJudgeScoreDTO::applies)
+                .containsExactlyInAnyOrder(tuple("j-1", false), tuple("j-2", false));
+    }
+
+    private List<FetchClassificationJudgeScoreDTO> judgeScores(FetchObdxClassificationDTO result) {
+        return result.competitors().getFirst().exercises().getFirst().judgeScores();
     }
 
     @Test

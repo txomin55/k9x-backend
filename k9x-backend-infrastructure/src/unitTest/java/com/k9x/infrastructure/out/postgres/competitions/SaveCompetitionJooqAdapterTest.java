@@ -62,7 +62,7 @@ class SaveCompetitionJooqAdapterTest {
     }
 
     private CompetitionAggregate aggregateWithActiveEvent() {
-        EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", null, NOW, NOW, null,
+        EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", FUTURE_TO, NOW, NOW, null,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of());
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 FUTURE_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
