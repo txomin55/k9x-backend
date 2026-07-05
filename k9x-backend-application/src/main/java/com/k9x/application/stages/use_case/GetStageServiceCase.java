@@ -69,7 +69,7 @@ public class GetStageServiceCase {
                                         .toList(),
                                 e.status(now, stage.dateTo()).name(),
                                 stage.enrollmentOpened(e, now),
-                                e.enrollmentDeadline()))
+                                e.enrollmentDeadline(), e.awards()))
                         .toList());
     }
 

@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 class UpdateObdxEventServiceCaseTest {
 
     private static final UpdateObdxEventCommand VALID_COMMAND = new UpdateObdxEventCommand(
-            "Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of());
+            "Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
 
     @Mock
     private GetCompetitionPersistencePort getCompetitionPersistencePort;
@@ -52,7 +52,7 @@ class UpdateObdxEventServiceCaseTest {
 
     private CompetitionSnapshot competition() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of());
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
@@ -69,7 +69,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_configuration_id_is_blank() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "  ", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of());
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "  ", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(EventConfigurationIdRequiredException.class);
@@ -90,7 +90,7 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_collector_email_does_not_exist() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
-                List.of(), List.of(), List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "missing@k9x.com")));
+                List.of(), List.of(), List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "missing@k9x.com")), List.of());
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getUserInfoPersistencePort.findById("missing@k9x.com")).thenReturn(null);
 
@@ -113,11 +113,11 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_bih_true_for_male_dog() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, true)), List.of(), List.of());
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, true)), List.of(), List.of(), List.of());
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getDogPersistencePort.getDog("dog-1"))
                 .thenReturn(new Dog("dog-1", "id", "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
-                        Sex.MALE, 55, 0L, 0L, null));
+                        Sex.MALE, 55, null, 0L, 0L, null));
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(BihNotAllowedForSexException.class);

@@ -13,6 +13,7 @@ public record Dog(
         String team,
         Sex sex,
         Integer withersCm,
+        Boolean threeFciGenerationsConfirmed,
         long lastUpdate,
         long createdAt,
         Long deletedAt
@@ -60,5 +61,9 @@ public record Dog(
 
     public Integer getWithersCm() {
         return this.withersCm;
+    }
+
+    public Boolean getThreeFciGenerationsConfirmed() {
+        return this.threeFciGenerationsConfirmed;
     }
 }

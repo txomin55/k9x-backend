@@ -50,12 +50,12 @@ class GetStageListServiceCaseTest {
     private static EventSnapshot event(String id, String configId, Long deletedAt, List<EventCompetitor> competitors,
                                        List<EventExercise> exercises, List<EventJudge> judges, List<Score> scores) {
         return new EventSnapshot(id, configId, "OBDX", "Event " + id, "s-1", "creator",
-                null, 0L, 0L, deletedAt, ObdxAvgMethod.AVG, competitors, exercises, judges, scores);
+                null, 0L, 0L, deletedAt, ObdxAvgMethod.AVG, competitors, exercises, judges, scores, List.of());
     }
 
     private static EventCompetitor competitor(String dogId, boolean notCompeting) {
         return new EventCompetitor(dogId, "Rex", "owner", "Handler", "Team A", "ES", "Border Collie", "ID-001",
-                (short) 1, true, notCompeting, null, null);
+                (short) 1, true, notCompeting, null, null, null);
     }
 
     private static EventExercise exercise(String id) {

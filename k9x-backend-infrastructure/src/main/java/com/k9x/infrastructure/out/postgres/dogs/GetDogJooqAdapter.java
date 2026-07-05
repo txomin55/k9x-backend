@@ -32,6 +32,7 @@ public class GetDogJooqAdapter implements GetDogPersistencePort {
                         r.get(Tables.DOGS.TEAM),
                         r.get(Tables.DOGS.SEX) == null ? null : Sex.valueOf(r.get(Tables.DOGS.SEX)),
                         r.get(Tables.DOGS.WITHERS_CM),
+                        r.get(Tables.DOGS._3FCI_GENERATIONS_CONFIRMED),
                         r.get(Tables.DOGS.LAST_UPDATE),
                         r.get(Tables.DOGS.CREATED_AT),
                         r.get(Tables.DOGS.DELETED_AT)

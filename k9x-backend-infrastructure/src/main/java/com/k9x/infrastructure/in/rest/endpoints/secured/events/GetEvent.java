@@ -8,6 +8,7 @@ import com.k9x.application.events.use_case.dto.FetchEventConfigurationDTO;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 import com.k9x.application.events.use_case.dto.FetchEventExerciseDTO;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
+import com.k9x.infrastructure.in.rest.mapper.AwardResponseMapper;
 import com.k9x.oas.stub.api.SecuredEventsFetchOneApiDelegate;
 import com.k9x.oas.stub.model.*;
 import org.springframework.context.MessageSource;
@@ -54,7 +55,8 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                 mapConfiguration(event.configuration()),
                 mapJudges(event.judges()),
                 obdx.enrollmentDeadline(),
-                obdx.scoreCalculation() == null ? null : obdx.scoreCalculation().name()
+                obdx.scoreCalculation() == null ? null : obdx.scoreCalculation().name(),
+                AwardResponseMapper.toIdNameList(obdx.awards())
         );
     }
 

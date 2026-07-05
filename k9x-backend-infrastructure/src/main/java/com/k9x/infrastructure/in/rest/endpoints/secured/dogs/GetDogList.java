@@ -37,7 +37,8 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
                                 dog.identity(),
                                 dog.breed(),
                                 dog.sex() == null ? null : dog.sex().name(),
-                                dog.withersCm()
+                                dog.withersCm(),
+                                dog.threeFciGenerationsConfirmed()
                         )
                 )
                 .toList();

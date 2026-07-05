@@ -32,7 +32,7 @@ class CreateDogJooqAdapterTest {
 
         long createdAt = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", Sex.FEMALE, 55, createdAt);
+        new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", Sex.FEMALE, 55, null, createdAt);
 
         assertThat(capturedSql.get())
                 .contains("insert into \"k9x\".\"dogs\"")

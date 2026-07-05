@@ -1,6 +1,7 @@
 package com.k9x.infrastructure.in.rest.endpoints.stages;
 
 import com.k9x.application.stages.use_case.GetStageListServiceCase;
+import com.k9x.infrastructure.in.rest.mapper.AwardResponseMapper;
 import com.k9x.oas.stub.api.StagesFetchAllApiDelegate;
 import com.k9x.oas.stub.model.CompetitionLocationDetailResponseDTO;
 import com.k9x.oas.stub.model.IdNameDTO;
@@ -46,7 +47,8 @@ public class GetStages implements StagesFetchAllApiDelegate {
                                                 e.competitorCount(),
                                                 e.status(),
                                                 e.enrollmentOpened(),
-                                                e.enrollmentDeadline()))
+                                                e.enrollmentDeadline(),
+                                                AwardResponseMapper.toIdNameList(e.awards())))
                                         .toList(),
                                 stage.status(),
                                 stage.organizer()))

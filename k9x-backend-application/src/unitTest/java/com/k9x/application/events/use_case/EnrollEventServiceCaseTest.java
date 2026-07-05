@@ -48,7 +48,7 @@ class EnrollEventServiceCaseTest {
 
     private CompetitionSnapshot competition() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1",
-                Long.MAX_VALUE, 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+                Long.MAX_VALUE, 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of());
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE,
                 Long.MAX_VALUE, 0L, 0L, null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
@@ -80,7 +80,7 @@ class EnrollEventServiceCaseTest {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getDogPersistencePort.getDog("dog-1"))
                 .thenReturn(new Dog("dog-1", "id", "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
-                        Sex.MALE, 55, 0L, 0L, null));
+                        Sex.MALE, 55, null, 0L, 0L, null));
 
         assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", true), "user-1"))
                 .isInstanceOf(BihNotAllowedForSexException.class);
@@ -91,7 +91,7 @@ class EnrollEventServiceCaseTest {
     @Test
     void throws_exception_when_event_has_no_enrollment_deadline() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L,
-                null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of());
+                null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of());
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE,
                 Long.MAX_VALUE, 0L, 0L, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null,
@@ -111,7 +111,7 @@ class EnrollEventServiceCaseTest {
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
         when(getDogPersistencePort.getDog("dog-1"))
                 .thenReturn(new Dog("dog-1", "id", "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
-                        Sex.FEMALE, 55, 0L, 0L, null));
+                        Sex.FEMALE, 55, null, 0L, 0L, null));
 
         serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", true), "user-1");
 

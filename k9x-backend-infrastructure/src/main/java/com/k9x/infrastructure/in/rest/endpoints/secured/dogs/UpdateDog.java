@@ -23,7 +23,8 @@ public class UpdateDog implements SecuredDogsUpdateApiDelegate {
         updateDogServiceCase.updateDog(id,
                 new UpdateDogCommand(body.getName(), body.getImage(), body.getBreed(), body.getIdentity(),
                         body.getOwner(), body.getHandler(), body.getTeam(), body.getCountry(),
-                        body.getSex() == null ? null : Sex.valueOf(body.getSex()), body.getWithersCm()),
+                        body.getSex() == null ? null : Sex.valueOf(body.getSex()), body.getWithersCm(),
+                        body.get3fciGenerationsConfirmed()),
                 userDetails.getEmail(), userDetails.isOrganizer());
         return ResponseEntity.ok().build();
     }

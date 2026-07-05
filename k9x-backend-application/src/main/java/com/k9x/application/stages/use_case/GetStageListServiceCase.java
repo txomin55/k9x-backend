@@ -47,7 +47,7 @@ public class GetStageListServiceCase {
                                 event.competitors() == null ? 0 : event.competitors().size(),
                                 event.status(now, stage.dateTo()).name(),
                                 stage.enrollmentOpened(event, now),
-                                event.enrollmentDeadline()))
+                                event.enrollmentDeadline(), event.awards()))
                         .toList(),
                 stage.status(now).name());
     }

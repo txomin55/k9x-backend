@@ -11,7 +11,8 @@ public record UpdateObdxEventCommand(
         ObdxAvgMethod scoreCalculation,
         List<CompetitorCommand> competitors,
         List<ExerciseCommand> exercises,
-        List<JudgeCommand> judges
+        List<JudgeCommand> judges,
+        List<String> awards
 ) {
     public record CompetitorCommand(String dogId, Integer order, boolean bih) {
     }

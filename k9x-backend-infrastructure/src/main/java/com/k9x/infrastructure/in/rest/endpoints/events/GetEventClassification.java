@@ -3,6 +3,7 @@ package com.k9x.infrastructure.in.rest.endpoints.events;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
+import com.k9x.infrastructure.in.rest.mapper.AwardResponseMapper;
 import com.k9x.oas.stub.api.EventsFetchClassificationApiDelegate;
 import com.k9x.oas.stub.model.*;
 import org.springframework.context.MessageSource;
@@ -79,7 +80,8 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                         c.tied(),
                         c.startOrder() != null ? c.startOrder().intValue() : null,
                         c.bih(),
-                        c.notCompeting()))
+                        c.notCompeting(),
+                        AwardResponseMapper.toIdNameList(c.awards())))
                 .toList();
     }
 

@@ -6,12 +6,13 @@ import com.k9x.domain.dogs.aggregates.Sex;
 
 public record UpdateDogPersistencePayload(String name, String image, String breed, String identity,
                                           String owner, String handler, String team, String country,
-                                          Sex sex, Integer withersCm, long lastUpdate) {
+                                          Sex sex, Integer withersCm, Boolean threeFciGenerationsConfirmed,
+                                          long lastUpdate) {
 
     public static UpdateDogPersistencePayload from(UpdateDogCommand command) {
         return new UpdateDogPersistencePayload(
                 command.name(), command.image(), command.breed(), command.identity(),
                 command.owner(), command.handler(), command.team(), command.country(),
-                command.sex(), command.withersCm(), DateUtils.nowUtcMillis());
+                command.sex(), command.withersCm(), command.threeFciGenerationsConfirmed(), DateUtils.nowUtcMillis());
     }
 }

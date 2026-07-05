@@ -38,7 +38,8 @@ public class UpdateObdxEventInfo implements SecuredEventsUpdateInfoObdxApiDelega
                                 .toList(),
                         body.getJudges() == null ? List.of() : body.getJudges().stream()
                                 .map(j -> new UpdateObdxEventCommand.JudgeCommand(j.getId(), j.getCollectorEmail()))
-                                .toList()
+                                .toList(),
+                        body.getAwards() == null ? List.of() : body.getAwards()
                 ),
                 userDetails.getEmail(),
                 userDetails.isOrganizer()

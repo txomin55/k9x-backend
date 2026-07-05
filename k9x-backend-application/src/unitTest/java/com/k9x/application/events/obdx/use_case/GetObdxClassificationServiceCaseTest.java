@@ -76,7 +76,7 @@ class GetObdxClassificationServiceCaseTest {
         for (Row r : rows) {
             if (dogIds.add(r.dogId())) {
                 competitors.add(new EventCompetitor(r.dogId(), r.dogName(), "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "identity", (short) 0, false, false, null, null));
+                        "breed", "identity", (short) 0, false, false, null, null, null));
             }
             if (judgeIds.add(r.judgeId())) {
                 judges.add(new EventJudge(r.judgeId(), "Judge " + r.judgeId(), null));
@@ -89,7 +89,7 @@ class GetObdxClassificationServiceCaseTest {
                 : List.of(new EventExercise("ex-1", (short) 1, null));
 
         return new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1", "stage-1", "creator@test.com",
-                null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG, competitors, exercises, judges, scores);
+                null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG, competitors, exercises, judges, scores, List.of());
     }
 
     private record Row(String dogId, String dogName, String judgeId, BigDecimal score) {}
@@ -167,7 +167,7 @@ class GetObdxClassificationServiceCaseTest {
         // MID_AVG (which only triggers with 4+ PRESENT scores).
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "identity", (short) 0, false, false, null, null));
+                        "breed", "identity", (short) 0, false, false, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(
                 new EventJudge("j-1", "Judge j-1", null),
@@ -181,7 +181,7 @@ class GetObdxClassificationServiceCaseTest {
                 new Score("ex-1", "j-4", "dog-1", null, 1000L));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
-                competitors, exercises, judges, scores);
+                competitors, exercises, judges, scores, List.of());
 
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
@@ -200,7 +200,7 @@ class GetObdxClassificationServiceCaseTest {
     void exposes_stamped_yellow_cards_per_exercise_with_judge_and_timestamp() {
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "identity", (short) 0, false, false, null, null));
+                        "breed", "identity", (short) 0, false, false, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(
                 new EventJudge("j-1", "Judge j-1", null),
@@ -210,7 +210,7 @@ class GetObdxClassificationServiceCaseTest {
                 new Score("ex-1", "j-2", "dog-1", new BigDecimal("6"), 1000L, null));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
-                competitors, exercises, judges, scores);
+                competitors, exercises, judges, scores, List.of());
 
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
@@ -230,14 +230,14 @@ class GetObdxClassificationServiceCaseTest {
     void exposes_the_stamped_red_card_of_an_exercise_with_judge_and_timestamp() {
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "identity", (short) 0, false, false, null, null));
+                        "breed", "identity", (short) 0, false, false, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
         List<Score> scores = List.of(
                 new Score("ex-1", "j-1", "dog-1", null, 1000L, null, 5000L));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
-                competitors, exercises, judges, scores);
+                competitors, exercises, judges, scores, List.of());
 
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
@@ -255,9 +255,9 @@ class GetObdxClassificationServiceCaseTest {
         // Each dog's average must use only its ring's scores, never the other ring's absent judges.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "id-1", (short) 0, false, false, null, null),
+                        "breed", "id-1", (short) 0, false, false, null, null, null),
                 new EventCompetitor("dog-2", "Max", "owner@test.com", "Handler", "Team B", "ES",
-                        "breed", "id-2", (short) 0, false, false, null, null));
+                        "breed", "id-2", (short) 0, false, false, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(
                 new EventJudge("j-1", "Judge j-1", null),
@@ -277,7 +277,7 @@ class GetObdxClassificationServiceCaseTest {
                 new Score("ex-1", "j-4", "dog-2", new BigDecimal("7"), 1000L));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
-                competitors, exercises, judges, scores);
+                competitors, exercises, judges, scores, List.of());
 
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
@@ -316,11 +316,11 @@ class GetObdxClassificationServiceCaseTest {
         // despite the higher score. dog-3: not competing, ranked last regardless of score.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "id-1", (short) 1, false, false, null, null),
+                        "breed", "id-1", (short) 1, false, false, null, null, null),
                 new EventCompetitor("dog-2", "Max", "owner@test.com", "Handler", "Team B", "ES",
-                        "breed", "id-2", (short) 2, false, false, null, null),
+                        "breed", "id-2", (short) 2, false, false, null, null, null),
                 new EventCompetitor("dog-3", "Fido", "owner@test.com", "Handler", "Team C", "ES",
-                        "breed", "id-3", (short) 3, false, true, null, null));
+                        "breed", "id-3", (short) 3, false, true, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
         List<Score> scores = List.of(
@@ -329,7 +329,7 @@ class GetObdxClassificationServiceCaseTest {
                 new Score("ex-1", "j-1", "dog-3", new BigDecimal("7"), 1000L));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
-                competitors, exercises, judges, scores);
+                competitors, exercises, judges, scores, List.of());
 
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
@@ -347,9 +347,9 @@ class GetObdxClassificationServiceCaseTest {
         // dynamic ranking position.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "id-1", (short) 5, false, false, null, null),
+                        "breed", "id-1", (short) 5, false, false, null, null, null),
                 new EventCompetitor("dog-2", "Max", "owner@test.com", "Handler", "Team B", "ES",
-                        "breed", "id-2", (short) 3, false, false, null, null));
+                        "breed", "id-2", (short) 3, false, false, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
         List<Score> scores = List.of(
@@ -357,7 +357,7 @@ class GetObdxClassificationServiceCaseTest {
                 new Score("ex-1", "j-1", "dog-2", new BigDecimal("9"), 1000L));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
-                competitors, exercises, judges, scores);
+                competitors, exercises, judges, scores, List.of());
 
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
@@ -394,7 +394,7 @@ class GetObdxClassificationServiceCaseTest {
         // one exercise, two judges, but only j-1 has scored -> required (1*2) not met -> LIVE.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "identity", (short) 0, false, false, null, null));
+                        "breed", "identity", (short) 0, false, false, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(
                 new EventJudge("j-1", "Judge j-1", null),
@@ -404,7 +404,7 @@ class GetObdxClassificationServiceCaseTest {
                 new Score("ex-1", "j-2", "dog-1", null, 1000L));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
-                competitors, exercises, judges, scores);
+                competitors, exercises, judges, scores, List.of());
 
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
@@ -421,14 +421,14 @@ class GetObdxClassificationServiceCaseTest {
         // while each exercise still exposes its maximum: exerciseScore ex-1 -> 10*coef(3)=30, ex-2 -> 10*coef(4)=40.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Luna", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "identity", (short) 0, false, false, null, null));
+                        "breed", "identity", (short) 0, false, false, null, null, null));
         List<EventExercise> exercises = List.of(
                 new EventExercise("ex-1", (short) 1, null),
                 new EventExercise("ex-2", (short) 2, null));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
-                competitors, exercises, judges, List.of());
+                competitors, exercises, judges, List.of(), List.of());
 
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
@@ -458,7 +458,7 @@ class GetObdxClassificationServiceCaseTest {
         // The competitor has started, so it is LIVE (not settled: ex-2 still missing).
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "identity", (short) 0, false, false, null, null));
+                        "breed", "identity", (short) 0, false, false, null, null, null));
         List<EventExercise> exercises = List.of(
                 new EventExercise("ex-1", (short) 1, null),
                 new EventExercise("ex-2", (short) 2, null));
@@ -466,7 +466,7 @@ class GetObdxClassificationServiceCaseTest {
         List<Score> scores = List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("8"), 1000L));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
-                competitors, exercises, judges, scores);
+                competitors, exercises, judges, scores, List.of());
 
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
@@ -484,13 +484,13 @@ class GetObdxClassificationServiceCaseTest {
         // avg(8)*coef(3)=24.00, the returned totalScore must be the manual final score.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "identity", (short) 0, false, false, new BigDecimal("42.00"), null));
+                        "breed", "identity", (short) 0, false, false, new BigDecimal("42.00"), null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
         List<Score> scores = List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("8"), 1000L));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
-                competitors, exercises, judges, scores);
+                competitors, exercises, judges, scores, List.of());
 
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
@@ -520,5 +520,126 @@ class GetObdxClassificationServiceCaseTest {
         assertThat(result.competitors()).hasSize(2);
         assertThat(result.competitors().get(0).position()).isEqualTo(1);
         assertThat(result.competitors().get(1).position()).isEqualTo(1);
+    }
+
+    // ---- CACOB / CACIOB awards -------------------------------------------------------------------
+
+    private EventCompetitor competitorWithFciFlag(String dogId, String dogName, short startOrder, Boolean fciConfirmed) {
+        return new EventCompetitor(dogId, dogName, "owner@test.com", "Handler", "Team A", "ES",
+                "breed", "id-" + dogId, startOrder, false, false, null, null, fciConfirmed);
+    }
+
+    @Test
+    void awards_cacob_to_first_place_when_fci_confirmed_and_score_rating_above_80() {
+        List<EventCompetitor> competitors = List.of(
+                competitorWithFciFlag("dog-1", "Rex", (short) 1, true),
+                competitorWithFciFlag("dog-2", "Max", (short) 2, false));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        List<Score> scores = List.of(
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("9"), 1000L),
+                new Score("ex-1", "j-1", "dog-2", new BigDecimal("6"), 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of("CACOB"));
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(awardsOf(result, "dog-1")).containsExactly("CACOB");
+        assertThat(awardsOf(result, "dog-2")).isEmpty();
+    }
+
+    @Test
+    void awards_rcacob_to_the_best_ranked_fci_confirmed_dog_when_it_is_not_first() {
+        List<EventCompetitor> competitors = List.of(
+                competitorWithFciFlag("dog-1", "Rex", (short) 1, false),
+                competitorWithFciFlag("dog-2", "Max", (short) 2, true));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        List<Score> scores = List.of(
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("9"), 1000L),
+                new Score("ex-1", "j-1", "dog-2", new BigDecimal("8.5"), 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of("CACOB"));
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(awardsOf(result, "dog-1")).isEmpty();
+        assertThat(awardsOf(result, "dog-2")).containsExactly("RCACOB");
+    }
+
+    private List<String> awardsOf(FetchObdxClassificationDTO result, String dogId) {
+        return result.competitors().stream()
+                .filter(c -> c.dogId().equals(dogId))
+                .findFirst().orElseThrow().awards();
+    }
+
+    @Test
+    void grants_no_award_when_best_ranked_fci_confirmed_dog_is_below_the_score_threshold() {
+        // dog-2 is the best-ranked FCI-confirmed dog but only reaches 70%: it blocks the award for
+        // everyone behind it (dog-3, also confirmed and above 80%) without qualifying itself.
+        List<EventCompetitor> competitors = List.of(
+                competitorWithFciFlag("dog-1", "Rex", (short) 1, false),
+                competitorWithFciFlag("dog-2", "Max", (short) 2, true),
+                competitorWithFciFlag("dog-3", "Fido", (short) 3, true));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        List<Score> scores = List.of(
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("9"), 1000L),
+                new Score("ex-1", "j-1", "dog-2", new BigDecimal("7"), 1000L),
+                new Score("ex-1", "j-1", "dog-3", new BigDecimal("6"), 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of("CACOB"));
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors()).allSatisfy(c -> assertThat(c.awards()).isEmpty());
+    }
+
+    @Test
+    void awards_both_cacob_and_caciob_to_the_same_competitor_when_event_enables_both() {
+        List<EventCompetitor> competitors = List.of(competitorWithFciFlag("dog-1", "Rex", (short) 1, true));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        List<Score> scores = List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("9"), 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of("CACOB", "CACIOB"));
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors().getFirst().awards()).containsExactlyInAnyOrder("CACOB", "CACIOB");
+    }
+
+    @Test
+    void grants_no_award_when_event_does_not_enable_cacob_or_caciob() {
+        List<EventCompetitor> competitors = List.of(competitorWithFciFlag("dog-1", "Rex", (short) 1, true));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        List<Score> scores = List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("9"), 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of());
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors().getFirst().awards()).isEmpty();
     }
 }

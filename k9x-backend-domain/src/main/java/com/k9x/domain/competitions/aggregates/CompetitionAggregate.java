@@ -193,7 +193,7 @@ public final class CompetitionAggregate {
             throw new UnauthorizedResourceException();
         }
         changes.add(new ObdxEventInfoUpdated(eventId, data.name(), data.configurationId(), data.scoreCalculation(),
-                data.enrollmentDeadline(), data.competitors(), data.exercises(), data.judges(), now));
+                data.enrollmentDeadline(), data.competitors(), data.exercises(), data.judges(), now, data.awards()));
     }
 
     /**

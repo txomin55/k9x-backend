@@ -23,6 +23,7 @@ public class GetObdxClassificationServiceCase {
     private final ClassificationCacheManagerPort classificationCacheManagerPort;
 
     private static final BigDecimal YELLOW_CARD_PENALTY = BigDecimal.TEN;
+    private static final BigDecimal CACOB_MIN_SCORE_RATING = new BigDecimal("80");
 
     public GetObdxClassificationServiceCase(
             GetObdxClassificationConfigPort getObdxClassificationConfigPort,
@@ -108,11 +109,14 @@ public class GetObdxClassificationServiceCase {
         Map<String, Boolean> bihByDog = new LinkedHashMap<>();
         // dogId → not competing flag, set on enrollment
         Map<String, Boolean> notCompetingByDog = new LinkedHashMap<>();
+        // dogId → whether the dog has 3 FCI generations confirmed, used to resolve CACOB/CACIOB awards
+        Map<String, Boolean> fciConfirmedByDog = new LinkedHashMap<>();
         for (EventCompetitor competitor : (event.competitors() == null ? List.<EventCompetitor>of() : event.competitors())) {
             startOrderByDog.put(competitor.dogId(), competitor.position());
             finalScoreByDog.put(competitor.dogId(), competitor.finalScore());
             bihByDog.put(competitor.dogId(), competitor.bih());
             notCompetingByDog.put(competitor.dogId(), competitor.notCompeting());
+            fciConfirmedByDog.put(competitor.dogId(), competitor.threeFciGenerationsConfirmed());
         }
 
         Long scoresLastUpdate = null;
@@ -213,12 +217,61 @@ public class GetObdxClassificationServiceCase {
             competitors.add(new FetchClassificationCompetitorDTO(
                     dogId, meta.dogName(), meta.dogBreed(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
                     startOrderByDog.get(dogId), 0, totalScore, competitorScoreRating, false,
-                    status.name(), bihByDog.get(dogId), Boolean.TRUE.equals(notCompetingByDog.get(dogId)), exercises));
+                    status.name(), bihByDog.get(dogId), Boolean.TRUE.equals(notCompetingByDog.get(dogId)), exercises,
+                    List.of()));
         }
 
         assignPositions(competitors, config);
+        assignCacobAwards(competitors, event.awards(), fciConfirmedByDog);
 
         return new FetchObdxClassificationDTO(scoresLastUpdate, competitors);
+    }
+
+    /**
+     * Awards CACOB/CACIOB (and their reserve RCACOB/RCACIOB) when the event enables them. For each enabled award,
+     * the best-ranked competitor whose dog has {@code threeFciGenerationsConfirmed} decides the outcome: if it
+     * also holds a score rating above {@link #CACOB_MIN_SCORE_RATING}, it wins the main award when ranked first,
+     * or the reserve award otherwise. Any competitor ranked behind it is blocked regardless of its own eligibility,
+     * since only the single best-ranked confirmed dog can ever qualify.
+     */
+    private void assignCacobAwards(List<FetchClassificationCompetitorDTO> competitors, List<String> eventAwards,
+                                   Map<String, Boolean> fciConfirmedByDog) {
+        if (eventAwards == null) {
+            return;
+        }
+        if (eventAwards.contains("CACOB")) {
+            assignCacobAward(competitors, fciConfirmedByDog, "CACOB", "RCACOB");
+        }
+        if (eventAwards.contains("CACIOB")) {
+            assignCacobAward(competitors, fciConfirmedByDog, "CACIOB", "RCACIOB");
+        }
+    }
+
+    private void assignCacobAward(List<FetchClassificationCompetitorDTO> competitors,
+                                  Map<String, Boolean> fciConfirmedByDog, String mainAward, String reserveAward) {
+        for (int i = 0; i < competitors.size(); i++) {
+            FetchClassificationCompetitorDTO competitor = competitors.get(i);
+            if (!Boolean.TRUE.equals(fciConfirmedByDog.get(competitor.dogId()))) {
+                continue;
+            }
+            if (competitor.scoreRating() != null && competitor.scoreRating().compareTo(CACOB_MIN_SCORE_RATING) > 0) {
+                String award = competitor.position() == 1 ? mainAward : reserveAward;
+                addAward(competitors, i, award);
+            }
+            // The best-ranked confirmed dog decides the outcome regardless of its own eligibility: every
+            // competitor ranked behind it is blocked from this award, so the search stops here.
+            return;
+        }
+    }
+
+    private void addAward(List<FetchClassificationCompetitorDTO> competitors, int index, String award) {
+        FetchClassificationCompetitorDTO c = competitors.get(index);
+        List<String> awards = new ArrayList<>(c.awards());
+        awards.add(award);
+        competitors.set(index, new FetchClassificationCompetitorDTO(
+                c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
+                c.startOrder(), c.position(), c.totalScore(), c.scoreRating(), c.tied(), c.status(), c.bih(),
+                c.notCompeting(), c.exercises(), awards));
     }
 
     /**
@@ -319,6 +372,6 @@ public class GetObdxClassificationServiceCase {
         competitors.set(index, new FetchClassificationCompetitorDTO(
                 c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
                 c.startOrder(), position, c.totalScore(), c.scoreRating(), tied, c.status(), c.bih(),
-                c.notCompeting(), c.exercises()));
+                c.notCompeting(), c.exercises(), c.awards()));
     }
 }

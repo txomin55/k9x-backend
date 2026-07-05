@@ -45,7 +45,7 @@ class GetStageServiceCaseTest {
 
     private EventSnapshot event() {
         return new EventSnapshot("evt-1", "obdx-1", "obdx", "Open", "s-1", "user-1",
-                null, 0L, 0L, null, null, List.of(), List.of(), List.of(), List.of());
+                null, 0L, 0L, null, null, List.of(), List.of(), List.of(), List.of(), List.of());
     }
 
     private CompetitionSnapshot competition(StageSnapshot stage) {

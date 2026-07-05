@@ -16,7 +16,7 @@ public class CreateDogJooqAdapter implements CreateDogPersistencePort {
     @Override
     public void createDog(String id, String name, String image, String breed, String identity,
                           String owner, String handler, String creator, String team, String country,
-                          Sex sex, Integer withersCm, long createdAt) {
+                          Sex sex, Integer withersCm, Boolean threeFciGenerationsConfirmed, long createdAt) {
         dsl.insertInto(Tables.DOGS)
                 .set(Tables.DOGS.ID, id)
                 .set(Tables.DOGS.NAME, name)
@@ -30,6 +30,7 @@ public class CreateDogJooqAdapter implements CreateDogPersistencePort {
                 .set(Tables.DOGS.COUNTRY, country)
                 .set(Tables.DOGS.SEX, sex == null ? null : sex.name())
                 .set(Tables.DOGS.WITHERS_CM, withersCm)
+                .set(Tables.DOGS._3FCI_GENERATIONS_CONFIRMED, threeFciGenerationsConfirmed)
                 .set(Tables.DOGS.CREATED_AT, createdAt)
                 .set(Tables.DOGS.LAST_UPDATE, createdAt)
                 .execute();

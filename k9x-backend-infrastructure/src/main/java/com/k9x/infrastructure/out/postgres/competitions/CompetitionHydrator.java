@@ -122,7 +122,7 @@ public class CompetitionHydrator {
 
         List<EventShell> eventShells = dsl.select(ev.ID, ev.CONFIGURATION_ID, ev.DISCIPLINE, ev.NAME,
                         ev.STAGE_ID, ev.CREATOR, ev.ENROLLMENT_DEADLINE, ev.LAST_UPDATE, ev.CREATED_AT,
-                        ev.DELETED_AT, ev.SCORE_CALCULATION)
+                        ev.DELETED_AT, ev.SCORE_CALCULATION, ev.AWARDS)
                 .from(ev)
                 .join(st).on(st.ID.eq(ev.STAGE_ID))
                 .where(st.COMPETITION_ID.in(toList(competitionIds)))
@@ -140,6 +140,7 @@ public class CompetitionHydrator {
                     shell.createdAt = r.get(ev.CREATED_AT);
                     shell.deletedAt = r.get(ev.DELETED_AT);
                     shell.scoreCalculation = r.get(ev.SCORE_CALCULATION);
+                    shell.awards = r.get(ev.AWARDS);
                     return shell;
                 });
 
@@ -157,7 +158,8 @@ public class CompetitionHydrator {
                     competitors.getOrDefault(s.id, new ArrayList<>()),
                     exercises.getOrDefault(s.id, new ArrayList<>()),
                     judges.getOrDefault(s.id, new ArrayList<>()),
-                    scores.getOrDefault(s.id, new ArrayList<>()));
+                    scores.getOrDefault(s.id, new ArrayList<>()),
+                    s.awards == null ? List.of() : Arrays.asList(s.awards));
             eventsByStage.computeIfAbsent(s.stageId, _ -> new ArrayList<>()).add(event);
         }
         return eventsByStage;
@@ -171,7 +173,7 @@ public class CompetitionHydrator {
         EventCompetitors ec = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
         Dogs d = Tables.DOGS;
         dsl.select(ec.EVENT_ID, ec.DOG_ID, ec.POSITION, ec.VERIFIED, ec.NOT_COMPETING, ec.FINAL_SCORE, ec.BIH,
-                        d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.IDENTITY)
+                        d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.IDENTITY, d._3FCI_GENERATIONS_CONFIRMED)
                 .from(ec)
                 .leftJoin(d).on(d.ID.eq(ec.DOG_ID).and(d.DELETED_AT.isNull()))
                 .where(ec.EVENT_ID.in(eventIds))
@@ -180,7 +182,8 @@ public class CompetitionHydrator {
                                 r.get(ec.DOG_ID), r.get(d.NAME), r.get(d.OWNER), r.get(d.HANDLER), r.get(d.TEAM),
                                 r.get(d.COUNTRY), r.get(d.BREED), r.get(d.IDENTITY),
                                 r.get(ec.POSITION), r.get(ec.VERIFIED),
-                                Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)), r.get(ec.FINAL_SCORE), r.get(ec.BIH))));
+                                Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)), r.get(ec.FINAL_SCORE), r.get(ec.BIH),
+                                r.get(d._3FCI_GENERATIONS_CONFIRMED))));
         return result;
     }
 
@@ -254,5 +257,6 @@ public class CompetitionHydrator {
         Long enrollmentDeadline;
         long lastUpdate, createdAt;
         Long deletedAt;
+        String[] awards;
     }
 }

@@ -34,7 +34,7 @@ class UpdateDogJooqAdapterTest {
         long lastUpdate = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
         new UpdateDogJooqAdapter(dsl).updateDog("dog-123",
-                new UpdateDogPersistencePayload("Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "team-1", "ES", Sex.FEMALE, 55, lastUpdate));
+                new UpdateDogPersistencePayload("Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "team-1", "ES", Sex.FEMALE, 55, null, lastUpdate));
 
         assertThat(capturedSql.get())
                 .contains("update \"k9x\".\"dogs\"")

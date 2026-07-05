@@ -66,7 +66,8 @@ public class UpdateObdxEventServiceCase {
                         .toList(),
                 command.judges().stream()
                         .map(j -> new ObdxJudgeItem(j.judgeId(), j.collectorEmail()))
-                        .toList());
+                        .toList(),
+                command.awards());
     }
 
     private void assertConfigurationId(String configurationId) {
