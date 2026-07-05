@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.in.rest.configuration.exception;
 
+import com.k9x.application.dogs.exceptions.DogChipAlreadyExistsException;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.exceptions.DomainException;
 import com.k9x.domain.exceptions.NotFoundResourceException;
@@ -65,6 +66,15 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     final ResponseEntity<CustomError> handleDisciplineConfigurationMalformedException(DisciplineConfigurationMalformedException ex, Locale locale) {
         log.warn("Discipline configuration malformed [{}] args={}", ex.getId(), ex.getArgs());
+        CustomError error = new CustomError(
+                messageSource.getMessage(ex.getId(), ex.getArgs(), locale), HttpStatus.CONFLICT.value());
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(DogChipAlreadyExistsException.class)
+    @ResponseBody
+    final ResponseEntity<CustomError> handleDogChipAlreadyExistsException(DogChipAlreadyExistsException ex, Locale locale) {
+        log.warn("Dog chip already exists [{}] args={}", ex.getId(), ex.getArgs());
         CustomError error = new CustomError(
                 messageSource.getMessage(ex.getId(), ex.getArgs(), locale), HttpStatus.CONFLICT.value());
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);

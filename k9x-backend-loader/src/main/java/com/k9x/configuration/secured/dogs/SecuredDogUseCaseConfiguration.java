@@ -16,8 +16,9 @@ import org.springframework.context.annotation.Configuration;
 public class SecuredDogUseCaseConfiguration {
 
     @Bean
-    public CreateDogServiceCase createDogServiceCase(CreateDogPersistencePort createDogPersistencePort) {
-        return new CreateDogServiceCase(createDogPersistencePort);
+    public CreateDogServiceCase createDogServiceCase(CreateDogPersistencePort createDogPersistencePort,
+                                                      GetDogPersistencePort getDogPersistencePort) {
+        return new CreateDogServiceCase(createDogPersistencePort, getDogPersistencePort);
     }
 
     @Bean

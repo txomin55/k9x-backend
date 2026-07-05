@@ -33,7 +33,8 @@ public enum ErrorEnum {
     COLLECTOR_NOT_FOUND("error.collector_not_found"),
     EXERCISE_CONFIGURATION_NOT_FOUND("error.exercise_configuration_not_found"),
     BIH_NOT_ALLOWED_FOR_SEX("error.bih_not_allowed_for_sex"),
-    NOT_ENOUGH_JUDGES_FOR_MID_AVG("error.not_enough_judges_for_mid_avg");
+    NOT_ENOUGH_JUDGES_FOR_MID_AVG("error.not_enough_judges_for_mid_avg"),
+    DOG_CHIP_ALREADY_EXISTS("error.dog_chip_already_exists");
 
     private final String id;
 
