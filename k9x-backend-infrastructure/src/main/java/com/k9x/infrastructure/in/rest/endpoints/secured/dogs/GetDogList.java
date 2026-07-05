@@ -29,7 +29,6 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
                                 dog.name(),
                                 dog.image(),
                                 dog.owned(),
-                                dog.creator(),
                                 dog.country(),
                                 dog.team(),
                                 dog.owner(),

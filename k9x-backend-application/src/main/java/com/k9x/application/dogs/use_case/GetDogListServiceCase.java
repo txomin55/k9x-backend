@@ -30,7 +30,6 @@ public class GetDogListServiceCase {
                                 dog.getName(),
                                 dog.getImage(),
                                 userId.equals(dog.getOwner()),
-                                dog.getCreator(),
                                 dog.getCountry(),
                                 dog.getTeam(),
                                 dog.getOwner(),

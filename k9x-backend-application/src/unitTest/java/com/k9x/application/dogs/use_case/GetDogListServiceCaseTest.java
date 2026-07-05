@@ -89,7 +89,6 @@ class GetDogListServiceCaseTest {
         assertThat(dto.image()).isEqualTo("img.png");
         assertThat(dto.owner()).isEqualTo("user-1");
         assertThat(dto.identity()).isEqualTo("ident-1");
-        assertThat(dto.creator()).isEqualTo("creator-1");
         assertThat(dto.country()).isEqualTo("ES");
         assertThat(dto.team()).isEqualTo("team-1");
     }
