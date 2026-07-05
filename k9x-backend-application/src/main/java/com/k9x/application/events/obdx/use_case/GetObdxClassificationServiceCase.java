@@ -224,7 +224,13 @@ public class GetObdxClassificationServiceCase {
         assignPositions(competitors, config);
         assignCacobAwards(competitors, event.awards(), fciConfirmedByDog);
 
-        return new FetchObdxClassificationDTO(scoresLastUpdate, competitors);
+        List<FetchObdxEventJudgeDTO> judges = (event.judges() == null ? List.<EventJudge>of() : event.judges())
+                .stream()
+                .map(j -> new FetchObdxEventJudgeDTO(j.judgeId(), j.judgeName(), j.collectorEmail()))
+                .toList();
+
+        return new FetchObdxClassificationDTO(scoresLastUpdate, competitors,
+                event.scoreCalculation() == null ? null : event.scoreCalculation().name(), judges);
     }
 
     /**

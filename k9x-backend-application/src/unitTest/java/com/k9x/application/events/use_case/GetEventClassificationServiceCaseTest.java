@@ -90,7 +90,7 @@ class GetEventClassificationServiceCaseTest {
 
     @Test
     void fetches_from_db_and_caches_context_on_cache_miss() throws IOException {
-        FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(5000L, List.of());
+        FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of());
         when(eventClassificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
         when(getCompetitionPersistencePort.competitionIdByEvent("evt-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(ACTIVE_EVENT));
@@ -112,7 +112,7 @@ class GetEventClassificationServiceCaseTest {
 
     @Test
     void uses_cached_context_without_hitting_db_on_cache_hit() throws IOException {
-        FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(5000L, List.of());
+        FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of());
         when(eventClassificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt()))
                 .thenReturn(new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE));
         when(getObdxClassificationServiceCase.getClassification(ACTIVE_EVENT)).thenReturn(obdx);

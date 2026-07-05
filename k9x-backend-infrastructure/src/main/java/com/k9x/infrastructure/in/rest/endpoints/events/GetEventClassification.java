@@ -2,6 +2,7 @@ package com.k9x.infrastructure.in.rest.endpoints.events;
 
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventJudgeDTO;
 import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
 import com.k9x.infrastructure.in.rest.mapper.AwardResponseMapper;
 import com.k9x.oas.stub.api.EventsFetchClassificationApiDelegate;
@@ -35,7 +36,14 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                 dto.eventStatus(),
                 dto.scoresLastUpdate(),
                 dto.obdx() == null ? null
-                        : new ObdxStageEventClassificationResponseDTO(mapCompetitors(dto.obdx().competitors()))));
+                        : new ObdxStageEventClassificationResponseDTO(mapCompetitors(dto.obdx().competitors()),
+                                dto.obdx().scoreCalculation(), mapJudges(dto.obdx().judges()))));
+    }
+
+    private List<IdNameDTO> mapJudges(List<FetchObdxEventJudgeDTO> judges) {
+        return judges.stream()
+                .map(j -> new IdNameDTO(j.judgeName(), j.judgeId()))
+                .toList();
     }
 
     private List<StageEventClassificationItemResponseDTO> mapCompetitors(

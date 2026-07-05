@@ -101,7 +101,7 @@ class GetObdxClassificationServiceCaseTest {
 
     @Test
     void returns_cached_result_when_ttl_not_expired() {
-        FetchObdxClassificationDTO cached = new FetchObdxClassificationDTO(null, List.of());
+        FetchObdxClassificationDTO cached = new FetchObdxClassificationDTO(null, List.of(), "AVG", List.of());
 
         when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
         when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(cached);
