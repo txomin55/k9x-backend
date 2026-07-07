@@ -8,7 +8,11 @@ import com.k9x.application.events.obdx.exceptions.ObdxCollectorNotFoundException
 import com.k9x.application.events.obdx.exceptions.ObdxDuplicateDogException;
 import com.k9x.application.events.obdx.exceptions.ObdxDuplicateExerciseException;
 import com.k9x.application.events.obdx.exceptions.ObdxDuplicateJudgeException;
+import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeNotFoundException;
+import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeRequiredException;
+import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
+import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
@@ -22,6 +26,7 @@ import com.k9x.domain.shared.UtcDates;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class UpdateObdxEventServiceCase {
 
@@ -46,6 +51,8 @@ public class UpdateObdxEventServiceCase {
         assertNoDuplicateJudges(command);
         assertNoDuplicateExercises(command);
         assertNoDuplicateDogs(command);
+        assertExerciseJudgesExist(command);
+        assertEnoughJudgesForMidAvg(command);
 
         String competitionId = getCompetitionPersistencePort.competitionIdByEvent(id);
         if (competitionId == null) {
@@ -71,7 +78,8 @@ public class UpdateObdxEventServiceCase {
                         .toList(),
                 command.exercises().stream()
                         .map(e -> new ObdxExerciseItem(e.exerciseId(), e.order().shortValue(),
-                                e.tags() == null ? new String[0] : e.tags().toArray(String[]::new)))
+                                e.tags() == null ? new String[0] : e.tags().toArray(String[]::new),
+                                e.judgeIds() == null ? new String[0] : e.judgeIds().toArray(String[]::new)))
                         .toList(),
                 command.judges().stream()
                         .map(j -> new ObdxJudgeItem(j.judgeId(), j.collectorEmail()))
@@ -99,6 +107,37 @@ public class UpdateObdxEventServiceCase {
         command.exercises().forEach(e -> {
             if (!seen.add(e.exerciseId())) {
                 throw new ObdxDuplicateExerciseException();
+            }
+        });
+    }
+
+    private void assertExerciseJudgesExist(UpdateObdxEventCommand command) {
+        Set<String> eventJudgeIds = command.judges().stream()
+                .map(UpdateObdxEventCommand.JudgeCommand::judgeId)
+                .collect(Collectors.toSet());
+        command.exercises().forEach(e -> {
+            if (e.judgeIds() == null || e.judgeIds().isEmpty()) {
+                throw new ObdxExerciseJudgeRequiredException(e.exerciseId());
+            }
+            e.judgeIds().forEach(judgeId -> {
+                if (!eventJudgeIds.contains(judgeId)) {
+                    throw new ObdxExerciseJudgeNotFoundException(judgeId);
+                }
+            });
+        });
+    }
+
+    /**
+     * MID_AVG discards the single highest and lowest score per exercise, so every exercise needs at
+     * least 4 assigned judges for that to be meaningful — otherwise it degenerates into (near-)AVG.
+     */
+    private void assertEnoughJudgesForMidAvg(UpdateObdxEventCommand command) {
+        if (command.scoreCalculation() != ObdxAvgMethod.MID_AVG) {
+            return;
+        }
+        command.exercises().forEach(e -> {
+            if (e.judgeIds() != null && e.judgeIds().size() < 4) {
+                throw new ObdxNotEnoughJudgesException();
             }
         });
     }

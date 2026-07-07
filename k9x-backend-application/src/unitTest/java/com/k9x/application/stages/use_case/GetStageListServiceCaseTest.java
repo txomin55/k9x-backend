@@ -59,7 +59,7 @@ class GetStageListServiceCaseTest {
     }
 
     private static EventExercise exercise(String id) {
-        return new EventExercise(id, (short) 1, List.of());
+        return new EventExercise(id, (short) 1, List.of(), List.of("j-1"));
     }
 
     private static EventJudge judge(String id) {

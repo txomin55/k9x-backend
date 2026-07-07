@@ -115,7 +115,9 @@ class CompetitionAggregateTest {
 
     @Test
     void delete_records_competition_deleted_and_cascades_to_stages_and_events() {
-        StageSnapshot stage = stageWith(event(null), FUTURE);
+        // dateFrom in the future -> stage is CREATED (not yet TO_START), so the competition is deletable.
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, FUTURE, 0L, 0L, null,
+                List.of(event(null)));
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stage));
 
         aggregate.delete(OWNER, NOW);

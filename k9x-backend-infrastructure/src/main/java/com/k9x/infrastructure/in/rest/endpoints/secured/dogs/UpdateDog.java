@@ -24,7 +24,7 @@ public class UpdateDog implements SecuredDogsUpdateApiDelegate {
                 new UpdateDogCommand(body.getName(), body.getImage(), body.getBreed(), body.getIdentity(),
                         body.getOwner(), body.getHandler(), body.getTeam(), body.getCountry(),
                         body.getSex() == null ? null : Sex.valueOf(body.getSex()), body.getWithersCm(),
-                        body.get3fciGenerationsConfirmed()),
+                        body.getThreeFciGenerationsConfirmed()),
                 userDetails.getEmail(), userDetails.isOrganizer());
         return ResponseEntity.ok().build();
     }

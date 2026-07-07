@@ -50,7 +50,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
             List<FetchClassificationCompetitorDTO> competitors) {
         return competitors.stream()
                 .map(c -> new StageEventClassificationItemResponseDTO(
-                        c.country(),
+                        resolveCountry(c.country()),
                         c.owner(),
                         c.handler(),
                         c.team(),
@@ -92,6 +92,15 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                         c.notCompeting(),
                         AwardResponseMapper.toIdNameList(c.awards())))
                 .toList();
+    }
+
+    private IdNameDTO resolveCountry(String countryCode) {
+        if (countryCode == null) {
+            return null;
+        }
+        String name = messageSource.getMessage(
+                "country." + countryCode.toLowerCase() + ".name", null, countryCode, LocaleContextHolder.getLocale());
+        return new IdNameDTO(name, countryCode);
     }
 
     private String resolveExerciseName(String exerciseId) {

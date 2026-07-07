@@ -68,20 +68,19 @@ public record EventSnapshot(
 
     /**
      * An event is finished when it has at least one competitor and every competitor is settled. A
-     * competitor is settled when it is flagged {@code notCompeting} or holds a score for every
-     * exercise×judge combination of the event.
+     * competitor is settled when it is flagged {@code notCompeting} or holds a score from every judge
+     * assigned to each exercise of the event.
      */
     private boolean allCompetitorsSettled() {
         if (competitors == null || competitors.isEmpty()) {
             return false;
         }
-        int required = requiredScores();
-        return competitors.stream().allMatch(c -> isSettled(c, required));
+        return competitors.stream().allMatch(this::isSettled);
     }
 
     /**
-     * Whether the given competitor is settled: flagged {@code notCompeting} or holding a score for every
-     * exercise×judge combination of the event. Unknown dog ids are treated as not settled.
+     * Whether the given competitor is settled: flagged {@code notCompeting} or holding a score from every
+     * judge assigned to each exercise of the event. Unknown dog ids are treated as not settled.
      */
     public boolean isCompetitorSettled(String dogId) {
         if (competitors == null) {
@@ -90,7 +89,7 @@ public record EventSnapshot(
         return competitors.stream()
                 .filter(c -> c.dogId().equals(dogId))
                 .findFirst()
-                .map(c -> isSettled(c, requiredScores()))
+                .map(this::isSettled)
                 .orElse(false);
     }
 
@@ -151,21 +150,26 @@ public record EventSnapshot(
                 .orElse(false);
     }
 
-    private int requiredScores() {
-        return (exercises == null ? 0 : exercises.size()) * (judges == null ? 0 : judges.size());
-    }
-
-    private boolean isSettled(EventCompetitor competitor, int requiredScores) {
+    /**
+     * Whether the competitor holds a score from every judge assigned to each exercise of the event
+     * (per-exercise judge assignment, e.g. only the judges of that exercise's ring). An event with no
+     * exercises defined is treated as never settled.
+     */
+    private boolean isSettled(EventCompetitor competitor) {
         if (competitor.notCompeting() || isDisqualified(competitor.dogId())) {
             return true;
         }
-        if (requiredScores == 0) {
+        if (exercises == null || exercises.isEmpty()) {
             return false;
         }
         Set<String> scoredPairs = scores == null ? Set.of() : scores.stream()
                 .filter(s -> s.score() != null && competitor.dogId().equals(s.dogId()))
                 .map(s -> s.exerciseId() + "|" + s.judgeId())
                 .collect(Collectors.toSet());
-        return scoredPairs.size() >= requiredScores;
+        return exercises.stream().allMatch(exercise -> {
+            List<String> assignedJudges = exercise.judges();
+            return assignedJudges == null || assignedJudges.stream()
+                    .allMatch(judgeId -> scoredPairs.contains(exercise.exerciseId() + "|" + judgeId));
+        });
     }
 }

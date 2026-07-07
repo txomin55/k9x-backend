@@ -71,8 +71,9 @@ class GetCompetitionListServiceCaseTest {
         EventSnapshot createdEvent = event("event-created", List.of(), List.of(), List.of(), List.of());
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "Handler", "team", "ES", "breed",
                 "id-1", (short) 1, true, false, null, null, null);
-        EventExercise exercise = new EventExercise("ex-1", (short) 1, null);
-        // two judges but only one scored -> a score exists yet the competitor is not settled -> STARTED.
+        // two judges assigned to the exercise but only one scored -> a score exists yet the competitor
+        // is not settled -> STARTED.
+        EventExercise exercise = new EventExercise("ex-1", (short) 1, null, List.of("judge-1", "judge-2"));
         List<EventJudge> startedJudges = List.of(new EventJudge("judge-1", "Judge", null),
                 new EventJudge("judge-2", "Judge 2", null));
         EventSnapshot startedEvent = event("event-started", List.of(competitor), List.of(exercise),

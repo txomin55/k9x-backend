@@ -5,6 +5,7 @@ import java.util.List;
 public record EventExercise(
         String exerciseId,
         Short position,
-        List<String> tags
+        List<String> tags,
+        List<String> judges
 ) {
 }

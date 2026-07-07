@@ -32,7 +32,7 @@ public class CreateDog implements SecuredDogsCreateApiDelegate {
                 body.getCountry(),
                 body.getSex() == null ? null : Sex.valueOf(body.getSex()),
                 body.getWithersCm(),
-                body.get3fciGenerationsConfirmed(),
+                body.getThreeFciGenerationsConfirmed(),
                 userDetails.isOrganizer()
         );
         return ResponseEntity.ok().build();

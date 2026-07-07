@@ -40,7 +40,9 @@ public enum ErrorEnum {
     DOG_CHIP_ALREADY_EXISTS("error.dog_chip_already_exists"),
     DUPLICATE_JUDGE_IN_EVENT("error.duplicate_judge_in_event"),
     DUPLICATE_EXERCISE_IN_EVENT("error.duplicate_exercise_in_event"),
-    DUPLICATE_DOG_IN_EVENT("error.duplicate_dog_in_event");
+    DUPLICATE_DOG_IN_EVENT("error.duplicate_dog_in_event"),
+    EXERCISE_JUDGE_NOT_FOUND("error.exercise_judge_not_found"),
+    EXERCISE_JUDGE_REQUIRED("error.exercise_judge_required");
 
     private final String id;
 

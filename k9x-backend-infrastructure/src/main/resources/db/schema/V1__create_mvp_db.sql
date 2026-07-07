@@ -32,7 +32,7 @@ CREATE TABLE k9x.dogs
     handler                     VARCHAR(255),
     sex                         VARCHAR(10),
     withers_cm                  INTEGER,
-    _3fci_generations_confirmed BOOLEAN,
+    three_fci_generations_confirmed BOOLEAN,
     CONSTRAINT dogs_pkey PRIMARY KEY (id),
     CONSTRAINT k9x_dogs_sex_check
         CHECK (sex IS NULL OR sex IN ('MALE', 'FEMALE'))
@@ -135,6 +135,7 @@ CREATE TABLE obdx.event_exercises
     exercise_id VARCHAR(255) NOT NULL,
     position    SMALLINT     NOT NULL,
     tags        VARCHAR(50)[],
+    judges      VARCHAR(255)[],
     last_update BIGINT       NOT NULL,
     CONSTRAINT obdx_event_exercises_pkey PRIMARY KEY (event_id, exercise_id),
     CONSTRAINT obdx_event_exercises_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id)

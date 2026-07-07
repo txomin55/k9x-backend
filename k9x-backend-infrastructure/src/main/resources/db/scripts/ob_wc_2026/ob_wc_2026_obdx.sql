@@ -38,38 +38,38 @@ VALUES
 -- 2) Exercises for the Qualification events, per fci/grade_3/v0/configuration.json,
 --    in running order. Exercises 3-6 are tagged 'ring-1', 7-10 'ring-2'.
 -- ---------------------------------------------------------------------------
-INSERT INTO obdx.event_exercises (event_id, exercise_id, position, tags, last_update)
+INSERT INTO obdx.event_exercises (event_id, exercise_id, position, tags, judges, last_update)
 VALUES
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.1_V0', 1, NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.2_V0', 2, NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.8_V0', 3, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.10_V0', 4, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.3_V0', 5, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.4_V0', 6, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.9_V0', 7, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.6_V0', 8, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.5_V0', 9, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.7_V0', 10, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.1_V0', 1, NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.2_V0', 2, NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.8_V0', 3, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.10_V0', 4, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.3_V0', 5, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.4_V0', 6, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.9_V0', 7, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.6_V0', 8, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.5_V0', 9, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.7_V0', 10, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.1_V0', 1, NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.2_V0', 2, NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.8_V0', 3, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.10_V0', 4, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.3_V0', 5, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.4_V0', 6, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.9_V0', 7, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.6_V0', 8, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.5_V0', 9, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.7_V0', 10, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000));
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.1_V0', 1, NULL, ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.2_V0', 2, NULL, ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.8_V0', 3, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.10_V0', 4, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.3_V0', 5, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.4_V0', 6, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.9_V0', 7, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.6_V0', 8, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.5_V0', 9, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.7_V0', 10, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.1_V0', 1, NULL, ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.2_V0', 2, NULL, ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.8_V0', 3, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.10_V0', 4, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.3_V0', 5, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.4_V0', 6, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.9_V0', 7, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.6_V0', 8, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.5_V0', 9, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.7_V0', 10, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.1_V0', 1, NULL, ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.2_V0', 2, NULL, ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.8_V0', 3, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.10_V0', 4, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.3_V0', 5, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.4_V0', 6, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.9_V0', 7, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.6_V0', 8, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.5_V0', 9, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.7_V0', 10, ARRAY['ring-2'], ARRAY['wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000));
 
 -- ---------------------------------------------------------------------------
 -- 3) Event 1 (Qualification 1) competitors, in Startnumber order
@@ -240,18 +240,18 @@ VALUES
 -- 7) Exercises for the Final, per fci/grade_3/v0/configuration.json, in
 --     running order. Exercises 3-6 are tagged 'ring-1', 7-10 'ring-2'.
 -- ---------------------------------------------------------------------------
-INSERT INTO obdx.event_exercises (event_id, exercise_id, position, tags, last_update)
+INSERT INTO obdx.event_exercises (event_id, exercise_id, position, tags, judges, last_update)
 VALUES
-    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.1_V0', 1, NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.2_V0', 2, NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.7_V0', 3, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.9_V0', 4, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.5_V0', 5, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.8_V0', 6, ARRAY['ring-1'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.10_V0', 7, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.3_V0', 8, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.4_V0', 9, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.6_V0', 10, ARRAY['ring-2'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000));
+    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.1_V0', 1, NULL, ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.2_V0', 2, NULL, ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.7_V0', 3, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.9_V0', 4, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.5_V0', 5, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.8_V0', 6, ARRAY['ring-1'], ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.10_V0', 7, ARRAY['ring-2'], ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.3_V0', 8, ARRAY['ring-2'], ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.4_V0', 9, ARRAY['ring-2'], ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-final', 'OBDX_FCI_GRADE_3.6_V0', 10, ARRAY['ring-2'], ARRAY['wc2026-judge-1', 'wc2026-judge-2', 'wc2026-judge-3', 'wc2026-judge-4'], FLOOR(EXTRACT(EPOCH FROM now()) * 1000));
 
 -- ---------------------------------------------------------------------------
 -- 8) Final scores, sourced from Resultsfinal.xlsx (tabs '1'..'20'). wc2026-dog-52

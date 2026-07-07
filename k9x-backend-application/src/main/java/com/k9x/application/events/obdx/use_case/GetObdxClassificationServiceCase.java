@@ -16,6 +16,7 @@ import com.k9x.domain.events.valueobjects.Score;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GetObdxClassificationServiceCase {
 
@@ -55,7 +56,9 @@ public class GetObdxClassificationServiceCase {
     private List<FetchClassificationRawRowDTO> buildRawRows(EventSnapshot event) {
         List<EventCompetitor> competitors = event.competitors() == null ? List.of() : event.competitors();
         List<EventExercise> exercises = event.exercises() == null ? List.of() : event.exercises();
-        List<EventJudge> judges = event.judges() == null ? List.of() : event.judges();
+        Map<String, EventJudge> judgesById = (event.judges() == null ? List.<EventJudge>of() : event.judges())
+                .stream()
+                .collect(Collectors.toMap(EventJudge::judgeId, j -> j, (a, _) -> a));
         List<Score> scores = event.scores() == null ? List.of() : event.scores();
 
         List<EventExercise> sortedExercises = new ArrayList<>(exercises);
@@ -65,7 +68,12 @@ public class GetObdxClassificationServiceCase {
         List<FetchClassificationRawRowDTO> rows = new ArrayList<>();
         for (EventCompetitor c : competitors) {
             for (EventExercise ex : sortedExercises) {
-                for (EventJudge jd : judges) {
+                List<String> assignedJudgeIds = ex.judges() == null ? List.of() : ex.judges();
+                for (String judgeId : assignedJudgeIds) {
+                    EventJudge jd = judgesById.get(judgeId);
+                    if (jd == null) {
+                        continue;
+                    }
                     Score s = scores.stream()
                             .filter(sc -> Objects.equals(sc.exerciseId(), ex.exerciseId())
                                     && Objects.equals(sc.judgeId(), jd.judgeId())
@@ -89,7 +97,10 @@ public class GetObdxClassificationServiceCase {
     private FetchObdxClassificationDTO aggregateProjection(EventSnapshot event,
                                                            ObdxClassificationConfigDTO config,
                                                            List<FetchClassificationRawRowDTO> rawRows) {
-        int judgeCount = event.judges() == null ? 0 : event.judges().size();
+        Map<String, Integer> judgeCountByExercise = (event.exercises() == null ? List.<EventExercise>of() : event.exercises())
+                .stream()
+                .collect(Collectors.toMap(EventExercise::exerciseId,
+                        e -> e.judges() == null ? 0 : e.judges().size(), (a, _) -> a));
         // dogId → exerciseId → list of (judgeId, judgeName, score)
         Map<String, Map<String, List<FetchClassificationJudgeScoreDTO>>> judgeScoresByDogExercise = new LinkedHashMap<>();
         // dogId → exerciseId → list of yellow cards stamped for that exercise (one per stamped slot, across judges)
@@ -179,7 +190,7 @@ public class GetObdxClassificationServiceCase {
                 // if a yellow card was stamped for this exercise (never below zero).
                 BigDecimal maxExerciseScore = config.maxAllowedScore().multiply(coef).setScale(2, RoundingMode.HALF_UP);
                 BigDecimal weightedScore = scores.isEmpty() ? null
-                        : computeAvg(scores, event.scoreCalculation(), judgeCount)
+                        : computeAvg(scores, event.scoreCalculation(), judgeCountByExercise.getOrDefault(exerciseId, 0))
                         .multiply(coef).setScale(2, RoundingMode.HALF_UP);
                 if (weightedScore != null && !exerciseYellowCards.isEmpty()) {
                     weightedScore = weightedScore.subtract(YELLOW_CARD_PENALTY).max(BigDecimal.ZERO);

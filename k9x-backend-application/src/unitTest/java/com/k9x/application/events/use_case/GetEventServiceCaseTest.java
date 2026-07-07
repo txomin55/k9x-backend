@@ -54,7 +54,7 @@ class GetEventServiceCaseTest {
     private EventSnapshot richEvent() {
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "Handler", "team", "ES", "breed",
                 "id-1", (short) 1, true, false, null, null, null);
-        EventExercise exercise = new EventExercise("ex-1", (short) 1, List.of("tag-a", "tag-b"));
+        EventExercise exercise = new EventExercise("ex-1", (short) 1, List.of("tag-a", "tag-b"), List.of("judge-1"));
         EventJudge judge = new EventJudge("judge-1", "Judge", "collector@k9x.com");
         return new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(exercise), List.of(judge), List.of(), List.of());
@@ -127,6 +127,8 @@ class GetEventServiceCaseTest {
         assertThat(result.exercises().getFirst().name()).isEqualTo("Exercise 1");
         assertThat(result.exercises().getFirst().position()).isEqualTo(1);
         assertThat(result.exercises().getFirst().tags()).containsExactly("tag-a", "tag-b");
+        assertThat(result.exercises().getFirst().judges()).hasSize(1);
+        assertThat(result.exercises().getFirst().judges().getFirst().judgeId()).isEqualTo("judge-1");
         assertThat(result.configuration()).isNotNull();
         assertThat(result.configuration().name()).isEqualTo("Config 1");
         assertThat(result.configuration().federation().id()).isEqualTo("fed-1");

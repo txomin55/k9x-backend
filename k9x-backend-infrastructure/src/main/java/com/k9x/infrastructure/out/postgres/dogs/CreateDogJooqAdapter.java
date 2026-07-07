@@ -30,7 +30,7 @@ public class CreateDogJooqAdapter implements CreateDogPersistencePort {
                 .set(Tables.DOGS.COUNTRY, country)
                 .set(Tables.DOGS.SEX, sex == null ? null : sex.name())
                 .set(Tables.DOGS.WITHERS_CM, withersCm)
-                .set(Tables.DOGS._3FCI_GENERATIONS_CONFIRMED, threeFciGenerationsConfirmed)
+                .set(Tables.DOGS.THREE_FCI_GENERATIONS_CONFIRMED, threeFciGenerationsConfirmed)
                 .set(Tables.DOGS.CREATED_AT, createdAt)
                 .set(Tables.DOGS.LAST_UPDATE, createdAt)
                 .execute();

@@ -173,7 +173,7 @@ public class CompetitionHydrator {
         EventCompetitors ec = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
         Dogs d = Tables.DOGS;
         dsl.select(ec.EVENT_ID, ec.DOG_ID, ec.POSITION, ec.VERIFIED, ec.NOT_COMPETING, ec.FINAL_SCORE, ec.BIH,
-                        d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.IDENTITY, d._3FCI_GENERATIONS_CONFIRMED)
+                        d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.IDENTITY, d.THREE_FCI_GENERATIONS_CONFIRMED)
                 .from(ec)
                 .leftJoin(d).on(d.ID.eq(ec.DOG_ID).and(d.DELETED_AT.isNull()))
                 .where(ec.EVENT_ID.in(eventIds))
@@ -183,7 +183,7 @@ public class CompetitionHydrator {
                                 r.get(d.COUNTRY), r.get(d.BREED), r.get(d.IDENTITY),
                                 r.get(ec.POSITION), r.get(ec.VERIFIED),
                                 Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)), r.get(ec.FINAL_SCORE), r.get(ec.BIH),
-                                r.get(d._3FCI_GENERATIONS_CONFIRMED))));
+                                r.get(d.THREE_FCI_GENERATIONS_CONFIRMED))));
         return result;
     }
 
@@ -193,14 +193,15 @@ public class CompetitionHydrator {
             return result;
         }
         EventExercises ee = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_EXERCISES;
-        dsl.select(ee.EVENT_ID, ee.EXERCISE_ID, ee.POSITION, ee.TAGS)
+        dsl.select(ee.EVENT_ID, ee.EXERCISE_ID, ee.POSITION, ee.TAGS, ee.JUDGES)
                 .from(ee)
                 .where(ee.EVENT_ID.in(eventIds))
                 .orderBy(ee.POSITION.asc())
                 .forEach(r -> result.computeIfAbsent(r.get(ee.EVENT_ID), _ -> new ArrayList<>())
                         .add(new EventExercise(
                                 r.get(ee.EXERCISE_ID), r.get(ee.POSITION),
-                                r.get(ee.TAGS) == null ? List.of() : Arrays.stream(r.get(ee.TAGS)).toList())));
+                                r.get(ee.TAGS) == null ? List.of() : Arrays.stream(r.get(ee.TAGS)).toList(),
+                                r.get(ee.JUDGES) == null ? List.of() : Arrays.stream(r.get(ee.JUDGES)).toList())));
         return result;
     }
 

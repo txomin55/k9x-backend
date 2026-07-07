@@ -9,6 +9,9 @@ import com.k9x.application.events.obdx.exceptions.ObdxCollectorNotFoundException
 import com.k9x.application.events.obdx.exceptions.ObdxDuplicateDogException;
 import com.k9x.application.events.obdx.exceptions.ObdxDuplicateExerciseException;
 import com.k9x.application.events.obdx.exceptions.ObdxDuplicateJudgeException;
+import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeNotFoundException;
+import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeRequiredException;
+import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
@@ -130,12 +133,51 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_exercise_is_duplicated() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
-                List.of(), List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of()),
-                        new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 2, List.of())),
+                List.of(), List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of("judge-1")),
+                        new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 2, List.of(), List.of("judge-1"))),
                 List.of(), List.of());
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxDuplicateExerciseException.class);
+
+        verifyNoInteractions(getCompetitionPersistencePort, saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_exercise_has_no_judges() {
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
+                List.of(), List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of())),
+                List.of(), List.of());
+
+        assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
+                .isInstanceOf(ObdxExerciseJudgeRequiredException.class);
+
+        verifyNoInteractions(getCompetitionPersistencePort, saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_exercise_judge_does_not_exist_in_event() {
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
+                List.of(),
+                List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of("judge-1"))),
+                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-2", null)), List.of());
+
+        assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
+                .isInstanceOf(ObdxExerciseJudgeNotFoundException.class);
+
+        verifyNoInteractions(getCompetitionPersistencePort, saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_mid_avg_and_an_exercise_has_fewer_than_4_judges() {
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
+                List.of(),
+                List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of("judge-1", "judge-2"))),
+                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null),
+                        new UpdateObdxEventCommand.JudgeCommand("judge-2", null)), List.of());
+
+        assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
+                .isInstanceOf(ObdxNotEnoughJudgesException.class);
 
         verifyNoInteractions(getCompetitionPersistencePort, saveCompetitionPersistencePort);
     }

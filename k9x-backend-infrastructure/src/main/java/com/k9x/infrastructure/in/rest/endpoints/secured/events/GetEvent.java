@@ -83,7 +83,8 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
 
     private List<EventExerciseDetailResponseDTO> mapExercises(List<FetchEventExerciseDTO> exercises) {
         return exercises.stream()
-                .map(e -> new EventExerciseDetailResponseDTO(e.id(), e.name(), e.position(), e.tags()))
+                .map(e -> new EventExerciseDetailResponseDTO(e.id(), e.name(), e.position(), e.tags(),
+                        e.judges().stream().map(j -> new IdNameDTO(j.judgeName(), j.judgeId())).toList()))
                 .toList();
     }
 

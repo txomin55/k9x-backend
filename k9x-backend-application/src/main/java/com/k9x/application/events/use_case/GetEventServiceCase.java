@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class GetEventServiceCase {
@@ -76,6 +77,8 @@ public class GetEventServiceCase {
         List<FetchObdxEventJudgeDTO> judges = event.judges().stream()
                 .map(j -> new FetchObdxEventJudgeDTO(j.judgeId(), j.judgeName(), j.collectorEmail()))
                 .toList();
+        Map<String, FetchObdxEventJudgeDTO> judgesById = judges.stream()
+                .collect(Collectors.toMap(FetchObdxEventJudgeDTO::judgeId, j -> j, (a, _) -> a));
 
         ConfigurationsDTO federation = resolveFederationConfiguration(event.configurationId());
         ConfigurationDTO configuration = federation == null ? null : federation.configurations().stream()
@@ -87,7 +90,11 @@ public class GetEventServiceCase {
 
         List<FetchEventExerciseDTO> exercises = event.exercises().stream()
                 .map(e -> new FetchEventExerciseDTO(e.exerciseId(), exerciseNames.get(e.exerciseId()),
-                        e.position() == null ? null : e.position().intValue(), e.tags()))
+                        e.position() == null ? null : e.position().intValue(), e.tags(),
+                        e.judges() == null ? List.of() : e.judges().stream()
+                                .map(judgesById::get)
+                                .filter(Objects::nonNull)
+                                .toList()))
                 .toList();
 
         FetchEventConfigurationDTO configurationDetail = configuration == null ? null
