@@ -17,19 +17,25 @@ CREATE TABLE k9x.organizers
 
 CREATE TABLE k9x.dogs
 (
-    id          VARCHAR(255) NOT NULL,
-    identity    VARCHAR(255) NOT NULL,
-    breed       VARCHAR(50)  NOT NULL,
-    name        VARCHAR(255) NOT NULL,
-    image       VARCHAR(255),
-    owner       VARCHAR(50)  NOT NULL,
-    creator     VARCHAR(50)  NOT NULL,
-    country     VARCHAR(50)  NOT NULL,
-    team        VARCHAR(50)  NOT NULL,
-    last_update BIGINT       NOT NULL,
-    created_at  BIGINT       NOT NULL,
-    deleted_at  BIGINT,
-    CONSTRAINT dogs_pkey PRIMARY KEY (id)
+    id                          VARCHAR(255) NOT NULL,
+    identity                    VARCHAR(255) NOT NULL,
+    breed                       VARCHAR(50)  NOT NULL,
+    name                        VARCHAR(255) NOT NULL,
+    image                       VARCHAR(255),
+    owner                       VARCHAR(50)  NOT NULL,
+    creator                     VARCHAR(50)  NOT NULL,
+    country                     VARCHAR(50)  NOT NULL,
+    team                        VARCHAR(50)  NOT NULL,
+    last_update                 BIGINT       NOT NULL,
+    created_at                  BIGINT       NOT NULL,
+    deleted_at                  BIGINT,
+    handler                     VARCHAR(255),
+    sex                         VARCHAR(10),
+    withers_cm                  INTEGER,
+    _3fci_generations_confirmed BOOLEAN,
+    CONSTRAINT dogs_pkey PRIMARY KEY (id),
+    CONSTRAINT k9x_dogs_sex_check
+        CHECK (sex IS NULL OR sex IN ('MALE', 'FEMALE'))
 );
 
 CREATE TABLE k9x.judges
@@ -40,6 +46,7 @@ CREATE TABLE k9x.judges
     last_update BIGINT       NOT NULL,
     created_at  BIGINT       NOT NULL,
     deleted_at  BIGINT,
+    country     VARCHAR(50)  NOT NULL DEFAULT '',
     CONSTRAINT judges_pkey PRIMARY KEY (id)
 );
 
@@ -87,6 +94,7 @@ CREATE TABLE k9x.events
     last_update         BIGINT       NOT NULL,
     created_at          BIGINT       NOT NULL,
     deleted_at          BIGINT,
+    awards              VARCHAR(50)[],
     CONSTRAINT k9x_events_pkey PRIMARY KEY (id),
     CONSTRAINT k9x_events_fk FOREIGN KEY (stage_id) REFERENCES k9x.stages (id)
 );
@@ -100,9 +108,13 @@ CREATE TABLE obdx.event_competitors
     verified      BOOLEAN,
     last_update   BIGINT       NOT NULL,
     not_competing BOOLEAN      NOT NULL DEFAULT FALSE,
+    bih           BOOLEAN,
+    final_score   NUMERIC(6, 2),
     CONSTRAINT obdx_event_competitors_pkey PRIMARY KEY (event_id, dog_id),
     CONSTRAINT obdx_event_competitors_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
-    CONSTRAINT obdx_event_competitors_dogs_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
+    CONSTRAINT obdx_event_competitors_dogs_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id),
+    CONSTRAINT obdx_event_competitors_final_score_range
+        CHECK (final_score IS NULL OR (final_score >= 0 AND final_score <= 1000))
 );
 
 CREATE TABLE obdx.event_judges
@@ -137,6 +149,8 @@ CREATE TABLE obdx.event_scores
     score       NUMERIC(3, 1),
     created_at  BIGINT       NOT NULL,
     last_update BIGINT       NOT NULL,
+    yellow_card BIGINT,
+    red_card    BIGINT,
     CONSTRAINT obdx_event_scores_pkey PRIMARY KEY (event_id, exercise_id, judge_id, dog_id),
     CONSTRAINT obdx_event_scores_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
     CONSTRAINT obdx_event_scores_judge_fk FOREIGN KEY (judge_id) REFERENCES k9x.judges (id),
