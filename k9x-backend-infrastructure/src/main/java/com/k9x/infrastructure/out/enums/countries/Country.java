@@ -1,12 +1,27 @@
 package com.k9x.infrastructure.out.enums.countries;
 
 public enum Country {
-    ES,
-    PT,
-    FR,
-    IT,
+    AM,
+    AT,
+    BE,
+    CH,
+    CZ,
     DE,
-    GB,
+    DK,
+    EE,
+    ES,
+    FI,
+    FR,
+    HU,
+    IT,
+    JP,
+    LT,
+    LV,
     NL,
-    BE
+    NO,
+    PL,
+    PT,
+    SE,
+    SK,
+    UNKNOWN
 }
