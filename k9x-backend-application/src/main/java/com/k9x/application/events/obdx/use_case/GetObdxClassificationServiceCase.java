@@ -235,11 +235,13 @@ public class GetObdxClassificationServiceCase {
     }
 
     /**
-     * Awards CACOB/CACIOB (and their reserve RCACOB/RCACIOB) when the event enables them. For each enabled award,
-     * the best-ranked competitor whose dog has {@code threeFciGenerationsConfirmed} decides the outcome: if it
-     * also holds a score rating above {@link #CACOB_MIN_SCORE_RATING}, it wins the main award when ranked first,
-     * or the reserve award otherwise. Any competitor ranked behind it is blocked regardless of its own eligibility,
-     * since only the single best-ranked confirmed dog can ever qualify.
+     * Awards CACOB/CACIOB (and their reserve RCACOB/RCACIOB) when the event enables them. A competitor "qualifies"
+     * when its dog has {@code threeFciGenerationsConfirmed} and its score rating is above
+     * {@link #CACOB_MIN_SCORE_RATING}. The main award only goes to the overall winner ({@code position() == 1})
+     * if it qualifies — no substitute winner is promoted when it doesn't. The reserve award goes to the next
+     * qualifying competitor found walking down the ranking, skipping the main award's recipient if there was one;
+     * when the winner didn't qualify (so no main award was granted to anyone), the reserve simply goes to the
+     * first qualifying competitor in the ranking, whatever their position.
      */
     private void assignCacobAwards(List<FetchClassificationCompetitorDTO> competitors, List<String> eventAwards,
                                    Map<String, Boolean> fciConfirmedByDog) {
@@ -256,18 +258,27 @@ public class GetObdxClassificationServiceCase {
 
     private void assignCacobAward(List<FetchClassificationCompetitorDTO> competitors,
                                   Map<String, Boolean> fciConfirmedByDog, String mainAward, String reserveAward) {
+        List<Integer> qualifyingIndexes = new ArrayList<>();
         for (int i = 0; i < competitors.size(); i++) {
             FetchClassificationCompetitorDTO competitor = competitors.get(i);
-            if (!Boolean.TRUE.equals(fciConfirmedByDog.get(competitor.dogId()))) {
-                continue;
+            if (Boolean.TRUE.equals(fciConfirmedByDog.get(competitor.dogId()))
+                    && competitor.scoreRating() != null
+                    && competitor.scoreRating().compareTo(CACOB_MIN_SCORE_RATING) > 0) {
+                qualifyingIndexes.add(i);
             }
-            if (competitor.scoreRating() != null && competitor.scoreRating().compareTo(CACOB_MIN_SCORE_RATING) > 0) {
-                String award = competitor.position() == 1 ? mainAward : reserveAward;
-                addAward(competitors, i, award);
-            }
-            // The best-ranked confirmed dog decides the outcome regardless of its own eligibility: every
-            // competitor ranked behind it is blocked from this award, so the search stops here.
+        }
+        if (qualifyingIndexes.isEmpty()) {
             return;
+        }
+
+        int reserveCandidate = 0;
+        int firstIndex = qualifyingIndexes.get(0);
+        if (competitors.get(firstIndex).position() == 1) {
+            addAward(competitors, firstIndex, mainAward);
+            reserveCandidate = 1;
+        }
+        if (reserveCandidate < qualifyingIndexes.size()) {
+            addAward(competitors, qualifyingIndexes.get(reserveCandidate), reserveAward);
         }
     }
 
