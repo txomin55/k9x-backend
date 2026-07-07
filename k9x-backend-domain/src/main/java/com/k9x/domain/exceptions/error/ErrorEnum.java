@@ -37,7 +37,10 @@ public enum ErrorEnum {
     EXERCISE_CONFIGURATION_NOT_FOUND("error.exercise_configuration_not_found"),
     BIH_NOT_ALLOWED_FOR_SEX("error.bih_not_allowed_for_sex"),
     NOT_ENOUGH_JUDGES_FOR_MID_AVG("error.not_enough_judges_for_mid_avg"),
-    DOG_CHIP_ALREADY_EXISTS("error.dog_chip_already_exists");
+    DOG_CHIP_ALREADY_EXISTS("error.dog_chip_already_exists"),
+    DUPLICATE_JUDGE_IN_EVENT("error.duplicate_judge_in_event"),
+    DUPLICATE_EXERCISE_IN_EVENT("error.duplicate_exercise_in_event"),
+    DUPLICATE_DOG_IN_EVENT("error.duplicate_dog_in_event");
 
     private final String id;
 

@@ -6,6 +6,9 @@ import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.events.exceptions.EventConfigurationIdRequiredException;
 import com.k9x.application.events.obdx.exceptions.BihNotAllowedForSexException;
 import com.k9x.application.events.obdx.exceptions.ObdxCollectorNotFoundException;
+import com.k9x.application.events.obdx.exceptions.ObdxDuplicateDogException;
+import com.k9x.application.events.obdx.exceptions.ObdxDuplicateExerciseException;
+import com.k9x.application.events.obdx.exceptions.ObdxDuplicateJudgeException;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
@@ -108,6 +111,46 @@ class UpdateObdxEventServiceCaseTest {
         serviceCase.updateEvent("event-1", VALID_COMMAND, "user-1", true);
 
         verify(saveCompetitionPersistencePort).save(any());
+    }
+
+    @Test
+    void throws_exception_when_judge_is_duplicated() {
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
+                List.of(), List.of(),
+                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null),
+                        new UpdateObdxEventCommand.JudgeCommand("judge-1", null)),
+                List.of());
+
+        assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
+                .isInstanceOf(ObdxDuplicateJudgeException.class);
+
+        verifyNoInteractions(getCompetitionPersistencePort, saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_exercise_is_duplicated() {
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
+                List.of(), List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of()),
+                        new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 2, List.of())),
+                List.of(), List.of());
+
+        assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
+                .isInstanceOf(ObdxDuplicateExerciseException.class);
+
+        verifyNoInteractions(getCompetitionPersistencePort, saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_dog_is_duplicated() {
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, false),
+                        new UpdateObdxEventCommand.CompetitorCommand("dog-1", 2, false)),
+                List.of(), List.of(), List.of());
+
+        assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
+                .isInstanceOf(ObdxDuplicateDogException.class);
+
+        verifyNoInteractions(getCompetitionPersistencePort, saveCompetitionPersistencePort);
     }
 
     @Test

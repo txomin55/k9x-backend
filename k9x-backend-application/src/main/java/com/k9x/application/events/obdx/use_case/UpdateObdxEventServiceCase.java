@@ -5,6 +5,9 @@ import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.events.exceptions.EventConfigurationIdRequiredException;
 import com.k9x.application.events.obdx.exceptions.ObdxCollectorNotFoundException;
+import com.k9x.application.events.obdx.exceptions.ObdxDuplicateDogException;
+import com.k9x.application.events.obdx.exceptions.ObdxDuplicateExerciseException;
+import com.k9x.application.events.obdx.exceptions.ObdxDuplicateJudgeException;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
@@ -16,6 +19,9 @@ import com.k9x.domain.competitions.commands.ObdxJudgeItem;
 import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.domain.shared.UtcDates;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class UpdateObdxEventServiceCase {
 
@@ -37,6 +43,9 @@ public class UpdateObdxEventServiceCase {
     public void updateEvent(String id, UpdateObdxEventCommand command, String userId, boolean organizer) {
         AuthAssertions.assertOrganizer(organizer, userId);
         assertConfigurationId(command.configurationId());
+        assertNoDuplicateJudges(command);
+        assertNoDuplicateExercises(command);
+        assertNoDuplicateDogs(command);
 
         String competitionId = getCompetitionPersistencePort.competitionIdByEvent(id);
         if (competitionId == null) {
@@ -74,6 +83,33 @@ public class UpdateObdxEventServiceCase {
         if (configurationId == null || configurationId.isBlank()) {
             throw new EventConfigurationIdRequiredException();
         }
+    }
+
+    private void assertNoDuplicateJudges(UpdateObdxEventCommand command) {
+        Set<String> seen = new HashSet<>();
+        command.judges().forEach(j -> {
+            if (!seen.add(j.judgeId())) {
+                throw new ObdxDuplicateJudgeException();
+            }
+        });
+    }
+
+    private void assertNoDuplicateExercises(UpdateObdxEventCommand command) {
+        Set<String> seen = new HashSet<>();
+        command.exercises().forEach(e -> {
+            if (!seen.add(e.exerciseId())) {
+                throw new ObdxDuplicateExerciseException();
+            }
+        });
+    }
+
+    private void assertNoDuplicateDogs(UpdateObdxEventCommand command) {
+        Set<String> seen = new HashSet<>();
+        command.competitors().forEach(c -> {
+            if (!seen.add(c.dogId())) {
+                throw new ObdxDuplicateDogException();
+            }
+        });
     }
 
     private void assertBihAllowedForSex(UpdateObdxEventCommand command) {
