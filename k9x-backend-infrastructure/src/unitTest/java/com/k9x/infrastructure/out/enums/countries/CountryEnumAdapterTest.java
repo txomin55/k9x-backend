@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +37,7 @@ class CountryEnumAdapterTest {
         List<CountryDTO> result = adapter.getCountries();
 
         assertThat(result).extracting(CountryDTO::id)
-                .containsExactlyInAnyOrder("ES", "PT", "FR", "IT", "DE", "GB", "NL", "BE");
+                .containsExactlyInAnyOrderElementsOf(Arrays.stream(Country.values()).map(Enum::name).toList());
     }
 
     @Test

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,9 +37,7 @@ class BreedEnumAdapterTest {
         List<BreedDTO> result = adapter.getBreeds();
 
         assertThat(result).extracting(BreedDTO::id)
-                .containsExactlyInAnyOrder("BORDER_COLLIE", "GERMAN_SHEPHERD", "LABRADOR_RETRIEVER",
-                        "GOLDEN_RETRIEVER", "BELGIAN_MALINOIS", "JACK_RUSSELL_TERRIER", "POODLE",
-                        "AUSTRALIAN_SHEPHERD", "SHETLAND_SHEEPDOG", "COCKER_SPANIEL");
+                .containsExactlyInAnyOrderElementsOf(Arrays.stream(Breed.values()).map(Enum::name).toList());
     }
 
     @Test
