@@ -39,7 +39,6 @@ public class GetCollectionListJooqAdapter implements GetCollectionListPersistenc
                 .join(j).on(j.ID.eq(ej.JUDGE_ID).and(j.DELETED_AT.isNull()))
                 .join(u).on(u.ID.eq(ej.COLLECTOR_ID))
                 .where(u.EMAIL.eq(collectorEmail))
-                .and(s.DATE_FROM.lessOrEqual(nowMillis))
                 .and(s.DATE_TO.greaterOrEqual(nowMillis))
                 .and(e.DELETED_AT.isNull())
                 .fetch();

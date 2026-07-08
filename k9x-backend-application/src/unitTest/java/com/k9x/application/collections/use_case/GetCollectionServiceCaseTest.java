@@ -126,6 +126,25 @@ class GetCollectionServiceCaseTest {
     }
 
     @Test
+    void allows_creator_to_view_expired_stage() {
+        List<FetchCollectionJudgeWithCollectorDTO> judges = List.of(
+                new FetchCollectionJudgeWithCollectorDTO("judge-1", "Judge One", "collector1@test.com")
+        );
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competition(event(null), 1L));
+        when(getObdxCollectionEventJudgesPersistencePort.getJudges("event-1")).thenReturn(judges);
+        when(getObdxConfigurationAllowedValuesPort.getAllowedValues("config-1")).thenReturn(List.of(new BigDecimal("7.5")));
+        when(getObdxCollectionServiceCase.getCollection(eq("event-1"), any())).thenReturn(OBDX);
+
+        FetchCollectionDetailDTO result = serviceCase.getCollection("event-1", "creator@test.com");
+
+        assertThat(result.obdx()).isSameAs(OBDX);
+        verify(getObdxCollectionServiceCase).getCollection(eq("event-1"), visibleJudgesCaptor.capture());
+        assertThat(visibleJudgesCaptor.getValue()).containsExactlyElementsOf(judges);
+    }
+
+    @Test
     void delegates_all_judges_and_builds_detail_when_user_is_creator() {
         List<FetchCollectionJudgeWithCollectorDTO> judges = List.of(
                 new FetchCollectionJudgeWithCollectorDTO("judge-1", "Judge One", "collector1@test.com"),

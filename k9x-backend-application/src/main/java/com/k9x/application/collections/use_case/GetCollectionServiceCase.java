@@ -47,7 +47,9 @@ public class GetCollectionServiceCase {
         EventSnapshot event = CompetitionNavigator.findEvent(competition, eventId);
         assertEventValidations(event);
         StageSnapshot stage = CompetitionNavigator.findStageOfEvent(competition, eventId);
-        assertStageNotExpired(stage);
+        if (!event.creator().equals(userId)) {
+            assertStageNotExpired(stage);
+        }
 
         List<FetchCollectionJudgeWithCollectorDTO> allJudges =
                 getObdxCollectionEventJudgesPersistencePort.getJudges(eventId);
