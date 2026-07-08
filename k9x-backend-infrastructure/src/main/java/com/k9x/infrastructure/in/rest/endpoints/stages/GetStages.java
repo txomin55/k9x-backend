@@ -31,7 +31,7 @@ public class GetStages implements StagesFetchAllApiDelegate {
                         .map(stage -> new StageSummaryResponseDTO(
                                 stage.id(),
                                 stage.name(),
-                                stage.description(),
+                                stage.competitionName(),
                                 stage.country(),
                                 new CompetitionLocationDetailResponseDTO(
                                         stage.address(),
@@ -48,7 +48,8 @@ public class GetStages implements StagesFetchAllApiDelegate {
                                                 e.status(),
                                                 e.enrollmentOpened(),
                                                 e.enrollmentDeadline(),
-                                                AwardResponseMapper.toIdNameList(e.awards())))
+                                                AwardResponseMapper.toIdNameList(e.awards()),
+                                                e.rank()))
                                         .toList(),
                                 stage.status(),
                                 stage.organizer()))

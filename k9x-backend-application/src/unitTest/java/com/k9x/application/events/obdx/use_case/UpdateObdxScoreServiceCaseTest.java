@@ -53,7 +53,7 @@ class UpdateObdxScoreServiceCaseTest {
 
     private CompetitionSnapshot competition() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of());
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
@@ -64,7 +64,7 @@ class UpdateObdxScoreServiceCaseTest {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
                 List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L),
-                        new Score("ex-2", "judge-1", "dog-1", null, 0L, 2000L)), List.of());
+                        new Score("ex-2", "judge-1", "dog-1", null, 0L, 2000L)), List.of(), null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,

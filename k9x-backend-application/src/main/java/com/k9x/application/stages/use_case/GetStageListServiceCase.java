@@ -36,7 +36,7 @@ public class GetStageListServiceCase {
         // The hydrated events carry their scores, so status() resolves the exact lifecycle here: the stage
         // is STARTED once any of its events holds a score, otherwise it falls back to the date-driven state.
         return new FetchStageListDTO(
-                stage.id(), stage.name(), competition.description(), competition.country(),
+                stage.id(), stage.name(), competition.name(), competition.country(),
                 competition.address(), competition.coordAlt(), competition.coordLong(),
                 stage.dateFrom(), stage.dateTo(),
                 competition.organizerName(),
@@ -47,7 +47,7 @@ public class GetStageListServiceCase {
                                 event.competitors() == null ? 0 : event.competitors().size(),
                                 event.status(now, stage.dateTo()).name(),
                                 stage.enrollmentOpened(event, now),
-                                event.enrollmentDeadline(), event.awards()))
+                                event.enrollmentDeadline(), event.awards(), event.rank()))
                         .toList(),
                 stage.status(now).name());
     }

@@ -30,6 +30,7 @@ public class GetStage implements StagesFetchOneApiDelegate {
         return ResponseEntity.ok(new StageDetailResponseDTO(
                 stage.id(),
                 stage.name(),
+                stage.competitionName(),
                 stage.dateFrom(),
                 stage.dateTo(),
                 stage.events().stream()
@@ -42,7 +43,8 @@ public class GetStage implements StagesFetchOneApiDelegate {
                                 e.status(),
                                 e.enrollmentOpened(),
                                 e.enrollmentDeadline() != null ? e.enrollmentDeadline() : null,
-                                AwardResponseMapper.toIdNameList(e.awards())))
+                                AwardResponseMapper.toIdNameList(e.awards()),
+                                e.rank()))
                         .toList(),
                 List.of(),
                 stage.address(),

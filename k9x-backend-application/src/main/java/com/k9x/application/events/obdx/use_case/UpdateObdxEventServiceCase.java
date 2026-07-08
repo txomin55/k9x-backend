@@ -45,6 +45,7 @@ public class UpdateObdxEventServiceCase {
         this.getDogPersistencePort = getDogPersistencePort;
     }
 
+    // TODO: rank is not settable yet — its calculation is discipline-specific and still pending.
     public void updateEvent(String id, UpdateObdxEventCommand command, String userId, boolean organizer) {
         AuthAssertions.assertOrganizer(organizer, userId);
         assertConfigurationId(command.configurationId());

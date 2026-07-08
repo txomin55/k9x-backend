@@ -66,7 +66,7 @@ public class GetCompetitionListServiceCase {
         return stage.events().stream()
                 .filter(event -> event.deletedAt() == null)
                 .map(event -> new FetchEventDTO(event.id(), event.name(), event.discipline(),
-                        event.status(now, stage.dateTo()).name()))
+                        event.status(now, stage.dateTo()).name(), event.rank()))
                 .toList();
     }
 }

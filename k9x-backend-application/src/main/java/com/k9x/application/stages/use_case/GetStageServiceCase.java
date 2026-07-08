@@ -55,7 +55,7 @@ public class GetStageServiceCase {
         Map<String, String> configNameById = buildConfigNameMap();
         long now = DateUtils.nowUtcMillis();
         return new FetchStageDetailDTO(
-                stage.id(), stage.name(), stage.dateFrom(), stage.dateTo(),
+                stage.id(), stage.name(), competition.name(), stage.dateFrom(), stage.dateTo(),
                 competition.address(), competition.organizerName(), stage.status(now).name(), null,
                 events.stream()
                         .map(e -> new FetchStageDetailEventDTO(
@@ -69,7 +69,7 @@ public class GetStageServiceCase {
                                         .toList(),
                                 e.status(now, stage.dateTo()).name(),
                                 stage.enrollmentOpened(e, now),
-                                e.enrollmentDeadline(), e.awards()))
+                                e.enrollmentDeadline(), e.awards(), e.rank()))
                         .toList());
     }
 

@@ -50,7 +50,8 @@ public class FetchCompetitions implements SecuredCompetitionsFetchAllApiDelegate
                                                                 event.id(),
                                                                 event.name(),
                                                                 resolveDiscipline(event.discipline()),
-                                                                event.status()))
+                                                                event.status(),
+                                                                event.rank()))
                                                         .toList()
                                         ))
                                         .toList(),
