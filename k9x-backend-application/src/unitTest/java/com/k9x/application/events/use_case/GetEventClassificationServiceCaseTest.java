@@ -102,25 +102,27 @@ class GetEventClassificationServiceCaseTest {
 
         assertThat(result.eventId()).isEqualTo("evt-1");
         assertThat(result.stageName()).isEqualTo("Stage A");
+        assertThat(result.competitionName()).isEqualTo("WC");
         assertThat(result.disciplineId()).isEqualTo("obdx");
         assertThat(result.configurationId()).isEqualTo("OBDX_RSCE_GRADE_1_V0");
         assertThat(result.configurationName()).isEqualTo("Grade 1");
         assertThat(result.obdx()).isSameAs(obdx);
         verify(eventClassificationCacheManagerPort)
-                .put("evt-1", new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE));
+                .put("evt-1", new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE, "WC"));
     }
 
     @Test
     void uses_cached_context_without_hitting_db_on_cache_hit() throws IOException {
         FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of());
         when(eventClassificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt()))
-                .thenReturn(new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE));
+                .thenReturn(new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE, "WC"));
         when(getObdxClassificationServiceCase.getClassification(ACTIVE_EVENT)).thenReturn(obdx);
         when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of());
 
         FetchClassificationDTO result = serviceCase.getClassification("evt-1");
 
         assertThat(result.stageName()).isEqualTo("Stage A");
+        assertThat(result.competitionName()).isEqualTo("WC");
         assertThat(result.obdx()).isSameAs(obdx);
         verifyNoInteractions(getCompetitionPersistencePort);
         verify(eventClassificationCacheManagerPort, never()).put(any(), any());
