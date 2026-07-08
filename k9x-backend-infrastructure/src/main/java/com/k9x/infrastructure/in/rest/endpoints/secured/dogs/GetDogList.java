@@ -39,7 +39,7 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
                                 dog.owner(),
                                 dog.handler(),
                                 dog.identity(),
-                                dog.breed(),
+                                resolveBreed(dog.breed()),
                                 dog.sex() == null ? null : dog.sex().name(),
                                 dog.withersCm(),
                                 dog.threeFciGenerationsConfirmed()
@@ -56,5 +56,14 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
         String name = messageSource.getMessage(
                 "country." + countryCode.toLowerCase() + ".name", null, countryCode, LocaleContextHolder.getLocale());
         return new IdNameDTO(name, countryCode);
+    }
+
+    private IdNameDTO resolveBreed(String breedId) {
+        if (breedId == null) {
+            return null;
+        }
+        String name = messageSource.getMessage(
+                "breed." + breedId.toLowerCase() + ".name", null, breedId, LocaleContextHolder.getLocale());
+        return new IdNameDTO(name, breedId);
     }
 }
