@@ -14,6 +14,7 @@ import com.k9x.domain.competitions.commands.StageUpdateData;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
+import com.k9x.domain.events.valueobjects.EventExercise;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 
 import java.math.BigDecimal;
@@ -74,7 +75,9 @@ class SaveCompetitionJooqAdapterTest {
     // Stage window [PAST_FROM, FUTURE_TO] contains NOW, so the stage is already started — required for scoring.
     private CompetitionAggregate aggregateWithStartedEvent() {
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", null, NOW, NOW, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null);
+                ObdxAvgMethod.MID_AVG, List.of(),
+                List.of(new EventExercise("exercise-1", (short) 1, List.of(), List.of("judge-1"))),
+                List.of(), List.of(), List.of(), null);
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 PAST_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",

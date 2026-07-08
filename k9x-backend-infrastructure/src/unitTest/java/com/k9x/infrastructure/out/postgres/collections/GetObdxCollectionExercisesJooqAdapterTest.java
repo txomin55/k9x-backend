@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GetObdxCollectionExercisesJooqAdapterTest {
 
     private static final Field<?>[] SELECT_FIELDS = {
-            Tables.EVENT_EXERCISES.EXERCISE_ID, Tables.EVENT_EXERCISES.POSITION
+            Tables.EVENT_EXERCISES.EXERCISE_ID, Tables.EVENT_EXERCISES.POSITION, Tables.EVENT_EXERCISES.JUDGES
     };
 
     @Test
@@ -50,6 +50,7 @@ class GetObdxCollectionExercisesJooqAdapterTest {
             Record record = mockDsl.newRecord(SELECT_FIELDS);
             record.set(Tables.EVENT_EXERCISES.EXERCISE_ID, "exercise-1");
             record.set(Tables.EVENT_EXERCISES.POSITION, (short) 1);
+            record.set(Tables.EVENT_EXERCISES.JUDGES, new String[]{"judge-1", "judge-2"});
             result.add(record);
             return new MockResult[]{new MockResult(1, result)};
         };
@@ -60,6 +61,7 @@ class GetObdxCollectionExercisesJooqAdapterTest {
         assertThat(exercises).hasSize(1);
         assertThat(exercises.getFirst().exerciseId()).isEqualTo("exercise-1");
         assertThat(exercises.getFirst().position()).isEqualTo((short) 1);
+        assertThat(exercises.getFirst().judges()).containsExactly("judge-1", "judge-2");
     }
 
     @Test

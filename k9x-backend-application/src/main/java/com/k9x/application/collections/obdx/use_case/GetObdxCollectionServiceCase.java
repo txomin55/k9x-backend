@@ -52,8 +52,13 @@ public class GetObdxCollectionServiceCase {
                                 c.notCompeting(), EventCompetitorStatus.of(c.notCompeting(), c.verified()).name(),
                                 c.bih(), scoresAllowed(c.dogId(), c.notCompeting(), allScores)))
                         .toList();
+        // Only expose exercises that at least one visible judge is assigned to. For the event creator every judge
+        // is visible, so all exercises remain; for a collector only the exercises their judge collects are kept.
         List<FetchCollectionExerciseDTO> exercises =
-                getObdxCollectionExercisesPersistencePort.getExercises(eventId);
+                getObdxCollectionExercisesPersistencePort.getExercises(eventId).stream()
+                        .filter(ex -> ex.judges() != null
+                                && ex.judges().stream().anyMatch(visibleJudgeIds::contains))
+                        .toList();
         List<FetchCollectionScoreDTO> scores = allScores.stream()
                 .filter(s -> visibleJudgeIds.contains(s.judgeId()))
                 .toList();
