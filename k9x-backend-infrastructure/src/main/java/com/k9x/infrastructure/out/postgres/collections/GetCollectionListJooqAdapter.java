@@ -31,7 +31,7 @@ public class GetCollectionListJooqAdapter implements GetCollectionListPersistenc
         Judges j = Tables.JUDGES;
         Users u = Tables.USERS;
 
-        List<Record> records = dsl.select()
+        var records = dsl.select(e.ID, e.NAME, e.DISCIPLINE, s.NAME, c.NAME, j.ID, j.NAME)
                 .from(e)
                 .join(s).on(s.ID.eq(e.STAGE_ID).and(s.DELETED_AT.isNull()))
                 .join(c).on(c.ID.eq(s.COMPETITION_ID).and(c.DELETED_AT.isNull()))

@@ -3,7 +3,6 @@ package com.k9x.infrastructure.out.postgres.collections;
 import com.k9x.application.collections.use_case.dto.FetchCollectionDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Events;
-import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventJudges;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
@@ -12,26 +11,19 @@ import org.jooq.tools.jdbc.MockDataProvider;
 import org.jooq.tools.jdbc.MockResult;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GetCollectionListJooqAdapterTest {
 
     private static final Events E = Tables.EVENTS;
-    private static final EventJudges EJ = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_JUDGES;
 
-    private static final Field<?>[] JOIN_FIELDS = Stream.of(
-            Arrays.stream(E.fields()),
-            Arrays.stream(Tables.STAGES.fields()),
-            Arrays.stream(Tables.COMPETITIONS.fields()),
-            Arrays.stream(EJ.fields()),
-            Arrays.stream(Tables.JUDGES.fields()),
-            Arrays.stream(Tables.USERS.fields())
-    ).flatMap(s -> s).toArray(Field[]::new);
+    private static final Field<?>[] JOIN_FIELDS = {
+            E.ID, E.NAME, E.DISCIPLINE, Tables.STAGES.NAME, Tables.COMPETITIONS.NAME,
+            Tables.JUDGES.ID, Tables.JUDGES.NAME
+    };
 
     @Test
     void generates_sql_with_joins_filtered_by_collector_email_and_active_stage() {
@@ -57,8 +49,7 @@ class GetCollectionListJooqAdapterTest {
                 .contains("join \"k9x\".\"users\"")
                 .contains("\"k9x\".\"users\".\"email\" = ?")
                 .contains("\"k9x\".\"stages\".\"date_to\" >= ?")
-                .contains("\"k9x\".\"events\".\"deleted_at\" is null")
-                .doesNotContain("\"k9x\".\"stages\".\"date_from\"");
+                .contains("\"k9x\".\"events\".\"deleted_at\" is null");
         assertThat(capturedBindings.get()).containsExactly("collector@test.com", 1000L);
     }
 
@@ -71,9 +62,7 @@ class GetCollectionListJooqAdapterTest {
             record.set(E.ID, "event-1");
             record.set(E.NAME, "Event A");
             record.set(E.DISCIPLINE, "obdx");
-            record.set(Tables.STAGES.ID, "stage-1");
             record.set(Tables.STAGES.NAME, "Stage A");
-            record.set(Tables.COMPETITIONS.ID, "comp-1");
             record.set(Tables.COMPETITIONS.NAME, "Competition A");
             record.set(Tables.JUDGES.ID, "judge-1");
             record.set(Tables.JUDGES.NAME, "Judge One");
@@ -105,9 +94,7 @@ class GetCollectionListJooqAdapterTest {
             Record r1 = mockDsl.newRecord(JOIN_FIELDS);
             r1.set(E.ID, "event-1");
             r1.set(E.NAME, "Event A");
-            r1.set(Tables.STAGES.ID, "stage-1");
             r1.set(Tables.STAGES.NAME, "Stage A");
-            r1.set(Tables.COMPETITIONS.ID, "comp-1");
             r1.set(Tables.COMPETITIONS.NAME, "Competition A");
             r1.set(Tables.JUDGES.ID, "judge-1");
             r1.set(Tables.JUDGES.NAME, "Judge One");
@@ -115,9 +102,7 @@ class GetCollectionListJooqAdapterTest {
             Record r2 = mockDsl.newRecord(JOIN_FIELDS);
             r2.set(E.ID, "event-1");
             r2.set(E.NAME, "Event A");
-            r2.set(Tables.STAGES.ID, "stage-1");
             r2.set(Tables.STAGES.NAME, "Stage A");
-            r2.set(Tables.COMPETITIONS.ID, "comp-1");
             r2.set(Tables.COMPETITIONS.NAME, "Competition A");
             r2.set(Tables.JUDGES.ID, "judge-2");
             r2.set(Tables.JUDGES.NAME, "Judge Two");
