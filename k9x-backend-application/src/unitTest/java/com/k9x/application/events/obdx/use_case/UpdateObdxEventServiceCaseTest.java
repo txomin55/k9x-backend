@@ -185,8 +185,8 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_dog_is_duplicated() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, false),
-                        new UpdateObdxEventCommand.CompetitorCommand("dog-1", 2, false)),
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, false, false),
+                        new UpdateObdxEventCommand.CompetitorCommand("dog-1", 2, false, false)),
                 List.of(), List.of(), List.of());
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
@@ -198,7 +198,7 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_bih_true_for_male_dog() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, true)), List.of(), List.of(), List.of());
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, true, false)), List.of(), List.of(), List.of());
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getDogPersistencePort.getDog("dog-1"))
                 .thenReturn(new Dog("dog-1", "id", "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",

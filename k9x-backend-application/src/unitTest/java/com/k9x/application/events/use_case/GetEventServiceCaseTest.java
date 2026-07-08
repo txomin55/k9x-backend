@@ -53,7 +53,7 @@ class GetEventServiceCaseTest {
 
     private EventSnapshot richEvent() {
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "Handler", "team", "ES", "breed",
-                "id-1", (short) 1, true, false, null, null, null);
+                "id-1", (short) 1, true, false, null, null, null, null);
         EventExercise exercise = new EventExercise("ex-1", (short) 1, List.of("tag-a", "tag-b"), List.of("judge-1"));
         EventJudge judge = new EventJudge("judge-1", "Judge", "collector@k9x.com");
         return new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
@@ -153,7 +153,7 @@ class GetEventServiceCaseTest {
     @Test
     void marks_competitor_as_not_competing_when_flagged() throws IOException {
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "Handler", "team", "ES", "breed",
-                "id-1", (short) 1, true, true, null, null, null);
+                "id-1", (short) 1, true, true, null, null, null, null);
         EventSnapshot event = new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L,
                 0L, null, ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of(), List.of(), null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
@@ -170,7 +170,7 @@ class GetEventServiceCaseTest {
     @Test
     void marks_competitor_as_pending_enroll_accept_when_not_verified() throws IOException {
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "Handler", "team", "ES", "breed",
-                "id-1", (short) 1, false, false, null, null, null);
+                "id-1", (short) 1, false, false, null, null, null, null);
         EventSnapshot event = new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L,
                 0L, null, ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of(), List.of(), null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");

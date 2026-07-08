@@ -175,6 +175,7 @@ public class CompetitionHydrator {
         EventCompetitors ec = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
         Dogs d = Tables.DOGS;
         dsl.select(ec.EVENT_ID, ec.DOG_ID, ec.POSITION, ec.VERIFIED, ec.NOT_COMPETING, ec.FINAL_SCORE, ec.BIH,
+                        ec.RESERVE,
                         d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.IDENTITY, d.THREE_FCI_GENERATIONS_CONFIRMED)
                 .from(ec)
                 .leftJoin(d).on(d.ID.eq(ec.DOG_ID).and(d.DELETED_AT.isNull()))
@@ -185,6 +186,7 @@ public class CompetitionHydrator {
                                 r.get(d.COUNTRY), r.get(d.BREED), r.get(d.IDENTITY),
                                 r.get(ec.POSITION), r.get(ec.VERIFIED),
                                 Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)), r.get(ec.FINAL_SCORE), r.get(ec.BIH),
+                                r.get(ec.RESERVE),
                                 r.get(d.THREE_FCI_GENERATIONS_CONFIRMED))));
         return result;
     }

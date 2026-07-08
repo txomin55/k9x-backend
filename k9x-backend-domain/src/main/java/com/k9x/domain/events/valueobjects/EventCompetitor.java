@@ -16,6 +16,7 @@ public record EventCompetitor(
         boolean notCompeting,
         BigDecimal finalScore,
         Boolean bih,
+        Boolean reserve,
         Boolean threeFciGenerationsConfirmed
 ) {
 }

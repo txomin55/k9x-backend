@@ -7420,4 +7420,20 @@ VALUES ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-1
        ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-4', 'wc2026-dog-118', 6,
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL);
 
+-- ---------------------------------------------------------------------------
+-- N) Reserve flag. Competitors whose Team/Participant column (column D) equals
+--     'Reserve' in the 'Individual_results_overall' sheet of
+--     ResultsqualificationWC_HCA_TeamvsIndv_ENDresults.xlsx. Matched by
+--     Startnumber -> wc2026-dog-<Startnumber>. Flag applies to every event the
+--     dog competes in. (Startnumbers 119 and 120 are the NA/Test reserves and
+--     have no event_competitors rows, so they no-op.)
+-- ---------------------------------------------------------------------------
+UPDATE obdx.event_competitors
+SET reserve     = TRUE,
+    last_update = FLOOR(EXTRACT(EPOCH FROM now()) * 1000)
+WHERE dog_id IN ('wc2026-dog-17', 'wc2026-dog-21', 'wc2026-dog-35', 'wc2026-dog-52', 'wc2026-dog-56',
+                 'wc2026-dog-73', 'wc2026-dog-79', 'wc2026-dog-82', 'wc2026-dog-93', 'wc2026-dog-97',
+                 'wc2026-dog-104', 'wc2026-dog-105', 'wc2026-dog-108', 'wc2026-dog-112', 'wc2026-dog-113',
+                 'wc2026-dog-117', 'wc2026-dog-119', 'wc2026-dog-120');
+
 COMMIT;

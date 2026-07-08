@@ -62,6 +62,7 @@ public class GetCollection implements SecuredCollectionsFetchOneApiDelegate {
                                 comp.competitor().breed(),
                                 new IdNameDTO(comp.competitor().dogName(), comp.competitor().dogId()),
                                 comp.competitor().bih(),
+                                comp.competitor().reserve(),
                                 comp.competitor().notCompeting(),
                                 comp.competitor().scoresAllowed()
                         )

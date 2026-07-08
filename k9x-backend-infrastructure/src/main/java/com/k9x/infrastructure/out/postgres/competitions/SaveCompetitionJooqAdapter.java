@@ -178,6 +178,7 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                     .set(EVENT_COMPETITORS.POSITION, competitor.position())
                     .set(EVENT_COMPETITORS.VERIFIED, true)
                     .set(EVENT_COMPETITORS.BIH, competitor.bih())
+                    .set(EVENT_COMPETITORS.RESERVE, competitor.reserve())
                     .set(EVENT_COMPETITORS.LAST_UPDATE, c.lastUpdate())
                     .execute();
         }

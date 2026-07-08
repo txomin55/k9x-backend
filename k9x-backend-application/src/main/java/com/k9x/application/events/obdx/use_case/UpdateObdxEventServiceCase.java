@@ -75,7 +75,7 @@ public class UpdateObdxEventServiceCase {
                 command.scoreCalculation(),
                 command.enrollmentDeadline() == null ? null : UtcDates.endOfUtcDay(command.enrollmentDeadline()),
                 command.competitors().stream()
-                        .map(c -> new ObdxCompetitorItem(c.dogId(), c.order().shortValue(), c.bih()))
+                        .map(c -> new ObdxCompetitorItem(c.dogId(), c.order().shortValue(), c.bih(), c.reserve()))
                         .toList(),
                 command.exercises().stream()
                         .map(e -> new ObdxExerciseItem(e.exerciseId(), e.order().shortValue(),

@@ -207,7 +207,7 @@ class SaveCompetitionJooqAdapterTest {
         givenCapturingDsl();
         CompetitionAggregate competition = aggregateWithActiveEvent();
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "config-1", ObdxAvgMethod.MID_AVG, 1735689600000L,
-                List.of(new ObdxCompetitorItem("dog-1", (short) 1, true)),
+                List.of(new ObdxCompetitorItem("dog-1", (short) 1, true, false)),
                 List.of(new ObdxExerciseItem("exercise-1", (short) 1, new String[]{"tag1"}, new String[]{"judge-1"})),
                 List.of(new ObdxJudgeItem("judge-1", "collector@example.com")), List.of());
         competition.updateObdxEventInfo("evt-1", data, "user", NOW);
@@ -233,7 +233,7 @@ class SaveCompetitionJooqAdapterTest {
     void emits_update_for_competitor_not_competing() {
         givenCapturingDsl();
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null,
-                (short) 1, true, false, null, null, null);
+                (short) 1, true, false, null, null, null, null);
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", null, NOW, NOW, null,
                 ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of(), List.of(), null);
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",

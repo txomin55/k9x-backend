@@ -110,6 +110,7 @@ CREATE TABLE obdx.event_competitors
     last_update   BIGINT       NOT NULL,
     not_competing BOOLEAN      NOT NULL DEFAULT FALSE,
     bih           BOOLEAN,
+    reserve       BOOLEAN      NOT NULL DEFAULT FALSE,
     final_score   NUMERIC(6, 2),
     CONSTRAINT obdx_event_competitors_pkey PRIMARY KEY (event_id, dog_id),
     CONSTRAINT obdx_event_competitors_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),

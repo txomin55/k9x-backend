@@ -90,6 +90,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                         c.tied(),
                         c.startOrder() != null ? c.startOrder().intValue() : null,
                         c.bih(),
+                        c.reserve(),
                         c.notCompeting(),
                         AwardResponseMapper.toIdNameList(c.awards())))
                 .toList();
