@@ -22,7 +22,7 @@ CREATE TABLE k9x.dogs
     breed                       VARCHAR(50)  NOT NULL,
     name                        VARCHAR(255) NOT NULL,
     image                       VARCHAR(255),
-    owner                       VARCHAR(50)  NOT NULL,
+    owner                       VARCHAR(50),
     creator                     VARCHAR(50)  NOT NULL,
     country                     VARCHAR(50)  NOT NULL,
     team                        VARCHAR(50)  NOT NULL,
