@@ -9,7 +9,9 @@ import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.exceptions.ExerciseJudgeNotAssignedException;
 import com.k9x.domain.events.exceptions.RedCardAlreadyRegisteredException;
+import com.k9x.domain.events.valueobjects.EventExercise;
 import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,9 +48,12 @@ class RegisterObdxRedCardServiceCaseTest {
                 getObdxEventCollectorPersistencePort, saveCompetitionPersistencePort);
     }
 
+    private static final List<EventExercise> EXERCISES = List.of(
+            new EventExercise("OBDX_FCI_GRADE_3.1_V0", (short) 1, List.of(), List.of("judge-1")));
+
     private CompetitionSnapshot competition() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null);
+                ObdxAvgMethod.MID_AVG, List.of(), EXERCISES, List.of(), List.of(), List.of(), null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
@@ -57,7 +62,7 @@ class RegisterObdxRedCardServiceCaseTest {
 
     private CompetitionSnapshot competitionWithRedCardAlreadyRegistered() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                ObdxAvgMethod.MID_AVG, List.of(), EXERCISES, List.of(),
                 List.of(new Score("OBDX_FCI_GRADE_3.1_V0", "judge-1", "dog-1", null, 0L, null, 1000L)), List.of(), null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
@@ -95,6 +100,20 @@ class RegisterObdxRedCardServiceCaseTest {
 
         assertThatThrownBy(() -> serviceCase.registerRedCard("event-1", COMMAND, "user@k9x.io"))
                 .isInstanceOf(RedCardAlreadyRegisteredException.class);
+
+        verifyNoInteractions(saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_judge_is_not_assigned_to_the_exercise() {
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("user@k9x.io");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
+
+        RegisterObdxRedCardCommand unassigned = new RegisterObdxRedCardCommand(
+                "judge-1", "OBDX_FCI_GRADE_3.9_V0", "dog-1");
+        assertThatThrownBy(() -> serviceCase.registerRedCard("event-1", unassigned, "user@k9x.io"))
+                .isInstanceOf(ExerciseJudgeNotAssignedException.class);
 
         verifyNoInteractions(saveCompetitionPersistencePort);
     }

@@ -212,6 +212,7 @@ public final class CompetitionAggregate {
         if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
             throw new StageExpiredException();
         }
+        assertJudgeAssignedToExercise(event, data.exerciseId(), data.judgeId());
         if (event.isDisqualified(data.dogId())) {
             throw new CompetitorDisqualifiedException();
         }
@@ -231,6 +232,7 @@ public final class CompetitionAggregate {
         if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
             throw new StageExpiredException();
         }
+        assertJudgeAssignedToExercise(event, data.exerciseId(), data.judgeId());
         if (hasYellowCard(event, data)) {
             throw new YellowCardAlreadyRegisteredException();
         }
@@ -256,10 +258,25 @@ public final class CompetitionAggregate {
         if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
             throw new StageExpiredException();
         }
+        assertJudgeAssignedToExercise(event, data.exerciseId(), data.judgeId());
         if (event.hasRedCard(data.dogId())) {
             throw new RedCardAlreadyRegisteredException();
         }
         changes.add(new RedCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogId(), now));
+    }
+
+    /**
+     * A score or card can only be recorded for an exercise/judge pair the event actually recognises: the judge
+     * must be assigned to that exercise in the event configuration. Otherwise it would be persisted but never
+     * surfaced by the classification (which only reads scores/cards for assigned judge+exercise pairs).
+     */
+    private void assertJudgeAssignedToExercise(EventSnapshot event, String exerciseId, String judgeId) {
+        boolean assigned = event.exercises() != null && event.exercises().stream()
+                .filter(e -> Objects.equals(e.exerciseId(), exerciseId))
+                .anyMatch(e -> e.judges() != null && e.judges().contains(judgeId));
+        if (!assigned) {
+            throw new ExerciseJudgeNotAssignedException(judgeId, exerciseId);
+        }
     }
 
     private boolean hasYellowCard(EventSnapshot event, YellowCardData data) {

@@ -10,10 +10,12 @@ import com.k9x.application.events.obdx.use_case.command.UpdateObdxScoreCommand;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.valueobjects.EventExercise;
 import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.events.exceptions.CompetitorDisqualifiedException;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.exceptions.ExerciseJudgeNotAssignedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,9 +53,12 @@ class UpdateObdxScoreServiceCaseTest {
                 getObdxEventCollectorPersistencePort, getObdxExerciseAllowedValuesPort, saveCompetitionPersistencePort);
     }
 
+    private static final List<EventExercise> EXERCISES = List.of(
+            new EventExercise("OBDX_FCI_GRADE_3.1_V0", (short) 1, List.of(), List.of("judge-1")));
+
     private CompetitionSnapshot competition() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null);
+                ObdxAvgMethod.MID_AVG, List.of(), EXERCISES, List.of(), List.of(), List.of(), null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
@@ -62,9 +67,20 @@ class UpdateObdxScoreServiceCaseTest {
 
     private CompetitionSnapshot competitionWithDisqualifiedDog() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                ObdxAvgMethod.MID_AVG, List.of(), EXERCISES, List.of(),
                 List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L),
                         new Score("ex-2", "judge-1", "dog-1", null, 0L, 2000L)), List.of(), null);
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
+                List.of(event));
+        return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
+                0L, 0L, null, List.of(stage));
+    }
+
+    private CompetitionSnapshot competitionWithExerciseJudgedByAnother() {
+        EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(),
+                List.of(new EventExercise("OBDX_FCI_GRADE_3.1_V0", (short) 1, List.of(), List.of("judge-2"))),
+                List.of(), List.of(), List.of(), null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
@@ -116,6 +132,21 @@ class UpdateObdxScoreServiceCaseTest {
 
         assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
                 .isInstanceOf(CompetitorDisqualifiedException.class);
+
+        verifyNoInteractions(saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_judge_is_not_assigned_to_the_exercise() {
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("user@k9x.io");
+        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX_FCI_GRADE_3.1_V0"))
+                .thenReturn(List.of(new BigDecimal("7.5")));
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competitionWithExerciseJudgedByAnother());
+
+        assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
+                .isInstanceOf(ExerciseJudgeNotAssignedException.class);
 
         verifyNoInteractions(saveCompetitionPersistencePort);
     }

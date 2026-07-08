@@ -10,6 +10,7 @@ import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.exceptions.*;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
+import com.k9x.domain.events.valueobjects.EventExercise;
 import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
@@ -462,7 +463,7 @@ class CompetitionAggregateTest {
 
     @Test
     void updateScore_records_score_updated() {
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(scoreEvent(), FUTURE)));
         ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-1", "dog-1", BigDecimal.TEN);
 
         aggregate.updateScore("evt-1", data, OWNER, NOW);
@@ -475,9 +476,17 @@ class CompetitionAggregateTest {
     }
 
     @Test
+    void updateScore_throws_when_judge_is_not_assigned_to_the_exercise() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(scoreEvent(), FUTURE)));
+        ScoreUpdateData data = new ScoreUpdateData("judge-2", "ex-1", "dog-1", BigDecimal.TEN);
+
+        assertThrows(ExerciseJudgeNotAssignedException.class, () -> aggregate.updateScore("evt-1", data, OWNER, NOW));
+    }
+
+    @Test
     void updateScore_throws_when_competitor_is_disqualified() {
         EventSnapshot disqualified = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                ObdxAvgMethod.MID_AVG, List.of(), scoreExercises(), List.of(),
                 List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L),
                         new Score("ex-2", "judge-1", "dog-1", null, 0L, 2000L)), List.of(), null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(disqualified, FUTURE)));
@@ -491,7 +500,7 @@ class CompetitionAggregateTest {
         EventCompetitor notCompeting = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed",
                 null, (short) 1, true, true, null, null, null);
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(notCompeting), List.of(), List.of(), List.of(), List.of(), null);
+                ObdxAvgMethod.MID_AVG, List.of(notCompeting), scoreExercises(), List.of(), List.of(), List.of(), null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event, FUTURE)));
         ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-1", "dog-1", BigDecimal.TEN);
 
@@ -500,7 +509,7 @@ class CompetitionAggregateTest {
 
     @Test
     void registerYellowCard_records_yellow_card_registered() {
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(cardEvent(), FUTURE)));
         YellowCardData data = new YellowCardData("judge-1", "ex-1", "dog-1");
 
         aggregate.registerYellowCard("evt-1", data, OWNER, NOW);
@@ -513,9 +522,18 @@ class CompetitionAggregateTest {
     }
 
     @Test
+    void registerYellowCard_throws_when_judge_is_not_assigned_to_the_exercise() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(cardEvent(), FUTURE)));
+        YellowCardData data = new YellowCardData("judge-2", "ex-1", "dog-1");
+
+        assertThrows(ExerciseJudgeNotAssignedException.class,
+                () -> aggregate.registerYellowCard("evt-1", data, OWNER, NOW));
+    }
+
+    @Test
     void registerYellowCard_throws_when_already_registered_for_judge_exercise_and_dog() {
         EventSnapshot carded = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                ObdxAvgMethod.MID_AVG, List.of(), cardExercises(), List.of(),
                 List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L)), List.of(), null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(carded, FUTURE)));
         YellowCardData data = new YellowCardData("judge-1", "ex-1", "dog-1");
@@ -527,7 +545,7 @@ class CompetitionAggregateTest {
     @Test
     void registerYellowCard_also_registers_red_card_when_it_is_the_second_yellow_card() {
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                ObdxAvgMethod.MID_AVG, List.of(), cardExercises(), List.of(),
                 List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L)), List.of(), null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event, FUTURE)));
         YellowCardData data = new YellowCardData("judge-2", "ex-2", "dog-1");
@@ -546,7 +564,7 @@ class CompetitionAggregateTest {
     @Test
     void registerYellowCard_does_not_duplicate_red_card_when_already_registered() {
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                ObdxAvgMethod.MID_AVG, List.of(), cardExercises(), List.of(),
                 List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L, null),
                         new Score("ex-1", "judge-1", "dog-1", null, 0L, null, 500L)), List.of(), null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event, FUTURE)));
@@ -559,7 +577,7 @@ class CompetitionAggregateTest {
 
     @Test
     void registerRedCard_records_red_card_registered() {
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(cardEvent(), FUTURE)));
         RedCardData data = new RedCardData("judge-1", "ex-1", "dog-1");
 
         aggregate.registerRedCard("evt-1", data, OWNER, NOW);
@@ -572,15 +590,55 @@ class CompetitionAggregateTest {
     }
 
     @Test
+    void registerRedCard_throws_when_judge_is_not_assigned_to_the_exercise() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(cardEvent(), FUTURE)));
+        RedCardData data = new RedCardData("judge-2", "ex-1", "dog-1");
+
+        assertThrows(ExerciseJudgeNotAssignedException.class,
+                () -> aggregate.registerRedCard("evt-1", data, OWNER, NOW));
+    }
+
+    @Test
     void registerRedCard_throws_when_already_registered() {
         EventSnapshot carded = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                ObdxAvgMethod.MID_AVG, List.of(), cardExercises(), List.of(),
                 List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, null, 1000L)), List.of(), null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(carded, FUTURE)));
-        RedCardData data = new RedCardData("judge-2", "ex-2", "dog-1");
+        RedCardData data = new RedCardData("judge-1", "ex-1", "dog-1");
 
         assertThrows(RedCardAlreadyRegisteredException.class,
                 () -> aggregate.registerRedCard("evt-1", data, OWNER, NOW));
+    }
+
+    /**
+     * Event whose exercises assign judge-1 to ex-1 and judge-2 to ex-2, so card registrations for those
+     * pairs pass the judge-assignment check.
+     */
+    private EventSnapshot cardEvent() {
+        return new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), cardExercises(), List.of(), List.of(), List.of(), null);
+    }
+
+    private static List<EventExercise> cardExercises() {
+        return List.of(
+                new EventExercise("ex-1", (short) 1, List.of(), List.of("judge-1")),
+                new EventExercise("ex-2", (short) 2, List.of(), List.of("judge-2")));
+    }
+
+    /**
+     * Event whose exercises all assign judge-1, so score registrations for judge-1 on ex-1/ex-2/ex-3 pass the
+     * judge-assignment check.
+     */
+    private EventSnapshot scoreEvent() {
+        return new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), scoreExercises(), List.of(), List.of(), List.of(), null);
+    }
+
+    private static List<EventExercise> scoreExercises() {
+        return List.of(
+                new EventExercise("ex-1", (short) 1, List.of(), List.of("judge-1")),
+                new EventExercise("ex-2", (short) 2, List.of(), List.of("judge-1")),
+                new EventExercise("ex-3", (short) 3, List.of(), List.of("judge-1")));
     }
 
 }
