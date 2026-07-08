@@ -11,7 +11,7 @@ public class AwardEnumAdapter implements GetAwardListPort {
 
     @Override
     public List<AwardDTO> getAwards(String disciplineId) {
-        Discipline discipline = Discipline.valueOf(disciplineId);
+        Discipline discipline = Discipline.fromRequest(disciplineId);
         return switch (discipline) {
             case OBDX -> Arrays.stream(ObdxAward.values())
                     .map(award -> new AwardDTO(award.name(), capitalize(award.name())))

@@ -9,7 +9,6 @@ import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.competitions.commands.YellowCardData;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
-import com.k9x.domain.shared.SupportUser;
 
 public class RegisterObdxYellowCardServiceCase {
 
@@ -30,9 +29,7 @@ public class RegisterObdxYellowCardServiceCase {
         if (competitionId == null) {
             throw new EventNotFoundException();
         }
-        if (!SupportUser.is(userEmail)) {
-            assertUserIsCollector(eventId, command.judgeId(), userEmail);
-        }
+        assertUserIsCollector(eventId, command.judgeId(), userEmail);
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
         competition.registerYellowCard(eventId,

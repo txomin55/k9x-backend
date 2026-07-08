@@ -20,7 +20,6 @@ import com.k9x.domain.shared.UtcDates;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 
 import java.util.List;
-import java.util.Locale;
 
 public class GetCollectionServiceCase {
 
@@ -56,7 +55,7 @@ public class GetCollectionServiceCase {
         List<FetchCollectionJudgeWithCollectorDTO> visibleJudges =
                 resolveVisibleJudges(allJudges, event.creator(), userId);
 
-        Discipline discipline = Discipline.valueOf(event.discipline().toUpperCase(Locale.ROOT));
+        Discipline discipline = Discipline.fromStored(event.discipline());
         FetchObdxCollectionDTO obdx = discipline == Discipline.OBDX
                 ? getObdxCollectionServiceCase.getCollection(eventId, visibleJudges)
                 : null;

@@ -19,7 +19,6 @@ import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 
 import java.io.IOException;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -47,7 +46,7 @@ public class GetEventClassificationServiceCase {
         EventClassificationContextDTO context = resolveContext(eventId);
         EventSnapshot event = context.event();
 
-        Discipline discipline = Discipline.valueOf(event.discipline().toUpperCase(Locale.ROOT));
+        Discipline discipline = Discipline.fromStored(event.discipline());
         FetchObdxClassificationDTO obdx = discipline == Discipline.OBDX
                 ? getObdxClassificationServiceCase.getClassification(event)
                 : null;

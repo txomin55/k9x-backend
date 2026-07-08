@@ -6,14 +6,12 @@ import com.k9x.domain.competitions.exceptions.CompetitionCannotBeDeletedExceptio
 import com.k9x.domain.competitions.exceptions.CompetitionCannotBeUpdatedException;
 import com.k9x.domain.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.domain.competitions.status.CompetitionStatus;
-import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.exceptions.*;
 import com.k9x.domain.events.status.EventStatus;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
 import com.k9x.domain.shared.UtcDates;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.stages.exceptions.*;
@@ -21,7 +19,6 @@ import com.k9x.domain.stages.status.StageStatus;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -62,14 +59,7 @@ public final class CompetitionAggregate {
     }
 
     private static String normalizeDiscipline(String disciplineId) {
-        if (disciplineId == null) {
-            throw new DisciplineConfigurationMalformedException();
-        }
-        try {
-            return Discipline.valueOf(disciplineId.toUpperCase(Locale.ROOT)).name();
-        } catch (IllegalArgumentException e) {
-            throw new DisciplineConfigurationMalformedException();
-        }
+        return Discipline.fromStored(disciplineId).name();
     }
 
     // ---- CompetitionSnapshot mutations -------------------------------------------------------------------
@@ -80,9 +70,7 @@ public final class CompetitionAggregate {
 
     public void update(CompetitionUpdateData data, String userId, long now) {
         assertCompetitionMutableBy(userId);
-        if (!SupportUser.is(userId)) {
-            assertCompetitionUpdatable(now);
-        }
+        assertCompetitionUpdatable(now);
 
         changes.add(new CompetitionUpdated(snapshot.id(), data.name(), data.description(), data.country(),
                 data.address(), data.coordAlt(), data.coordLong(), now));
@@ -92,9 +80,7 @@ public final class CompetitionAggregate {
 
     public void delete(String userId, long now) {
         assertCompetitionMutableBy(userId);
-        if (!SupportUser.is(userId)) {
-            assertCompetitionDeletable(now);
-        }
+        assertCompetitionDeletable(now);
 
         changes.add(new CompetitionDeleted(snapshot.id(), now));
         if (snapshot.stages() != null) {
@@ -118,9 +104,7 @@ public final class CompetitionAggregate {
         StageSnapshot stage = requireActiveStage(stageId, userId);
         assertStageOwnedBy(stage, userId);
         assertCompetitionMutableBy(userId);
-        if (!SupportUser.is(userId)) {
-            assertStageUpdatable(stage, now);
-        }
+        assertStageUpdatable(stage, now);
 
         changes.add(new StageRenamed(stageId, data.name(), data.dateFrom(), data.dateTo(), now));
     }
@@ -131,9 +115,7 @@ public final class CompetitionAggregate {
         StageSnapshot stage = requireActiveStage(stageId, userId);
         assertStageOwnedBy(stage, userId);
         assertCompetitionMutableBy(userId);
-        if (!SupportUser.is(userId)) {
-            assertStageDeletable(stage, now);
-        }
+        assertStageDeletable(stage, now);
 
         changes.add(new StageDeleted(stageId, now));
         cascadeDeleteEvents(stage, now);
@@ -151,11 +133,9 @@ public final class CompetitionAggregate {
         EventSnapshot event = requireActiveEvent(eventId, userId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
-        if (!SupportUser.is(userId)) {
-            assertEventDeletable(event, stage, now);
-            if (stage.deletedAt() != null) {
-                throw new StageAlreadyDeletedException();
-            }
+        assertEventDeletable(event, stage, now);
+        if (stage.deletedAt() != null) {
+            throw new StageAlreadyDeletedException();
         }
         assertStageOwnedBy(stage, userId);
         changes.add(new EventDeleted(eventId, now));
@@ -166,13 +146,11 @@ public final class CompetitionAggregate {
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
 
-        if (!SupportUser.is(userId)) {
-            if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
-                throw new StageExpiredException();
-            }
-            if (!stage.enrollmentOpened(event, now)) {
-                throw new EnrollmentClosedException();
-            }
+        if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
+            throw new StageExpiredException();
+        }
+        if (!stage.enrollmentOpened(event, now)) {
+            throw new EnrollmentClosedException();
         }
         changes.add(new DogEnrolled(eventId, dogId, bih, nextPosition(event), now));
     }
@@ -196,14 +174,12 @@ public final class CompetitionAggregate {
     public void updateObdxEventInfo(String eventId, ObdxEventUpdateData data, String userId, long now) {
         EventSnapshot event = requireActiveEvent(eventId, userId);
 
-        if (!SupportUser.is(userId) && !event.creator().equals(userId)) {
+        if (!event.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
-        if (!SupportUser.is(userId)) {
-            StageSnapshot stage = findStageOfEvent(eventId);
-            assert stage != null;
-            assertEventUpdatable(stage, now);
-        }
+        StageSnapshot stage = findStageOfEvent(eventId);
+        assert stage != null;
+        assertEventUpdatable(stage, now);
         changes.add(new ObdxEventInfoUpdated(eventId, data.name(), data.configurationId(), data.scoreCalculation(),
                 data.enrollmentDeadline(), data.competitors(), data.exercises(), data.judges(), now, data.awards()));
     }
@@ -216,7 +192,7 @@ public final class CompetitionAggregate {
     public void updateCompetitorNotCompeting(String eventId, String dogId, boolean notCompeting, String userId, long now) {
         EventSnapshot event = requireActiveEvent(eventId, userId);
 
-        if (!SupportUser.is(userId) && !event.creator().equals(userId)) {
+        if (!event.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
         EventCompetitor competitor = findCompetitor(event, dogId);
@@ -230,13 +206,11 @@ public final class CompetitionAggregate {
         EventSnapshot event = requireActiveEvent(eventId, userId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
-        if (!SupportUser.is(userId)) {
-            if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
-                throw new StageNotStartedException();
-            }
-            if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
-                throw new StageExpiredException();
-            }
+        if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
+            throw new StageNotStartedException();
+        }
+        if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
+            throw new StageExpiredException();
         }
         if (event.isDisqualified(data.dogId())) {
             throw new CompetitorDisqualifiedException();
@@ -251,13 +225,11 @@ public final class CompetitionAggregate {
         EventSnapshot event = requireActiveEvent(eventId, userId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
-        if (!SupportUser.is(userId)) {
-            if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
-                throw new StageNotStartedException();
-            }
-            if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
-                throw new StageExpiredException();
-            }
+        if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
+            throw new StageNotStartedException();
+        }
+        if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
+            throw new StageExpiredException();
         }
         if (hasYellowCard(event, data)) {
             throw new YellowCardAlreadyRegisteredException();
@@ -278,13 +250,11 @@ public final class CompetitionAggregate {
         EventSnapshot event = requireActiveEvent(eventId, userId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
-        if (!SupportUser.is(userId)) {
-            if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
-                throw new StageNotStartedException();
-            }
-            if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
-                throw new StageExpiredException();
-            }
+        if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
+            throw new StageNotStartedException();
+        }
+        if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
+            throw new StageExpiredException();
         }
         if (event.hasRedCard(data.dogId())) {
             throw new RedCardAlreadyRegisteredException();
@@ -306,9 +276,6 @@ public final class CompetitionAggregate {
     // ---- invariants & navigation -----------------------------------------------------------------
 
     private void assertCompetitionMutableBy(String userId) {
-        if (SupportUser.is(userId)) {
-            return;
-        }
         if (snapshot.deletedAt() != null) {
             throw new CompetitionAlreadyDeletedException();
         }
@@ -349,16 +316,13 @@ public final class CompetitionAggregate {
         if (stage == null) {
             throw new StageNotFoundException();
         }
-        if (!SupportUser.is(userId) && stage.deletedAt() != null) {
+        if (stage.deletedAt() != null) {
             throw new StageAlreadyDeletedException();
         }
         return stage;
     }
 
     private void assertStageOwnedBy(StageSnapshot stage, String userId) {
-        if (SupportUser.is(userId)) {
-            return;
-        }
         if (!stage.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
@@ -414,7 +378,7 @@ public final class CompetitionAggregate {
         if (event == null) {
             throw new EventNotFoundException();
         }
-        if (!SupportUser.is(userId) && event.deletedAt() != null) {
+        if (event.deletedAt() != null) {
             throw new EventAlreadyDeletedException();
         }
         return event;

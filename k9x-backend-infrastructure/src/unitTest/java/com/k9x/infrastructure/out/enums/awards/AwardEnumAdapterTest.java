@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.out.enums.awards;
 
+import com.k9x.domain.disciplines.exceptions.DisciplineNotFoundException;
 import com.k9x.application.awards.use_case.dto.AwardDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,14 +36,20 @@ class AwardEnumAdapterTest {
     }
 
     @Test
-    void throws_exception_when_discipline_is_unknown() {
-        assertThatThrownBy(() -> adapter.getAwards("NOT_A_DISCIPLINE"))
-                .isInstanceOf(IllegalArgumentException.class);
+    void throws_discipline_not_found_when_discipline_case_does_not_match() {
+        assertThatThrownBy(() -> adapter.getAwards("obdx"))
+                .isInstanceOf(DisciplineNotFoundException.class);
     }
 
     @Test
-    void throws_exception_when_discipline_is_null() {
+    void throws_discipline_not_found_when_discipline_is_unknown() {
+        assertThatThrownBy(() -> adapter.getAwards("NOT_A_DISCIPLINE"))
+                .isInstanceOf(DisciplineNotFoundException.class);
+    }
+
+    @Test
+    void throws_discipline_not_found_when_discipline_is_null() {
         assertThatThrownBy(() -> adapter.getAwards(null))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(DisciplineNotFoundException.class);
     }
 }

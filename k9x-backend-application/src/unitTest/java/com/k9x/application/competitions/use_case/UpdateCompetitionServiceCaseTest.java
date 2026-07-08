@@ -75,14 +75,4 @@ class UpdateCompetitionServiceCaseTest {
         verify(saveCompetitionPersistencePort).save(any());
     }
 
-    @Test
-    void support_can_update_a_competition_it_does_not_own_without_being_organizer() {
-        when(geoCoordinatesPort.getCoordinates("Address")).thenReturn(new Coordinates(40.4168, -3.7038));
-        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition("user-1"));
-
-        serviceCase.updateCompetition("comp-1", new UpdateCompetitionCommand("Name", "Desc", "ES", "Address"),
-                "k9x.support@gmail.com", false);
-
-        verify(saveCompetitionPersistencePort).save(any());
-    }
 }

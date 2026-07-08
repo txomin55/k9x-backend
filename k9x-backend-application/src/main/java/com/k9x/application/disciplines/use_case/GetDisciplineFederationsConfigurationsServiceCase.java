@@ -9,7 +9,6 @@ import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 
 public class GetDisciplineFederationsConfigurationsServiceCase {
 
@@ -27,7 +26,7 @@ public class GetDisciplineFederationsConfigurationsServiceCase {
 
     public DisciplineConfigurationsDTO getDisciplineConfigurations(String discipline, boolean organizer) {
         assertOrganizer(organizer);
-        Discipline parsedDiscipline = Discipline.valueOf(discipline.toUpperCase(Locale.ROOT));
+        Discipline parsedDiscipline = Discipline.fromRequest(discipline);
         return new DisciplineConfigurationsDTO(
                 parsedDiscipline == Discipline.OBDX ? getObdxConfigurations() : null);
     }

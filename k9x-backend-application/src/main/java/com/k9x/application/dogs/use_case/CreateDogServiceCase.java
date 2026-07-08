@@ -6,7 +6,6 @@ import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
 
 public class CreateDogServiceCase {
 
@@ -28,9 +27,6 @@ public class CreateDogServiceCase {
     }
 
     private void assertUserIdMatchesOwnerWhenNoOrganizer(String owner, String userId, boolean organizer) {
-        if (SupportUser.is(userId)) {
-            return;
-        }
         if (!organizer && (owner == null || !owner.equals(userId))) {
             throw new UnauthorizedResourceException();
         }

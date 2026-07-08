@@ -23,7 +23,7 @@ public class GetDogListJooqAdapter implements GetDogListPersistencePort {
                 .from(Tables.DOGS)
                 .where(owner == null
                         ? DSL.noCondition()
-                        : Tables.DOGS.OWNER.eq(owner).or(Tables.DOGS.CREATOR.eq(owner)))
+                        : Tables.DOGS.OWNER.eq(owner))
                 .and(Tables.DOGS.DELETED_AT.isNull())
                 .fetch(r -> new Dog(
                         r.get(Tables.DOGS.ID),

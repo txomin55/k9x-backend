@@ -23,11 +23,9 @@ import com.k9x.domain.events.status.EventCompetitorStatus;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
-import com.k9x.domain.shared.SupportUser;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -55,7 +53,7 @@ public class GetEventServiceCase {
         StageSnapshot stage = CompetitionNavigator.findStageOfEvent(competition, id);
         assertStageValidations(stage, userId);
 
-        Discipline discipline = Discipline.valueOf(event.discipline().toUpperCase(Locale.ROOT));
+        Discipline discipline = Discipline.fromStored(event.discipline());
         if (discipline != Discipline.OBDX) {
             return new FetchEventDetailDTO(null, List.of(), List.of(), List.of(), null);
         }
@@ -125,9 +123,6 @@ public class GetEventServiceCase {
     }
 
     private void assertStageValidations(StageSnapshot stage, String userId) {
-        if (SupportUser.is(userId)) {
-            return;
-        }
         if (stage.deletedAt() != null) {
             throw new StageAlreadyDeletedException();
         }
