@@ -1025,9 +1025,13 @@ VALUES
 --     ResultsqualificationWC_HCA_TeamvsIndv_ENDresults.xlsx (tabs '1'..'118').
 --     Dogs 13, 41 and 96 had no scores at all (withdrawn) and are excluded.
 --     Dogs 10, 62 and 114 got a yellow card with no exercise specified on the
---     sheet; per instruction it's registered on judge 1's last exercise
---     (OBDX_FCI_GRADE_3.7_V0). Dog 41 was disqualified (red card), registered
---     the same way.
+--     sheet; per instruction it's registered on the last exercise
+--     (OBDX_FCI_GRADE_3.7_V0). The card is stamped against one of the judges
+--     actually assigned to that exercise (judge 3), because the classification
+--     only reads scores/cards for judge+exercise pairs listed in event_exercises;
+--     a card on an unassigned judge would be silently dropped. Dog 41 was
+--     disqualified (red card): stamped on the first exercise (OBDX_FCI_GRADE_3.1_V0)
+--     with score 0, against judge 1 who is assigned to it.
 -- ---------------------------------------------------------------------------
 INSERT INTO obdx.event_scores (event_id, exercise_id, judge_id, dog_id, score, created_at, last_update,
                                yellow_card, red_card)
@@ -1270,9 +1274,8 @@ VALUES
     ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.6_V0', 'wc2026-judge-4', 'wc2026-dog-10', 8, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.5_V0', 'wc2026-judge-3', 'wc2026-dog-10', 8.5, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.5_V0', 'wc2026-judge-4', 'wc2026-dog-10', 8, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-3', 'wc2026-dog-10', 8.5, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-3', 'wc2026-dog-10', 8.5, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL),
     ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-4', 'wc2026-dog-10', 8.5, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-1', 'wc2026-dog-10', NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL),
     ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-1', 'wc2026-dog-11', 10, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-2', 'wc2026-dog-11', 9, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-3', 'wc2026-dog-11', 10, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
@@ -1969,7 +1972,7 @@ VALUES
     ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.5_V0', 'wc2026-judge-4', 'wc2026-dog-40', 7.5, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-3', 'wc2026-dog-40', 0, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-4', 'wc2026-dog-40', 0, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
-    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-1', 'wc2026-dog-41', NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
+    ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-1', 'wc2026-dog-41', 0, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
     ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-1', 'wc2026-dog-42', 10, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-2', 'wc2026-dog-42', 10, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-3', 'wc2026-dog-42', 10, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
@@ -2472,9 +2475,8 @@ VALUES
     ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.6_V0', 'wc2026-judge-4', 'wc2026-dog-62', 0, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.5_V0', 'wc2026-judge-3', 'wc2026-dog-62', 8.5, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.5_V0', 'wc2026-judge-4', 'wc2026-dog-62', 7, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-3', 'wc2026-dog-62', 6, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
+    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-3', 'wc2026-dog-62', 6, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL),
     ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-4', 'wc2026-dog-62', 6, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
-    ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-1', 'wc2026-dog-62', NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL),
     ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-1', 'wc2026-dog-63', 8, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-2', 'wc2026-dog-63', 9.5, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-2', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-3', 'wc2026-dog-63', 9.5, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
@@ -3697,9 +3699,8 @@ VALUES
     ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.6_V0', 'wc2026-judge-4', 'wc2026-dog-114', 7, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.5_V0', 'wc2026-judge-3', 'wc2026-dog-114', 9, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.5_V0', 'wc2026-judge-4', 'wc2026-dog-114', 8.5, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-3', 'wc2026-dog-114', 6, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
+    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-3', 'wc2026-dog-114', 6, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL),
     ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-4', 'wc2026-dog-114', 6.5, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
-    ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.7_V0', 'wc2026-judge-1', 'wc2026-dog-114', NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL),
     ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-1', 'wc2026-dog-115', 10, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-2', 'wc2026-dog-115', 10, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
     ('wc2026-event-qualification-3', 'OBDX_FCI_GRADE_3.1_V0', 'wc2026-judge-3', 'wc2026-dog-115', 10, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL),
