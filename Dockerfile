@@ -20,7 +20,7 @@ ARG GPR_KEY
 
 RUN ./gradlew :k9x-backend-loader:bootJar -PspringProfilesActive=production \
     -Pgpr.user="$GPR_USER" -Pgpr.key="$GPR_KEY" \
-    -x test --warn
+    -x test
 
 #
 # Package stage
