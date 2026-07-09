@@ -59,7 +59,7 @@ public class GetCollection implements SecuredCollectionsFetchOneApiDelegate {
                                 comp.competitor().country(),
                                 comp.competitor().position() != null ? comp.competitor().position().intValue() : null,
                                 comp.competitor().status(),
-                                comp.competitor().breed(),
+                                resolveBreed(comp.competitor().breed()),
                                 new IdNameDTO(comp.competitor().dogName(), comp.competitor().dogId()),
                                 comp.competitor().bih(),
                                 comp.competitor().reserve(),
@@ -68,6 +68,15 @@ public class GetCollection implements SecuredCollectionsFetchOneApiDelegate {
                         )
                 ))
                 .toList();
+    }
+
+    private IdNameDTO resolveBreed(String breedId) {
+        if (breedId == null) {
+            return null;
+        }
+        String name = messageSource.getMessage(
+                "breed." + breedId.toLowerCase() + ".name", null, breedId, LocaleContextHolder.getLocale());
+        return new IdNameDTO(name, breedId);
     }
 
     private String resolveTranslation(String key) {

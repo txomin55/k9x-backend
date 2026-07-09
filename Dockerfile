@@ -12,7 +12,7 @@ COPY k9x-backend-application/ k9x-backend-application/
 COPY k9x-backend-infrastructure/ k9x-backend-infrastructure/
 COPY k9x-backend-loader/ k9x-backend-loader/
 
-RUN ./gradlew :k9x-backend-loader:bootJar -PspringProfilesActive=production -x test --stacktrace --info
+RUN ./gradlew :k9x-backend-loader:bootJar -PspringProfilesActive=production -x test --warn
 
 #
 # Package stage

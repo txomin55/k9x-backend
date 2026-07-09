@@ -70,7 +70,7 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                         c.country(),
                         c.position() != null ? c.position().intValue() : null,
                         c.status(),
-                        c.breed(),
+                        resolveBreed(c.breed()),
                         new IdNameDTO(c.dogName(), c.dogId()),
                         c.bih(),
                         c.reserve(),
@@ -103,6 +103,15 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                 : new FederationConfigurationResponseDTO(configuration.federation().id(),
                 configuration.federation().name(), configuration.federation().country());
         return new EventConfigurationDetailResponseDTO(configuration.id(), configuration.name(), federation);
+    }
+
+    private IdNameDTO resolveBreed(String breedId) {
+        if (breedId == null) {
+            return null;
+        }
+        String name = messageSource.getMessage(
+                "breed." + breedId.toLowerCase() + ".name", null, breedId, LocaleContextHolder.getLocale());
+        return new IdNameDTO(name, breedId);
     }
 
     private IdNameDTO resolveDiscipline(String disciplineId) {

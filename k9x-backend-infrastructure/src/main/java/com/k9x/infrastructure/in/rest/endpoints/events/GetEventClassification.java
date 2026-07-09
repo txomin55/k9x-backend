@@ -56,7 +56,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                         c.handler(),
                         c.team(),
                         c.status(),
-                        c.breed(),
+                        resolveBreed(c.breed()),
                         new IdNameDTO(c.dogName(), c.dogId()),
                         c.exercises().stream()
                                 .map(e -> new StageEventClassificationExerciseScoresResponseDTO(
@@ -103,6 +103,15 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
         String name = messageSource.getMessage(
                 "country." + countryCode.toLowerCase() + ".name", null, countryCode, LocaleContextHolder.getLocale());
         return new IdNameDTO(name, countryCode);
+    }
+
+    private IdNameDTO resolveBreed(String breedId) {
+        if (breedId == null) {
+            return null;
+        }
+        String name = messageSource.getMessage(
+                "breed." + breedId.toLowerCase() + ".name", null, breedId, LocaleContextHolder.getLocale());
+        return new IdNameDTO(name, breedId);
     }
 
     private String resolveExerciseName(String exerciseId) {

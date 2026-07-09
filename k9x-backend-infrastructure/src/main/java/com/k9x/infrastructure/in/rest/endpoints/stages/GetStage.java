@@ -60,8 +60,17 @@ public class GetStage implements StagesFetchOneApiDelegate {
                         c.handler(),
                         c.country(),
                         c.team(),
-                        c.breed()))
+                        resolveBreed(c.breed())))
                 .toList();
+    }
+
+    private IdNameDTO resolveBreed(String breedId) {
+        if (breedId == null) {
+            return null;
+        }
+        String name = messageSource.getMessage(
+                "breed." + breedId.toLowerCase() + ".name", null, breedId, LocaleContextHolder.getLocale());
+        return new IdNameDTO(name, breedId);
     }
 
     private IdNameDTO resolveDiscipline(String disciplineId) {

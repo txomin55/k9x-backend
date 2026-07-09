@@ -2,8 +2,6 @@
 <configuration>
 
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    <logger name="org.springframework" level="INFO"/>
-    <logger name="org.springframework.web" level="DEBUG"/>
 
     <property name="LOG_FILE" value="LogFile"/>
     <property name="LOG_DIR" value="var/logs/k9x-backend"/>
@@ -16,13 +14,15 @@
     </appender>
 
     <springProfile name="develop">
+        <logger name="org.springframework.web" level="DEBUG"/>
         <root level="DEBUG">
             <appender-ref ref="STDOUT"/>
         </root>
     </springProfile>
 
     <springProfile name="production">
-        <root level="ERROR">
+        <logger name="org.springframework" level="ERROR"/>
+        <root level="WARN">
             <appender-ref ref="STDOUT"/>
         </root>
     </springProfile>
