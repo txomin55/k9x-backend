@@ -8,6 +8,8 @@ val jjwtVersion = "0.13.0"
 val restAssuredVersion = "6.0.0"
 val k9xStubsVersion = "0.0.1-SNAPSHOT"
 val jooqVersion = "3.19.23"
+val postgresqlVersion = "42.7.11"
+val flywayDatabasePostgresqlVersion = "12.4.0"
 
 dependencies {
     implementation(project(":k9x-backend-application"))
@@ -21,9 +23,9 @@ dependencies {
     implementation("com.google.api-client:google-api-client:2.7.2")
     implementation("com.google.http-client:google-http-client-gson:1.44.2")
 
-    runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("org.postgresql:postgresql:$postgresqlVersion")
     implementation("org.flywaydb:flyway-core")
-    runtimeOnly("org.flywaydb:flyway-database-postgresql")
+    runtimeOnly("org.flywaydb:flyway-database-postgresql:$flywayDatabasePostgresqlVersion")
 
     compileOnly("org.springframework:spring-context")
 
