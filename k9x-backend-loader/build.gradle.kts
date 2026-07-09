@@ -18,6 +18,8 @@ springBoot {
 val springProfilesActive = (findProperty("springProfilesActive") as String?) ?: "develop"
 val projectArtifactId: String = project.name
 val projectVersion = project.version.toString()
+// Local fallback for the Google secrets: baked in from gradle.properties at build time.
+// Empty when gradle.properties is absent (e.g. Render), where runtime env vars take over.
 val googleClientId = (findProperty("google.client_id") as String?) ?: ""
 val googleClientSecret = (findProperty("google.client_secret") as String?) ?: ""
 val googleRedirectUrl = (findProperty("google.redirect_url") as String?) ?: ""
