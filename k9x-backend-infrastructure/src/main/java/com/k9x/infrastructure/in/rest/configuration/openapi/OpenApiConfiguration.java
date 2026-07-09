@@ -31,7 +31,7 @@ public class OpenApiConfiguration {
     public GroupedOpenApi securedOpenApi() {
         return GroupedOpenApi.builder()
                 .group("secured")
-                .pathsToMatch("/api/**")
+                .pathsToMatch("/secured/**")
                 .addOpenApiCustomizer(openApi ->
                         openApi.addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 )
