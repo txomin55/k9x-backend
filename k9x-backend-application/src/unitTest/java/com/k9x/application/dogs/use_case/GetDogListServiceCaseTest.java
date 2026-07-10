@@ -77,6 +77,28 @@ class GetDogListServiceCaseTest {
     }
 
     @Test
+    void marks_dog_as_owned_when_owner_is_null_and_user_is_creator() {
+        Dog createdDog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", null, "handler-1", "user-1", "ES", "team-1", null, null, null, 0L, 0L, null);
+        Dog othersCreatedDog = new Dog("id-2", "ident-2", "breed", "Max", "img2.png", null, "handler-1", "creator-2", "FR", "team-2", null, null, null, 0L, 0L, null);
+        when(getDogListPersistencePort.getDogs("user-1")).thenReturn(List.of(createdDog, othersCreatedDog));
+
+        List<DogDTO> result = serviceCase.getDogs("user-1", true, true);
+
+        assertThat(result.get(0).owned()).isTrue();
+        assertThat(result.get(1).owned()).isFalse();
+    }
+
+    @Test
+    void does_not_mark_dog_as_owned_by_creator_when_owner_is_set_to_another_user() {
+        Dog dog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-2", "handler-1", "user-1", "ES", "team-1", null, null, null, 0L, 0L, null);
+        when(getDogListPersistencePort.getDogs("user-1")).thenReturn(List.of(dog));
+
+        List<DogDTO> result = serviceCase.getDogs("user-1", true, true);
+
+        assertThat(result.getFirst().owned()).isFalse();
+    }
+
+    @Test
     void maps_dog_fields_to_dto_correctly() {
         Dog dog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-1", "handler-1", "creator-1", "ES", "team-1", null, null, null, 0L, 0L, null);
         when(getDogListPersistencePort.getDogs("user-1")).thenReturn(List.of(dog));

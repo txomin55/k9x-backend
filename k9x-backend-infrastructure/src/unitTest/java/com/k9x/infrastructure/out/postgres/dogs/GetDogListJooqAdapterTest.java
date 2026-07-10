@@ -44,8 +44,10 @@ class GetDogListJooqAdapterTest {
                         "k9x"."dogs"."handler"\
                         """)
                 .contains("from \"k9x\".\"dogs\"")
-                .contains("where (\"k9x\".\"dogs\".\"owner\" = ? and \"k9x\".\"dogs\".\"deleted_at\" is null)");
-        assertThat(capturedBindings.get()).containsExactly("owner-123");
+                .contains("where ((\"k9x\".\"dogs\".\"owner\" = ? "
+                        + "or (\"k9x\".\"dogs\".\"owner\" is null and \"k9x\".\"dogs\".\"creator\" = ?)) "
+                        + "and \"k9x\".\"dogs\".\"deleted_at\" is null)");
+        assertThat(capturedBindings.get()).containsExactly("owner-123", "owner-123");
     }
 
     @Test

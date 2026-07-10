@@ -27,7 +27,7 @@ public class GetDogListServiceCase {
                                 dog.getId(),
                                 dog.getName(),
                                 dog.getImage(),
-                                userId.equals(dog.getOwner()),
+                                userId.equals(dog.getOwner()) || (dog.getOwner() == null && userId.equals(dog.getCreator())),
                                 dog.getCountry(),
                                 dog.getTeam(),
                                 dog.getOwner(),
