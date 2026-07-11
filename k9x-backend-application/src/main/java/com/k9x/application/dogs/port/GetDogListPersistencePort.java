@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface GetDogListPersistencePort {
 
-    List<Dog> getDogs(String owner);
+    List<Dog> getDogs(String owner, String creator);
 }

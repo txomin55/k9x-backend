@@ -15,12 +15,21 @@ public class GetDogListServiceCase {
         this.getDogListPersistencePort = getDogListPersistencePort;
     }
 
-    public List<DogDTO> getDogs(String userId, boolean organizer, boolean onlyOwned) {
+    public List<DogDTO> getDogs(String userId, boolean organizer, boolean owned, boolean created) {
 
         assertOwnerWhenNoOrganizer(userId, organizer);
 
-        String dogsByOwner = !organizer || onlyOwned ? userId : null;
-        List<Dog> dogs = getDogListPersistencePort.getDogs(dogsByOwner);
+        boolean filterByOwner = owned;
+        boolean filterByCreator = created;
+        // A non-organizer may only ever list their own dogs (owned or created).
+        if (!organizer && !owned && !created) {
+            filterByOwner = true;
+            filterByCreator = true;
+        }
+
+        String ownerFilter = filterByOwner ? userId : null;
+        String creatorFilter = filterByCreator ? userId : null;
+        List<Dog> dogs = getDogListPersistencePort.getDogs(ownerFilter, creatorFilter);
 
         return dogs.stream()
                 .map(dog -> new DogDTO(

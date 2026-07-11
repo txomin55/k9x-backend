@@ -32,44 +32,62 @@ class GetDogListServiceCaseTest {
 
     @Test
     void throws_exception_when_no_owner_is_provided_and_user_is_not_organizer() {
-        assertThatThrownBy(() -> serviceCase.getDogs(null, false, false))
+        assertThatThrownBy(() -> serviceCase.getDogs(null, false, false, false))
                 .isInstanceOf(OwnerNonProvidedWhenOrganizerException.class);
     }
 
     @Test
-    void filters_dogs_to_owned_when_not_organizer() {
-        when(getDogListPersistencePort.getDogs("user-1")).thenReturn(List.of());
+    void filters_dogs_to_own_when_not_organizer_and_no_filter() {
+        when(getDogListPersistencePort.getDogs("user-1", "user-1")).thenReturn(List.of());
 
-        serviceCase.getDogs("user-1", false, false);
+        serviceCase.getDogs("user-1", false, false, false);
 
-        verify(getDogListPersistencePort).getDogs("user-1");
+        verify(getDogListPersistencePort).getDogs("user-1", "user-1");
     }
 
     @Test
-    void filters_dogs_to_owned_when_organizer_and_only_owned() {
-        when(getDogListPersistencePort.getDogs("user-1")).thenReturn(List.of());
+    void filters_dogs_to_owned_when_owned_requested() {
+        when(getDogListPersistencePort.getDogs("user-1", null)).thenReturn(List.of());
 
-        serviceCase.getDogs("user-1", true, true);
+        serviceCase.getDogs("user-1", true, true, false);
 
-        verify(getDogListPersistencePort).getDogs("user-1");
+        verify(getDogListPersistencePort).getDogs("user-1", null);
     }
 
     @Test
-    void fetches_all_dogs_when_organizer_and_not_only_owned() {
-        when(getDogListPersistencePort.getDogs(null)).thenReturn(List.of());
+    void filters_dogs_to_created_when_created_requested() {
+        when(getDogListPersistencePort.getDogs(null, "user-1")).thenReturn(List.of());
 
-        serviceCase.getDogs("user-1", true, false);
+        serviceCase.getDogs("user-1", true, false, true);
 
-        verify(getDogListPersistencePort).getDogs(null);
+        verify(getDogListPersistencePort).getDogs(null, "user-1");
+    }
+
+    @Test
+    void merges_owned_and_created_when_both_requested() {
+        when(getDogListPersistencePort.getDogs("user-1", "user-1")).thenReturn(List.of());
+
+        serviceCase.getDogs("user-1", true, true, true);
+
+        verify(getDogListPersistencePort).getDogs("user-1", "user-1");
+    }
+
+    @Test
+    void fetches_all_dogs_when_organizer_and_no_filter() {
+        when(getDogListPersistencePort.getDogs(null, null)).thenReturn(List.of());
+
+        serviceCase.getDogs("user-1", true, false, false);
+
+        verify(getDogListPersistencePort).getDogs(null, null);
     }
 
     @Test
     void maps_dog_to_dto_with_owned_flag() {
         Dog ownDog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-1", "handler-1", "creator-1", "ES", "team-1", null, null, null, 0L, 0L, null);
         Dog othersDog = new Dog("id-2", "ident-2", "breed", "Max", "img2.png", "user-2", "handler-1", "creator-2", "FR", "team-2", null, null, null, 0L, 0L, null);
-        when(getDogListPersistencePort.getDogs(null)).thenReturn(List.of(ownDog, othersDog));
+        when(getDogListPersistencePort.getDogs(null, null)).thenReturn(List.of(ownDog, othersDog));
 
-        List<DogDTO> result = serviceCase.getDogs("user-1", true, false);
+        List<DogDTO> result = serviceCase.getDogs("user-1", true, false, false);
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).owned()).isTrue();
@@ -80,9 +98,9 @@ class GetDogListServiceCaseTest {
     void marks_dog_as_owned_when_owner_is_null_and_user_is_creator() {
         Dog createdDog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", null, "handler-1", "user-1", "ES", "team-1", null, null, null, 0L, 0L, null);
         Dog othersCreatedDog = new Dog("id-2", "ident-2", "breed", "Max", "img2.png", null, "handler-1", "creator-2", "FR", "team-2", null, null, null, 0L, 0L, null);
-        when(getDogListPersistencePort.getDogs("user-1")).thenReturn(List.of(createdDog, othersCreatedDog));
+        when(getDogListPersistencePort.getDogs(null, "user-1")).thenReturn(List.of(createdDog, othersCreatedDog));
 
-        List<DogDTO> result = serviceCase.getDogs("user-1", true, true);
+        List<DogDTO> result = serviceCase.getDogs("user-1", true, false, true);
 
         assertThat(result.get(0).owned()).isTrue();
         assertThat(result.get(1).owned()).isFalse();
@@ -91,9 +109,9 @@ class GetDogListServiceCaseTest {
     @Test
     void does_not_mark_dog_as_owned_by_creator_when_owner_is_set_to_another_user() {
         Dog dog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-2", "handler-1", "user-1", "ES", "team-1", null, null, null, 0L, 0L, null);
-        when(getDogListPersistencePort.getDogs("user-1")).thenReturn(List.of(dog));
+        when(getDogListPersistencePort.getDogs(null, "user-1")).thenReturn(List.of(dog));
 
-        List<DogDTO> result = serviceCase.getDogs("user-1", true, true);
+        List<DogDTO> result = serviceCase.getDogs("user-1", true, false, true);
 
         assertThat(result.getFirst().owned()).isFalse();
     }
@@ -101,9 +119,9 @@ class GetDogListServiceCaseTest {
     @Test
     void maps_dog_fields_to_dto_correctly() {
         Dog dog = new Dog("id-1", "ident-1", "breed", "Rex", "img.png", "user-1", "handler-1", "creator-1", "ES", "team-1", null, null, null, 0L, 0L, null);
-        when(getDogListPersistencePort.getDogs("user-1")).thenReturn(List.of(dog));
+        when(getDogListPersistencePort.getDogs("user-1", "user-1")).thenReturn(List.of(dog));
 
-        List<DogDTO> result = serviceCase.getDogs("user-1", false, false);
+        List<DogDTO> result = serviceCase.getDogs("user-1", false, false, false);
 
         DogDTO dto = result.getFirst();
         assertThat(dto.id()).isEqualTo("id-1");

@@ -46,6 +46,28 @@ class GetJudgeListJooqAdapterTest {
     }
 
     @Test
+    void generates_sql_filtered_only_by_not_deleted_when_creator_is_null() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+        AtomicReference<Object[]> capturedBindings = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            capturedBindings.set(ctx.bindings());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.JUDGES.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetJudgeListJooqAdapter(dsl).getJudges(null);
+
+        assertThat(capturedSql.get())
+                .contains("from \"k9x\".\"judges\"")
+                .contains("where \"k9x\".\"judges\".\"deleted_at\" is null")
+                .doesNotContain("\"creator\" = ?");
+        assertThat(capturedBindings.get()).isEmpty();
+    }
+
+    @Test
     void maps_records_to_judge_domain() {
         MockDataProvider provider = _ -> {
             DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);

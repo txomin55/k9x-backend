@@ -33,7 +33,7 @@ class GetDogListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetDogListJooqAdapter(dsl).getDogs("owner-123");
+        new GetDogListJooqAdapter(dsl).getDogs("owner-123", null);
 
         assertThat(capturedSql.get())
                 .contains("""
@@ -44,10 +44,54 @@ class GetDogListJooqAdapterTest {
                         "k9x"."dogs"."handler"\
                         """)
                 .contains("from \"k9x\".\"dogs\"")
-                .contains("where ((\"k9x\".\"dogs\".\"owner\" = ? "
-                        + "or (\"k9x\".\"dogs\".\"owner\" is null and \"k9x\".\"dogs\".\"creator\" = ?)) "
+                .contains("where (\"k9x\".\"dogs\".\"owner\" = ? "
                         + "and \"k9x\".\"dogs\".\"deleted_at\" is null)");
-        assertThat(capturedBindings.get()).containsExactly("owner-123", "owner-123");
+        assertThat(capturedBindings.get()).containsExactly("owner-123");
+    }
+
+    @Test
+    void generates_sql_filtered_by_creator() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+        AtomicReference<Object[]> capturedBindings = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            capturedBindings.set(ctx.bindings());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.DOGS.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetDogListJooqAdapter(dsl).getDogs(null, "creator-123");
+
+        assertThat(capturedSql.get())
+                .contains("from \"k9x\".\"dogs\"")
+                .contains("where (\"k9x\".\"dogs\".\"creator\" = ? "
+                        + "and \"k9x\".\"dogs\".\"deleted_at\" is null)");
+        assertThat(capturedBindings.get()).containsExactly("creator-123");
+    }
+
+    @Test
+    void generates_sql_merging_owner_and_creator() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+        AtomicReference<Object[]> capturedBindings = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            capturedBindings.set(ctx.bindings());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.DOGS.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetDogListJooqAdapter(dsl).getDogs("user-123", "user-123");
+
+        assertThat(capturedSql.get())
+                .contains("from \"k9x\".\"dogs\"")
+                .contains("where ((\"k9x\".\"dogs\".\"owner\" = ? "
+                        + "or \"k9x\".\"dogs\".\"creator\" = ?) "
+                        + "and \"k9x\".\"dogs\".\"deleted_at\" is null)");
+        assertThat(capturedBindings.get()).containsExactly("user-123", "user-123");
     }
 
     @Test
@@ -63,7 +107,7 @@ class GetDogListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetDogListJooqAdapter(dsl).getDogs(null);
+        new GetDogListJooqAdapter(dsl).getDogs(null, null);
 
         assertThat(capturedSql.get())
                 .contains("from \"k9x\".\"dogs\"")
@@ -99,7 +143,7 @@ class GetDogListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<Dog> dogs = new GetDogListJooqAdapter(dsl).getDogs("owner-123");
+        List<Dog> dogs = new GetDogListJooqAdapter(dsl).getDogs("owner-123", null);
 
         assertThat(dogs).hasSize(1);
         Dog dog = dogs.getFirst();

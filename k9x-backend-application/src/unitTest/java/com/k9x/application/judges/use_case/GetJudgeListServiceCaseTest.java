@@ -32,25 +32,34 @@ class GetJudgeListServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_organizer() {
-        assertThatThrownBy(() -> serviceCase.getJudges("user-1", false))
+        assertThatThrownBy(() -> serviceCase.getJudges("user-1", false, false))
                 .isInstanceOf(UnauthorizedResourceException.class);
     }
 
     @Test
-    void fetches_judges_by_user_id_when_organizer() {
+    void fetches_only_created_judges_by_user_id_when_created_is_true() {
         when(getJudgeListPersistencePort.getJudges("user-1")).thenReturn(List.of());
 
-        serviceCase.getJudges("user-1", true);
+        serviceCase.getJudges("user-1", true, true);
 
         verify(getJudgeListPersistencePort).getJudges("user-1");
     }
 
     @Test
+    void fetches_all_judges_when_created_is_false() {
+        when(getJudgeListPersistencePort.getJudges(null)).thenReturn(List.of());
+
+        serviceCase.getJudges("user-1", true, false);
+
+        verify(getJudgeListPersistencePort).getJudges(null);
+    }
+
+    @Test
     void maps_judge_fields_to_dto_correctly() {
         Judge judge = new Judge("id-1", "Rex", "user-1", "ES", 0L, 0L, null);
-        when(getJudgeListPersistencePort.getJudges("user-1")).thenReturn(List.of(judge));
+        when(getJudgeListPersistencePort.getJudges(null)).thenReturn(List.of(judge));
 
-        List<JudgeDTO> result = serviceCase.getJudges("user-1", true);
+        List<JudgeDTO> result = serviceCase.getJudges("user-1", true, false);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().id()).isEqualTo("id-1");

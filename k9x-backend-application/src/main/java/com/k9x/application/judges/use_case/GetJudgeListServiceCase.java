@@ -14,9 +14,10 @@ public class GetJudgeListServiceCase {
         this.getJudgeListPersistencePort = getJudgeListPersistencePort;
     }
 
-    public List<JudgeDTO> getJudges(String userId, boolean organizer) {
+    public List<JudgeDTO> getJudges(String userId, boolean organizer, boolean created) {
         AuthAssertions.assertOrganizer(organizer, userId);
-        return getJudgeListPersistencePort.getJudges(userId).stream()
+        String creator = created ? userId : null;
+        return getJudgeListPersistencePort.getJudges(creator).stream()
                 .map(judge -> new JudgeDTO(judge.getId(), judge.getName(), judge.getCountry()))
                 .toList();
     }

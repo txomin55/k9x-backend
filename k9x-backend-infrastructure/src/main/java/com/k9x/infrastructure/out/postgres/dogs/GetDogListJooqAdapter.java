@@ -4,6 +4,7 @@ import com.k9x.application.dogs.port.GetDogListPersistencePort;
 import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 
@@ -18,13 +19,17 @@ public class GetDogListJooqAdapter implements GetDogListPersistencePort {
     }
 
     @Override
-    public List<Dog> getDogs(String owner) {
+    public List<Dog> getDogs(String owner, String creator) {
+        Condition ownership = DSL.noCondition();
+        if (owner != null) {
+            ownership = ownership.or(Tables.DOGS.OWNER.eq(owner));
+        }
+        if (creator != null) {
+            ownership = ownership.or(Tables.DOGS.CREATOR.eq(creator));
+        }
         return dsl.select()
                 .from(Tables.DOGS)
-                .where(owner == null
-                        ? DSL.noCondition()
-                        : Tables.DOGS.OWNER.eq(owner)
-                                .or(Tables.DOGS.OWNER.isNull().and(Tables.DOGS.CREATOR.eq(owner))))
+                .where(ownership)
                 .and(Tables.DOGS.DELETED_AT.isNull())
                 .fetch(r -> new Dog(
                         r.get(Tables.DOGS.ID),
