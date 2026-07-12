@@ -92,7 +92,8 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                         c.bih(),
                         c.reserve(),
                         c.notCompeting(),
-                        AwardResponseMapper.toIdNameList(c.awards())))
+                        AwardResponseMapper.toIdNameList(c.awards()),
+                        c.qualification()))
                 .toList();
     }
 

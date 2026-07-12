@@ -33,12 +33,19 @@ public class ObdxJsonClassificationConfigAdapter implements GetObdxClassificatio
             BigDecimal maxAllowedScore = raw.allowedValues() != null
                     ? raw.allowedValues().stream().max(Comparator.naturalOrder()).orElse(BigDecimal.TEN)
                     : BigDecimal.TEN;
+            List<ObdxClassificationConfigDTO.QualificationThreshold> qualifications = raw.qualifications() == null
+                    ? List.of()
+                    : raw.qualifications().stream()
+                    .filter(q -> q.id() != null && q.minScore() != null)
+                    .map(q -> new ObdxClassificationConfigDTO.QualificationThreshold(q.id(), q.minScore()))
+                    .toList();
             result.put(raw.id(), new ObdxClassificationConfigDTO(
                     ClassificationCacheEvictStrategy.OBDX,
                     maxAllowedScore,
                     coefs,
                     raw.breakTie() != null ? raw.breakTie() : List.of(),
-                    raw.breakTieTie() != null ? raw.breakTieTie() : List.of()));
+                    raw.breakTieTie() != null ? raw.breakTieTie() : List.of(),
+                    qualifications));
         }
         return result;
     }

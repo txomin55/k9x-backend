@@ -25,6 +25,11 @@
     9.5,
     10
   ],
+  "qualifications": [
+    { "id": "EXC", "min_score": 256 },
+    { "id": "MB", "min_score": 224 },
+    { "id": "B", "min_score": 192 }
+  ],
   "exercises": [
     {
       "id": "OBDX_FCI_GRADE_2.1_V0",

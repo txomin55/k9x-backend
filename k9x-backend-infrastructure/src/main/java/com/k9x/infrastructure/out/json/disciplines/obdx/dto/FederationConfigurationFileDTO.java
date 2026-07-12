@@ -12,9 +12,14 @@ public record FederationConfigurationFileDTO(String id,
                                              @JsonProperty("allowed_values") List<BigDecimal> allowedValues,
                                              @JsonProperty("break_tie") List<String> breakTie,
                                              @JsonProperty("break_tie_tie") List<String> breakTieTie,
-                                             List<Exercise> exercises) {
+                                             List<Exercise> exercises,
+                                             List<Qualification> qualifications) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Exercise(String id, @JsonProperty("coef") BigDecimal coef) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Qualification(String id, @JsonProperty("min_score") BigDecimal minScore) {
     }
 }

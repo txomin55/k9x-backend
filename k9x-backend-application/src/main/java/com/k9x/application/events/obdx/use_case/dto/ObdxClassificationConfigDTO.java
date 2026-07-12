@@ -11,5 +11,15 @@ public record ObdxClassificationConfigDTO(
         BigDecimal maxAllowedScore,
         Map<String, BigDecimal> coefByExerciseId,
         List<String> breakTie,
-        List<String> breakTieTie) {
+        List<String> breakTieTie,
+        List<QualificationThreshold> qualifications) {
+
+    /**
+     * A text qualification tier keyed by an i18n-resolvable id (e.g. {@code OBDX_QUALIFICATION_EXC}) and
+     * the minimum absolute total score required to reach it. The applicable qualification for a competitor
+     * is the highest tier whose {@code minScore} its total score reaches; below the lowest tier the
+     * competitor is {@code NC} (No clasificado).
+     */
+    public record QualificationThreshold(String id, BigDecimal minScore) {
+    }
 }

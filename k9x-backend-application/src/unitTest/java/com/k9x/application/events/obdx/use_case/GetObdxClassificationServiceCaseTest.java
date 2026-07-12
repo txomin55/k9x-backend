@@ -43,7 +43,8 @@ class GetObdxClassificationServiceCaseTest {
             new BigDecimal("10"),
             Map.of("ex-1", new BigDecimal("3"), "ex-2", new BigDecimal("4")),
             List.of("ex-1"),
-            List.of("ex-2"));
+            List.of("ex-2"),
+            List.of());
 
     @Mock
     private GetObdxClassificationConfigPort getObdxClassificationConfigPort;
@@ -153,7 +154,7 @@ class GetObdxClassificationServiceCaseTest {
         ObdxClassificationConfigDTO midAvgConfig = new ObdxClassificationConfigDTO(
                 ClassificationCacheEvictStrategy.OBDX,
                 new BigDecimal("10"),
-                Map.of("ex-1", new BigDecimal("2")), List.of(), List.of());
+                Map.of("ex-1", new BigDecimal("2")), List.of(), List.of(), List.of());
 
         EventSnapshot event = event(List.of(
                 new Row("dog-1", "Rex", "j-1", new BigDecimal("5")),
@@ -545,7 +546,7 @@ class GetObdxClassificationServiceCaseTest {
         ObdxClassificationConfigDTO tieConfig = new ObdxClassificationConfigDTO(
                 ClassificationCacheEvictStrategy.OBDX,
                 new BigDecimal("10"),
-                Map.of("ex-1", new BigDecimal("1")), List.of(), List.of());
+                Map.of("ex-1", new BigDecimal("1")), List.of(), List.of(), List.of());
 
         EventSnapshot event = event(List.of(
                 new Row("dog-1", "Rex", "j-1", new BigDecimal("7")),
@@ -559,6 +560,51 @@ class GetObdxClassificationServiceCaseTest {
         assertThat(result.competitors()).hasSize(2);
         assertThat(result.competitors().get(0).position()).isEqualTo(1);
         assertThat(result.competitors().get(1).position()).isEqualTo(1);
+    }
+
+    // ---- Text qualifications (calificativos) -----------------------------------------------------
+
+    private ObdxClassificationConfigDTO configWithQualifications() {
+        // ex-1 has coef 3 and maxAllowedScore 10, so totalScore = judgeScore * 3.
+        return new ObdxClassificationConfigDTO(
+                ClassificationCacheEvictStrategy.OBDX,
+                new BigDecimal("10"),
+                Map.of("ex-1", new BigDecimal("3")), List.of(), List.of(),
+                List.of(
+                        new ObdxClassificationConfigDTO.QualificationThreshold("EXC", new BigDecimal("25")),
+                        new ObdxClassificationConfigDTO.QualificationThreshold("MB", new BigDecimal("20"))));
+    }
+
+    @Test
+    void assigns_highest_reached_qualification_tier_by_total_score() {
+        EventSnapshot event = event(List.of(
+                new Row("dog-1", "Rex", "j-1", new BigDecimal("9")),   // total 27 -> EXC
+                new Row("dog-2", "Max", "j-1", new BigDecimal("7")),   // total 21 -> MB
+                new Row("dog-3", "Ace", "j-1", new BigDecimal("5"))));  // total 15 -> below lowest -> NC
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(configWithQualifications());
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors())
+                .extracting(FetchClassificationCompetitorDTO::dogId, FetchClassificationCompetitorDTO::qualification)
+                .containsExactlyInAnyOrder(
+                        tuple("dog-1", "EXC"),
+                        tuple("dog-2", "MB"),
+                        tuple("dog-3", "NC"));
+    }
+
+    @Test
+    void qualification_is_null_when_configuration_defines_no_scale() {
+        EventSnapshot event = event(List.of(new Row("dog-1", "Rex", "j-1", new BigDecimal("9"))));
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors().getFirst().qualification()).isNull();
     }
 
     // ---- CACOB / CACIOB awards -------------------------------------------------------------------

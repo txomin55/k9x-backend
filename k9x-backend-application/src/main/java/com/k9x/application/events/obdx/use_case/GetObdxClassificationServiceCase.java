@@ -25,6 +25,8 @@ public class GetObdxClassificationServiceCase {
 
     private static final BigDecimal YELLOW_CARD_PENALTY = BigDecimal.TEN;
     private static final BigDecimal CACOB_MIN_SCORE_RATING = new BigDecimal("80");
+    /** Fallback qualification when the total score does not reach the lowest configured tier. */
+    private static final String NOT_CLASSIFIED_QUALIFICATION = "NC";
 
     public GetObdxClassificationServiceCase(
             GetObdxClassificationConfigPort getObdxClassificationConfigPort,
@@ -229,12 +231,14 @@ public class GetObdxClassificationServiceCase {
                 status = ClassificationCompetitorStatus.PENDING;
             }
 
+            String qualification = resolveQualification(config, totalScore);
+
             competitors.add(new FetchClassificationCompetitorDTO(
                     dogId, meta.dogName(), meta.dogBreed(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
                     startOrderByDog.get(dogId), 0, totalScore, competitorScoreRating, false,
                     status.name(), bihByDog.get(dogId), reserveByDog.get(dogId),
                     Boolean.TRUE.equals(notCompetingByDog.get(dogId)), exercises,
-                    List.of()));
+                    List.of(), qualification));
         }
 
         assignPositions(competitors, config);
@@ -304,7 +308,28 @@ public class GetObdxClassificationServiceCase {
         competitors.set(index, new FetchClassificationCompetitorDTO(
                 c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
                 c.startOrder(), c.position(), c.totalScore(), c.scoreRating(), c.tied(), c.status(), c.bih(),
-                c.reserve(), c.notCompeting(), c.exercises(), awards));
+                c.reserve(), c.notCompeting(), c.exercises(), awards, c.qualification()));
+    }
+
+    /**
+     * Text qualification (calificativo) for the competitor: the id of the highest configured tier whose
+     * {@code minScore} the total score reaches, returned verbatim. Below the lowest tier — or when no score has been
+     * recorded yet — the competitor is {@link #NOT_CLASSIFIED_QUALIFICATION} (NC). Returns {@code null} when the
+     * federation configuration defines no qualification scale, so the field stays absent for grades that don't use it.
+     */
+    private String resolveQualification(ObdxClassificationConfigDTO config, BigDecimal totalScore) {
+        List<ObdxClassificationConfigDTO.QualificationThreshold> tiers = config.qualifications();
+        if (tiers == null || tiers.isEmpty()) {
+            return null;
+        }
+        if (totalScore == null) {
+            return NOT_CLASSIFIED_QUALIFICATION;
+        }
+        return tiers.stream()
+                .filter(t -> t.minScore() != null && totalScore.compareTo(t.minScore()) >= 0)
+                .max(Comparator.comparing(ObdxClassificationConfigDTO.QualificationThreshold::minScore))
+                .map(ObdxClassificationConfigDTO.QualificationThreshold::id)
+                .orElse(NOT_CLASSIFIED_QUALIFICATION);
     }
 
     /**
@@ -451,6 +476,6 @@ public class GetObdxClassificationServiceCase {
         competitors.set(index, new FetchClassificationCompetitorDTO(
                 c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
                 c.startOrder(), position, c.totalScore(), c.scoreRating(), tied, c.status(), c.bih(),
-                c.reserve(), c.notCompeting(), c.exercises(), c.awards()));
+                c.reserve(), c.notCompeting(), c.exercises(), c.awards(), c.qualification()));
     }
 }
