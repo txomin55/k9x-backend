@@ -19,6 +19,13 @@
             <appender-ref ref="STDOUT"/>
         </root>
     </springProfile>
+    
+    <springProfile name="local-pro">
+        <logger name="org.springframework.web" level="DEBUG"/>
+        <root level="DEBUG">
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
 
     <springProfile name="production">
         <logger name="org.springframework" level="ERROR"/>

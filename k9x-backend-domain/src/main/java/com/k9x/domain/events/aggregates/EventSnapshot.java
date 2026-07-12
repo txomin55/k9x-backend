@@ -7,7 +7,7 @@ import com.k9x.domain.events.valueobjects.EventJudge;
 import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.shared.UtcDates;
 
-import com.k9x.domain.disciplines.obdx.GroupExercise;
+import com.k9x.domain.disciplines.obdx.LiveExcludedExercise;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 
 import java.util.List;
@@ -69,20 +69,24 @@ public record EventSnapshot(
     }
 
     /**
-     * An event is finished when it has at least one competitor and every competitor is settled. A
-     * competitor is settled when it is flagged {@code notCompeting} or holds a score from every judge
-     * assigned to each exercise of the event.
+     * An event is finished when it has at least one competitor and every competitor is fully scored.
+     * Unlike the per-competitor LIVE/SETTLED status, this considers <em>every</em> exercise — including
+     * group stays and general impression — so the event stays STARTED until those collective scores are
+     * also in, even when every competitor has already left LIVE.
      */
     private boolean allCompetitorsSettled() {
         if (competitors == null || competitors.isEmpty()) {
             return false;
         }
-        return competitors.stream().allMatch(this::isSettled);
+        return competitors.stream().allMatch(c -> isSettled(c, true));
     }
 
     /**
-     * Whether the given competitor is settled: flagged {@code notCompeting} or holding a score from every
-     * judge assigned to each exercise of the event. Unknown dog ids are treated as not settled.
+     * Whether the given competitor is settled for its displayed status: flagged {@code notCompeting} or
+     * holding a score from every judge assigned to each individual exercise. Exercises excluded from the
+     * live status (see {@link LiveExcludedExercise}) do not count, so a competitor that has finished its
+     * individual runs is settled even while the group stay / general impression are still pending.
+     * Unknown dog ids are treated as not settled.
      */
     public boolean isCompetitorSettled(String dogId) {
         if (competitors == null) {
@@ -91,21 +95,21 @@ public record EventSnapshot(
         return competitors.stream()
                 .filter(c -> c.dogId().equals(dogId))
                 .findFirst()
-                .map(this::isSettled)
+                .map(c -> isSettled(c, false))
                 .orElse(false);
     }
 
     /**
-     * Whether the given competitor has started: it holds at least one recorded score on a non-group
-     * exercise. Group exercises (see {@link GroupExercise}) are scored for the whole field at once, so
-     * their scores never start a competitor on their own — otherwise scoring the group flight would flip
-     * every competitor to LIVE regardless of their individual runs. A competitor that has not started yet
-     * is neither {@code LIVE} nor {@code SETTLED} but pending.
+     * Whether the given competitor has started: it holds at least one recorded score on an individual
+     * exercise. Exercises excluded from the live status (see {@link LiveExcludedExercise}) — group stays
+     * and general impression — never start a competitor on their own, otherwise scoring the group flight
+     * would flip every competitor to LIVE regardless of their individual runs. A competitor that has not
+     * started yet is neither {@code LIVE} nor {@code SETTLED} but pending.
      */
     public boolean isCompetitorStarted(String dogId) {
         return scores != null && scores.stream()
                 .anyMatch(s -> s.score() != null && dogId.equals(s.dogId())
-                        && !GroupExercise.isGroupExercise(s.exerciseId()));
+                        && !LiveExcludedExercise.isExcluded(s.exerciseId()));
     }
 
     /**
@@ -157,22 +161,33 @@ public record EventSnapshot(
     }
 
     /**
-     * Whether the competitor holds a score from every judge assigned to each exercise of the event
-     * (per-exercise judge assignment, e.g. only the judges of that exercise's ring). An event with no
-     * exercises defined is treated as never settled.
+     * Whether the competitor holds a score from every judge assigned to each relevant exercise of the
+     * event (per-exercise judge assignment, e.g. only the judges of that exercise's ring). When
+     * {@code includeExcludedExercises} is {@code false} the exercises excluded from the live status (see
+     * {@link LiveExcludedExercise}) — group stays and general impression — are ignored, so a competitor
+     * that has finished its individual runs counts as settled even while those collective scores are
+     * still pending; this drives the displayed competitor status. When {@code true} every exercise must
+     * be scored, which is what marks the whole event FINISHED. An event with no relevant exercise is
+     * treated as never settled.
      */
-    private boolean isSettled(EventCompetitor competitor) {
+    private boolean isSettled(EventCompetitor competitor, boolean includeExcludedExercises) {
         if (competitor.notCompeting() || isDisqualified(competitor.dogId())) {
             return true;
         }
         if (exercises == null || exercises.isEmpty()) {
             return false;
         }
+        List<EventExercise> relevantExercises = includeExcludedExercises ? exercises : exercises.stream()
+                .filter(e -> !LiveExcludedExercise.isExcluded(e.exerciseId()))
+                .toList();
+        if (relevantExercises.isEmpty()) {
+            return false;
+        }
         Set<String> scoredPairs = scores == null ? Set.of() : scores.stream()
                 .filter(s -> s.score() != null && competitor.dogId().equals(s.dogId()))
                 .map(s -> s.exerciseId() + "|" + s.judgeId())
                 .collect(Collectors.toSet());
-        return exercises.stream().allMatch(exercise -> {
+        return relevantExercises.stream().allMatch(exercise -> {
             List<String> assignedJudges = exercise.judges();
             return assignedJudges == null || assignedJudges.stream()
                     .allMatch(judgeId -> scoredPairs.contains(exercise.exerciseId() + "|" + judgeId));
