@@ -121,6 +121,29 @@ class GetStageListServiceCaseTest {
     }
 
     @Test
+    void orders_upcoming_ascending_then_past_descending() {
+        long pastOld = FAR_PAST;                    // 1970
+        long pastRecent = 1_500_000_000_000L;       // 2017
+        long upcomingSoon = 3_000_000_000_000L;     // 2065
+        long upcomingFar = FAR_FUTURE;              // 2096
+
+        StageSnapshot sPastOld = stage("past-old", pastOld, pastOld, List.of());
+        StageSnapshot sPastRecent = stage("past-recent", pastRecent, pastRecent, List.of());
+        StageSnapshot sUpcomingSoon = stage("upcoming-soon", upcomingSoon, upcomingSoon, List.of());
+        StageSnapshot sUpcomingFar = stage("upcoming-far", upcomingFar, upcomingFar, List.of());
+        CompetitionSnapshot competition = competition(
+                List.of(sPastOld, sUpcomingFar, sPastRecent, sUpcomingSoon));
+
+        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
+
+        List<FetchStageListDTO> result = serviceCase.getStages();
+
+        // Upcoming/ongoing first (soonest first), then past (most recent first).
+        assertThat(result).extracting(FetchStageListDTO::id)
+                .containsExactly("upcoming-soon", "upcoming-far", "past-recent", "past-old");
+    }
+
+    @Test
     void skips_deleted_stages_and_deleted_events() {
         EventSnapshot liveEvent = event("evt-1", "obdx-1", null, List.of(), List.of(), List.of(), List.of());
         EventSnapshot deletedEvent = event("evt-2", "obdx-1", 999L, List.of(), List.of(), List.of(), List.of());
