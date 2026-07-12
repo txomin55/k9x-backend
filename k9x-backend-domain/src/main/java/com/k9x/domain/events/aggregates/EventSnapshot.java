@@ -7,6 +7,7 @@ import com.k9x.domain.events.valueobjects.EventJudge;
 import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.shared.UtcDates;
 
+import com.k9x.domain.disciplines.obdx.GroupExercise;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 
 import java.util.List;
@@ -95,12 +96,16 @@ public record EventSnapshot(
     }
 
     /**
-     * Whether the given competitor has started: it holds at least one recorded score. A competitor that
-     * has not started yet is neither {@code LIVE} nor {@code SETTLED} but pending.
+     * Whether the given competitor has started: it holds at least one recorded score on a non-group
+     * exercise. Group exercises (see {@link GroupExercise}) are scored for the whole field at once, so
+     * their scores never start a competitor on their own — otherwise scoring the group flight would flip
+     * every competitor to LIVE regardless of their individual runs. A competitor that has not started yet
+     * is neither {@code LIVE} nor {@code SETTLED} but pending.
      */
     public boolean isCompetitorStarted(String dogId) {
         return scores != null && scores.stream()
-                .anyMatch(s -> s.score() != null && dogId.equals(s.dogId()));
+                .anyMatch(s -> s.score() != null && dogId.equals(s.dogId())
+                        && !GroupExercise.isGroupExercise(s.exerciseId()));
     }
 
     /**
