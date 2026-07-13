@@ -4,8 +4,8 @@ import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
 import com.k9x.application.utils.date.DateUtils;
+import com.k9x.application.utils.stages.StageProximity;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
-import com.k9x.domain.shared.UtcDates;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 
 import java.util.List;
@@ -24,18 +24,8 @@ public class GetStageListServiceCase {
                 .flatMap(competition -> competition.stages().stream()
                         .filter(stage -> stage.deletedAt() == null)
                         .map(stage -> new CompetitionStage(competition, stage)))
-                .sorted((a, b) -> {
-                    boolean aPast = UtcDates.isBeforeUtcDay(a.stage().dateFrom(), now);
-                    boolean bPast = UtcDates.isBeforeUtcDay(b.stage().dateFrom(), now);
-                    // Upcoming/ongoing stages first; then past stages.
-                    if (aPast != bPast) {
-                        return Boolean.compare(aPast, bPast);
-                    }
-                    // Upcoming: soonest first (ascending). Past: most recent first (descending).
-                    return aPast
-                            ? Long.compare(b.stage().dateFrom(), a.stage().dateFrom())
-                            : Long.compare(a.stage().dateFrom(), b.stage().dateFrom());
-                })
+                .sorted((a, b) -> StageProximity.compareByProximity(
+                        a.stage().dateFrom(), b.stage().dateFrom(), now))
                 .map(cs -> toStageDto(cs.competition(), cs.stage(), now))
                 .toList();
     }

@@ -89,4 +89,14 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 messageSource.getMessage("error.request_timeout", new String[]{timeoutValue}, locale), HttpStatus.REQUEST_TIMEOUT.value());
         return new ResponseEntity<>(error, HttpStatus.REQUEST_TIMEOUT);
     }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseBody
+    final ResponseEntity<CustomError> handleUnexpectedException(Exception ex, Locale locale) {
+
+        log.error("Unexpected exception", ex);
+        CustomError error = new CustomError(
+                messageSource.getMessage("error.internal", null, locale), HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

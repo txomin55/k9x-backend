@@ -98,6 +98,31 @@ class GetCompetitionListServiceCaseTest {
     }
 
     @Test
+    void orders_competitions_by_nearest_stage_proximity() {
+        long now = com.k9x.application.utils.date.DateUtils.nowUtcMillis();
+        long day = 24L * 60 * 60 * 1000;
+        // upcoming-soon (nearest upcoming) should win, then upcoming-later, then most-recent-past,
+        // then older-past, then a competition with no stages.
+        CompetitionSnapshot upcomingLater = competition("upcoming-later", List.of(stage(now + 30 * day)));
+        CompetitionSnapshot upcomingSoon = competition("upcoming-soon", List.of(stage(now + 2 * day)));
+        CompetitionSnapshot recentPast = competition("recent-past", List.of(stage(now - 2 * day)));
+        CompetitionSnapshot olderPast = competition("older-past", List.of(stage(now - 30 * day)));
+        CompetitionSnapshot noStages = competition("no-stages", List.of());
+        when(getCompetitionListPersistencePort.getCompetitions("user-1"))
+                .thenReturn(List.of(olderPast, noStages, upcomingLater, recentPast, upcomingSoon));
+
+        List<FetchCompetitionDTO> result = serviceCase.getCompetitions("user-1", true);
+
+        assertThat(result).extracting(FetchCompetitionDTO::id)
+                .containsExactly("upcoming-soon", "upcoming-later", "recent-past", "older-past", "no-stages");
+    }
+
+    private StageSnapshot stage(long dateFrom) {
+        return new StageSnapshot("stage-" + dateFrom, "Stage", "comp-1", "user-1",
+                dateFrom, dateFrom, 0L, 0L, null, List.of());
+    }
+
+    @Test
     void maps_competition_with_finished_stage_as_finished() {
         // dateTo = 0L (1970) is strictly before today's UTC day -> FINISHED stage -> FINISHED competition.
         StageSnapshot finishedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1",

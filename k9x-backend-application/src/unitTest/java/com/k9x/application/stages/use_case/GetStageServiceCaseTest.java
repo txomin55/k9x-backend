@@ -6,7 +6,6 @@ import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
 import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
 import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
-import com.k9x.application.stages.exceptions.StageHasNoEventsException;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailDTO;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
@@ -77,16 +76,17 @@ class GetStageServiceCaseTest {
     }
 
     @Test
-    void throws_exception_when_stage_has_no_events() {
+    void returns_stage_with_empty_events_when_stage_has_no_events() throws IOException {
         StageSnapshot noEvents = new StageSnapshot("s-1", "Stage A", "comp-1", "user-1",
                 1000L, 2000L, 0L, 0L, null, List.of());
         when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(noEvents));
+        when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of());
 
-        assertThatThrownBy(() -> serviceCase.getStage("s-1"))
-                .isInstanceOf(StageHasNoEventsException.class);
+        FetchStageDetailDTO result = serviceCase.getStage("s-1");
 
-        verifyNoInteractions(getObdxFederationsConfigurationsPort);
+        assertThat(result.id()).isEqualTo("s-1");
+        assertThat(result.events()).isEmpty();
     }
 
     @Test

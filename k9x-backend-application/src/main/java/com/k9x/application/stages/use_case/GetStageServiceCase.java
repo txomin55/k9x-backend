@@ -5,7 +5,6 @@ import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
-import com.k9x.application.stages.exceptions.StageHasNoEventsException;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailCompetitorDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailDTO;
@@ -48,9 +47,6 @@ public class GetStageServiceCase {
 
         var events = stage.events() == null ? java.util.List.<EventSnapshot>of()
                 : stage.events().stream().filter(e -> e.deletedAt() == null).toList();
-        if (events.isEmpty()) {
-            throw new StageHasNoEventsException();
-        }
 
         Map<String, String> configNameById = buildConfigNameMap();
         long now = DateUtils.nowUtcMillis();
