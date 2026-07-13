@@ -93,6 +93,28 @@ class EventSnapshotTest {
     }
 
     @Test
+    void event_started_when_only_scored_on_group_stay_even_though_competitor_not_started() {
+        List<EventExercise> exercises = List.of(
+                exercise(INDIVIDUAL_1), exercise(GROUP_STAY), exercise(GENERAL_IMPRESSION));
+        List<Score> scores = List.of(score(GROUP_STAY));
+        EventSnapshot event = event(exercises, scores);
+
+        assertFalse(event.isCompetitorStarted(DOG));
+        assertEquals(EventStatus.STARTED, event.status(0L, FUTURE));
+    }
+
+    @Test
+    void event_started_when_only_scored_on_general_impression_even_though_competitor_not_started() {
+        List<EventExercise> exercises = List.of(
+                exercise(INDIVIDUAL_1), exercise(GROUP_STAY), exercise(GENERAL_IMPRESSION));
+        List<Score> scores = List.of(score(GENERAL_IMPRESSION));
+        EventSnapshot event = event(exercises, scores);
+
+        assertFalse(event.isCompetitorStarted(DOG));
+        assertEquals(EventStatus.STARTED, event.status(0L, FUTURE));
+    }
+
+    @Test
     void event_finished_only_when_all_exercises_including_group_and_impression_scored() {
         List<EventExercise> exercises = List.of(
                 exercise(INDIVIDUAL_1), exercise(INDIVIDUAL_2), exercise(GROUP_STAY), exercise(GENERAL_IMPRESSION));
