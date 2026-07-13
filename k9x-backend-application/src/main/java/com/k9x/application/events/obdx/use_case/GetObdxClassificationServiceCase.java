@@ -27,6 +27,8 @@ public class GetObdxClassificationServiceCase {
     private static final BigDecimal CACOB_MIN_SCORE_RATING = new BigDecimal("80");
     /** Fallback qualification when the total score does not reach the lowest configured tier. */
     private static final String NOT_CLASSIFIED_QUALIFICATION = "NC";
+    /** Qualification for a competitor that is disqualified (red card / second yellow) or not competing. */
+    private static final String DISQUALIFIED_QUALIFICATION = "DISQ";
 
     public GetObdxClassificationServiceCase(
             GetObdxClassificationConfigPort getObdxClassificationConfigPort,
@@ -176,6 +178,7 @@ public class GetObdxClassificationServiceCase {
             String dogId = dogEntry.getKey();
             FetchClassificationRawRowDTO meta = dogMeta.get(dogId);
             BigDecimal computedTotal = BigDecimal.ZERO;
+            boolean anyExerciseScored = false;
             List<FetchClassificationExerciseScoreDTO> exercises = new ArrayList<>();
 
             for (Map.Entry<String, List<FetchClassificationJudgeScoreDTO>> exEntry : dogEntry.getValue().entrySet()) {
@@ -205,6 +208,7 @@ public class GetObdxClassificationServiceCase {
 
                 if (weightedScore != null) {
                     computedTotal = computedTotal.add(weightedScore);
+                    anyExerciseScored = true;
                 }
                 exercises.add(new FetchClassificationExerciseScoreDTO(
                         exerciseId,
@@ -231,7 +235,9 @@ public class GetObdxClassificationServiceCase {
                 status = ClassificationCompetitorStatus.PENDING;
             }
 
-            String qualification = resolveQualification(config, totalScore);
+            boolean disqualifiedOrNotCompeting = event.isDisqualified(dogId) || event.isNotCompeting(dogId);
+            boolean hasScore = manualFinalScore != null || anyExerciseScored;
+            String qualification = resolveQualification(config, totalScore, disqualifiedOrNotCompeting, hasScore);
 
             competitors.add(new FetchClassificationCompetitorDTO(
                     dogId, meta.dogName(), meta.dogBreed(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
@@ -312,18 +318,29 @@ public class GetObdxClassificationServiceCase {
     }
 
     /**
-     * Text qualification (calificativo) for the competitor: the id of the highest configured tier whose
-     * {@code minScore} the total score reaches, returned verbatim. Below the lowest tier — or when no score has been
-     * recorded yet — the competitor is {@link #NOT_CLASSIFIED_QUALIFICATION} (NC). Returns {@code null} when the
-     * federation configuration defines no qualification scale, so the field stays absent for grades that don't use it.
+     * Text qualification (calificativo) for the competitor, resolved in this order, independently of the numeric
+     * total score for the first two cases:
+     * <ol>
+     *     <li>a disqualified (red card / second yellow) or not-competing competitor is
+     *     {@link #DISQUALIFIED_QUALIFICATION} (DISQ);</li>
+     *     <li>a competitor with no recorded score has no qualification yet ({@code null});</li>
+     *     <li>otherwise it is the id of the highest configured tier whose {@code minScore} the total score reaches,
+     *     or {@link #NOT_CLASSIFIED_QUALIFICATION} (NC) when it reaches none.</li>
+     * </ol>
+     * Returns {@code null} when the federation configuration defines no qualification scale, so the field stays
+     * absent for grades that don't use it.
      */
-    private String resolveQualification(ObdxClassificationConfigDTO config, BigDecimal totalScore) {
+    private String resolveQualification(ObdxClassificationConfigDTO config, BigDecimal totalScore,
+                                        boolean disqualifiedOrNotCompeting, boolean hasScore) {
         List<ObdxClassificationConfigDTO.QualificationThreshold> tiers = config.qualifications();
         if (tiers == null || tiers.isEmpty()) {
             return null;
         }
-        if (totalScore == null) {
-            return NOT_CLASSIFIED_QUALIFICATION;
+        if (disqualifiedOrNotCompeting) {
+            return DISQUALIFIED_QUALIFICATION;
+        }
+        if (!hasScore) {
+            return null;
         }
         return tiers.stream()
                 .filter(t -> t.minScore() != null && totalScore.compareTo(t.minScore()) >= 0)

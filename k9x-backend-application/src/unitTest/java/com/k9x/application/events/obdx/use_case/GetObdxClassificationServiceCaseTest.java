@@ -607,6 +607,92 @@ class GetObdxClassificationServiceCaseTest {
         assertThat(result.competitors().getFirst().qualification()).isNull();
     }
 
+    @Test
+    void qualification_is_null_when_competitor_has_no_score_yet() {
+        // A competitor enrolled on an exercise but without any recorded score is not NC: it simply has no
+        // qualification yet.
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "identity", (short) 0, false, false, null, null, null, null));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1")));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, List.of(), List.of(), null);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(configWithQualifications());
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors().getFirst().qualification()).isNull();
+    }
+
+    @Test
+    void qualification_is_disq_when_competitor_has_a_red_card_even_if_score_reaches_a_tier() {
+        // total 27 would reach EXC, but the red card disqualifies the competitor.
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "identity", (short) 0, false, false, null, null, null, null));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1")));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        List<Score> scores = List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("9"), 1000L, null, 5000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of(), null);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(configWithQualifications());
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors().getFirst().qualification()).isEqualTo("DISQ");
+    }
+
+    @Test
+    void qualification_is_disq_when_competitor_has_two_yellow_cards() {
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "identity", (short) 0, false, false, null, null, null, null));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1", "j-2")));
+        List<EventJudge> judges = List.of(
+                new EventJudge("j-1", "Judge j-1", null),
+                new EventJudge("j-2", "Judge j-2", null));
+        List<Score> scores = List.of(
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("9"), 1000L, 5000L),
+                new Score("ex-1", "j-2", "dog-1", new BigDecimal("9"), 1000L, 6000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of(), null);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(configWithQualifications());
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors().getFirst().qualification()).isEqualTo("DISQ");
+    }
+
+    @Test
+    void qualification_is_disq_when_competitor_is_not_competing() {
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "identity", (short) 0, false, true, null, null, null, null));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1")));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null));
+        List<Score> scores = List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("9"), 1000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of(), null);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX_RSCE_GRADE_1_V0")).thenReturn(configWithQualifications());
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors().getFirst().qualification()).isEqualTo("DISQ");
+    }
+
     // ---- CACOB / CACIOB awards -------------------------------------------------------------------
 
     private EventCompetitor competitorWithFciFlag(String dogId, String dogName, short startOrder, Boolean fciConfirmed) {
