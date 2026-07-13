@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record FetchCollectionDetailDTO(
+    String competitionName,
+    String eventName,
     String configurationId,
     String discipline,
     List<BigDecimal> allowedValues,

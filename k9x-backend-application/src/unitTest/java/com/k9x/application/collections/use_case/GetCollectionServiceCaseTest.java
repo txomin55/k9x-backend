@@ -157,6 +157,8 @@ class GetCollectionServiceCaseTest {
 
         FetchCollectionDetailDTO result = serviceCase.getCollection("event-1", "creator@test.com");
 
+        assertThat(result.competitionName()).isEqualTo("WC");
+        assertThat(result.eventName()).isEqualTo("Event A");
         assertThat(result.configurationId()).isEqualTo("config-1");
         assertThat(result.discipline()).isEqualTo("obdx");
         assertThat(result.allowedValues()).containsExactly(new BigDecimal("7.5"));

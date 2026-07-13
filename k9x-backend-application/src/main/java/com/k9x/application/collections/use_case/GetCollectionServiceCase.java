@@ -61,6 +61,8 @@ public class GetCollectionServiceCase {
                 : null;
 
         return new FetchCollectionDetailDTO(
+                competition.name(),
+                event.name(),
                 event.configurationId(),
                 event.discipline(),
                 getObdxConfigurationAllowedValuesPort.getAllowedValues(event.configurationId()),

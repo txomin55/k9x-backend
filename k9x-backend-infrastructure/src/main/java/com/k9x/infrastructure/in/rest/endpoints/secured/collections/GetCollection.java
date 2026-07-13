@@ -31,6 +31,8 @@ public class GetCollection implements SecuredCollectionsFetchOneApiDelegate {
         FetchCollectionDetailDTO detail = getCollectionServiceCase.getCollection(id, userDetails.getEmail());
 
         return ResponseEntity.ok(new CollectionResponseDTO(
+                detail.competitionName(),
+                detail.eventName(),
                 new ScoresConfigurationResponseDTO(detail.allowedValues(), resolveTranslation(detail.configurationId())),
                 detail.obdx() == null ? null
                         : new ObdxCompetitorsScoresResponseDTO(mapCompetitors(detail.obdx().competitors())),
