@@ -31,4 +31,9 @@ LABEL version="1.0"
 VOLUME /tmp/k9x-backend
 COPY --from=build /home/k9x-backend/k9x-backend-loader/build/libs/*.jar /usr/local/lib/k9x-backend.jar
 EXPOSE 4000
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=production", "/usr/local/lib/k9x-backend.jar"]
+
+# Spring profile, overridable at build time (defaults to production).
+ARG SPRING_PROFILES_ACTIVE=production
+ENV SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+
+ENTRYPOINT ["java", "-jar", "/usr/local/lib/k9x-backend.jar"]
