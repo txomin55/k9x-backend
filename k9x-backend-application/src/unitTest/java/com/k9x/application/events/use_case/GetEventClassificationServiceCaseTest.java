@@ -9,6 +9,7 @@ import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
+import com.k9x.application.events.snapshot.port.GetEventSnapshotPersistencePort;
 import com.k9x.application.events.use_case.dto.EventClassificationContextDTO;
 import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -47,6 +49,8 @@ class GetEventClassificationServiceCaseTest {
     private GetObdxClassificationServiceCase getObdxClassificationServiceCase;
     @Mock
     private GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
+    @Mock
+    private GetEventSnapshotPersistencePort getEventSnapshotPersistencePort;
 
     private GetEventClassificationServiceCase serviceCase;
 
@@ -55,7 +59,7 @@ class GetEventClassificationServiceCaseTest {
         serviceCase = new GetEventClassificationServiceCase(
                 getCompetitionPersistencePort,
                 eventClassificationCacheManagerPort, getObdxClassificationServiceCase,
-                getObdxFederationsConfigurationsPort);
+                getObdxFederationsConfigurationsPort, getEventSnapshotPersistencePort);
     }
 
     private CompetitionSnapshot competition(EventSnapshot event) {
@@ -63,6 +67,21 @@ class GetEventClassificationServiceCaseTest {
                 null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
                 0L, 0L, null, List.of(stage));
+    }
+
+    @Test
+    void serves_persisted_snapshot_without_hydrating_or_computing_when_present() {
+        FetchClassificationDTO snapshot = new FetchClassificationDTO(
+                "evt-1", "Open Grade 1", "FINISHED", "stage-1", "Stage A", "WC",
+                "obdx", "OBDX_RSCE_GRADE_1_V0", "Grade 1", 5000L,
+                new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of()));
+        when(getEventSnapshotPersistencePort.getSnapshot("evt-1")).thenReturn(Optional.of(snapshot));
+
+        FetchClassificationDTO result = serviceCase.getClassification("evt-1");
+
+        assertThat(result).isSameAs(snapshot);
+        verifyNoInteractions(getCompetitionPersistencePort, eventClassificationCacheManagerPort,
+                getObdxClassificationServiceCase, getObdxFederationsConfigurationsPort);
     }
 
     @Test

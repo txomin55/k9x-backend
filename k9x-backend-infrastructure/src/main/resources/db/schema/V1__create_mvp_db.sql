@@ -155,4 +155,13 @@ CREATE TABLE obdx.event_scores
     CONSTRAINT obdx_event_scores_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
     CONSTRAINT obdx_event_scores_judge_fk FOREIGN KEY (judge_id) REFERENCES k9x.judges (id),
     CONSTRAINT obdx_event_scores_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
+);
+
+CREATE TABLE obdx.event_snapshot
+(
+    event_id  VARCHAR(255) NOT NULL,
+    timestamp BIGINT       NOT NULL,
+    snapshot  JSON         NOT NULL,
+    CONSTRAINT event_snapshot_pkey PRIMARY KEY (event_id),
+    CONSTRAINT event_snapshot_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id)
 )

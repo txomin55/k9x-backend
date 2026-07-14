@@ -5,6 +5,7 @@ import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfiguration
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
+import com.k9x.application.events.snapshot.port.GetEventSnapshotPersistencePort;
 import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
 import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
 import org.springframework.context.annotation.Bean;
@@ -27,11 +28,13 @@ public class EventUseCaseConfiguration {
             GetCompetitionPersistencePort getCompetitionPersistencePort,
             EventClassificationCacheManagerPort eventClassificationCacheManagerPort,
             GetObdxClassificationServiceCase getObdxClassificationServiceCase,
-            GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
+            GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort,
+            GetEventSnapshotPersistencePort getEventSnapshotPersistencePort) {
         return new GetEventClassificationServiceCase(
                 getCompetitionPersistencePort,
                 eventClassificationCacheManagerPort,
                 getObdxClassificationServiceCase,
-                getObdxFederationsConfigurationsPort);
+                getObdxFederationsConfigurationsPort,
+                getEventSnapshotPersistencePort);
     }
 }

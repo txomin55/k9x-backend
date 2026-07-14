@@ -10,6 +10,7 @@ import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
+import com.k9x.application.events.snapshot.port.GetEventSnapshotPersistencePort;
 import com.k9x.application.events.use_case.dto.EventClassificationContextDTO;
 import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
 import com.k9x.application.utils.date.DateUtils;
@@ -20,6 +21,7 @@ import com.k9x.domain.stages.aggregates.StageSnapshot;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GetEventClassificationServiceCase {
@@ -30,19 +32,30 @@ public class GetEventClassificationServiceCase {
     private final EventClassificationCacheManagerPort eventClassificationCacheManagerPort;
     private final GetObdxClassificationServiceCase getObdxClassificationServiceCase;
     private final GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
+    private final GetEventSnapshotPersistencePort getEventSnapshotPersistencePort;
 
     public GetEventClassificationServiceCase(
             GetCompetitionPersistencePort getCompetitionPersistencePort,
             EventClassificationCacheManagerPort eventClassificationCacheManagerPort,
             GetObdxClassificationServiceCase getObdxClassificationServiceCase,
-            GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
+            GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort,
+            GetEventSnapshotPersistencePort getEventSnapshotPersistencePort) {
         this.getCompetitionPersistencePort = getCompetitionPersistencePort;
         this.eventClassificationCacheManagerPort = eventClassificationCacheManagerPort;
         this.getObdxClassificationServiceCase = getObdxClassificationServiceCase;
         this.getObdxFederationsConfigurationsPort = getObdxFederationsConfigurationsPort;
+        this.getEventSnapshotPersistencePort = getEventSnapshotPersistencePort;
     }
 
     public FetchClassificationDTO getClassification(String eventId) {
+        // A persisted snapshot exists only for events whose stage has already finished; their results are final,
+        // so serve the stored classification verbatim and skip aggregate hydration and recomputation. The REST
+        // layer still applies i18n on top, so the snapshot stays language-independent.
+        Optional<FetchClassificationDTO> snapshot = getEventSnapshotPersistencePort.getSnapshot(eventId);
+        if (snapshot.isPresent()) {
+            return snapshot.get();
+        }
+
         EventClassificationContextDTO context = resolveContext(eventId);
         EventSnapshot event = context.event();
 
