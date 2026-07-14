@@ -17,7 +17,8 @@ BEGIN;
 --    image is NOT NULL with no source value, left as ''.
 -- ---------------------------------------------------------------------------
 INSERT INTO k9x.users (id, email, image)
-VALUES ('acsupercaes@gmail.com', 'acsupercaes@gmail.com', '');
+VALUES ('acsupercaes@gmail.com', 'acsupercaes@gmail.com',
+        'https://supercaes.pt/wp-content/uploads/2026/03/WhatsApp-Image-2026-02-16-at-20.41.34.jpg');
 
 INSERT INTO k9x.organizers (user_id, name)
 VALUES ('acsupercaes@gmail.com', 'A.V. Super Cães');
@@ -69,14 +70,14 @@ VALUES ('event_1783770421009', 'OBDX', 'OBDX_FCI_GRADE_1_V0', 'AVG', 'Classe 1',
 -- ---------------------------------------------------------------------------
 INSERT INTO k9x.dogs (id, identity, breed, name, image, owner, creator, country, team, handler,
                       last_update, created_at, deleted_at, three_fci_generations_confirmed, sex)
-VALUES  -- Classe 1
+VALUES -- Classe 1
        ('621XXXXXXXXXXXX', 'OP638636', 'WHITE_SWISS_SHEPHERD_DOG', 'Bali From House Black&White', NULL, NULL,
         'k9x.support@gmail.com', 'PT', 'Gugadogs Centro De Treino & Educação Canina', 'Leana Dias',
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL, 'FEMALE'),
        ('avsc-dog-2', '', 'BORDER_COLLIE', 'Angel Do Sonho Do Cão', NULL, NULL,
         'k9x.support@gmail.com', 'PT', 'Afeto', 'Eva Flor Lobo',
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL, 'MALE'),
-        -- Classe 2
+       -- Classe 2
        ('620095300051547', 'OP604806', 'RIESENSCHNAUZER', 'Simply Black Despacito', NULL, NULL,
         'k9x.support@gmail.com', 'PT', 'Gugadogs Centro De Treino & Educação Canina', 'António Dias',
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL, 'MALE'),
@@ -86,7 +87,7 @@ VALUES  -- Classe 1
        ('623XXXXXXXXXXXX', 'OP621309', 'GERMAN_SHEPHERD', 'Zidane Vom', NULL, NULL,
         'k9x.support@gmail.com', 'PT', 'Alfa Dog', 'Ana Mota Pereira',
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL, 'MALE'),
-        -- Classe 3
+       -- Classe 3
        ('380260102376914', 'OP627563', 'BORDER_COLLIE', 'Mind The Dog Thor', NULL, NULL,
         'k9x.support@gmail.com', 'PT', 'A.V.Super Cães', 'Florinda Sampaio',
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL, 'MALE'),
@@ -99,7 +100,7 @@ VALUES  -- Classe 1
        ('620098500124755', '582019', 'WHITE_SWISS_SHEPHERD_DOG', 'Chita', NULL, NULL,
         'k9x.support@gmail.com', 'PT', 'Gugadogs Centro De Treino E Educação Canina', 'António Dias',
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL, 'FEMALE'),
-        -- COBS
+       -- COBS
        ('624XXXXXXXXXXXX', 'LOP64811', 'DOBERMANN', 'Vince Vermute D''Ikòskylo', NULL, NULL,
         'k9x.support@gmail.com', 'PT', 'A.V.Super Cães', 'Arnauld Jambart',
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, NULL, 'MALE'),
