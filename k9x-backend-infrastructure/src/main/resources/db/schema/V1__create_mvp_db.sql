@@ -111,12 +111,9 @@ CREATE TABLE obdx.event_competitors
     not_competing BOOLEAN      NOT NULL DEFAULT FALSE,
     bih           BOOLEAN,
     reserve       BOOLEAN      NOT NULL DEFAULT FALSE,
-    final_score   NUMERIC(6, 2),
     CONSTRAINT obdx_event_competitors_pkey PRIMARY KEY (event_id, dog_id),
     CONSTRAINT obdx_event_competitors_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
-    CONSTRAINT obdx_event_competitors_dogs_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id),
-    CONSTRAINT obdx_event_competitors_final_score_range
-        CHECK (final_score IS NULL OR (final_score >= 0 AND final_score <= 1000))
+    CONSTRAINT obdx_event_competitors_dogs_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
 );
 
 CREATE TABLE obdx.event_judges

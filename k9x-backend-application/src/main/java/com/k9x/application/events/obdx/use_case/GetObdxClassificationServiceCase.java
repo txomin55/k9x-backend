@@ -118,8 +118,6 @@ public class GetObdxClassificationServiceCase {
         Map<String, List<String>> exerciseTags = new LinkedHashMap<>();
         // dogId → static start order (competitor number), set on enrollment
         Map<String, Short> startOrderByDog = new LinkedHashMap<>();
-        // dogId → manually set final score; when present it overrides the computed totalScore
-        Map<String, BigDecimal> finalScoreByDog = new LinkedHashMap<>();
         // dogId → best in show flag, set on enrollment
         Map<String, Boolean> bihByDog = new LinkedHashMap<>();
         // dogId → reserve flag, set on enrollment
@@ -130,7 +128,6 @@ public class GetObdxClassificationServiceCase {
         Map<String, Boolean> fciConfirmedByDog = new LinkedHashMap<>();
         for (EventCompetitor competitor : (event.competitors() == null ? List.<EventCompetitor>of() : event.competitors())) {
             startOrderByDog.put(competitor.dogId(), competitor.position());
-            finalScoreByDog.put(competitor.dogId(), competitor.finalScore());
             bihByDog.put(competitor.dogId(), competitor.bih());
             reserveByDog.put(competitor.dogId(), competitor.reserve());
             notCompetingByDog.put(competitor.dogId(), competitor.notCompeting());
@@ -218,10 +215,7 @@ public class GetObdxClassificationServiceCase {
                         judgeEntries, exerciseYellowCards, exerciseRedCard));
             }
 
-            // A manually set final score takes precedence over the computed sum of exercise scores.
-            BigDecimal manualFinalScore = finalScoreByDog.get(dogId);
-            BigDecimal totalScore = manualFinalScore != null
-                    ? manualFinalScore.setScale(2, RoundingMode.HALF_UP) : computedTotal;
+            BigDecimal totalScore = computedTotal;
 
             BigDecimal maxPossibleTotal = computeMaxPossibleTotal(config, exercisePositions.keySet());
             BigDecimal competitorScoreRating = percentageOfMax(totalScore, maxPossibleTotal);
@@ -236,7 +230,7 @@ public class GetObdxClassificationServiceCase {
             }
 
             boolean disqualifiedOrNotCompeting = event.isDisqualified(dogId) || event.isNotCompeting(dogId);
-            boolean hasScore = manualFinalScore != null || anyExerciseScored;
+            boolean hasScore = anyExerciseScored;
             String qualification = resolveQualification(config, totalScore, disqualifiedOrNotCompeting, hasScore);
 
             competitors.add(new FetchClassificationCompetitorDTO(
