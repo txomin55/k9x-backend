@@ -19,6 +19,7 @@ public enum ErrorEnum {
     STAGE_EXPIRED("error.stage_expired"),
     STAGE_NOT_STARTED("error.stage_not_started"),
     ENROLLMENT_CLOSED("error.enrollment_closed"),
+    ENROLLMENT_DEADLINE_AFTER_STAGE_START("error.enrollment_deadline_after_stage_start"),
     EVENT_NOT_FOUND("error.event_not_found"),
     EVENT_ALREADY_DELETED("error.event_already_deleted"),
     EVENT_CANNOT_BE_DELETED("error.event_cannot_be_deleted"),

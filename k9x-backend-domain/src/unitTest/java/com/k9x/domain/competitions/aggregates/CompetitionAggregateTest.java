@@ -432,6 +432,27 @@ class CompetitionAggregateTest {
     }
 
     @Test
+    void updateObdxEventInfo_throws_when_enrollment_deadline_is_after_stage_start() {
+        // stageWith uses dateFrom = PAST (2020); a deadline on NOW (2024) is after the stage starts.
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+        ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, NOW,
+                List.of(), List.of(), List.of(), List.of());
+        assertThrows(EnrollmentDeadlineAfterStageStartException.class,
+                () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
+    }
+
+    @Test
+    void updateObdxEventInfo_throws_when_enrollment_deadline_is_on_stage_start_day() {
+        // Deadline must be at least the day before dateFrom: the same UTC day is not allowed.
+        long sameDayAsDateFrom = Instant.parse("2020-01-01T23:00:00Z").toEpochMilli();
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+        ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, sameDayAsDateFrom,
+                List.of(), List.of(), List.of(), List.of());
+        assertThrows(EnrollmentDeadlineAfterStageStartException.class,
+                () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
+    }
+
+    @Test
     void updateObdxEventInfo_records_obdx_event_info_updated() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,

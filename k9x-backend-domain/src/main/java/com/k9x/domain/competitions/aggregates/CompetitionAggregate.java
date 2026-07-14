@@ -180,6 +180,7 @@ public final class CompetitionAggregate {
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
         assertEventUpdatable(stage, now);
+        assertEnrollmentDeadlineBeforeStageStart(data.enrollmentDeadline(), stage);
         changes.add(new ObdxEventInfoUpdated(eventId, data.name(), data.configurationId(), data.scoreCalculation(),
                 data.enrollmentDeadline(), data.competitors(), data.exercises(), data.judges(), now, data.awards()));
     }
@@ -405,6 +406,16 @@ public final class CompetitionAggregate {
         EventStatus status = event.status(now, stage.dateTo());
         if (status == EventStatus.STARTED || status == EventStatus.FINISHED) {
             throw new EventCannotBeDeletedException();
+        }
+    }
+
+    /**
+     * The enrollment deadline must fall at least the day before the stage starts: enrollment has to close
+     * before the stage's {@code dateFrom} day. A null deadline (no deadline set) is always allowed.
+     */
+    private void assertEnrollmentDeadlineBeforeStageStart(Long enrollmentDeadline, StageSnapshot stage) {
+        if (enrollmentDeadline != null && !UtcDates.isBeforeUtcDay(enrollmentDeadline, stage.dateFrom())) {
+            throw new EnrollmentDeadlineAfterStageStartException();
         }
     }
 
