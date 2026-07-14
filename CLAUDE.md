@@ -236,8 +236,6 @@ class UpdateXxxServiceCaseTest {
 
 Use `any()` for the payload argument in the happy-path `verify` — field-level assertions go in a separate test with `ArgumentCaptor` if needed.
 
-After implementing a new endpoint (service case, adapter, or tests), update `TEST_COVERAGE.md` at the repo root — mark the endpoint row and adjust the summary totals.
-
 ### Infrastructure unit tests (jOOQ MockDataProvider)
 
 Use `MockConnection` / `MockDataProvider` — no real database, no Spring context. One test class per adapter.

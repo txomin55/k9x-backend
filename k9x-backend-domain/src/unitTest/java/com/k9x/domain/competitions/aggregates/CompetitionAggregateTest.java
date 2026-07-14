@@ -306,6 +306,10 @@ class CompetitionAggregateTest {
         return new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, PAST, dateTo, 0L, 0L, null, List.of(event));
     }
 
+    private StageSnapshot stageWith(EventSnapshot event, long dateFrom, long dateTo) {
+        return new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, dateFrom, dateTo, 0L, 0L, null, List.of(event));
+    }
+
     /**
      * A stage not yet under way (dateFrom in the future), so enrollment is governed solely by the
      * event's own deadline rather than being force-closed by stage status.
@@ -423,8 +427,20 @@ class CompetitionAggregateTest {
     }
 
     @Test
-    void updateObdxEventInfo_throws_when_stage_date_to_has_passed() {
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), PAST)));
+    void updateObdxEventInfo_throws_when_stage_has_started() {
+        // dateFrom in the past -> stage already under way, so the event config is locked.
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), PAST, FUTURE)));
+        ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,
+                List.of(), List.of(), List.of(), List.of());
+        assertThrows(EventCannotBeUpdatedException.class,
+                () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
+    }
+
+    @Test
+    void updateObdxEventInfo_throws_when_stage_starts_today() {
+        // dateFrom on the same UTC day as now -> stage start day has begun, config already locked.
+        long startsToday = Instant.parse("2024-06-15T20:00:00Z").toEpochMilli();
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), startsToday, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,
                 List.of(), List.of(), List.of(), List.of());
         assertThrows(EventCannotBeUpdatedException.class,
@@ -433,9 +449,10 @@ class CompetitionAggregateTest {
 
     @Test
     void updateObdxEventInfo_throws_when_enrollment_deadline_is_after_stage_start() {
-        // stageWith uses dateFrom = PAST (2020); a deadline on NOW (2024) is after the stage starts.
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
-        ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, NOW,
+        // dateFrom in the future so the event is still editable; a deadline after that start day is rejected.
+        long afterStart = Instant.parse("2030-01-02T00:00:00Z").toEpochMilli();
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE, FUTURE)));
+        ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, afterStart,
                 List.of(), List.of(), List.of(), List.of());
         assertThrows(EnrollmentDeadlineAfterStageStartException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
@@ -443,9 +460,9 @@ class CompetitionAggregateTest {
 
     @Test
     void updateObdxEventInfo_throws_when_enrollment_deadline_is_on_stage_start_day() {
-        // Deadline must be at least the day before dateFrom: the same UTC day is not allowed.
-        long sameDayAsDateFrom = Instant.parse("2020-01-01T23:00:00Z").toEpochMilli();
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+        // Deadline must be at least the day before dateFrom: the same UTC day as the (future) start is not allowed.
+        long sameDayAsDateFrom = Instant.parse("2030-01-01T23:00:00Z").toEpochMilli();
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, sameDayAsDateFrom,
                 List.of(), List.of(), List.of(), List.of());
         assertThrows(EnrollmentDeadlineAfterStageStartException.class,
@@ -454,7 +471,8 @@ class CompetitionAggregateTest {
 
     @Test
     void updateObdxEventInfo_records_obdx_event_info_updated() {
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+        // dateFrom in the future -> stage not started, event config still editable.
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,
                 List.of(), List.of(), List.of(), List.of());
 

@@ -420,11 +420,12 @@ public final class CompetitionAggregate {
     }
 
     /**
-     * An event can no longer be edited once its stage's {@code dateTo} day has passed, regardless of the
-     * event's own status.
+     * An event's configuration can no longer be edited once its stage has started, i.e. once the stage's
+     * {@code dateFrom} day has begun, regardless of the event's own status. Scoring a running stage is a
+     * separate concern handled in the score path.
      */
     private void assertEventUpdatable(StageSnapshot stage, long now) {
-        if (UtcDates.isAfterUtcDay(now, stage.dateTo())) {
+        if (!UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
             throw new EventCannotBeUpdatedException();
         }
     }
