@@ -1,10 +1,11 @@
-package com.k9x.infrastructure.out.postgres.snapshot;
+package com.k9x.infrastructure.out.postgres.events.obdx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventSnapshot;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.JSON;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -20,7 +21,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GetEventSnapshotJooqAdapterTest {
+class GetObdxEventSnapshotJooqAdapterTest {
 
     private static final EventSnapshot ES = EventSnapshot.EVENT_SNAPSHOT;
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -34,8 +35,8 @@ class GetEventSnapshotJooqAdapterTest {
 
         MockDataProvider provider = _ -> {
             DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);
-            Result<Record> result = mockDsl.newResult(new org.jooq.Field<?>[]{ES.SNAPSHOT});
-            Record record = mockDsl.newRecord(new org.jooq.Field<?>[]{ES.SNAPSHOT});
+            Result<Record> result = mockDsl.newResult(new Field<?>[]{ES.SNAPSHOT});
+            Record record = mockDsl.newRecord(new Field<?>[]{ES.SNAPSHOT});
             record.set(ES.SNAPSHOT, JSON.valueOf(json));
             result.add(record);
             return new MockResult[]{new MockResult(1, result)};
@@ -43,7 +44,7 @@ class GetEventSnapshotJooqAdapterTest {
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
         Optional<FetchClassificationDTO> result =
-                new GetEventSnapshotJooqAdapter(dsl, MAPPER).getSnapshot("evt-1");
+                new GetObdxEventSnapshotJooqAdapter(dsl, MAPPER).getSnapshot("evt-1");
 
         assertThat(result).isPresent();
         assertThat(result.get().eventId()).isEqualTo("evt-1");
@@ -54,10 +55,10 @@ class GetEventSnapshotJooqAdapterTest {
     @Test
     void returns_empty_when_no_row() {
         MockDataProvider provider = _ -> new MockResult[]{
-                new MockResult(0, DSL.using(SQLDialect.POSTGRES).newResult(ES.SNAPSHOT))
+                new MockResult(0, DSL.using(SQLDialect.POSTGRES).newResult(new Field<?>[]{ES.SNAPSHOT}))
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        assertThat(new GetEventSnapshotJooqAdapter(dsl, MAPPER).getSnapshot("evt-1")).isEmpty();
+        assertThat(new GetObdxEventSnapshotJooqAdapter(dsl, MAPPER).getSnapshot("evt-1")).isEmpty();
     }
 }

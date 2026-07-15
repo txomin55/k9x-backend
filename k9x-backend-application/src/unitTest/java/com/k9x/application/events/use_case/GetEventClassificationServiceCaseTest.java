@@ -9,7 +9,7 @@ import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
-import com.k9x.application.events.snapshot.port.GetEventSnapshotPersistencePort;
+import com.k9x.application.events.snapshot.use_case.GetEventSnapshotServiceCase;
 import com.k9x.application.events.use_case.dto.EventClassificationContextDTO;
 import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
@@ -50,7 +50,7 @@ class GetEventClassificationServiceCaseTest {
     @Mock
     private GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
     @Mock
-    private GetEventSnapshotPersistencePort getEventSnapshotPersistencePort;
+    private GetEventSnapshotServiceCase getEventSnapshotServiceCase;
 
     private GetEventClassificationServiceCase serviceCase;
 
@@ -59,7 +59,7 @@ class GetEventClassificationServiceCaseTest {
         serviceCase = new GetEventClassificationServiceCase(
                 getCompetitionPersistencePort,
                 eventClassificationCacheManagerPort, getObdxClassificationServiceCase,
-                getObdxFederationsConfigurationsPort, getEventSnapshotPersistencePort);
+                getObdxFederationsConfigurationsPort, getEventSnapshotServiceCase);
     }
 
     private CompetitionSnapshot competition(EventSnapshot event) {
@@ -70,18 +70,22 @@ class GetEventClassificationServiceCaseTest {
     }
 
     @Test
-    void serves_persisted_snapshot_without_hydrating_or_computing_when_present() {
+    void serves_persisted_snapshot_without_computing_when_present() {
         FetchClassificationDTO snapshot = new FetchClassificationDTO(
                 "evt-1", "Open Grade 1", "FINISHED", "stage-1", "Stage A", "WC",
                 "obdx", "OBDX_RSCE_GRADE_1_V0", "Grade 1", 5000L,
                 new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of()));
-        when(getEventSnapshotPersistencePort.getSnapshot("evt-1")).thenReturn(Optional.of(snapshot));
+        // The context is resolved first (that is where the discipline comes from), then the snapshot is looked up
+        // by (eventId, discipline); when it exists the aggregate is not recomputed.
+        when(eventClassificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+        when(getCompetitionPersistencePort.competitionIdByEvent("evt-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(ACTIVE_EVENT));
+        when(getEventSnapshotServiceCase.getSnapshot("evt-1", "obdx")).thenReturn(Optional.of(snapshot));
 
         FetchClassificationDTO result = serviceCase.getClassification("evt-1");
 
         assertThat(result).isSameAs(snapshot);
-        verifyNoInteractions(getCompetitionPersistencePort, eventClassificationCacheManagerPort,
-                getObdxClassificationServiceCase, getObdxFederationsConfigurationsPort);
+        verifyNoInteractions(getObdxClassificationServiceCase, getObdxFederationsConfigurationsPort);
     }
 
     @Test

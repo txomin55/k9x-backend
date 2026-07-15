@@ -1,4 +1,4 @@
-package com.k9x.infrastructure.out.postgres.snapshot;
+package com.k9x.infrastructure.out.postgres.events.obdx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SaveEventSnapshotJooqAdapterTest {
+class SaveObdxEventSnapshotJooqAdapterTest {
 
     private static final EventSnapshot ES = EventSnapshot.EVENT_SNAPSHOT;
 
@@ -42,7 +42,7 @@ class SaveEventSnapshotJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new SaveEventSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, classification());
+        new SaveObdxEventSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, classification());
 
         assertThat(capturedSql.get())
                 .contains("insert into \"obdx\".\"event_snapshot\"")
@@ -52,7 +52,6 @@ class SaveEventSnapshotJooqAdapterTest {
                 .contains("on conflict")
                 .contains("do nothing");
         assertThat(capturedBindings.get()).contains("evt-1", 1700000000000L);
-        // The serialized DTO is bound as a JSON payload containing the event id.
         assertThat(capturedBindings.get()).anyMatch(b -> b != null && b.toString().contains("\"eventId\":\"evt-1\""));
     }
 }

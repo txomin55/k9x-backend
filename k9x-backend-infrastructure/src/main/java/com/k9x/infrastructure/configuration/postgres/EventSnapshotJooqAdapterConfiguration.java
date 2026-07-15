@@ -1,12 +1,12 @@
 package com.k9x.infrastructure.configuration.postgres;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.k9x.application.events.snapshot.port.GetEventSnapshotPersistencePort;
+import com.k9x.application.events.snapshot.port.GetObdxEventSnapshotPersistencePort;
 import com.k9x.application.events.snapshot.port.GetPendingSnapshotEventsPersistencePort;
-import com.k9x.application.events.snapshot.port.SaveEventSnapshotPersistencePort;
-import com.k9x.infrastructure.out.postgres.snapshot.GetEventSnapshotJooqAdapter;
-import com.k9x.infrastructure.out.postgres.snapshot.GetPendingSnapshotEventsJooqAdapter;
-import com.k9x.infrastructure.out.postgres.snapshot.SaveEventSnapshotJooqAdapter;
+import com.k9x.application.events.snapshot.port.SaveObdxEventSnapshotPersistencePort;
+import com.k9x.infrastructure.out.postgres.events.GetPendingSnapshotEventsJooqAdapter;
+import com.k9x.infrastructure.out.postgres.events.obdx.GetObdxEventSnapshotJooqAdapter;
+import com.k9x.infrastructure.out.postgres.events.obdx.SaveObdxEventSnapshotJooqAdapter;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,13 +21,13 @@ public class EventSnapshotJooqAdapterConfiguration {
     }
 
     @Bean
-    public GetEventSnapshotPersistencePort getEventSnapshotPersistencePort(ObjectMapper objectMapper) {
-        return new GetEventSnapshotJooqAdapter(dsl, objectMapper);
+    public GetObdxEventSnapshotPersistencePort getObdxEventSnapshotPersistencePort(ObjectMapper objectMapper) {
+        return new GetObdxEventSnapshotJooqAdapter(dsl, objectMapper);
     }
 
     @Bean
-    public SaveEventSnapshotPersistencePort saveEventSnapshotPersistencePort(ObjectMapper objectMapper) {
-        return new SaveEventSnapshotJooqAdapter(dsl, objectMapper);
+    public SaveObdxEventSnapshotPersistencePort saveObdxEventSnapshotPersistencePort(ObjectMapper objectMapper) {
+        return new SaveObdxEventSnapshotJooqAdapter(dsl, objectMapper);
     }
 
     @Bean

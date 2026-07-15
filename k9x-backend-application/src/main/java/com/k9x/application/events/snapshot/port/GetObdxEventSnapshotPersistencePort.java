@@ -4,6 +4,6 @@ import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 
 import java.util.Optional;
 
-public interface GetEventSnapshotPersistencePort {
+public interface GetObdxEventSnapshotPersistencePort {
     Optional<FetchClassificationDTO> getSnapshot(String eventId);
 }
