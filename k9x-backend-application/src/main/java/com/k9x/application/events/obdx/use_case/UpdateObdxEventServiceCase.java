@@ -13,18 +13,23 @@ import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeRequiredExcep
 import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxRank;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
+import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.competitions.commands.ObdxCompetitorItem;
 import com.k9x.domain.competitions.commands.ObdxEventUpdateData;
 import com.k9x.domain.competitions.commands.ObdxExerciseItem;
 import com.k9x.domain.competitions.commands.ObdxJudgeItem;
 import com.k9x.application.utils.auth.AuthAssertions;
+import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.domain.shared.UtcDates;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,7 +50,6 @@ public class UpdateObdxEventServiceCase {
         this.getDogPersistencePort = getDogPersistencePort;
     }
 
-    // TODO: rank is not settable yet — its calculation is discipline-specific and still pending.
     public void updateEvent(String id, UpdateObdxEventCommand command, String userId, boolean organizer) {
         AuthAssertions.assertOrganizer(organizer, userId);
         assertConfigurationId(command.configurationId());
@@ -60,15 +64,34 @@ public class UpdateObdxEventServiceCase {
             throw new EventNotFoundException();
         }
         assertCollectorsExist(command);
-        assertBihAllowedForSex(command);
+        Map<String, Dog> competitorDogs = fetchCompetitorDogs(command);
+        assertBihAllowedForSex(command, competitorDogs);
 
-        CompetitionAggregate competition =
-                CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
-        competition.updateObdxEventInfo(id, toUpdateData(command), userId, DateUtils.nowUtcMillis());
+        CompetitionSnapshot snapshot = getCompetitionPersistencePort.getCompetition(competitionId);
+        CompetitionAggregate competition = CompetitionAggregate.of(snapshot);
+        String rank = computeRank(command, competitorDogs, snapshot.country());
+        competition.updateObdxEventInfo(id, toUpdateData(command, rank), userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }
 
-    private ObdxEventUpdateData toUpdateData(UpdateObdxEventCommand command) {
+    /**
+     * The OBDX event rank is derived from the number of competitors, with a {@code +} suffix when the event is
+     * international — at least one competitor whose (dog's) country differs from the event's country, which is
+     * the country of its owning competition. Competitors with no country are ignored for the international check.
+     */
+    private String computeRank(UpdateObdxEventCommand command, Map<String, Dog> competitorDogs, String eventCountry) {
+        boolean international = command.competitors().stream()
+                .map(c -> competitorDogs.get(c.dogId()))
+                .anyMatch(dog -> dog != null && isForeign(dog.getCountry(), eventCountry));
+        return ObdxRank.fromCompetitorCount(command.competitors().size()).format(international);
+    }
+
+    private boolean isForeign(String competitorCountry, String eventCountry) {
+        return competitorCountry != null && !competitorCountry.isBlank()
+                && !competitorCountry.equalsIgnoreCase(eventCountry);
+    }
+
+    private ObdxEventUpdateData toUpdateData(UpdateObdxEventCommand command, String rank) {
         return new ObdxEventUpdateData(
                 command.name(),
                 command.configurationId(),
@@ -87,7 +110,14 @@ public class UpdateObdxEventServiceCase {
                 command.judges().stream()
                         .map(j -> new ObdxJudgeItem(j.judgeId(), j.collectorEmail()))
                         .toList(),
-                command.awards());
+                command.awards(),
+                rank);
+    }
+
+    private Map<String, Dog> fetchCompetitorDogs(UpdateObdxEventCommand command) {
+        Map<String, Dog> dogs = new LinkedHashMap<>();
+        command.competitors().forEach(c -> dogs.put(c.dogId(), getDogPersistencePort.getDog(c.dogId())));
+        return dogs;
     }
 
     private void assertConfigurationId(String configurationId) {
@@ -154,9 +184,9 @@ public class UpdateObdxEventServiceCase {
         });
     }
 
-    private void assertBihAllowedForSex(UpdateObdxEventCommand command) {
+    private void assertBihAllowedForSex(UpdateObdxEventCommand command, Map<String, Dog> competitorDogs) {
         command.competitors().forEach(c ->
-                BihGuards.assertBihAllowedForSex(c.bih(), getDogPersistencePort.getDog(c.dogId())));
+                BihGuards.assertBihAllowedForSex(c.bih(), competitorDogs.get(c.dogId())));
     }
 
     private void assertCollectorsExist(UpdateObdxEventCommand command) {

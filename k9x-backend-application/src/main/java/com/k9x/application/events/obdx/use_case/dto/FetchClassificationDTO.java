@@ -7,5 +7,6 @@ public record FetchClassificationDTO(
         String disciplineId,
         String configurationId, String configurationName,
         Long scoresLastUpdate,
-        FetchObdxClassificationDTO obdx) {
+        FetchObdxClassificationDTO obdx,
+        String rank) {
 }

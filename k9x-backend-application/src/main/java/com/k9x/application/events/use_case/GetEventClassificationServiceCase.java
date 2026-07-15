@@ -73,7 +73,7 @@ public class GetEventClassificationServiceCase {
         long now = DateUtils.nowUtcMillis();
         return new FetchClassificationDTO(eventId, event.name(), event.status(now, context.stageDateTo()).name(),
                 event.stageId(), context.stageName(), context.competitionName(), event.discipline(),
-                event.configurationId(), configurationName, scoresLastUpdate, obdx);
+                event.configurationId(), configurationName, scoresLastUpdate, obdx, event.rank());
     }
 
     private Map<String, String> buildConfigNameMap() {

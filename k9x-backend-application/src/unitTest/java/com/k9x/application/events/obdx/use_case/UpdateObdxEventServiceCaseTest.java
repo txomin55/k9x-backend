@@ -14,7 +14,9 @@ import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeRequiredExcep
 import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
+import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.commands.ObdxEventInfoUpdated;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.dogs.aggregates.Sex;
@@ -25,11 +27,13 @@ import com.k9x.domain.stages.aggregates.StageSnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -209,5 +213,65 @@ class UpdateObdxEventServiceCaseTest {
                 .isInstanceOf(BihNotAllowedForSexException.class);
 
         verifyNoInteractions(saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void computes_international_plus_rank_when_a_competitor_is_from_another_country() {
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L,
+                ObdxAvgMethod.AVG,
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, false),
+                        new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, false)),
+                List.of(), List.of(), List.of());
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
+        when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
+        when(getDogPersistencePort.getDog("dog-fr")).thenReturn(dogFrom("dog-fr", "FR"));
+
+        serviceCase.updateEvent("event-1", command, "user-1", true);
+
+        // 2 competitors -> E; a competitor from FR while the event is in ES -> international -> "E+".
+        assertThat(recordedRank()).isEqualTo("E+");
+    }
+
+    @Test
+    void computes_national_rank_when_every_competitor_shares_the_event_country() {
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L,
+                ObdxAvgMethod.AVG,
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, false),
+                        new UpdateObdxEventCommand.CompetitorCommand("dog-es-2", 2, null, false, false)),
+                List.of(), List.of(), List.of());
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
+        when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
+        when(getDogPersistencePort.getDog("dog-es-2")).thenReturn(dogFrom("dog-es-2", "es"));
+
+        serviceCase.updateEvent("event-1", command, "user-1", true);
+
+        // 2 competitors -> E; both from ES (case-insensitive) -> not international -> "E".
+        assertThat(recordedRank()).isEqualTo("E");
+    }
+
+    private String recordedRank() {
+        ArgumentCaptor<CompetitionAggregate> captor = ArgumentCaptor.forClass(CompetitionAggregate.class);
+        verify(saveCompetitionPersistencePort).save(captor.capture());
+        return captor.getValue().pendingChanges().stream()
+                .filter(ObdxEventInfoUpdated.class::isInstance)
+                .map(c -> ((ObdxEventInfoUpdated) c).rank())
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private CompetitionSnapshot competitionInCountry(String country) {
+        EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null);
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 4102444800000L, Long.MAX_VALUE,
+                0L, 0L, null, List.of(event));
+        return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", country, null, null, null, null,
+                0L, 0L, null, List.of(stage));
+    }
+
+    private Dog dogFrom(String id, String country) {
+        return new Dog(id, "id-" + id, "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", country, "team",
+                Sex.FEMALE, 55, null, 0L, 0L, null);
     }
 }

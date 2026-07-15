@@ -39,7 +39,7 @@ class GenerateEventSnapshotsServiceCaseTest {
 
     private FetchClassificationDTO classification(String eventId) {
         return new FetchClassificationDTO(eventId, "Event", "FINISHED", "stage-1", "Stage A", "WC",
-                "obdx", "cfg", "Cfg", null, null);
+                "obdx", "cfg", "Cfg", null, null, "A+");
     }
 
     @Test

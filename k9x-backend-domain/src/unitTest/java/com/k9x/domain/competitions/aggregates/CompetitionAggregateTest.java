@@ -444,7 +444,7 @@ class CompetitionAggregateTest {
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(otherEvent, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("E", "cfg", ObdxAvgMethod.MID_AVG, null,
-                List.of(), List.of(), List.of(), List.of());
+                List.of(), List.of(), List.of(), List.of(), "A");
         assertThrows(UnauthorizedResourceException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
@@ -454,7 +454,7 @@ class CompetitionAggregateTest {
         // dateFrom in the past -> stage already under way, so the event config is locked.
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), PAST, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,
-                List.of(), List.of(), List.of(), List.of());
+                List.of(), List.of(), List.of(), List.of(), "A");
         assertThrows(EventCannotBeUpdatedException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
@@ -465,7 +465,7 @@ class CompetitionAggregateTest {
         long startsToday = Instant.parse("2024-06-15T20:00:00Z").toEpochMilli();
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), startsToday, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,
-                List.of(), List.of(), List.of(), List.of());
+                List.of(), List.of(), List.of(), List.of(), "A");
         assertThrows(EventCannotBeUpdatedException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
@@ -476,7 +476,7 @@ class CompetitionAggregateTest {
         long afterStart = Instant.parse("2030-01-02T00:00:00Z").toEpochMilli();
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, afterStart,
-                List.of(), List.of(), List.of(), List.of());
+                List.of(), List.of(), List.of(), List.of(), "A");
         assertThrows(EnrollmentDeadlineAfterStageStartException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
@@ -487,7 +487,7 @@ class CompetitionAggregateTest {
         long sameDayAsDateFrom = Instant.parse("2030-01-01T23:00:00Z").toEpochMilli();
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, sameDayAsDateFrom,
-                List.of(), List.of(), List.of(), List.of());
+                List.of(), List.of(), List.of(), List.of(), "A");
         assertThrows(EnrollmentDeadlineAfterStageStartException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
@@ -497,7 +497,7 @@ class CompetitionAggregateTest {
         // dateFrom in the future -> stage not started, event config still editable.
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,
-                List.of(), List.of(), List.of(), List.of());
+                List.of(), List.of(), List.of(), List.of(), "B+");
 
         aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW);
 
@@ -505,6 +505,7 @@ class CompetitionAggregateTest {
         assertEquals("evt-1", change.eventId());
         assertEquals("cfg-1", change.configurationId());
         assertEquals(NOW, change.lastUpdate());
+        assertEquals("B+", change.rank());
     }
 
     @Test

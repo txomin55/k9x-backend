@@ -30,7 +30,7 @@ class GetObdxEventSnapshotJooqAdapterTest {
     void deserializes_stored_snapshot() throws Exception {
         FetchClassificationDTO stored = new FetchClassificationDTO("evt-1", "Event", "FINISHED", "stage-1",
                 "Stage A", "WC", "obdx", "cfg", "Cfg", 5000L,
-                new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of()));
+                new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of()), "A+");
         String json = MAPPER.writeValueAsString(stored);
 
         MockDataProvider provider = _ -> {

@@ -29,7 +29,7 @@ class GetEventSnapshotServiceCaseTest {
     @Test
     void returns_the_persisted_snapshot_when_present() {
         FetchClassificationDTO snapshot = new FetchClassificationDTO("evt-1", "Event", "FINISHED", "stage-1",
-                "Stage A", "WC", "obdx", "cfg", "Cfg", null, null);
+                "Stage A", "WC", "obdx", "cfg", "Cfg", null, null, "A+");
         when(getObdxEventSnapshotPersistencePort.getSnapshot("evt-1")).thenReturn(Optional.of(snapshot));
 
         assertThat(serviceCase.getSnapshot("evt-1", "obdx")).containsSame(snapshot);

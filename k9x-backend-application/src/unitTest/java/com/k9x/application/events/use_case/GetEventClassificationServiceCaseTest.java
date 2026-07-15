@@ -74,7 +74,7 @@ class GetEventClassificationServiceCaseTest {
         FetchClassificationDTO snapshot = new FetchClassificationDTO(
                 "evt-1", "Open Grade 1", "FINISHED", "stage-1", "Stage A", "WC",
                 "obdx", "OBDX_RSCE_GRADE_1_V0", "Grade 1", 5000L,
-                new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of()));
+                new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of()), "A+");
         // The context is resolved first (that is where the discipline comes from), then the snapshot is looked up
         // by (eventId, discipline); when it exists the aggregate is not recomputed.
         when(eventClassificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);

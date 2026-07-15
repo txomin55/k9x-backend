@@ -209,7 +209,7 @@ class SaveCompetitionJooqAdapterTest {
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "config-1", ObdxAvgMethod.MID_AVG, 1735689600000L,
                 List.of(new ObdxCompetitorItem("dog-1", (short) 1, null, true, false)),
                 List.of(new ObdxExerciseItem("exercise-1", (short) 1, new String[]{"tag1"}, new String[]{"judge-1"})),
-                List.of(new ObdxJudgeItem("judge-1", "collector@example.com")), List.of());
+                List.of(new ObdxJudgeItem("judge-1", "collector@example.com")), List.of(), "A+");
         competition.updateObdxEventInfo("evt-1", data, "user", NOW);
 
         new SaveCompetitionJooqAdapter(dsl).save(competition);

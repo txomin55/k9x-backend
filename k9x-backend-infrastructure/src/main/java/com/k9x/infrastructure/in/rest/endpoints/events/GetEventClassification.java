@@ -31,8 +31,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
         return ResponseEntity.ok(new StageEventClassificationResponseDTO(
                 resolveDiscipline(dto.disciplineId()),
                 new IdNameDTO(dto.eventName(), dto.eventId()),
-                // TODO: rank is not settable yet — its calculation is discipline-specific and still pending.
-                "",
+                dto.rank(),
                 new IdNameDTO(dto.stageName(), dto.stageId()),
                 new IdNameDTO(dto.configurationName(), dto.configurationId()),
                 dto.eventStatus(),
