@@ -95,6 +95,7 @@ public final class CompetitionAggregate {
 
     public void createStage(NewStageData data, String userId, long now) {
         assertCompetitionMutableBy(userId);
+        assertStageDateRange(data.dateFrom(), data.dateTo());
 
         changes.add(new StageCreated(data.id(), data.name(), snapshot.id(), data.dateFrom(), data.dateTo(),
                 userId, now));
@@ -105,6 +106,7 @@ public final class CompetitionAggregate {
         assertStageOwnedBy(stage, userId);
         assertCompetitionMutableBy(userId);
         assertStageUpdatable(stage, now);
+        assertStageDateRange(data.dateFrom(), data.dateTo());
 
         changes.add(new StageRenamed(stageId, data.name(), data.dateFrom(), data.dateTo(), now));
     }
@@ -343,6 +345,16 @@ public final class CompetitionAggregate {
     private void assertStageOwnedBy(StageSnapshot stage, String userId) {
         if (!stage.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
+        }
+    }
+
+    /**
+     * A stage's {@code dateTo} must fall on at least the same UTC day as its {@code dateFrom}: a stage cannot
+     * end before the day it starts.
+     */
+    private void assertStageDateRange(Long dateFrom, Long dateTo) {
+        if (UtcDates.isBeforeUtcDay(dateTo, dateFrom)) {
+            throw new StageDateToBeforeDateFromException();
         }
     }
 

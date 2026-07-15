@@ -169,6 +169,22 @@ class CompetitionAggregateTest {
                 () -> aggregate.createStage(new NewStageData("s", "S", FUTURE, FUTURE), OWNER, NOW));
     }
 
+    @Test
+    void createStage_throws_when_date_to_is_before_date_from() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
+        assertThrows(StageDateToBeforeDateFromException.class,
+                () -> aggregate.createStage(new NewStageData("s", "S", NOW, PAST), OWNER, NOW));
+    }
+
+    @Test
+    void createStage_allows_date_to_on_the_same_day_as_date_from() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
+
+        aggregate.createStage(new NewStageData("s", "S", NOW, NOW), OWNER, NOW);
+
+        assertInstanceOf(StageCreated.class, onlyChange(aggregate));
+    }
+
     // ---- renameStage ----------------------------------------------------------------------------
 
     @Test
@@ -211,6 +227,13 @@ class CompetitionAggregateTest {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, finishedStage));
         assertThrows(StageCannotBeUpdatedException.class,
                 () -> aggregate.renameStage("stage-1", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
+    }
+
+    @Test
+    void renameStage_throws_when_date_to_is_before_date_from() {
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
+        assertThrows(StageDateToBeforeDateFromException.class,
+                () -> aggregate.renameStage("stage-1", new StageUpdateData("X", NOW, PAST), OWNER, NOW));
     }
 
     // ---- deleteStage ----------------------------------------------------------------------------
