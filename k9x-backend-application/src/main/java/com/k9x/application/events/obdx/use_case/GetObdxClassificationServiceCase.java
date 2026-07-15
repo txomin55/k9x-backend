@@ -116,8 +116,10 @@ public class GetObdxClassificationServiceCase {
         // exerciseId → position and tags (same for all dogs)
         Map<String, Short> exercisePositions = new LinkedHashMap<>();
         Map<String, List<String>> exerciseTags = new LinkedHashMap<>();
-        // dogId → static start order (competitor number), set on enrollment
+        // dogId → static start order, set on enrollment
         Map<String, Short> startOrderByDog = new LinkedHashMap<>();
+        // dogId → competitor number (dorsal), set on enrollment; independent from the start order
+        Map<String, Short> competitorNumberByDog = new LinkedHashMap<>();
         // dogId → best in show flag, set on enrollment
         Map<String, Boolean> bihByDog = new LinkedHashMap<>();
         // dogId → reserve flag, set on enrollment
@@ -128,6 +130,7 @@ public class GetObdxClassificationServiceCase {
         Map<String, Boolean> fciConfirmedByDog = new LinkedHashMap<>();
         for (EventCompetitor competitor : (event.competitors() == null ? List.<EventCompetitor>of() : event.competitors())) {
             startOrderByDog.put(competitor.dogId(), competitor.position());
+            competitorNumberByDog.put(competitor.dogId(), competitor.competitorNumber());
             bihByDog.put(competitor.dogId(), competitor.bih());
             reserveByDog.put(competitor.dogId(), competitor.reserve());
             notCompetingByDog.put(competitor.dogId(), competitor.notCompeting());
@@ -235,7 +238,7 @@ public class GetObdxClassificationServiceCase {
 
             competitors.add(new FetchClassificationCompetitorDTO(
                     dogId, meta.dogName(), meta.dogBreed(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
-                    startOrderByDog.get(dogId), 0, totalScore, competitorScoreRating, false,
+                    startOrderByDog.get(dogId), competitorNumberByDog.get(dogId), 0, totalScore, competitorScoreRating, false,
                     status.name(), bihByDog.get(dogId), reserveByDog.get(dogId),
                     Boolean.TRUE.equals(notCompetingByDog.get(dogId)), exercises,
                     List.of(), qualification));
@@ -307,7 +310,7 @@ public class GetObdxClassificationServiceCase {
         awards.add(award);
         competitors.set(index, new FetchClassificationCompetitorDTO(
                 c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
-                c.startOrder(), c.position(), c.totalScore(), c.scoreRating(), c.tied(), c.status(), c.bih(),
+                c.startOrder(), c.competitorNumber(), c.position(), c.totalScore(), c.scoreRating(), c.tied(), c.status(), c.bih(),
                 c.reserve(), c.notCompeting(), c.exercises(), awards, c.qualification()));
     }
 
@@ -486,7 +489,7 @@ public class GetObdxClassificationServiceCase {
         FetchClassificationCompetitorDTO c = competitors.get(index);
         competitors.set(index, new FetchClassificationCompetitorDTO(
                 c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
-                c.startOrder(), position, c.totalScore(), c.scoreRating(), tied, c.status(), c.bih(),
+                c.startOrder(), c.competitorNumber(), position, c.totalScore(), c.scoreRating(), tied, c.status(), c.bih(),
                 c.reserve(), c.notCompeting(), c.exercises(), c.awards(), c.qualification()));
     }
 }

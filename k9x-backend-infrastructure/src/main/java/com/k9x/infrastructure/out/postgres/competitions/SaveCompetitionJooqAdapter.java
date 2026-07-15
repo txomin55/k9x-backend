@@ -176,6 +176,7 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                     .set(EVENT_COMPETITORS.EVENT_ID, c.eventId())
                     .set(EVENT_COMPETITORS.DOG_ID, competitor.dogId())
                     .set(EVENT_COMPETITORS.POSITION, competitor.position())
+                    .set(EVENT_COMPETITORS.COMPETITOR_NUMBER, competitor.competitorNumber())
                     .set(EVENT_COMPETITORS.VERIFIED, true)
                     .set(EVENT_COMPETITORS.BIH, competitor.bih())
                     .set(EVENT_COMPETITORS.RESERVE, competitor.reserve())

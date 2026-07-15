@@ -111,32 +111,31 @@ VALUES -- Classe 1 (OBDX_FCI_GRADE_1_V0)
 -- ---------------------------------------------------------------------------
 -- 3) Event competitors: each dog enrolled in the event of its class
 --    (Classe 1/2/3 and COBS). All verified.
---    position = the competitor's dorsal number (bib), taken from the scoresheet
---    PDF. Competitors with no scoresheet (avsc-dog-2, avsc-dog-12) have an
---    unknown dorsal, so they are placed last within their event (next free
---    number after the known dorsals).
+--    competitor_number = the competitor's dorsal (bib), taken from the "Dorsal"
+--    column of proba.jpeg (dorsal N == avsc-dog-N).
+--    position = a 1-based incremental order within each event, assigned in
+--    enrollment order; it is NOT the dorsal.
 -- ---------------------------------------------------------------------------
-INSERT INTO obdx.event_competitors (event_id, dog_id, position, verified, last_update, not_competing, reserve)
+INSERT INTO obdx.event_competitors (event_id, dog_id, position, competitor_number, verified, last_update, not_competing, reserve)
 VALUES -- Classe 1 -> event_1783770421009
-       ('event_1783770421009', '621XXXXXXXXXXXX', 1, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       ('event_1783770421009', 'avsc-dog-2', 2, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770421009', '621XXXXXXXXXXXX', 1, 1, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770421009', 'avsc-dog-2', 2, 2, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
        -- Classe 2 -> event_1783770430523
-       ('event_1783770430523', '620095300051547', 3, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       ('event_1783770430523', '622XXXXXXXXXXXX', 4, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       ('event_1783770430523', '623XXXXXXXXXXXX', 5, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770430523', '620095300051547', 1, 3, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770430523', '622XXXXXXXXXXXX', 2, 4, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770430523', '623XXXXXXXXXXXX', 3, 5, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
        -- Classe 3 -> event_1783770452508
-       ('event_1783770452508', '380260102376914', 6, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       ('event_1783770452508', '945000001842619', 7, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       ('event_1783770452508', '978000040086211', 8, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       ('event_1783770452508', '620098500124755', 9, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       -- COBS -> event_1783770408793 (dorsals 10, 11, 13, 14, 15; avsc-dog-12 has no
-       -- scoresheet -> placed last as 16)
-       ('event_1783770408793', '624XXXXXXXXXXXX', 10, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       ('event_1783770408793', '963XXXXXXXXXXXX', 11, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       ('event_1783770408793', '956XXXXXXXXXXXX', 13, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       ('event_1783770408793', '992XXXXXXXXXXXX', 14, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       ('event_1783770408793', '625XXXXXXXXXXXX', 15, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
-       ('event_1783770408793', 'avsc-dog-12', 16, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE);
+       ('event_1783770452508', '380260102376914', 1, 6, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770452508', '945000001842619', 2, 7, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770452508', '978000040086211', 3, 8, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770452508', '620098500124755', 4, 9, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       -- COBS -> event_1783770408793 (dorsals 10, 11, 12, 13, 14, 15)
+       ('event_1783770408793', '624XXXXXXXXXXXX', 1, 10, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770408793', '963XXXXXXXXXXXX', 2, 11, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770408793', '956XXXXXXXXXXXX', 3, 13, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770408793', '992XXXXXXXXXXXX', 4, 14, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770408793', '625XXXXXXXXXXXX', 5, 15, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
+       ('event_1783770408793', 'avsc-dog-12', 6, 12, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE);
 
 -- ---------------------------------------------------------------------------
 -- 4) Event scores: the raw per-exercise score (the "Juiz 1" column) from each

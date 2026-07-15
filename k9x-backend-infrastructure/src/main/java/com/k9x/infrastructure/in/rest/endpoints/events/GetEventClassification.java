@@ -31,6 +31,8 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
         return ResponseEntity.ok(new StageEventClassificationResponseDTO(
                 resolveDiscipline(dto.disciplineId()),
                 new IdNameDTO(dto.eventName(), dto.eventId()),
+                // TODO: rank is not settable yet — its calculation is discipline-specific and still pending.
+                "",
                 new IdNameDTO(dto.stageName(), dto.stageId()),
                 new IdNameDTO(dto.configurationName(), dto.configurationId()),
                 dto.eventStatus(),
@@ -85,6 +87,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                                                         e.redCard().timestamp())))
                                 .toList(),
                         c.position(),
+                        c.competitorNumber() != null ? c.competitorNumber().intValue() : null,
                         c.totalScore(),
                         c.scoreRating(),
                         c.tied(),

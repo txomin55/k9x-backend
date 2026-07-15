@@ -48,7 +48,8 @@ public class GetObdxCollectionServiceCase {
         List<FetchCollectionCompetitorDTO> competitors =
                 getObdxCollectionCompetitorsPersistencePort.getCompetitors(eventId).stream()
                         .map(c -> new FetchCollectionCompetitorDTO(c.dogId(), c.dogName(), c.dogIdentity(),
-                                c.breed(), c.owner(), c.handler(), c.team(), c.country(), c.position(), c.verified(),
+                                c.breed(), c.owner(), c.handler(), c.team(), c.country(), c.position(),
+                                c.competitorNumber(), c.verified(),
                                 c.notCompeting(), EventCompetitorStatus.of(c.notCompeting(), c.verified()).name(),
                                 c.bih(), c.reserve(), scoresAllowed(c.dogId(), c.notCompeting(), allScores)))
                         .toList();

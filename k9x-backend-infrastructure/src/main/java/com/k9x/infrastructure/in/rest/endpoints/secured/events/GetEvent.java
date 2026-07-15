@@ -69,6 +69,7 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                         c.team(),
                         c.country(),
                         c.position() != null ? c.position().intValue() : null,
+                        c.competitorNumber() != null ? c.competitorNumber().intValue() : null,
                         c.status(),
                         resolveBreed(c.breed()),
                         new IdNameDTO(c.dogName(), c.dogId()),

@@ -10,6 +10,7 @@ public record EventCompetitor(
         String breed,
         String identity,
         Short position,
+        Short competitorNumber,
         Boolean verified,
         boolean notCompeting,
         Boolean bih,

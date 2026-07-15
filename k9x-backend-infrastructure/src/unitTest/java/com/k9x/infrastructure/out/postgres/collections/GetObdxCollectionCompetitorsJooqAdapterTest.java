@@ -25,7 +25,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
     private static final Dogs D = Tables.DOGS;
 
     private static final Field<?>[] SELECT_FIELDS = {
-            EC.DOG_ID, EC.POSITION, EC.VERIFIED, EC.NOT_COMPETING, EC.BIH, EC.RESERVE,
+            EC.DOG_ID, EC.POSITION, EC.COMPETITOR_NUMBER, EC.VERIFIED, EC.NOT_COMPETING, EC.BIH, EC.RESERVE,
             D.NAME, D.IDENTITY, D.BREED, D.OWNER, D.HANDLER, D.TEAM, D.COUNTRY
     };
 
@@ -64,6 +64,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
             Record record = mockDsl.newRecord(SELECT_FIELDS);
             record.set(EC.DOG_ID, "dog-1");
             record.set(EC.POSITION, (short) 1);
+            record.set(EC.COMPETITOR_NUMBER, (short) 7);
             record.set(EC.VERIFIED, true);
             record.set(EC.NOT_COMPETING, true);
             record.set(EC.BIH, true);
