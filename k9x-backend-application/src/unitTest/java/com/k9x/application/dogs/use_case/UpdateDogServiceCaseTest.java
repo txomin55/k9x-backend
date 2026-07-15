@@ -1,6 +1,7 @@
 package com.k9x.application.dogs.use_case;
 
 import com.k9x.application.dogs.exceptions.DogAlreadyDeletedException;
+import com.k9x.application.dogs.exceptions.DogChipAlreadyExistsException;
 import com.k9x.application.dogs.exceptions.DogNotFoundException;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
@@ -85,6 +86,30 @@ class UpdateDogServiceCaseTest {
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(updateDogPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_identity_is_used_by_another_dog() {
+        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "user-1", "handler-1", "creator-1", "ES", "team", null, null, null, 0L, 0L, null);
+        Dog otherDog = new Dog("dog-2", "new-id", "breed", "Max", "img", "user-1", "handler-1", "creator-1", "ES", "team", null, null, null, 0L, 0L, null);
+        when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
+        when(getDogPersistencePort.getDogByIdentity("new-id")).thenReturn(otherDog);
+
+        assertThatThrownBy(() -> serviceCase.updateDog("dog-1", new UpdateDogCommand("Rex", "img", "Lab", "new-id", "user-1", "handler-1", "team", "ES", null, null, null), "user-1", false))
+                .isInstanceOf(DogChipAlreadyExistsException.class);
+
+        verifyNoInteractions(updateDogPersistencePort);
+    }
+
+    @Test
+    void updates_dog_when_identity_belongs_to_same_dog() {
+        Dog dog = new Dog("dog-1", "id", "breed", "Rex", "img", "user-1", "handler-1", "creator-1", "ES", "team", null, null, null, 0L, 0L, null);
+        when(getDogPersistencePort.getDog("dog-1")).thenReturn(dog);
+        when(getDogPersistencePort.getDogByIdentity("id")).thenReturn(dog);
+
+        serviceCase.updateDog("dog-1", new UpdateDogCommand("NewName", "img", "Lab", "id", "user-1", "handler-1", "team", "ES", null, null, null), "user-1", false);
+
+        verify(updateDogPersistencePort).updateDog(eq("dog-1"), any());
     }
 
     @Test

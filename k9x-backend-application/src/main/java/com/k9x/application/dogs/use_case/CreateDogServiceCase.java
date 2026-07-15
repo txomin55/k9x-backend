@@ -21,7 +21,10 @@ public class CreateDogServiceCase {
                           String owner, String handler, String userId, String team, String country,
                           Sex sex, Integer withersCm, Boolean threeFciGenerationsConfirmed, boolean organizer) {
         assertUserIdMatchesOwnerWhenNoOrganizer(owner, userId, organizer);
-        assertChipNotAlreadyRegistered(id);
+        assertChipNotUsedByActiveDog(id);
+        assertIdentityNotUsedByActiveDog(identity);
+        // If the chip belongs to a soft-deleted dog, the persistence upsert reactivates that row with the
+        // new data ("recover"). Only active collisions are rejected above.
         createDogPersistencePort.createDog(id, name, image, breed, identity, owner, handler, userId, team, country,
                 sex, withersCm, threeFciGenerationsConfirmed, DateUtils.nowUtcMillis());
     }
@@ -32,8 +35,14 @@ public class CreateDogServiceCase {
         }
     }
 
-    private void assertChipNotAlreadyRegistered(String id) {
+    private void assertChipNotUsedByActiveDog(String id) {
         if (getDogPersistencePort.getDog(id) != null) {
+            throw new DogChipAlreadyExistsException();
+        }
+    }
+
+    private void assertIdentityNotUsedByActiveDog(String identity) {
+        if (getDogPersistencePort.getDogByIdentity(identity) != null) {
             throw new DogChipAlreadyExistsException();
         }
     }

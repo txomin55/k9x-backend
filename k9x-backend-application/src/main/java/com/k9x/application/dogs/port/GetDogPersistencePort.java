@@ -5,4 +5,6 @@ import com.k9x.domain.dogs.aggregates.Dog;
 public interface GetDogPersistencePort {
 
     Dog getDog(String id);
+
+    Dog getDogByIdentity(String identity);
 }

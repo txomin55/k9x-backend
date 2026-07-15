@@ -45,8 +45,19 @@ class CreateDogServiceCaseTest {
     }
 
     @Test
-    void throws_exception_when_chip_already_exists() {
+    void throws_exception_when_chip_used_by_active_dog() {
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(mock(com.k9x.domain.dogs.aggregates.Dog.class));
+
+        assertThatThrownBy(() -> serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", "user-1", "handler-1", "user-1", "team", "ES", null, null, null, false))
+                .isInstanceOf(DogChipAlreadyExistsException.class);
+
+        verifyNoInteractions(createDogPersistencePort);
+    }
+
+    @Test
+    void throws_exception_when_identity_used_by_active_dog() {
+        when(getDogPersistencePort.getDog("dog-1")).thenReturn(null);
+        when(getDogPersistencePort.getDogByIdentity("id")).thenReturn(mock(com.k9x.domain.dogs.aggregates.Dog.class));
 
         assertThatThrownBy(() -> serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", "user-1", "handler-1", "user-1", "team", "ES", null, null, null, false))
                 .isInstanceOf(DogChipAlreadyExistsException.class);

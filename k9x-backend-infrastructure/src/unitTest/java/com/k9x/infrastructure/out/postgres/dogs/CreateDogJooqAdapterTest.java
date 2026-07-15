@@ -52,4 +52,23 @@ class CreateDogJooqAdapterTest {
                 .contains("\"last_update\"");
         assertThat(capturedBindings.get()).contains("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", "FEMALE", 55, createdAt);
     }
+
+    @Test
+    void upserts_on_chip_conflict_reactivating_deleted_dog() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.DOGS.fields());
+            return new MockResult[]{new MockResult(1, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", Sex.FEMALE, 55, null, 1700000000000L);
+
+        assertThat(capturedSql.get())
+                .contains("on conflict (\"id\")")
+                .contains("do update")
+                .contains("\"deleted_at\" = ");
+    }
 }

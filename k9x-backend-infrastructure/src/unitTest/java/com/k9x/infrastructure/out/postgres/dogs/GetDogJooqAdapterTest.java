@@ -35,7 +35,28 @@ class GetDogJooqAdapterTest {
         assertThat(capturedSql.get())
                 .contains("select")
                 .contains("from \"k9x\".\"dogs\"")
-                .contains("where \"k9x\".\"dogs\".\"id\" = ?");
+                .contains("\"k9x\".\"dogs\".\"id\" = ?")
+                .contains("\"k9x\".\"dogs\".\"deleted_at\" is null");
+    }
+
+    @Test
+    void generates_sql_filtered_by_identity_and_not_deleted() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.DOGS.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetDogJooqAdapter(dsl).getDogByIdentity("K9-001");
+
+        assertThat(capturedSql.get())
+                .contains("select")
+                .contains("from \"k9x\".\"dogs\"")
+                .contains("\"k9x\".\"dogs\".\"identity\" = ?")
+                .contains("\"k9x\".\"dogs\".\"deleted_at\" is null");
     }
 
     @Test

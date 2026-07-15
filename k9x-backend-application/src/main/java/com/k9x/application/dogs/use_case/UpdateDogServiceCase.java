@@ -1,5 +1,6 @@
 package com.k9x.application.dogs.use_case;
 
+import com.k9x.application.dogs.exceptions.DogChipAlreadyExistsException;
 import com.k9x.application.dogs.port.payload.UpdateDogPersistencePayload;
 import com.k9x.application.dogs.use_case.command.UpdateDogCommand;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
@@ -20,6 +21,14 @@ public class UpdateDogServiceCase {
     public void updateDog(String dogId, UpdateDogCommand command, String userId, boolean organizer) {
         Dog dog = getDogPersistencePort.getDog(dogId);
         DogGuards.assertMutableBy(dog, userId, organizer);
+        assertIdentityNotUsedByAnotherDog(dogId, command.identity());
         updateDogPersistencePort.updateDog(dogId, UpdateDogPersistencePayload.from(command));
+    }
+
+    private void assertIdentityNotUsedByAnotherDog(String dogId, String identity) {
+        Dog existing = getDogPersistencePort.getDogByIdentity(identity);
+        if (existing != null && !existing.id().equals(dogId)) {
+            throw new DogChipAlreadyExistsException();
+        }
     }
 }
