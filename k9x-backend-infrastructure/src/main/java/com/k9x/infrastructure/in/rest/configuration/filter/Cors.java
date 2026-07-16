@@ -18,7 +18,7 @@ public class Cors implements Filter {
             "http://localhost:4000",
             "http://localhost:5173",
             "https://txomin55.github.io",
-            "https://k9x-frontend-app.vercel.app"
+            "https://k9x.vercel.app"
     );
 
     @Override
