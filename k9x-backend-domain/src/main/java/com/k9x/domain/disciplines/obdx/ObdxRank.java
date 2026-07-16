@@ -15,17 +15,18 @@ package com.k9x.domain.disciplines.obdx;
 public enum ObdxRank {
     E, D, C, B, A;
 
-    private static final String INTERNATIONAL_SUFFIX = "+";
-
-    /** Reserved, unreachable rank value that only ever originates from seed data. */
+    /**
+     * Reserved, unreachable rank value that only ever originates from seed data.
+     */
     public static final String EXCEPTIONAL = "A++";
+    private static final String INTERNATIONAL_SUFFIX = "+";
 
     /**
      * Resolves the rank letter from the competitor count:
-     * E &lt; 5, D [5,10), C [10,20), B [20,40), A &ge; 40.
+     * E &lt; 5, D [5,10), C [10,20), B [20,35), A &ge; 35.
      */
     public static ObdxRank fromCompetitorCount(int competitorCount) {
-        if (competitorCount >= 40) {
+        if (competitorCount >= 35) {
             return A;
         }
         if (competitorCount >= 20) {
