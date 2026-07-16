@@ -18,16 +18,21 @@ public class GetStageListServiceCase {
         this.getStageListPersistencePort = getStageListPersistencePort;
     }
 
-    public List<FetchStageListDTO> getStages() {
+    public List<FetchStageListDTO> getStages(Long from, Long to) {
         long now = DateUtils.nowUtcMillis();
         return getStageListPersistencePort.getCompetitions().stream()
                 .flatMap(competition -> competition.stages().stream()
                         .filter(stage -> stage.deletedAt() == null)
+                        .filter(stage -> withinRange(stage.dateFrom(), from, to))
                         .map(stage -> new CompetitionStage(competition, stage)))
                 .sorted((a, b) -> StageProximity.compareByProximity(
                         a.stage().dateFrom(), b.stage().dateFrom(), now))
                 .map(cs -> toStageDto(cs.competition(), cs.stage(), now))
                 .toList();
+    }
+
+    private boolean withinRange(long dateFrom, Long from, Long to) {
+        return (from == null || dateFrom >= from) && (to == null || dateFrom <= to);
     }
 
     private FetchStageListDTO toStageDto(CompetitionSnapshot competition, StageSnapshot stage, long now) {

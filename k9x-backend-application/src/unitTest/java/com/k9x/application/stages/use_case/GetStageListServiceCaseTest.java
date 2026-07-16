@@ -79,7 +79,7 @@ class GetStageListServiceCaseTest {
 
         when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
 
-        List<FetchStageListDTO> result = serviceCase.getStages();
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().events()).hasSize(1);
@@ -101,7 +101,7 @@ class GetStageListServiceCaseTest {
 
         when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
 
-        List<FetchStageListDTO> result = serviceCase.getStages();
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
 
         assertThat(result.getFirst().events().getFirst().status()).isEqualTo("STARTED");
         assertThat(result.getFirst().status()).isEqualTo("STARTED");
@@ -114,7 +114,7 @@ class GetStageListServiceCaseTest {
 
         when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
 
-        List<FetchStageListDTO> result = serviceCase.getStages();
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
 
         assertThat(result.getFirst().events().getFirst().enrollmentOpened()).isFalse();
         assertThat(result.getFirst().events().getFirst().enrollmentDeadline()).isNull();
@@ -136,11 +136,44 @@ class GetStageListServiceCaseTest {
 
         when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
 
-        List<FetchStageListDTO> result = serviceCase.getStages();
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
 
         // Upcoming/ongoing first (soonest first), then past (most recent first).
         assertThat(result).extracting(FetchStageListDTO::id)
                 .containsExactly("upcoming-soon", "upcoming-far", "past-recent", "past-old");
+    }
+
+    @Test
+    void filters_stages_by_date_from_within_range() {
+        long before = 1_000_000_000_000L; // 2001
+        long inside = 2_000_000_000_000L;  // 2033
+        long after = 3_000_000_000_000L;   // 2065
+        CompetitionSnapshot competition = competition(List.of(
+                stage("before", before, before, List.of()),
+                stage("inside", inside, inside, List.of()),
+                stage("after", after, after, List.of())));
+
+        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
+
+        List<FetchStageListDTO> result = serviceCase.getStages(before + 1, after - 1);
+
+        assertThat(result).extracting(FetchStageListDTO::id).containsExactly("inside");
+    }
+
+    @Test
+    void treats_null_range_bounds_as_open_ended() {
+        long early = 1_000_000_000_000L; // 2001
+        long late = 3_000_000_000_000L;  // 2065
+        CompetitionSnapshot competition = competition(List.of(
+                stage("early", early, early, List.of()),
+                stage("late", late, late, List.of())));
+
+        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
+
+        assertThat(serviceCase.getStages(null, early).stream().map(FetchStageListDTO::id).toList())
+                .containsExactly("early");
+        assertThat(serviceCase.getStages(late, null).stream().map(FetchStageListDTO::id).toList())
+                .containsExactly("late");
     }
 
     @Test
@@ -154,7 +187,7 @@ class GetStageListServiceCaseTest {
 
         when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
 
-        List<FetchStageListDTO> result = serviceCase.getStages();
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().id()).isEqualTo("s-1");

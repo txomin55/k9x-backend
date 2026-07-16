@@ -124,7 +124,7 @@ VALUES ('wc2026-event-qualification-1', 'OBDX_FCI_GRADE_3.1_V0', 1, NULL,
 --     position = a 1-based running index over the enrolled dogs (NOT the dorsal),
 --     matching the tab's row order.
 -- ---------------------------------------------------------------------------
-INSERT INTO obdx.event_competitors (event_id, dog_id, position, competitor_number, verified, last_update, not_competing)
+INSERT INTO obdx.event_competitors (event_id, dog_id, start_number, competitor_number, verified, last_update, not_competing)
 VALUES ('wc2026-event-qualification-1', 'wc2026-dog-1', 1, 1, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE),
        ('wc2026-event-qualification-1', 'wc2026-dog-2', 2, 2, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE),
        ('wc2026-event-qualification-1', 'wc2026-dog-3', 3, 3, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE),
@@ -168,7 +168,7 @@ VALUES ('wc2026-event-qualification-1', 'wc2026-dog-1', 1, 1, TRUE, FLOOR(EXTRAC
 -- ---------------------------------------------------------------------------
 -- 4) Event 2 (Qualification 2) competitors, in Startnumber order
 -- ---------------------------------------------------------------------------
-INSERT INTO obdx.event_competitors (event_id, dog_id, position, competitor_number, verified, last_update, not_competing)
+INSERT INTO obdx.event_competitors (event_id, dog_id, start_number, competitor_number, verified, last_update, not_competing)
 VALUES ('wc2026-event-qualification-2', 'wc2026-dog-43', 1, 43, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE),
        ('wc2026-event-qualification-2', 'wc2026-dog-44', 2, 44, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE),
        ('wc2026-event-qualification-2', 'wc2026-dog-45', 3, 45, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE),
@@ -214,7 +214,7 @@ VALUES ('wc2026-event-qualification-2', 'wc2026-dog-43', 1, 43, TRUE, FLOOR(EXTR
 -- 5) Event 3 (Qualification 3) competitors, in Startnumber order. Dogs 21 and
 --     107 are flagged bih = TRUE.
 -- ---------------------------------------------------------------------------
-INSERT INTO obdx.event_competitors (event_id, dog_id, position, competitor_number, verified, last_update, not_competing, bih)
+INSERT INTO obdx.event_competitors (event_id, dog_id, start_number, competitor_number, verified, last_update, not_competing, bih)
 VALUES ('wc2026-event-qualification-3', 'wc2026-dog-85', 1, 85, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, NULL),
        ('wc2026-event-qualification-3', 'wc2026-dog-86', 2, 86, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, NULL),
        ('wc2026-event-qualification-3', 'wc2026-dog-87', 3, 87, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, NULL),
@@ -261,7 +261,7 @@ VALUES ('wc2026-event-qualification-3', 'wc2026-dog-85', 1, 85, TRUE, FLOOR(EXTR
 --     Startnumber (column A "Contestant" of the RESULTS tab, 1..20) is used for
 --     both position and competitor_number, which coincide in the Final.
 -- ---------------------------------------------------------------------------
-INSERT INTO obdx.event_competitors (event_id, dog_id, position, competitor_number, verified, last_update, not_competing)
+INSERT INTO obdx.event_competitors (event_id, dog_id, start_number, competitor_number, verified, last_update, not_competing)
 VALUES ('wc2026-event-final', 'wc2026-dog-105', 1, 1, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE),
        ('wc2026-event-final', 'wc2026-dog-7', 2, 2, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE),
        ('wc2026-event-final', 'wc2026-dog-42', 3, 3, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE),

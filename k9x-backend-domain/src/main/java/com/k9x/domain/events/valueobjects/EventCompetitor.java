@@ -9,7 +9,7 @@ public record EventCompetitor(
         String country,
         String breed,
         String identity,
-        Short position,
+        Short startNumber,
         Short competitorNumber,
         Boolean verified,
         boolean notCompeting,

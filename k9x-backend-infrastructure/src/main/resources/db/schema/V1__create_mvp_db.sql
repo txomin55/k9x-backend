@@ -106,6 +106,7 @@ CREATE TABLE obdx.event_competitors
     event_id      VARCHAR(255) NOT NULL,
     dog_id        VARCHAR(255) NOT NULL,
     position      SMALLINT,
+    start_number  SMALLINT,
     competitor_number SMALLINT,
     verified      BOOLEAN,
     last_update   BIGINT       NOT NULL,

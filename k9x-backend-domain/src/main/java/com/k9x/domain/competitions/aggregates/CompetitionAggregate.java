@@ -154,19 +154,19 @@ public final class CompetitionAggregate {
         if (!stage.enrollmentOpened(event, now)) {
             throw new EnrollmentClosedException();
         }
-        changes.add(new DogEnrolled(eventId, dogId, bih, nextPosition(event), now));
+        changes.add(new DogEnrolled(eventId, dogId, bih, nextStartNumber(event), now));
     }
 
     /**
      * New enrollments are appended after every already-enrolled competitor, so a dog always joins at the
-     * back of the line rather than defaulting to position 0/null.
+     * back of the line rather than defaulting to start number 0/null.
      */
-    private short nextPosition(EventSnapshot event) {
+    private short nextStartNumber(EventSnapshot event) {
         if (event.competitors() == null || event.competitors().isEmpty()) {
             return 1;
         }
         return (short) (event.competitors().stream()
-                .map(EventCompetitor::position)
+                .map(EventCompetitor::startNumber)
                 .filter(Objects::nonNull)
                 .mapToInt(Short::intValue)
                 .max()

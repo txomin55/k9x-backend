@@ -59,7 +59,7 @@ public class GetCollection implements SecuredCollectionsFetchOneApiDelegate {
                                 comp.competitor().dogIdentity(),
                                 comp.competitor().team(),
                                 comp.competitor().country(),
-                                comp.competitor().position() != null ? comp.competitor().position().intValue() : null,
+                                comp.competitor().startNumber() != null ? comp.competitor().startNumber().intValue() : null,
                                 comp.competitor().competitorNumber() != null ? comp.competitor().competitorNumber().intValue() : null,
                                 comp.competitor().status(),
                                 resolveBreed(comp.competitor().breed()),

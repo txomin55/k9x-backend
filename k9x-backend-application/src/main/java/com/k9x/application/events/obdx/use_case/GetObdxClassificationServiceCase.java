@@ -129,7 +129,7 @@ public class GetObdxClassificationServiceCase {
         // dogId → whether the dog has 3 FCI generations confirmed, used to resolve CACOB/CACIOB awards
         Map<String, Boolean> fciConfirmedByDog = new LinkedHashMap<>();
         for (EventCompetitor competitor : (event.competitors() == null ? List.<EventCompetitor>of() : event.competitors())) {
-            startOrderByDog.put(competitor.dogId(), competitor.position());
+            startOrderByDog.put(competitor.dogId(), competitor.startNumber());
             competitorNumberByDog.put(competitor.dogId(), competitor.competitorNumber());
             bihByDog.put(competitor.dogId(), competitor.bih());
             reserveByDog.put(competitor.dogId(), competitor.reserve());

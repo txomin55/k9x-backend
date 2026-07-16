@@ -25,7 +25,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
     private static final Dogs D = Tables.DOGS;
 
     private static final Field<?>[] SELECT_FIELDS = {
-            EC.DOG_ID, EC.POSITION, EC.COMPETITOR_NUMBER, EC.VERIFIED, EC.NOT_COMPETING, EC.BIH, EC.RESERVE,
+            EC.DOG_ID, EC.START_NUMBER, EC.COMPETITOR_NUMBER, EC.VERIFIED, EC.NOT_COMPETING, EC.BIH, EC.RESERVE,
             D.NAME, D.IDENTITY, D.BREED, D.OWNER, D.HANDLER, D.TEAM, D.COUNTRY
     };
 
@@ -63,7 +63,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
             Result<Record> result = mockDsl.newResult(SELECT_FIELDS);
             Record record = mockDsl.newRecord(SELECT_FIELDS);
             record.set(EC.DOG_ID, "dog-1");
-            record.set(EC.POSITION, (short) 1);
+            record.set(EC.START_NUMBER, (short) 1);
             record.set(EC.COMPETITOR_NUMBER, (short) 7);
             record.set(EC.VERIFIED, true);
             record.set(EC.NOT_COMPETING, true);
@@ -93,7 +93,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
         assertThat(comp.handler()).isEqualTo("Rex Handler");
         assertThat(comp.team()).isEqualTo("Team A");
         assertThat(comp.country()).isEqualTo("ES");
-        assertThat(comp.position()).isEqualTo((short) 1);
+        assertThat(comp.startNumber()).isEqualTo((short) 1);
         assertThat(comp.verified()).isTrue();
         assertThat(comp.notCompeting()).isTrue();
         assertThat(comp.bih()).isTrue();

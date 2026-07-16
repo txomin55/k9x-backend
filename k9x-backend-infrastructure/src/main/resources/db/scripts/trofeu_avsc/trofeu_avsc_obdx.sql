@@ -116,7 +116,7 @@ VALUES -- Classe 1 (OBDX_FCI_GRADE_1_V0)
 --    position = a 1-based incremental order within each event, assigned in
 --    enrollment order; it is NOT the dorsal.
 -- ---------------------------------------------------------------------------
-INSERT INTO obdx.event_competitors (event_id, dog_id, position, competitor_number, verified, last_update, not_competing, reserve)
+INSERT INTO obdx.event_competitors (event_id, dog_id, start_number, competitor_number, verified, last_update, not_competing, reserve)
 VALUES -- Classe 1 -> event_1783770421009
        ('event_1783770421009', '621XXXXXXXXXXXX', 1, 1, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),
        ('event_1783770421009', 'avsc-dog-2', 2, 2, TRUE, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FALSE, FALSE),

@@ -25,9 +25,9 @@ public class GetStages implements StagesFetchAllApiDelegate {
     }
 
     @Override
-    public ResponseEntity<List<StageSummaryResponseDTO>> fetchAllStages() {
+    public ResponseEntity<List<StageSummaryResponseDTO>> fetchAllStages(Long from, Long to) {
         return ResponseEntity.ok(
-                getStageListServiceCase.getStages().stream()
+                getStageListServiceCase.getStages(from, to).stream()
                         .map(stage -> new StageSummaryResponseDTO(
                                 stage.id(),
                                 stage.name(),
