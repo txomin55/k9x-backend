@@ -17,8 +17,9 @@ COPY k9x-backend-loader/ k9x-backend-loader/
 # gradle.properties is git-ignored, so it is never present in the build context.
 ARG GPR_USER
 ARG GPR_KEY
+ARG SPRING_PROFILES_ACTIVE
 
-RUN ./gradlew :k9x-backend-loader:bootJar -PspringProfilesActive=production \
+RUN ./gradlew :k9x-backend-loader:bootJar -PspringProfilesActive="$SPRING_PROFILES_ACTIVE" \
     -Pgpr.user="$GPR_USER" -Pgpr.key="$GPR_KEY" \
     -x test
 
@@ -31,9 +32,5 @@ LABEL version="1.0"
 VOLUME /tmp/k9x-backend
 COPY --from=build /home/k9x-backend/k9x-backend-loader/build/libs/*.jar /usr/local/lib/k9x-backend.jar
 EXPOSE 4000
-
-# Spring profile, overridable at build time (defaults to production).
-ARG SPRING_PROFILES_ACTIVE=production
-ENV SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
 
 ENTRYPOINT ["java", "-jar", "/usr/local/lib/k9x-backend.jar"]
