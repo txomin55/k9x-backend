@@ -4,21 +4,19 @@ import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetito
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.snapshot.port.GetPendingSnapshotEventsPersistencePort;
-import com.k9x.application.events.snapshot.port.SaveObdxEventSnapshotPersistencePort;
-import com.k9x.application.events.snapshot.port.UpdateObdxCompetitorPositionsPersistencePort;
+import com.k9x.application.events.snapshot.port.SaveObdxSnapshotPersistencePort;
 import com.k9x.application.events.snapshot.port.payload.ObdxCompetitorPosition;
 import com.k9x.application.events.snapshot.use_case.dto.PendingSnapshotEventDTO;
 import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -31,9 +29,7 @@ class GenerateEventSnapshotsServiceCaseTest {
     @Mock
     private GetEventClassificationServiceCase getEventClassificationServiceCase;
     @Mock
-    private SaveObdxEventSnapshotPersistencePort saveObdxEventSnapshotPersistencePort;
-    @Mock
-    private UpdateObdxCompetitorPositionsPersistencePort updateObdxCompetitorPositionsPersistencePort;
+    private SaveObdxSnapshotPersistencePort saveObdxSnapshotPersistencePort;
 
     private GenerateEventSnapshotsServiceCase serviceCase;
 
@@ -42,8 +38,7 @@ class GenerateEventSnapshotsServiceCaseTest {
         serviceCase = new GenerateEventSnapshotsServiceCase(
                 getPendingSnapshotEventsPersistencePort,
                 getEventClassificationServiceCase,
-                saveObdxEventSnapshotPersistencePort,
-                updateObdxCompetitorPositionsPersistencePort);
+                saveObdxSnapshotPersistencePort);
     }
 
     private FetchClassificationDTO classification(String eventId) {
@@ -55,10 +50,10 @@ class GenerateEventSnapshotsServiceCaseTest {
                 "obdx", "cfg", "Cfg", null, obdx, "A+");
     }
 
-    private FetchClassificationCompetitorDTO competitor(String dogId, int position) {
+    private FetchClassificationCompetitorDTO competitor(String dogId, int position, BigDecimal rankScore) {
         return new FetchClassificationCompetitorDTO(dogId, dogId, "Border Collie", "o", "h", "t", "ES",
                 (short) 5, (short) 7, position, null, null, false, "OK", false, false, false,
-                List.of(), List.of(), null);
+                List.of(), List.of(), null, rankScore);
     }
 
     @Test
@@ -68,8 +63,7 @@ class GenerateEventSnapshotsServiceCaseTest {
 
         serviceCase.generateSnapshots();
 
-        verifyNoInteractions(getEventClassificationServiceCase, saveObdxEventSnapshotPersistencePort,
-                updateObdxCompetitorPositionsPersistencePort);
+        verifyNoInteractions(getEventClassificationServiceCase, saveObdxSnapshotPersistencePort);
     }
 
     @Test
@@ -84,14 +78,16 @@ class GenerateEventSnapshotsServiceCaseTest {
 
         serviceCase.generateSnapshots();
 
-        verify(saveObdxEventSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(c1));
-        verify(saveObdxEventSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(c2));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(c1), eq(List.of()));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(c2), eq(List.of()));
     }
 
     @Test
-    void persists_the_tie_aware_positions_before_saving_the_snapshot() {
+    void persists_the_tie_aware_positions_and_rank_scores_with_the_snapshot() {
         FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(null,
-                List.of(competitor("dog-1", 1), competitor("dog-2", 1), competitor("dog-3", 3)),
+                List.of(competitor("dog-1", 1, new BigDecimal("475.50")),
+                        competitor("dog-2", 1, new BigDecimal("475.50")),
+                        competitor("dog-3", 3, new BigDecimal("410.00"))),
                 "MID_AVG", List.of());
         FetchClassificationDTO classification = classification("evt-1", obdx);
         when(getPendingSnapshotEventsPersistencePort.getFinishedEventsWithoutSnapshot(anyLong()))
@@ -101,17 +97,14 @@ class GenerateEventSnapshotsServiceCaseTest {
         serviceCase.generateSnapshots();
 
         List<ObdxCompetitorPosition> expected = List.of(
-                new ObdxCompetitorPosition("dog-1", (short) 1),
-                new ObdxCompetitorPosition("dog-2", (short) 1),
-                new ObdxCompetitorPosition("dog-3", (short) 3));
-        // Positions must be written first; the snapshot save is the "done" marker.
-        InOrder inOrder = inOrder(updateObdxCompetitorPositionsPersistencePort, saveObdxEventSnapshotPersistencePort);
-        inOrder.verify(updateObdxCompetitorPositionsPersistencePort).updatePositions("evt-1", expected);
-        inOrder.verify(saveObdxEventSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(classification));
+                new ObdxCompetitorPosition("dog-1", (short) 1, new BigDecimal("475.50")),
+                new ObdxCompetitorPosition("dog-2", (short) 1, new BigDecimal("475.50")),
+                new ObdxCompetitorPosition("dog-3", (short) 3, new BigDecimal("410.00")));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(classification), eq(expected));
     }
 
     @Test
-    void persists_empty_positions_when_classification_has_no_obdx_payload() {
+    void persists_empty_competitors_when_classification_has_no_obdx_payload() {
         FetchClassificationDTO classification = classification("evt-1");
         when(getPendingSnapshotEventsPersistencePort.getFinishedEventsWithoutSnapshot(anyLong()))
                 .thenReturn(List.of(new PendingSnapshotEventDTO("evt-1", "obdx")));
@@ -119,8 +112,7 @@ class GenerateEventSnapshotsServiceCaseTest {
 
         serviceCase.generateSnapshots();
 
-        verify(updateObdxCompetitorPositionsPersistencePort).updatePositions("evt-1", List.of());
-        verify(saveObdxEventSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(classification));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(classification), eq(List.of()));
     }
 
     @Test
@@ -133,10 +125,9 @@ class GenerateEventSnapshotsServiceCaseTest {
 
         serviceCase.generateSnapshots();
 
-        // The unknown discipline is skipped (never computed nor saved); the OBDX one is still processed.
         verify(getEventClassificationServiceCase, never()).getClassification("evt-1");
-        verify(saveObdxEventSnapshotPersistencePort, never()).save(eq("evt-1"), anyLong(), any());
-        verify(saveObdxEventSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(obdx));
+        verify(saveObdxSnapshotPersistencePort, never()).save(eq("evt-1"), anyLong(), any(), any());
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(obdx), eq(List.of()));
     }
 
     @Test
@@ -151,7 +142,7 @@ class GenerateEventSnapshotsServiceCaseTest {
 
         serviceCase.generateSnapshots();
 
-        verify(saveObdxEventSnapshotPersistencePort, never()).save(eq("evt-1"), anyLong(), any());
-        verify(saveObdxEventSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(c2));
+        verify(saveObdxSnapshotPersistencePort, never()).save(eq("evt-1"), anyLong(), any(), any());
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(c2), eq(List.of()));
     }
 }

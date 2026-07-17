@@ -3,12 +3,10 @@ package com.k9x.infrastructure.configuration.postgres;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.k9x.application.events.snapshot.port.GetObdxEventSnapshotPersistencePort;
 import com.k9x.application.events.snapshot.port.GetPendingSnapshotEventsPersistencePort;
-import com.k9x.application.events.snapshot.port.SaveObdxEventSnapshotPersistencePort;
-import com.k9x.application.events.snapshot.port.UpdateObdxCompetitorPositionsPersistencePort;
+import com.k9x.application.events.snapshot.port.SaveObdxSnapshotPersistencePort;
 import com.k9x.infrastructure.out.postgres.events.GetPendingSnapshotEventsJooqAdapter;
 import com.k9x.infrastructure.out.postgres.events.obdx.GetObdxEventSnapshotJooqAdapter;
-import com.k9x.infrastructure.out.postgres.events.obdx.SaveObdxEventSnapshotJooqAdapter;
-import com.k9x.infrastructure.out.postgres.events.obdx.UpdateObdxCompetitorPositionsJooqAdapter;
+import com.k9x.infrastructure.out.postgres.events.obdx.SaveObdxSnapshotJooqAdapter;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,17 +26,12 @@ public class EventSnapshotJooqAdapterConfiguration {
     }
 
     @Bean
-    public SaveObdxEventSnapshotPersistencePort saveObdxEventSnapshotPersistencePort(ObjectMapper objectMapper) {
-        return new SaveObdxEventSnapshotJooqAdapter(dsl, objectMapper);
+    public SaveObdxSnapshotPersistencePort saveObdxSnapshotPersistencePort(ObjectMapper objectMapper) {
+        return new SaveObdxSnapshotJooqAdapter(dsl, objectMapper);
     }
 
     @Bean
     public GetPendingSnapshotEventsPersistencePort getPendingSnapshotEventsPersistencePort() {
         return new GetPendingSnapshotEventsJooqAdapter(dsl);
-    }
-
-    @Bean
-    public UpdateObdxCompetitorPositionsPersistencePort updateObdxCompetitorPositionsPersistencePort() {
-        return new UpdateObdxCompetitorPositionsJooqAdapter(dsl);
     }
 }

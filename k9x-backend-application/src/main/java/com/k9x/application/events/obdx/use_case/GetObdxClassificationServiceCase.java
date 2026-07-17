@@ -6,6 +6,7 @@ import com.k9x.application.events.obdx.use_case.dto.*;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxRank;
 import com.k9x.domain.events.status.ClassificationCompetitorStatus;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
@@ -235,13 +236,14 @@ public class GetObdxClassificationServiceCase {
             boolean disqualifiedOrNotCompeting = event.isDisqualified(dogId) || event.isNotCompeting(dogId);
             boolean hasScore = anyExerciseScored;
             String qualification = resolveQualification(config, totalScore, disqualifiedOrNotCompeting, hasScore);
+            BigDecimal rankScore = competitorRankScore(event.rankScore(), totalScore, maxPossibleTotal, hasScore);
 
             competitors.add(new FetchClassificationCompetitorDTO(
                     dogId, meta.dogName(), meta.dogBreed(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
                     startOrderByDog.get(dogId), competitorNumberByDog.get(dogId), 0, totalScore, competitorScoreRating, false,
                     status.name(), bihByDog.get(dogId), reserveByDog.get(dogId),
                     Boolean.TRUE.equals(notCompetingByDog.get(dogId)), exercises,
-                    List.of(), qualification));
+                    List.of(), qualification, rankScore));
         }
 
         assignPositions(competitors, config);
@@ -311,7 +313,7 @@ public class GetObdxClassificationServiceCase {
         competitors.set(index, new FetchClassificationCompetitorDTO(
                 c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
                 c.startOrder(), c.competitorNumber(), c.position(), c.totalScore(), c.scoreRating(), c.tied(), c.status(), c.bih(),
-                c.reserve(), c.notCompeting(), c.exercises(), awards, c.qualification()));
+                c.reserve(), c.notCompeting(), c.exercises(), awards, c.qualification(), c.rankScore()));
     }
 
     /**
@@ -362,6 +364,25 @@ public class GetObdxClassificationServiceCase {
         if (max.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
         return score.divide(max, 4, RoundingMode.HALF_UP)
                 .multiply(new BigDecimal("100")).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * The competitor's own ranking score: their performance ({@code totalScore / maxPossibleTotal}) projected
+     * onto the event's rank-score band. The band spans from the floor of the event rank's global letter range
+     * up to the event's own {@code rankScore}, so a 100% competitor earns the event's rank score and a 0% one
+     * earns the range floor. Returns {@code null} when the event has no rank score, the competitor has no score,
+     * or there is no attainable maximum.
+     */
+    private BigDecimal competitorRankScore(Integer eventRankScore, BigDecimal totalScore,
+                                           BigDecimal maxPossibleTotal, boolean hasScore) {
+        if (eventRankScore == null || !hasScore || maxPossibleTotal == null
+                || maxPossibleTotal.compareTo(BigDecimal.ZERO) == 0) {
+            return null;
+        }
+        int floor = ObdxRank.fromScore(eventRankScore).rangeFloor();
+        BigDecimal span = BigDecimal.valueOf(eventRankScore - floor);
+        BigDecimal fraction = totalScore.divide(maxPossibleTotal, 6, RoundingMode.HALF_UP);
+        return BigDecimal.valueOf(floor).add(span.multiply(fraction)).setScale(2, RoundingMode.HALF_UP);
     }
 
     private BigDecimal computeAvg(List<BigDecimal> scores, ObdxAvgMethod method, int judgeCount) {
@@ -490,6 +511,6 @@ public class GetObdxClassificationServiceCase {
         competitors.set(index, new FetchClassificationCompetitorDTO(
                 c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
                 c.startOrder(), c.competitorNumber(), position, c.totalScore(), c.scoreRating(), tied, c.status(), c.bih(),
-                c.reserve(), c.notCompeting(), c.exercises(), c.awards(), c.qualification()));
+                c.reserve(), c.notCompeting(), c.exercises(), c.awards(), c.qualification(), c.rankScore()));
     }
 }

@@ -125,6 +125,20 @@ public enum ObdxRank {
     }
 
     /**
+     * The lower bound of this rank's global score band: {@code E→0, D→201, C→401, B→601, A→801}. Used to
+     * project a competitor's performance into the event's rank-score band.
+     */
+    public int rangeFloor() {
+        return switch (this) {
+            case A -> A_MIN_SCORE;
+            case B -> B_MIN_SCORE;
+            case C -> C_MIN_SCORE;
+            case D -> D_MIN_SCORE;
+            case E -> 0;
+        };
+    }
+
+    /**
      * Derives the full rank label (e.g. {@code "B+"}, {@code "D"}) from a stored {@code rankScore}: the
      * letter comes from the global bands ({@link #fromScore(int)}) and the {@code +} suffix from the
      * international flag. A score above {@link #MAX_AUTOMATIC_SCORE} can only be a manual seed and is
