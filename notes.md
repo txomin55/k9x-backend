@@ -5,12 +5,12 @@
         - puede ver stages y eventos
     - competidor
         - puede hacer enroll en evento
+        - colecta scores
     - organizador
         - puede crear jueces
         - puede crear competiciones
             - aceptar enroll
         - puede elegir si owns a dog
-    - admin
 
 # PENDIENTES FUTUROS
 
@@ -19,18 +19,3 @@
 [9:10, 8/5/2026] Txomin: Eventos de usuario enviar a atlas
 
 - Terminar push manager
-
-### MVP
-
-- Postgresql https://supabase.com/dashboard/project/rivmavaifjpjrifqlzzk
-    - pass: jx%9!@i*kEw?r9K
-    - host: db.rivmavaifjpjrifqlzzk.supabase.co
-    - port: 5432
-    - database: postgres
-    - user: postgres
-
-# Funcionalidades premium
-
-- Al estar logged, offline
-- Filtros avanzados en busquedas (PENDIENTE)
-- funcionalidad own a dog (PENDIENTE)
