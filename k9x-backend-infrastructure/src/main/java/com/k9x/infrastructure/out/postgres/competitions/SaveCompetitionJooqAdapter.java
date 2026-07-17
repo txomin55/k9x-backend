@@ -157,6 +157,7 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 .set(Tables.EVENTS.LAST_UPDATE, c.lastUpdate())
                 .set(Tables.EVENTS.AWARDS, c.awards() == null ? null : c.awards().toArray(String[]::new))
                 .set(Tables.EVENTS.RANK, c.rank())
+                .set(Tables.EVENTS.RANK_SCORE, c.rankScore())
                 .where(Tables.EVENTS.ID.eq(c.eventId()))
                 .execute();
 

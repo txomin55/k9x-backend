@@ -31,7 +31,8 @@ public record EventSnapshot(
         List<EventJudge> judges,
         List<Score> scores,
         List<String> awards,
-        String rank
+        String rank,
+        Integer rankScore
 ) {
 
     /**

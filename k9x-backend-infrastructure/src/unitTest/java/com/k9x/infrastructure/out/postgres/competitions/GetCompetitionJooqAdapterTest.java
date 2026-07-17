@@ -66,7 +66,8 @@ class GetCompetitionJooqAdapterTest {
             Tables.EVENTS.DELETED_AT,
             Tables.EVENTS.SCORE_CALCULATION,
             Tables.EVENTS.AWARDS,
-            Tables.EVENTS.RANK
+            Tables.EVENTS.RANK,
+            Tables.EVENTS.RANK_SCORE
     };
 
     private static final Field<?>[] COMPETITION_ID_FIELDS = {Tables.STAGES.COMPETITION_ID};

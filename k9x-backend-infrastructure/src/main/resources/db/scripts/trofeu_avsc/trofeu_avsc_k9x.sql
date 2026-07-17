@@ -51,15 +51,15 @@ VALUES ('stage_1783770388394', 'Proba Nocturna', 'competition_1783770154788', 17
 -- 4) Events (discipline OBDX = obedience)
 -- ---------------------------------------------------------------------------
 INSERT INTO k9x.events (id, discipline, configuration_id, score_calculation, name, creator, stage_id,
-                        enrollment_deadline, last_update, created_at, deleted_at, awards, rank)
+                        enrollment_deadline, last_update, created_at, deleted_at, awards, rank, rank_score)
 VALUES ('event_1783770421009', 'OBDX', 'OBDX_FCI_GRADE_1.V0', 'AVG', 'Classe 1', 'k9x.support@gmail.com',
-        'stage_1783770388394', NULL, 1783770635598, 1783770428198, NULL, ARRAY []::VARCHAR[], 'E'),
+        'stage_1783770388394', NULL, 1783770635598, 1783770428198, NULL, ARRAY []::VARCHAR[], 'D', 237),
        ('event_1783770430523', 'OBDX', 'OBDX_FCI_GRADE_2.V0', 'AVG', 'Classe 2', 'k9x.support@gmail.com',
-        'stage_1783770388394', NULL, 1783770623129, 1783770439363, NULL, ARRAY []::VARCHAR[], 'E'),
+        'stage_1783770388394', NULL, 1783770623129, 1783770439363, NULL, ARRAY []::VARCHAR[], 'C', 437),
        ('event_1783770452508', 'OBDX', 'OBDX_FCI_GRADE_3.V0', 'AVG', 'Classe 3', 'k9x.support@gmail.com',
-        'stage_1783770388394', NULL, 1783770606029, 1783770460401, NULL, ARRAY []::VARCHAR[], 'E+'),
+        'stage_1783770388394', NULL, 1783770606029, 1783770460401, NULL, ARRAY []::VARCHAR[], 'B+', 699),
        ('event_1783770408793', 'OBDX', 'CPC_COBS.V0', 'AVG', 'COBS', 'k9x.support@gmail.com',
-        'stage_1783770388394', NULL, 1783770506599, 1783770415880, NULL, ARRAY []::VARCHAR[], 'D');
+        'stage_1783770388394', NULL, 1783770506599, 1783770415880, NULL, ARRAY []::VARCHAR[], 'E', 136);
 
 -- ---------------------------------------------------------------------------
 -- 5) Dogs (from proba.jpeg, one row per competitor: handler = Nome Condutor,

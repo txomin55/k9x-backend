@@ -94,7 +94,7 @@ class GetCompetitionListServiceCaseTest {
     private EventSnapshot event(String id, List<EventCompetitor> competitors, List<EventExercise> exercises,
                                 List<EventJudge> judges, List<Score> scores) {
         return new EventSnapshot(id, "cfg-1", "OBDX", id, "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, competitors, exercises, judges, scores, List.of(), null);
+                ObdxAvgMethod.MID_AVG, competitors, exercises, judges, scores, List.of(), null, null);
     }
 
     @Test

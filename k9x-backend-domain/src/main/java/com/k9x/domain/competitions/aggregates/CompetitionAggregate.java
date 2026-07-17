@@ -185,7 +185,7 @@ public final class CompetitionAggregate {
         assertEnrollmentDeadlineBeforeStageStart(data.enrollmentDeadline(), stage);
         changes.add(new ObdxEventInfoUpdated(eventId, data.name(), data.configurationId(), data.scoreCalculation(),
                 data.enrollmentDeadline(), data.competitors(), data.exercises(), data.judges(), now, data.awards(),
-                data.rank()));
+                data.rank(), data.rankScore()));
     }
 
     /**

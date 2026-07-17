@@ -96,6 +96,7 @@ CREATE TABLE k9x.events
     deleted_at          BIGINT,
     awards              VARCHAR(50)[],
     rank                VARCHAR(50),
+    rank_score          INTEGER,
     CONSTRAINT k9x_events_pkey PRIMARY KEY (id),
     CONSTRAINT k9x_events_fk FOREIGN KEY (stage_id) REFERENCES k9x.stages (id)
 );

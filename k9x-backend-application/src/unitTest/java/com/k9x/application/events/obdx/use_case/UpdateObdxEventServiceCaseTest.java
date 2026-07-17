@@ -62,7 +62,7 @@ class UpdateObdxEventServiceCaseTest {
 
     private CompetitionSnapshot competition() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null);
         // dateFrom after the command's enrollment deadline (2025-01-01) so the deadline-before-start invariant holds.
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 4102444800000L, Long.MAX_VALUE,
                 0L, 0L, null, List.of(event));
@@ -251,19 +251,57 @@ class UpdateObdxEventServiceCaseTest {
         assertThat(recordedRank()).isEqualTo("E");
     }
 
+    @Test
+    void computes_rank_score_within_the_configuration_band_and_derives_rank_from_it() {
+        // CPC_COBS band is [100, 200]; two competitors -> E tier; one from FR while the event is in ES ->
+        // international. score = 100 + round(1/5 * 0.9 * 100) + round(0.1 * 100) = 100 + 18 + 10 = 128, "E+".
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "CPC_COBS.V0", 1735689600000L,
+                ObdxAvgMethod.AVG,
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, false),
+                        new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, false)),
+                List.of(), List.of(), List.of());
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
+        when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
+        when(getDogPersistencePort.getDog("dog-fr")).thenReturn(dogFrom("dog-fr", "FR"));
+
+        serviceCase.updateEvent("event-1", command, "user-1", true);
+
+        ObdxEventInfoUpdated change = recordedChange();
+        assertThat(change.rankScore()).isEqualTo(128);
+        assertThat(change.rank()).isEqualTo("E+");
+    }
+
+    @Test
+    void leaves_rank_score_null_when_the_configuration_has_no_band() {
+        // "config-1" is not a known configuration, so no band -> null score, letter falls back to tier+intl.
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
+
+        serviceCase.updateEvent("event-1", VALID_COMMAND, "user-1", true);
+
+        ObdxEventInfoUpdated change = recordedChange();
+        assertThat(change.rankScore()).isNull();
+        assertThat(change.rank()).isEqualTo("E");
+    }
+
     private String recordedRank() {
+        return recordedChange().rank();
+    }
+
+    private ObdxEventInfoUpdated recordedChange() {
         ArgumentCaptor<CompetitionAggregate> captor = ArgumentCaptor.forClass(CompetitionAggregate.class);
         verify(saveCompetitionPersistencePort).save(captor.capture());
         return captor.getValue().pendingChanges().stream()
                 .filter(ObdxEventInfoUpdated.class::isInstance)
-                .map(c -> ((ObdxEventInfoUpdated) c).rank())
+                .map(ObdxEventInfoUpdated.class::cast)
                 .findFirst()
                 .orElseThrow();
     }
 
     private CompetitionSnapshot competitionInCountry(String country) {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 4102444800000L, Long.MAX_VALUE,
                 0L, 0L, null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", country, null, null, null, null,

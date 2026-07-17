@@ -67,7 +67,8 @@ class GetCompetitionListJooqAdapterTest {
             Tables.EVENTS.DELETED_AT,
             Tables.EVENTS.SCORE_CALCULATION,
             Tables.EVENTS.AWARDS,
-            Tables.EVENTS.RANK
+            Tables.EVENTS.RANK,
+            Tables.EVENTS.RANK_SCORE
     };
 
     private static MockResult emptyNoFields() {
