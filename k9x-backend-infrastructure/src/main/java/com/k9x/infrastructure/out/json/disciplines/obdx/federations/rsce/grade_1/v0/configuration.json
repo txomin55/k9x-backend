@@ -1,5 +1,5 @@
 {
-  "id": "OBDX_RSCE_GRADE_1_V0",
+  "id": "OBDX_RSCE_GRADE_1.V0",
   "description": "RSCE grade 1 version 20/05/2026",
   "country": "ES",
   "break_tie": [
@@ -26,9 +26,18 @@
     10
   ],
   "qualifications": [
-    { "id": "EXC", "min_score": 256 },
-    { "id": "MB", "min_score": 224 },
-    { "id": "B", "min_score": 192 }
+    {
+      "id": "EXC",
+      "min_score": 256
+    },
+    {
+      "id": "MB",
+      "min_score": 224
+    },
+    {
+      "id": "B",
+      "min_score": 192
+    }
   ],
   "exercises": [
     {

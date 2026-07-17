@@ -35,10 +35,10 @@ import static org.mockito.Mockito.*;
 class GetEventClassificationServiceCaseTest {
 
     private static final EventSnapshot ACTIVE_EVENT = new EventSnapshot(
-            "evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open Grade 1", "stage-1", "creator@test.com",
+            "evt-1", "OBDX_RSCE_GRADE_1.V0", "obdx", "Open Grade 1", "stage-1", "creator@test.com",
             null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null);
     private static final EventSnapshot DELETED_EVENT = new EventSnapshot(
-            "evt-1", "OBDX_RSCE_GRADE_1_V0", "obdx", "Open", "stage-1", "creator@test.com",
+            "evt-1", "OBDX_RSCE_GRADE_1.V0", "obdx", "Open", "stage-1", "creator@test.com",
             null, 1000L, 1000L, 9999L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null);
 
     @Mock
@@ -73,7 +73,7 @@ class GetEventClassificationServiceCaseTest {
     void serves_persisted_snapshot_without_computing_when_present() {
         FetchClassificationDTO snapshot = new FetchClassificationDTO(
                 "evt-1", "Open Grade 1", "FINISHED", "stage-1", "Stage A", "WC",
-                "obdx", "OBDX_RSCE_GRADE_1_V0", "Grade 1", 5000L,
+                "obdx", "OBDX_RSCE_GRADE_1.V0", "Grade 1", 5000L,
                 new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of()), "A+");
         // The context is resolved first (that is where the discipline comes from), then the snapshot is looked up
         // by (eventId, discipline); when it exists the aggregate is not recomputed.
@@ -119,7 +119,7 @@ class GetEventClassificationServiceCaseTest {
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(ACTIVE_EVENT));
         when(getObdxClassificationServiceCase.getClassification(ACTIVE_EVENT)).thenReturn(obdx);
         when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of(
-                new ConfigurationsDTO(null, List.of(new ConfigurationDTO("OBDX_RSCE_GRADE_1_V0", "Grade 1", List.of())))));
+                new ConfigurationsDTO(null, List.of(new ConfigurationDTO("OBDX_RSCE_GRADE_1.V0", "Grade 1", List.of())))));
 
         FetchClassificationDTO result = serviceCase.getClassification("evt-1");
 
@@ -127,7 +127,7 @@ class GetEventClassificationServiceCaseTest {
         assertThat(result.stageName()).isEqualTo("Stage A");
         assertThat(result.competitionName()).isEqualTo("WC");
         assertThat(result.disciplineId()).isEqualTo("obdx");
-        assertThat(result.configurationId()).isEqualTo("OBDX_RSCE_GRADE_1_V0");
+        assertThat(result.configurationId()).isEqualTo("OBDX_RSCE_GRADE_1.V0");
         assertThat(result.configurationName()).isEqualTo("Grade 1");
         assertThat(result.obdx()).isSameAs(obdx);
         verify(eventClassificationCacheManagerPort)

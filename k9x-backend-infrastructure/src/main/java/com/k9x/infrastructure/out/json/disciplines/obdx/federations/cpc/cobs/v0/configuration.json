@@ -1,5 +1,5 @@
 {
-  "id": "CPC_COBS_V0",
+  "id": "CPC_COBS.V0",
   "description": "CPC COBS version 20/05/2026",
   "country": "PT",
   "break_tie": [],
@@ -28,9 +28,18 @@
     10
   ],
   "qualifications": [
-    { "id": "EXC", "min_score": 160 },
-    { "id": "MB", "min_score": 140 },
-    { "id": "B", "min_score": 100 }
+    {
+      "id": "EXC",
+      "min_score": 160
+    },
+    {
+      "id": "MB",
+      "min_score": 140
+    },
+    {
+      "id": "B",
+      "min_score": 100
+    }
   ],
   "exercises": [
     {

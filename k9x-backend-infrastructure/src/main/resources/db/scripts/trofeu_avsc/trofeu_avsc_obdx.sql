@@ -29,7 +29,7 @@ VALUES ('event_1783770421009', 'judge_1783770129340', 'acsupercaes@gmail.com', 1
 --    declared exercise numbering.
 -- ---------------------------------------------------------------------------
 INSERT INTO obdx.event_exercises (event_id, exercise_id, position, tags, judges, last_update)
-VALUES -- Classe 1 (OBDX_FCI_GRADE_1_V0)
+VALUES -- Classe 1 (OBDX_FCI_GRADE_1.V0)
        ('event_1783770421009', 'OBDX_FCI_GRADE_1.1_V0', 8, NULL, ARRAY ['judge_1783770129340'],
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
        ('event_1783770421009', 'OBDX_FCI_GRADE_1.2_V0', 3, NULL, ARRAY ['judge_1783770129340'],
@@ -48,7 +48,7 @@ VALUES -- Classe 1 (OBDX_FCI_GRADE_1_V0)
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
        ('event_1783770421009', 'OBDX_FCI_GRADE_1.9_V0', 9, NULL, ARRAY ['judge_1783770129340'],
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-       -- Classe 2 (OBDX_FCI_GRADE_2_V0)
+       -- Classe 2 (OBDX_FCI_GRADE_2.V0)
        ('event_1783770430523', 'OBDX_FCI_GRADE_2.1_V0', 9, NULL, ARRAY ['judge_1783770129340'],
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
        ('event_1783770430523', 'OBDX_FCI_GRADE_2.2_V0', 2, NULL, ARRAY ['judge_1783770129340'],
@@ -90,7 +90,7 @@ VALUES -- Classe 1 (OBDX_FCI_GRADE_1_V0)
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
        ('event_1783770452508', 'OBDX_FCI_GRADE_3.10_V0', 6, NULL, ARRAY ['judge_1783770129340'],
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
-       -- COBS (CPC_COBS_V0)
+       -- COBS (CPC_COBS.V0)
        ('event_1783770408793', 'OBDX_CPC_COBS.1_V0', 1, NULL, ARRAY ['judge_1783770129340'],
         FLOOR(EXTRACT(EPOCH FROM now()) * 1000)),
        ('event_1783770408793', 'OBDX_CPC_COBS.2_V0', 2, NULL, ARRAY ['judge_1783770129340'],
