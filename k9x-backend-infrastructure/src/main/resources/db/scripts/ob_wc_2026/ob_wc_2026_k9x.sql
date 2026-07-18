@@ -415,13 +415,13 @@ INSERT INTO k9x.events (id, discipline, configuration_id, score_calculation, nam
                         enrollment_deadline, last_update, created_at, deleted_at, awards, rank_score, international)
 VALUES ('wc2026-event-qualification-1', 'OBDX', 'OBDX_FCI_GRADE_3.V0', 'AVG', 'Qualification 1',
         'k9x.support@gmail.com', 'wc2026-stage-qualifications', NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000),
-        FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, ARRAY ['CACIOB'], 901, TRUE),
+        FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, ARRAY ['CACIOB'], 900, TRUE),
        ('wc2026-event-qualification-2', 'OBDX', 'OBDX_FCI_GRADE_3.V0', 'AVG', 'Qualification 2',
         'k9x.support@gmail.com', 'wc2026-stage-qualifications', NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000),
-        FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, ARRAY ['CACIOB'], 901, TRUE),
+        FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, ARRAY ['CACIOB'], 900, TRUE),
        ('wc2026-event-qualification-3', 'OBDX', 'OBDX_FCI_GRADE_3.V0', 'AVG', 'Qualification 3',
         'k9x.support@gmail.com', 'wc2026-stage-qualifications', NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000),
-        FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, ARRAY ['CACIOB'], 901, TRUE),
+        FLOOR(EXTRACT(EPOCH FROM now()) * 1000), NULL, ARRAY ['CACIOB'], 900, TRUE),
        ('wc2026-event-final', 'OBDX', 'OBDX_FCI_GRADE_3.V0', 'AVG', 'Final', 'k9x.support@gmail.com',
         'wc2026-stage-final', NULL, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), FLOOR(EXTRACT(EPOCH FROM now()) * 1000),
         NULL, ARRAY ['CACIOB'], 1000, TRUE);
