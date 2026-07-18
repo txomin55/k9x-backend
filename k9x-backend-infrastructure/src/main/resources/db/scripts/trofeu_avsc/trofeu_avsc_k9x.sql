@@ -13,17 +13,6 @@
 BEGIN;
 
 -- ---------------------------------------------------------------------------
--- 0) Organizer user (A.V. Super Cães) — also the event collector (see obdx).
---    image is NOT NULL with no source value, left as ''.
--- ---------------------------------------------------------------------------
-INSERT INTO k9x.users (id, email, image)
-VALUES ('acsupercaes@gmail.com', 'acsupercaes@gmail.com',
-        'https://supercaes.pt/wp-content/uploads/2026/03/WhatsApp-Image-2026-02-16-at-20.41.34.jpg');
-
-INSERT INTO k9x.organizers (user_id, name)
-VALUES ('acsupercaes@gmail.com', 'A.V. Super Cães');
-
--- ---------------------------------------------------------------------------
 -- 1) Judge (Ivan Ramil)
 -- ---------------------------------------------------------------------------
 INSERT INTO k9x.judges (id, name, creator, last_update, created_at, deleted_at, country)
