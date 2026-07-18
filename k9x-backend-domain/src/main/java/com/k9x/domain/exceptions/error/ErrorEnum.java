@@ -23,6 +23,7 @@ public enum ErrorEnum {
     ENROLLMENT_DEADLINE_AFTER_STAGE_START("error.enrollment_deadline_after_stage_start"),
     EVENT_NOT_FOUND("error.event_not_found"),
     EVENT_ALREADY_DELETED("error.event_already_deleted"),
+    EVENT_CANNOT_BE_CREATED("error.event_cannot_be_created"),
     EVENT_CANNOT_BE_DELETED("error.event_cannot_be_deleted"),
     EVENT_CANNOT_BE_UPDATED("error.event_cannot_be_updated"),
     DISCIPLINE_CONFIGURATION_MALFORMED("error.discipline_configuration_malformed"),

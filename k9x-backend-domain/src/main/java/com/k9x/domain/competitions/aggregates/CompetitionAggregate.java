@@ -105,6 +105,7 @@ public final class CompetitionAggregate {
 
     public void createStage(NewStageData data, String userId, long now) {
         assertCompetitionMutableBy(userId);
+        assertCompetitionUpdatable(now);
         assertStageDateRange(data.dateFrom(), data.dateTo());
 
         changes.add(new StageCreated(data.id(), data.name(), snapshot.id(), data.dateFrom(), data.dateTo(),
@@ -136,6 +137,7 @@ public final class CompetitionAggregate {
     public void createEvent(NewEventData data, String userId, long now) {
         StageSnapshot stage = requireActiveStage(data.stageId(), userId);
         assertStageOwnedBy(stage, userId);
+        assertStageAcceptsNewEvents(stage, now);
 
         String discipline = normalizeDiscipline(data.discipline());
         changes.add(new EventCreated(data.id(), data.name(), data.stageId(), discipline, userId, now));
@@ -191,7 +193,7 @@ public final class CompetitionAggregate {
         }
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
-        assertEventUpdatable(stage, now);
+        assertEventUpdatable(event, stage, now);
         assertEnrollmentDeadlineBeforeStageStart(data.enrollmentDeadline(), stage);
         changes.add(new ObdxEventInfoUpdated(eventId, data.name(), data.configurationId(), data.scoreCalculation(),
                 data.enrollmentDeadline(), data.competitors(), data.exercises(), data.judges(), now, data.awards(),
@@ -316,11 +318,11 @@ public final class CompetitionAggregate {
     }
 
     /**
-     * A finished competition can no longer be edited, matching the read-only state its stages/events settle
-     * into once they are all done.
+     * A competition can only be edited (and have stages added) while it is still in the CREATED state: once any
+     * of its stages is under way (TO_START/STARTED) or everything has finished, its configuration is locked.
      */
     private void assertCompetitionUpdatable(long now) {
-        if (snapshot.status(now) == CompetitionStatus.FINISHED) {
+        if (snapshot.status(now) != CompetitionStatus.CREATED) {
             throw new CompetitionCannotBeUpdatedException();
         }
     }
@@ -376,29 +378,32 @@ public final class CompetitionAggregate {
     }
 
     /**
-     * A finished stage can no longer be edited.
+     * A stage can only be edited while it is still in the CREATED state: once it is TO_START, STARTED or
+     * FINISHED its configuration is locked.
      */
     private void assertStageUpdatable(StageSnapshot stage, long now) {
-        if (stage.status(now) == StageStatus.FINISHED) {
+        if (stage.status(now) != StageStatus.CREATED) {
             throw new StageCannotBeUpdatedException();
         }
     }
 
     /**
-     * A stage is deletable only while it has not started or finished and every one of its (active) events is
-     * still in the CREATED state. Deleting it cascades the soft-delete to those events.
+     * A new event can only be added to a stage that is still in the CREATED state: once the stage is
+     * TO_START, STARTED or FINISHED its line-up is locked.
+     */
+    private void assertStageAcceptsNewEvents(StageSnapshot stage, long now) {
+        if (stage.status(now) != StageStatus.CREATED) {
+            throw new EventCannotBeCreatedException();
+        }
+    }
+
+    /**
+     * A stage is deletable only while it is still in the CREATED state. A CREATED stage cannot yet hold any
+     * non-CREATED event, so this also guarantees its events are all deletable. Deleting it cascades the
+     * soft-delete to those events.
      */
     private boolean isStageDeletable(StageSnapshot stage, long now) {
-        StageStatus status = stage.status(now);
-        if (status == StageStatus.STARTED || status == StageStatus.FINISHED) {
-            return false;
-        }
-        if (stage.events() == null) {
-            return true;
-        }
-        return stage.events().stream()
-                .filter(e -> e.deletedAt() == null)
-                .allMatch(e -> e.status(now, stage.dateTo()) == EventStatus.CREATED);
+        return stage.status(now) == StageStatus.CREATED;
     }
 
     /**
@@ -426,8 +431,7 @@ public final class CompetitionAggregate {
     }
 
     private void assertEventDeletable(EventSnapshot event, StageSnapshot stage, long now) {
-        EventStatus status = event.status(now, stage.dateTo());
-        if (status == EventStatus.STARTED || status == EventStatus.FINISHED) {
+        if (event.status(now, stage.dateTo()) != EventStatus.CREATED) {
             throw new EventCannotBeDeletedException();
         }
     }
@@ -443,12 +447,12 @@ public final class CompetitionAggregate {
     }
 
     /**
-     * An event's configuration can no longer be edited once its stage has started, i.e. once the stage's
-     * {@code dateFrom} day has begun, regardless of the event's own status. Scoring a running stage is a
-     * separate concern handled in the score path.
+     * An event's configuration can only be edited while the event itself is still in the CREATED state, i.e.
+     * before any score is recorded on it (or its stage's {@code dateTo} day has passed). Scoring a running
+     * stage is a separate concern handled in the score path.
      */
-    private void assertEventUpdatable(StageSnapshot stage, long now) {
-        if (!UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
+    private void assertEventUpdatable(EventSnapshot event, StageSnapshot stage, long now) {
+        if (event.status(now, stage.dateTo()) != EventStatus.CREATED) {
             throw new EventCannotBeUpdatedException();
         }
     }

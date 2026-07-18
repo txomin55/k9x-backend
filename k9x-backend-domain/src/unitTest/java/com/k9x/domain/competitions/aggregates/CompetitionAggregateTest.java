@@ -87,6 +87,15 @@ class CompetitionAggregateTest {
     }
 
     @Test
+    void update_throws_when_competition_has_started() {
+        // A stage whose date range has begun -> stage TO_START -> competition STARTED, no longer editable.
+        StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, PAST, FUTURE, 0L, 0L, null, List.of());
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, startedStage));
+        assertThrows(CompetitionCannotBeUpdatedException.class,
+                () -> aggregate.update(new CompetitionUpdateData("N", "D", "ES", "A", 1.0, 2.0), OWNER, NOW));
+    }
+
+    @Test
     void update_records_competition_updated() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
 
@@ -183,6 +192,15 @@ class CompetitionAggregateTest {
         aggregate.createStage(new NewStageData("s", "S", NOW, NOW), OWNER, NOW);
 
         assertInstanceOf(StageCreated.class, onlyChange(aggregate));
+    }
+
+    @Test
+    void createStage_throws_when_competition_has_started() {
+        // A stage already under way -> competition STARTED, so no further stages can be added.
+        StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, PAST, FUTURE, 0L, 0L, null, List.of());
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, startedStage));
+        assertThrows(CompetitionCannotBeUpdatedException.class,
+                () -> aggregate.createStage(new NewStageData("s", "S", FUTURE, FUTURE), OWNER, NOW));
     }
 
     // ---- renameStage ----------------------------------------------------------------------------
@@ -302,7 +320,8 @@ class CompetitionAggregateTest {
 
     @Test
     void deleteStage_cascades_soft_delete_to_its_active_events() {
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE)));
+        // dateFrom in the future -> stage is CREATED (deletable); deleting it cascades to its active events.
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE, FUTURE)));
 
         aggregate.deleteStage("stage-1", OWNER, NOW);
 
@@ -367,6 +386,19 @@ class CompetitionAggregateTest {
 
         assertThrows(DisciplineConfigurationMalformedException.class,
                 () -> aggregate.createEvent(new NewEventData("evt-new", "E", "stage-1", "nope"), OWNER, NOW));
+    }
+
+    @Test
+    void createEvent_throws_when_stage_has_started() {
+        // A score on one of the stage's events -> stage STARTED, so it no longer accepts new events.
+        EventSnapshot started = new EventSnapshot("evt-1", "cfg-1", "obdx", "Open", "stage-1", OWNER,
+                null, 0L, 0L, null, null, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null);
+        StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, FUTURE, 0L, 0L, null,
+                List.of(started));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, startedStage));
+        assertThrows(EventCannotBeCreatedException.class,
+                () -> aggregate.createEvent(new NewEventData("evt-new", "E", "stage-1", "obdx"), OWNER, NOW));
     }
 
     @Test
@@ -450,9 +482,13 @@ class CompetitionAggregateTest {
     }
 
     @Test
-    void updateObdxEventInfo_throws_when_stage_has_started() {
-        // dateFrom in the past -> stage already under way, so the event config is locked.
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), PAST, FUTURE)));
+    void updateObdxEventInfo_throws_when_event_has_started() {
+        // A score recorded on the event -> event is STARTED, so its config is locked even though the stage
+        // itself has not reached its start day yet.
+        EventSnapshot started = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null);
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(started, FUTURE, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,
                 List.of(), List.of(), List.of(), List.of(), null, false);
         assertThrows(EventCannotBeUpdatedException.class,
@@ -460,11 +496,10 @@ class CompetitionAggregateTest {
     }
 
     @Test
-    void updateObdxEventInfo_throws_when_stage_starts_today() {
-        // dateFrom on the same UTC day as now -> stage start day has begun, config already locked.
-        long startsToday = Instant.parse("2024-06-15T20:00:00Z").toEpochMilli();
-        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), startsToday, FUTURE)));
-        ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,
+    void updateObdxEventInfo_throws_when_event_is_finished() {
+        // Stage dateTo already in the past -> event is FINISHED, so its config is locked.
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), PAST, PAST)));
+        ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, null,
                 List.of(), List.of(), List.of(), List.of(), null, false);
         assertThrows(EventCannotBeUpdatedException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
