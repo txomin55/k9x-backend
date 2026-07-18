@@ -1,6 +1,6 @@
 package com.k9x.application.events.snapshot.use_case;
 
-import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.snapshot.port.GetObdxEventSnapshotPersistencePort;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 
@@ -20,7 +20,7 @@ public class GetEventSnapshotServiceCase {
         this.getObdxEventSnapshotPersistencePort = getObdxEventSnapshotPersistencePort;
     }
 
-    public Optional<FetchClassificationDTO> getSnapshot(String eventId, String disciplineId) {
+    public Optional<FetchObdxClassificationDTO> getSnapshot(String eventId, String disciplineId) {
         return switch (Discipline.fromStored(disciplineId)) {
             case OBDX -> getObdxEventSnapshotPersistencePort.getSnapshot(eventId);
         };

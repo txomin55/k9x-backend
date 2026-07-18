@@ -2,7 +2,7 @@ package com.k9x.infrastructure.out.postgres.events.obdx;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.snapshot.port.SaveObdxSnapshotPersistencePort;
 import com.k9x.application.events.snapshot.port.payload.ObdxCompetitorPosition;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventSnapshot;
@@ -32,9 +32,9 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
     }
 
     @Override
-    public void save(String eventId, long snapshotAt, FetchClassificationDTO classification,
+    public void save(String eventId, long snapshotAt, FetchObdxClassificationDTO obdx,
                      List<ObdxCompetitorPosition> competitors) {
-        String json = serialize(eventId, classification);
+        String json = serialize(eventId, obdx);
 
         dsl.transaction(cfg -> {
             DSLContext ctx = DSL.using(cfg);
@@ -61,7 +61,7 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
         });
     }
 
-    private String serialize(String eventId, FetchClassificationDTO snapshot) {
+    private String serialize(String eventId, FetchObdxClassificationDTO snapshot) {
         try {
             return objectMapper.writeValueAsString(snapshot);
         } catch (JsonProcessingException e) {

@@ -3,8 +3,9 @@
 ## Qué es
 
 Cada prueba (evento) OBDX obtiene una **puntuación de ranking numérica de 0 a 1000**, guardada en
-`k9x.events.rank_score`. Es el **dato primario**: la letra `rank` (`E`, `E+`, … `A`, `A+`, `A++`) ahora es
-una **etiqueta derivada** de ese número.
+`k9x.events.rank_score`. Es el **dato primario**. Junto a él se persiste solo un booleano `k9x.events.international`.
+La letra `rank` (`E`, `E+`, … `A`, `A+`, `A++`) **no se guarda**: se **computa en lectura** a partir de
+`rank_score` + `international` (ver [`EventSnapshot.rank()`](../k9x-backend-domain/src/main/java/com/k9x/domain/events/aggregates/EventSnapshot.java)).
 
 La puntuación refleja lo "fuerte" que es la prueba y depende de tres factores:
 
@@ -18,7 +19,7 @@ La puntuación refleja lo "fuerte" que es la prueba y depende de tres factores:
 
 Las franjas son una **regla fija** (no cambian entre versiones de una configuración), así que viven en
 **código**, no en los `configuration.json`. Se definen en el enum de dominio
-[`ObdxRankBand`](../k9x-backend-domain/src/main/java/com/k9x/domain/disciplines/obdx/ObdxRankBand.java),
+[`ObdxConfigurationsRankThresholds`](../k9x-backend-domain/src/main/java/com/k9x/domain/disciplines/obdx/ObdxConfigurationsRankThresholds.java),
 que resuelve la franja a partir del `configuration_id` **ignorando el sufijo de versión** `.V0` (regex
 `\.V\d+$`), de modo que `OBDX_FCI_GRADE_3.V0`, `.V1`, … comparten franja.
 
@@ -81,23 +82,28 @@ Como cada franja de configuración cae dentro de uno de estos rangos, **la letra
 prueba (COBS → E, GRADE_1 → D, GRADE_2 → C, GRADE_3 → B/A) y el score la posiciona dentro. En GRADE_3
 (`[601, 950]`) el nº de competidores puede empujar de **B** a **A**.
 
-## Cuándo se calcula
+## Qué se persiste y qué se computa
 
-Igual que antes con la letra: **una sola vez al actualizar la prueba**
-(`UpdateObdxEventServiceCase.updateEvent`). Se computa `rank_score`, se deriva `rank`, y ambos se persisten
-en `k9x.events` (columnas `rank_score` y `rank`). Si la configuración no tiene franja definida, `rank_score`
-es `null` y `rank` cae al comportamiento antiguo (letra + `+`).
+Al **actualizar la prueba** (`UpdateObdxEventServiceCase.updateEvent`) se computan y persisten en `k9x.events`
+solo dos cosas: `rank_score` (INTEGER) e `international` (BOOLEAN). Si la configuración no tiene franja,
+`rank_score` es `null` (y `rank()` devuelve `null`). La **letra `rank` no se guarda**: se deriva en cada
+lectura con `EventSnapshot.rank()`, así que no hay valor duplicado que mantener sincronizado.
+
+El **snapshot del cron guarda solo la parte pesada `obdx`** (totales, posiciones, scores por ejercicio); los
+metadatos del evento y la letra se **reconstruyen en lectura** a partir del detalle del evento (los joins que
+ya hace `GetEventClassificationServiceCase`). Objetivo: cachear solo el cálculo caro de puntuaciones.
 
 ## Dónde está cada pieza
 
 | Pieza | Fichero |
 |---|---|
 | Fórmula + derivación de letra + tope | `k9x-backend-domain/.../disciplines/obdx/ObdxRank.java` |
-| Franjas por configuración | `k9x-backend-domain/.../disciplines/obdx/ObdxRankBand.java` |
+| Franjas por configuración | `k9x-backend-domain/.../disciplines/obdx/ObdxConfigurationsRankThresholds.java` |
+| Letra derivada del evento | `k9x-backend-domain/.../events/aggregates/EventSnapshot.java` (`rank()`) |
 | Cálculo al actualizar la prueba | `k9x-backend-application/.../events/obdx/use_case/UpdateObdxEventServiceCase.java` |
-| Persistencia (escritura) | `k9x-backend-infrastructure/.../competitions/SaveCompetitionJooqAdapter.java` |
-| Persistencia (lectura/hidratación) | `k9x-backend-infrastructure/.../competitions/CompetitionHydrator.java` |
-| Columna | `k9x-backend-infrastructure/src/main/resources/db/schema/V1__create_mvp_db.sql` (`events.rank_score`) |
+| Ensamblado en lectura (snapshot obdx + metadatos) | `k9x-backend-application/.../events/use_case/GetEventClassificationServiceCase.java` |
+| Persistencia (escritura/lectura) | `SaveCompetitionJooqAdapter.java` / `CompetitionHydrator.java` |
+| Columnas | `V1__create_mvp_db.sql` (`events.rank_score`, `events.international`) |
 
 ## rank_score por competidor
 

@@ -14,7 +14,7 @@ import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.disciplines.obdx.ObdxRank;
-import com.k9x.domain.disciplines.obdx.ObdxRankBand;
+import com.k9x.domain.disciplines.obdx.ObdxConfigurationsRankThresholds;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
@@ -71,35 +71,33 @@ public class UpdateObdxEventServiceCase {
         CompetitionSnapshot snapshot = getCompetitionPersistencePort.getCompetition(competitionId);
         CompetitionAggregate competition = CompetitionAggregate.of(snapshot);
         RankResult rank = computeRank(command, competitorDogs, snapshot.country());
-        competition.updateObdxEventInfo(id, toUpdateData(command, rank.rank(), rank.rankScore()),
+        competition.updateObdxEventInfo(id, toUpdateData(command, rank.rankScore(), rank.international()),
                 userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }
 
-    private record RankResult(String rank, Integer rankScore) {
+    private record RankResult(Integer rankScore, boolean international) {
     }
 
     /**
-     * Computes the OBDX event's ranking score (the primary value) and its derived {@code rank} letter.
+     * Computes what the OBDX event persists for its rank: the numeric {@code rankScore} and the
+     * {@code international} flag. The rank <em>letter</em> is not stored — it is derived from these on read
+     * (see {@code EventSnapshot#rank()}).
      *
-     * <p>The tier comes from the number of competitors and the international flag is set when at least one
+     * <p>The tier comes from the number of competitors; the international flag is set when at least one
      * competitor's (dog's) country differs from the event's country — the country of its owning competition;
      * competitors with no country are ignored. The configuration's band {@code [min, max]} places the score
-     * within the 0–1000 scale (see {@link ObdxRank#score(int, int, boolean)}) and the {@code rank} letter is
-     * then derived from that score. When the configuration declares no band the score is {@code null} and the
-     * letter falls back to the plain tier + international label.
+     * within the 0–1000 scale (see {@link ObdxRank#score(int, int, boolean)}); when the configuration declares
+     * no band the score is {@code null}.
      */
     private RankResult computeRank(UpdateObdxEventCommand command, Map<String, Dog> competitorDogs, String eventCountry) {
         boolean international = command.competitors().stream()
                 .map(c -> competitorDogs.get(c.dogId()))
                 .anyMatch(dog -> dog != null && isForeign(dog.getCountry(), eventCountry));
-        ObdxRank tier = ObdxRank.fromCompetitorCount(command.competitors().size());
-        ObdxRankBand band = ObdxRankBand.fromConfigurationId(command.configurationId());
-        if (band == null) {
-            return new RankResult(tier.format(international), null);
-        }
-        int rankScore = tier.score(band.min(), band.max(), international);
-        return new RankResult(ObdxRank.labelFromScore(rankScore, international), rankScore);
+        ObdxConfigurationsRankThresholds band = ObdxConfigurationsRankThresholds.fromConfigurationId(command.configurationId());
+        Integer rankScore = band == null ? null
+                : ObdxRank.fromCompetitorCount(command.competitors().size()).score(band.min(), band.max(), international);
+        return new RankResult(rankScore, international);
     }
 
     private boolean isForeign(String competitorCountry, String eventCountry) {
@@ -107,7 +105,7 @@ public class UpdateObdxEventServiceCase {
                 && !competitorCountry.equalsIgnoreCase(eventCountry);
     }
 
-    private ObdxEventUpdateData toUpdateData(UpdateObdxEventCommand command, String rank, Integer rankScore) {
+    private ObdxEventUpdateData toUpdateData(UpdateObdxEventCommand command, Integer rankScore, boolean international) {
         return new ObdxEventUpdateData(
                 command.name(),
                 command.configurationId(),
@@ -127,8 +125,8 @@ public class UpdateObdxEventServiceCase {
                         .map(j -> new ObdxJudgeItem(j.judgeId(), j.collectorEmail()))
                         .toList(),
                 command.awards(),
-                rank,
-                rankScore);
+                rankScore,
+                international);
     }
 
     private Map<String, Dog> fetchCompetitorDogs(UpdateObdxEventCommand command) {

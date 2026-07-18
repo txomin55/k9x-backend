@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  * {@code configuration.json} version. Every {@code max} stays at or below {@link ObdxRank#MAX_AUTOMATIC_SCORE},
  * leaving the top slice for the manually seeded A++ rank.
  */
-public enum ObdxRankBand {
+public enum ObdxConfigurationsRankThresholds {
     RSCE_DEBUTANTE("OBDX_RSCE_DEBUTANTE", 100, 200),
     CPC_COBS("CPC_COBS", 100, 200),
     FCI_GRADE_1("OBDX_FCI_GRADE_1", 201, 400),
@@ -27,7 +27,7 @@ public enum ObdxRankBand {
     private final int min;
     private final int max;
 
-    ObdxRankBand(String configurationKey, int min, int max) {
+    ObdxConfigurationsRankThresholds(String configurationKey, int min, int max) {
         this.configurationKey = configurationKey;
         this.min = min;
         this.max = max;
@@ -45,12 +45,12 @@ public enum ObdxRankBand {
      * Resolves the band for a configuration id (with or without its {@code .V<n>} version suffix), or
      * {@code null} when the configuration has no band defined.
      */
-    public static ObdxRankBand fromConfigurationId(String configurationId) {
+    public static ObdxConfigurationsRankThresholds fromConfigurationId(String configurationId) {
         if (configurationId == null) {
             return null;
         }
         String key = VERSION_SUFFIX.matcher(configurationId).replaceFirst("");
-        for (ObdxRankBand band : values()) {
+        for (ObdxConfigurationsRankThresholds band : values()) {
             if (band.configurationKey.equals(key)) {
                 return band;
             }

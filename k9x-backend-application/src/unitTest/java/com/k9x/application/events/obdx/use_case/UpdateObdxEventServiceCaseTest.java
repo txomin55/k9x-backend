@@ -216,7 +216,7 @@ class UpdateObdxEventServiceCaseTest {
     }
 
     @Test
-    void computes_international_plus_rank_when_a_competitor_is_from_another_country() {
+    void flags_the_event_international_when_a_competitor_is_from_another_country() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L,
                 ObdxAvgMethod.AVG,
                 List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, false),
@@ -229,12 +229,12 @@ class UpdateObdxEventServiceCaseTest {
 
         serviceCase.updateEvent("event-1", command, "user-1", true);
 
-        // 2 competitors -> E; a competitor from FR while the event is in ES -> international -> "E+".
-        assertThat(recordedRank()).isEqualTo("E+");
+        // A competitor from FR while the event is in ES -> international. (The rank letter is derived on read.)
+        assertThat(recordedChange().international()).isTrue();
     }
 
     @Test
-    void computes_national_rank_when_every_competitor_shares_the_event_country() {
+    void flags_the_event_national_when_every_competitor_shares_the_event_country() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L,
                 ObdxAvgMethod.AVG,
                 List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, false),
@@ -247,14 +247,14 @@ class UpdateObdxEventServiceCaseTest {
 
         serviceCase.updateEvent("event-1", command, "user-1", true);
 
-        // 2 competitors -> E; both from ES (case-insensitive) -> not international -> "E".
-        assertThat(recordedRank()).isEqualTo("E");
+        // Both from ES (case-insensitive) -> not international.
+        assertThat(recordedChange().international()).isFalse();
     }
 
     @Test
-    void computes_rank_score_within_the_configuration_band_and_derives_rank_from_it() {
+    void computes_rank_score_within_the_configuration_band_and_flags_international() {
         // CPC_COBS band is [100, 200]; two competitors -> E tier; one from FR while the event is in ES ->
-        // international. score = 100 + round(1/5 * 0.9 * 100) + round(0.1 * 100) = 100 + 18 + 10 = 128, "E+".
+        // international. score = 100 + round(1/5 * 0.9 * 100) + round(0.1 * 100) = 100 + 18 + 10 = 128.
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "CPC_COBS.V0", 1735689600000L,
                 ObdxAvgMethod.AVG,
                 List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, false),
@@ -269,12 +269,12 @@ class UpdateObdxEventServiceCaseTest {
 
         ObdxEventInfoUpdated change = recordedChange();
         assertThat(change.rankScore()).isEqualTo(128);
-        assertThat(change.rank()).isEqualTo("E+");
+        assertThat(change.international()).isTrue();
     }
 
     @Test
     void leaves_rank_score_null_when_the_configuration_has_no_band() {
-        // "config-1" is not a known configuration, so no band -> null score, letter falls back to tier+intl.
+        // "config-1" is not a known configuration, so no band -> null score.
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
@@ -282,11 +282,7 @@ class UpdateObdxEventServiceCaseTest {
 
         ObdxEventInfoUpdated change = recordedChange();
         assertThat(change.rankScore()).isNull();
-        assertThat(change.rank()).isEqualTo("E");
-    }
-
-    private String recordedRank() {
-        return recordedChange().rank();
+        assertThat(change.international()).isFalse();
     }
 
     private ObdxEventInfoUpdated recordedChange() {

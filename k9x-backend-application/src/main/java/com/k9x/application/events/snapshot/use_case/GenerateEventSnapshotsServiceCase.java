@@ -69,7 +69,7 @@ public class GenerateEventSnapshotsServiceCase {
                         : classification.obdx().competitors().stream()
                                 .map(c -> new ObdxCompetitorPosition(c.dogId(), (short) c.position(), c.rankScore()))
                                 .toList();
-                saveObdxSnapshotPersistencePort.save(pending.eventId(), now, classification, competitors);
+                saveObdxSnapshotPersistencePort.save(pending.eventId(), now, classification.obdx(), competitors);
             }
         }
     }

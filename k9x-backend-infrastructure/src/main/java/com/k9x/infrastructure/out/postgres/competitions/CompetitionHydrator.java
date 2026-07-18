@@ -122,7 +122,7 @@ public class CompetitionHydrator {
 
         List<EventShell> eventShells = dsl.select(ev.ID, ev.CONFIGURATION_ID, ev.DISCIPLINE, ev.NAME,
                         ev.STAGE_ID, ev.CREATOR, ev.ENROLLMENT_DEADLINE, ev.LAST_UPDATE, ev.CREATED_AT,
-                        ev.DELETED_AT, ev.SCORE_CALCULATION, ev.AWARDS, ev.RANK, ev.RANK_SCORE)
+                        ev.DELETED_AT, ev.SCORE_CALCULATION, ev.AWARDS, ev.RANK_SCORE, ev.INTERNATIONAL)
                 .from(ev)
                 .join(st).on(st.ID.eq(ev.STAGE_ID))
                 .where(st.COMPETITION_ID.in(toList(competitionIds)))
@@ -141,8 +141,8 @@ public class CompetitionHydrator {
                     shell.deletedAt = r.get(ev.DELETED_AT);
                     shell.scoreCalculation = r.get(ev.SCORE_CALCULATION);
                     shell.awards = r.get(ev.AWARDS);
-                    shell.rank = r.get(ev.RANK);
                     shell.rankScore = r.get(ev.RANK_SCORE);
+                    shell.international = r.get(ev.INTERNATIONAL);
                     return shell;
                 });
 
@@ -162,8 +162,8 @@ public class CompetitionHydrator {
                     judges.getOrDefault(s.id, new ArrayList<>()),
                     scores.getOrDefault(s.id, new ArrayList<>()),
                     s.awards == null ? List.of() : Arrays.asList(s.awards),
-                    s.rank,
-                    s.rankScore);
+                    s.rankScore,
+                    s.international);
             eventsByStage.computeIfAbsent(s.stageId, _ -> new ArrayList<>()).add(event);
         }
         return eventsByStage;
@@ -260,8 +260,9 @@ public class CompetitionHydrator {
     }
 
     private static final class EventShell {
-        String id, configurationId, discipline, name, stageId, creator, scoreCalculation, rank;
+        String id, configurationId, discipline, name, stageId, creator, scoreCalculation;
         Integer rankScore;
+        Boolean international;
         Long enrollmentDeadline;
         long lastUpdate, createdAt;
         Long deletedAt;

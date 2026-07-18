@@ -1,6 +1,6 @@
 package com.k9x.application.events.snapshot.use_case;
 
-import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.snapshot.port.GetObdxEventSnapshotPersistencePort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,8 +29,7 @@ class GetEventSnapshotServiceCaseTest {
 
     @Test
     void returns_the_persisted_snapshot_when_present() {
-        FetchClassificationDTO snapshot = new FetchClassificationDTO("evt-1", "Event", "FINISHED", "stage-1",
-                "Stage A", "WC", "obdx", "cfg", "Cfg", null, null, "A+");
+        FetchObdxClassificationDTO snapshot = new FetchObdxClassificationDTO(null, List.of(), "AVG", List.of());
         when(getObdxEventSnapshotPersistencePort.getSnapshot("evt-1")).thenReturn(Optional.of(snapshot));
 
         assertThat(serviceCase.getSnapshot("evt-1", "obdx")).containsSame(snapshot);

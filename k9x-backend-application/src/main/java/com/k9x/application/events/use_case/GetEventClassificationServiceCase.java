@@ -51,19 +51,15 @@ public class GetEventClassificationServiceCase {
         EventClassificationContextDTO context = resolveContext(eventId);
         EventSnapshot event = context.event();
 
-        // A persisted snapshot exists only for events whose stage has already finished; their results are final,
-        // so serve the stored classification and skip recomputation. The lookup needs the discipline (to pick the
-        // right store), which is why it happens after the event context is resolved. The REST layer still applies
-        // i18n on top, so the snapshot stays language-independent.
-        Optional<FetchClassificationDTO> snapshot = getEventSnapshotServiceCase.getSnapshot(eventId, event.discipline());
-        if (snapshot.isPresent()) {
-            return snapshot.get();
-        }
-
-        Discipline discipline = Discipline.fromStored(event.discipline());
-        FetchObdxClassificationDTO obdx = discipline == Discipline.OBDX
-                ? getObdxClassificationServiceCase.getClassification(event)
-                : null;
+        // The snapshot caches only the heavy OBDX computation (competitor totals, positions, per-exercise
+        // scores). A persisted snapshot exists only for finished events; their results are final, so serve the
+        // stored payload and skip recomputation. Everything else — event metadata and the derived rank label —
+        // is always rebuilt fresh here from the event context (the joins in resolveContext), never stored.
+        Optional<FetchObdxClassificationDTO> stored = getEventSnapshotServiceCase.getSnapshot(eventId, event.discipline());
+        FetchObdxClassificationDTO obdx = stored.orElseGet(() ->
+                Discipline.fromStored(event.discipline()) == Discipline.OBDX
+                        ? getObdxClassificationServiceCase.getClassification(event)
+                        : null);
 
         Long scoresLastUpdate = obdx == null ? null : obdx.scoresLastUpdate();
 

@@ -9,6 +9,7 @@ import com.k9x.domain.shared.UtcDates;
 
 import com.k9x.domain.disciplines.obdx.LiveExcludedExercise;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxRank;
 
 import java.util.List;
 import java.util.Set;
@@ -31,9 +32,18 @@ public record EventSnapshot(
         List<EventJudge> judges,
         List<Score> scores,
         List<String> awards,
-        String rank,
-        Integer rankScore
+        Integer rankScore,
+        Boolean international
 ) {
+
+    /**
+     * The OBDX rank label, derived (not stored) from the numeric {@link #rankScore} and the
+     * {@link #international} flag: {@code null} when the event carries no rank score, otherwise e.g.
+     * {@code "B"}, {@code "B+"} or {@code "A++"}. See {@link ObdxRank#labelFromScore(int, boolean)}.
+     */
+    public String rank() {
+        return rankScore == null ? null : ObdxRank.labelFromScore(rankScore, Boolean.TRUE.equals(international));
+    }
 
     /**
      * Lifecycle status. "Pooling" is only a front-end label, so the backend derives the status from the

@@ -1,7 +1,6 @@
 package com.k9x.infrastructure.out.postgres.events.obdx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.snapshot.port.payload.ObdxCompetitorPosition;
 import org.jooq.DSLContext;
@@ -23,10 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SaveObdxSnapshotJooqAdapterTest {
 
-    private FetchClassificationDTO classification() {
-        return new FetchClassificationDTO("evt-1", "Event", "FINISHED", "stage-1", "Stage A", "WC",
-                "obdx", "cfg", "Cfg", 5000L,
-                new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of()), "A+");
+    private FetchObdxClassificationDTO obdx() {
+        return new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of());
     }
 
     private DSLContext capturingDsl(List<String> sqls) {
@@ -48,7 +45,7 @@ class SaveObdxSnapshotJooqAdapterTest {
         List<String> sqls = Collections.synchronizedList(new ArrayList<>());
         DSLContext dsl = capturingDsl(sqls);
 
-        new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, classification(),
+        new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, obdx(),
                 List.of(new ObdxCompetitorPosition("dog-1", (short) 1, new BigDecimal("475.50")),
                         new ObdxCompetitorPosition("dog-2", (short) 3, null)));
 
@@ -63,7 +60,7 @@ class SaveObdxSnapshotJooqAdapterTest {
         List<String> sqls = Collections.synchronizedList(new ArrayList<>());
         DSLContext dsl = capturingDsl(sqls);
 
-        new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, classification(),
+        new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, obdx(),
                 List.of());
 
         assertThat(sqls).noneMatch(s -> s.contains("update \"obdx\".\"event_competitors\""));

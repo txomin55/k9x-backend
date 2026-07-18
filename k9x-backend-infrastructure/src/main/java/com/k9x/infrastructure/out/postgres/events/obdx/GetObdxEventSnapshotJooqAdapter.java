@@ -2,7 +2,7 @@ package com.k9x.infrastructure.out.postgres.events.obdx;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.snapshot.port.GetObdxEventSnapshotPersistencePort;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventSnapshot;
 import org.jooq.DSLContext;
@@ -21,7 +21,7 @@ public class GetObdxEventSnapshotJooqAdapter implements GetObdxEventSnapshotPers
     }
 
     @Override
-    public Optional<FetchClassificationDTO> getSnapshot(String eventId) {
+    public Optional<FetchObdxClassificationDTO> getSnapshot(String eventId) {
         EventSnapshot es = EventSnapshot.EVENT_SNAPSHOT;
         JSON json = dsl.select(es.SNAPSHOT)
                 .from(es)
@@ -31,7 +31,7 @@ public class GetObdxEventSnapshotJooqAdapter implements GetObdxEventSnapshotPers
             return Optional.empty();
         }
         try {
-            return Optional.of(objectMapper.readValue(json.data(), FetchClassificationDTO.class));
+            return Optional.of(objectMapper.readValue(json.data(), FetchObdxClassificationDTO.class));
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Unable to deserialize classification snapshot for event " + eventId, e);
         }

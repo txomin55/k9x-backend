@@ -1,7 +1,6 @@
 package com.k9x.infrastructure.out.postgres.events.obdx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventSnapshot;
 import org.jooq.DSLContext;
@@ -28,9 +27,7 @@ class GetObdxEventSnapshotJooqAdapterTest {
 
     @Test
     void deserializes_stored_snapshot() throws Exception {
-        FetchClassificationDTO stored = new FetchClassificationDTO("evt-1", "Event", "FINISHED", "stage-1",
-                "Stage A", "WC", "obdx", "cfg", "Cfg", 5000L,
-                new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of()), "A+");
+        FetchObdxClassificationDTO stored = new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of());
         String json = MAPPER.writeValueAsString(stored);
 
         MockDataProvider provider = _ -> {
@@ -43,13 +40,12 @@ class GetObdxEventSnapshotJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        Optional<FetchClassificationDTO> result =
+        Optional<FetchObdxClassificationDTO> result =
                 new GetObdxEventSnapshotJooqAdapter(dsl, MAPPER).getSnapshot("evt-1");
 
         assertThat(result).isPresent();
-        assertThat(result.get().eventId()).isEqualTo("evt-1");
-        assertThat(result.get().stageName()).isEqualTo("Stage A");
-        assertThat(result.get().obdx().scoreCalculation()).isEqualTo("AVG");
+        assertThat(result.get().scoresLastUpdate()).isEqualTo(5000L);
+        assertThat(result.get().scoreCalculation()).isEqualTo("AVG");
     }
 
     @Test

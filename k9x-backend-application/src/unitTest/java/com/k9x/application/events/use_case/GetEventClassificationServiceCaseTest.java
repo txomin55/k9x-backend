@@ -70,22 +70,23 @@ class GetEventClassificationServiceCaseTest {
     }
 
     @Test
-    void serves_persisted_snapshot_without_computing_when_present() {
-        FetchClassificationDTO snapshot = new FetchClassificationDTO(
-                "evt-1", "Open Grade 1", "FINISHED", "stage-1", "Stage A", "WC",
-                "obdx", "OBDX_RSCE_GRADE_1.V0", "Grade 1", 5000L,
-                new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of()), "A+");
+    void serves_the_persisted_obdx_payload_without_recomputing_when_present() throws IOException {
+        FetchObdxClassificationDTO storedObdx = new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of());
         // The context is resolved first (that is where the discipline comes from), then the snapshot is looked up
-        // by (eventId, discipline); when it exists the aggregate is not recomputed.
+        // by (eventId, discipline). When it exists the OBDX payload is reused as-is (no recomputation); the event
+        // metadata is always rebuilt fresh from the context.
         when(eventClassificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
         when(getCompetitionPersistencePort.competitionIdByEvent("evt-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(ACTIVE_EVENT));
-        when(getEventSnapshotServiceCase.getSnapshot("evt-1", "obdx")).thenReturn(Optional.of(snapshot));
+        when(getEventSnapshotServiceCase.getSnapshot("evt-1", "obdx")).thenReturn(Optional.of(storedObdx));
+        when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of());
 
         FetchClassificationDTO result = serviceCase.getClassification("evt-1");
 
-        assertThat(result).isSameAs(snapshot);
-        verifyNoInteractions(getObdxClassificationServiceCase, getObdxFederationsConfigurationsPort);
+        assertThat(result.obdx()).isSameAs(storedObdx);
+        assertThat(result.eventId()).isEqualTo("evt-1");
+        assertThat(result.competitionName()).isEqualTo("WC");
+        verifyNoInteractions(getObdxClassificationServiceCase);
     }
 
     @Test

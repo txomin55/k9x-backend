@@ -19,6 +19,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,8 +42,8 @@ class GenerateEventSnapshotsServiceCaseTest {
                 saveObdxSnapshotPersistencePort);
     }
 
-    private FetchClassificationDTO classification(String eventId) {
-        return classification(eventId, null);
+    private FetchObdxClassificationDTO obdx(FetchClassificationCompetitorDTO... competitors) {
+        return new FetchObdxClassificationDTO(null, List.of(competitors), "AVG", List.of());
     }
 
     private FetchClassificationDTO classification(String eventId, FetchObdxClassificationDTO obdx) {
@@ -67,32 +68,30 @@ class GenerateEventSnapshotsServiceCaseTest {
     }
 
     @Test
-    void computes_and_saves_a_snapshot_for_each_pending_obdx_event() {
-        FetchClassificationDTO c1 = classification("evt-1");
-        FetchClassificationDTO c2 = classification("evt-2");
+    void saves_only_the_obdx_payload_for_each_pending_event() {
+        FetchObdxClassificationDTO o1 = obdx();
+        FetchObdxClassificationDTO o2 = obdx();
         when(getPendingSnapshotEventsPersistencePort.getFinishedEventsWithoutSnapshot(anyLong()))
                 .thenReturn(List.of(new PendingSnapshotEventDTO("evt-1", "obdx"),
                         new PendingSnapshotEventDTO("evt-2", "obdx")));
-        when(getEventClassificationServiceCase.getClassification("evt-1")).thenReturn(c1);
-        when(getEventClassificationServiceCase.getClassification("evt-2")).thenReturn(c2);
+        when(getEventClassificationServiceCase.getClassification("evt-1")).thenReturn(classification("evt-1", o1));
+        when(getEventClassificationServiceCase.getClassification("evt-2")).thenReturn(classification("evt-2", o2));
 
         serviceCase.generateSnapshots();
 
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(c1), eq(List.of()));
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(c2), eq(List.of()));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(o1), eq(List.of()));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(o2), eq(List.of()));
     }
 
     @Test
     void persists_the_tie_aware_positions_and_rank_scores_with_the_snapshot() {
-        FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(null,
-                List.of(competitor("dog-1", 1, new BigDecimal("475.50")),
-                        competitor("dog-2", 1, new BigDecimal("475.50")),
-                        competitor("dog-3", 3, new BigDecimal("410.00"))),
-                "MID_AVG", List.of());
-        FetchClassificationDTO classification = classification("evt-1", obdx);
+        FetchObdxClassificationDTO obdx = obdx(
+                competitor("dog-1", 1, new BigDecimal("475.50")),
+                competitor("dog-2", 1, new BigDecimal("475.50")),
+                competitor("dog-3", 3, new BigDecimal("410.00")));
         when(getPendingSnapshotEventsPersistencePort.getFinishedEventsWithoutSnapshot(anyLong()))
                 .thenReturn(List.of(new PendingSnapshotEventDTO("evt-1", "obdx")));
-        when(getEventClassificationServiceCase.getClassification("evt-1")).thenReturn(classification);
+        when(getEventClassificationServiceCase.getClassification("evt-1")).thenReturn(classification("evt-1", obdx));
 
         serviceCase.generateSnapshots();
 
@@ -100,49 +99,48 @@ class GenerateEventSnapshotsServiceCaseTest {
                 new ObdxCompetitorPosition("dog-1", (short) 1, new BigDecimal("475.50")),
                 new ObdxCompetitorPosition("dog-2", (short) 1, new BigDecimal("475.50")),
                 new ObdxCompetitorPosition("dog-3", (short) 3, new BigDecimal("410.00")));
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(classification), eq(expected));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(obdx), eq(expected));
     }
 
     @Test
     void persists_empty_competitors_when_classification_has_no_obdx_payload() {
-        FetchClassificationDTO classification = classification("evt-1");
         when(getPendingSnapshotEventsPersistencePort.getFinishedEventsWithoutSnapshot(anyLong()))
                 .thenReturn(List.of(new PendingSnapshotEventDTO("evt-1", "obdx")));
-        when(getEventClassificationServiceCase.getClassification("evt-1")).thenReturn(classification);
+        when(getEventClassificationServiceCase.getClassification("evt-1")).thenReturn(classification("evt-1", null));
 
         serviceCase.generateSnapshots();
 
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(classification), eq(List.of()));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), isNull(), eq(List.of()));
     }
 
     @Test
     void skips_events_of_unsupported_discipline() {
-        FetchClassificationDTO obdx = classification("evt-2");
+        FetchObdxClassificationDTO o2 = obdx();
         when(getPendingSnapshotEventsPersistencePort.getFinishedEventsWithoutSnapshot(anyLong()))
                 .thenReturn(List.of(new PendingSnapshotEventDTO("evt-1", "rally"),
                         new PendingSnapshotEventDTO("evt-2", "obdx")));
-        when(getEventClassificationServiceCase.getClassification("evt-2")).thenReturn(obdx);
+        when(getEventClassificationServiceCase.getClassification("evt-2")).thenReturn(classification("evt-2", o2));
 
         serviceCase.generateSnapshots();
 
         verify(getEventClassificationServiceCase, never()).getClassification("evt-1");
         verify(saveObdxSnapshotPersistencePort, never()).save(eq("evt-1"), anyLong(), any(), any());
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(obdx), eq(List.of()));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(o2), eq(List.of()));
     }
 
     @Test
     void one_failing_event_does_not_abort_the_rest() {
-        FetchClassificationDTO c2 = classification("evt-2");
+        FetchObdxClassificationDTO o2 = obdx();
         when(getPendingSnapshotEventsPersistencePort.getFinishedEventsWithoutSnapshot(anyLong()))
                 .thenReturn(List.of(new PendingSnapshotEventDTO("evt-1", "obdx"),
                         new PendingSnapshotEventDTO("evt-2", "obdx")));
         when(getEventClassificationServiceCase.getClassification("evt-1"))
                 .thenThrow(new RuntimeException("boom"));
-        when(getEventClassificationServiceCase.getClassification("evt-2")).thenReturn(c2);
+        when(getEventClassificationServiceCase.getClassification("evt-2")).thenReturn(classification("evt-2", o2));
 
         serviceCase.generateSnapshots();
 
         verify(saveObdxSnapshotPersistencePort, never()).save(eq("evt-1"), anyLong(), any(), any());
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(c2), eq(List.of()));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(o2), eq(List.of()));
     }
 }
