@@ -13,7 +13,6 @@ import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeRequiredExcep
 import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.disciplines.obdx.ObdxRank;
 import com.k9x.domain.disciplines.obdx.ObdxConfigurationsRankThresholds;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
@@ -86,9 +85,9 @@ public class UpdateObdxEventServiceCase {
      *
      * <p>The tier comes from the number of competitors; the international flag is set when at least one
      * competitor's (dog's) country differs from the event's country — the country of its owning competition;
-     * competitors with no country are ignored. The configuration's band {@code [min, max]} places the score
-     * within the 0–1000 scale (see {@link ObdxRank#score(int, int, boolean)}); when the configuration declares
-     * no band the score is {@code null}.
+     * competitors with no country are ignored. The configuration's band places the score within the 0–1000
+     * scale (see {@link ObdxConfigurationsRankThresholds#eventScore(int, boolean)}); when the configuration
+     * declares no band the score is {@code null}.
      */
     private RankResult computeRank(UpdateObdxEventCommand command, Map<String, Dog> competitorDogs, String eventCountry) {
         boolean international = command.competitors().stream()
@@ -96,7 +95,7 @@ public class UpdateObdxEventServiceCase {
                 .anyMatch(dog -> dog != null && isForeign(dog.getCountry(), eventCountry));
         ObdxConfigurationsRankThresholds band = ObdxConfigurationsRankThresholds.fromConfigurationId(command.configurationId());
         Integer rankScore = band == null ? null
-                : ObdxRank.fromCompetitorCount(command.competitors().size()).score(band.min(), band.max(), international);
+                : band.eventScore(command.competitors().size(), international);
         return new RankResult(rankScore, international);
     }
 

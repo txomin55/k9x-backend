@@ -39,7 +39,7 @@ public record EventSnapshot(
     /**
      * The OBDX rank label, derived (not stored) from the numeric {@link #rankScore} and the
      * {@link #international} flag: {@code null} when the event carries no rank score, otherwise e.g.
-     * {@code "B"}, {@code "B+"} or {@code "A++"}. See {@link ObdxRank#labelFromScore(int, boolean)}.
+     * {@code "B"}, {@code "B+"} or {@code "S"}. See {@link ObdxRank#labelFromScore(int, boolean)}.
      */
     public String rank() {
         return rankScore == null ? null : ObdxRank.labelFromScore(rankScore, Boolean.TRUE.equals(international));
