@@ -108,20 +108,18 @@ ya hace `GetEventClassificationServiceCase`). Objetivo: cachear solo el cálculo
 ## rank_score por competidor
 
 Además del `rank_score` del evento, cada competidor tiene su propio `rank_score` en
-`obdx.event_competitors.rank_score` (`NUMERIC(6,2)`), que proyecta su rendimiento en la prueba sobre la banda
-del evento:
+`obdx.event_competitors.rank_score` (`NUMERIC(6,2)`). **Premia el mérito** (subir por los calificativos), no
+solo ir a un evento con mucho campo. Resumen:
 
-```
-floor = límite inferior del rango de letra del rank_score del evento   (p.ej. evento 550 → C → 401)
-span  = rank_score_evento − floor
-rank_score_competidor = floor + span × (total_competidor / max_total)
-```
+- No llega a la 1ª qualificación → **suelo del rango anterior** (`configBandMin − 1`).
+- Llegar a la 1ª qualificación desbloquea un **10 % fijo** de `(eventScore − configBandMin)`.
+- El **90 % restante** tiene la **rodilla en el calificativo más alto** de la config (p.ej. EXC): de la 1ª al
+  top qualificativo se gana el **85 %** de esa ventana; del top al máximo, el 15 % (pulido). Un 100 % cae justo
+  en `eventScore`.
+- Sin puntuación (no compiten / sin scores) → **NULL**.
 
-- `total_competidor` = suma de las notas ponderadas por coeficiente (misma agregación AVG/MID_AVG que la
-  clasificación); `max_total` = `maxAllowedScore × Σcoef` de la prueba.
-- Un 100 % de rendimiento obtiene el `rank_score` del evento; un 0 %, el `floor`.
-- Competidores **sin puntuación** (no compiten / sin scores) → `rank_score` **NULL**.
-- Ejemplo: evento 550 (C, 401–600), competidor 160/320 → `401 + 149 × 0.5 = 475.50`.
+La fórmula completa, con ejemplo y tabla, está en **[`obdx-competitor-event-score.md`](obdx-competitor-event-score.md)**
+(dominio: `ObdxCompetitorEventScore`).
 
 Se calcula en `GetObdxClassificationServiceCase` (junto a la posición) y se **persiste en el cron diario de
 snapshot** (`GenerateEventSnapshotsServiceCase`): posición + `rank_score` del competidor + fila de snapshot se

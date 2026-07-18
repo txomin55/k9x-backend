@@ -30,16 +30,6 @@ class ObdxRankTest {
     }
 
     @Test
-    void range_floor_returns_the_lower_bound_of_each_global_band() {
-        assertEquals(0, ObdxRank.E.rangeFloor());
-        assertEquals(201, ObdxRank.D.rangeFloor());
-        assertEquals(401, ObdxRank.C.rangeFloor());
-        assertEquals(601, ObdxRank.B.rangeFloor());
-        assertEquals(801, ObdxRank.A.rangeFloor());
-        assertEquals(901, ObdxRank.S.rangeFloor());
-    }
-
-    @Test
     void label_from_score_combines_the_global_letter_with_the_international_suffix() {
         assertEquals("E", ObdxRank.labelFromScore(136, false));     // COBS, national
         assertEquals("D", ObdxRank.labelFromScore(237, false));     // FCI grade 1, national

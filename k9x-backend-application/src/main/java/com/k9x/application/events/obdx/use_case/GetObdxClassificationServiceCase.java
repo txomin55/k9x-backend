@@ -6,7 +6,8 @@ import com.k9x.application.events.obdx.use_case.dto.*;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.disciplines.obdx.ObdxRank;
+import com.k9x.domain.disciplines.obdx.ObdxCompetitorEventScore;
+import com.k9x.domain.disciplines.obdx.ObdxConfigurationsRankThresholds;
 import com.k9x.domain.events.status.ClassificationCompetitorStatus;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
@@ -236,7 +237,7 @@ public class GetObdxClassificationServiceCase {
             boolean disqualifiedOrNotCompeting = event.isDisqualified(dogId) || event.isNotCompeting(dogId);
             boolean hasScore = anyExerciseScored;
             String qualification = resolveQualification(config, totalScore, disqualifiedOrNotCompeting, hasScore);
-            BigDecimal rankScore = competitorRankScore(event.rankScore(), totalScore, maxPossibleTotal, hasScore);
+            BigDecimal rankScore = competitorRankScore(event, config, totalScore, maxPossibleTotal, hasScore);
 
             competitors.add(new FetchClassificationCompetitorDTO(
                     dogId, meta.dogName(), meta.dogBreed(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
@@ -367,22 +368,31 @@ public class GetObdxClassificationServiceCase {
     }
 
     /**
-     * The competitor's own ranking score: their performance ({@code totalScore / maxPossibleTotal}) projected
-     * onto the event's rank-score band. The band spans from the floor of the event rank's global letter range
-     * up to the event's own {@code rankScore}, so a 100% competitor earns the event's rank score and a 0% one
-     * earns the range floor. Returns {@code null} when the event has no rank score, the competitor has no score,
-     * or there is no attainable maximum.
+     * The competitor's own ranking score (see {@link ObdxCompetitorEventScore}): merit-based, bounded by the
+     * event's own {@code rankScore} and driven by how far the competitor climbs through the configuration's
+     * qualification tiers (with the knee at the highest qualification). Returns {@code null} when the event has
+     * no rank score, the competitor has no score, or there is no attainable maximum / no configuration band.
      */
-    private BigDecimal competitorRankScore(Integer eventRankScore, BigDecimal totalScore,
-                                           BigDecimal maxPossibleTotal, boolean hasScore) {
-        if (eventRankScore == null || !hasScore || maxPossibleTotal == null
+    private BigDecimal competitorRankScore(EventSnapshot event, ObdxClassificationConfigDTO config,
+                                           BigDecimal totalScore, BigDecimal maxPossibleTotal, boolean hasScore) {
+        Integer eventScore = event.rankScore();
+        if (eventScore == null || !hasScore || maxPossibleTotal == null
                 || maxPossibleTotal.compareTo(BigDecimal.ZERO) == 0) {
             return null;
         }
-        int floor = ObdxRank.fromScore(eventRankScore).rangeFloor();
-        BigDecimal span = BigDecimal.valueOf(eventRankScore - floor);
-        BigDecimal fraction = totalScore.divide(maxPossibleTotal, 6, RoundingMode.HALF_UP);
-        return BigDecimal.valueOf(floor).add(span.multiply(fraction)).setScale(2, RoundingMode.HALF_UP);
+        ObdxConfigurationsRankThresholds band =
+                ObdxConfigurationsRankThresholds.fromConfigurationId(event.configurationId());
+        if (band == null) {
+            return null;
+        }
+        List<BigDecimal> qualMinScores = config.qualifications().stream()
+                .map(ObdxClassificationConfigDTO.QualificationThreshold::minScore)
+                .filter(Objects::nonNull)
+                .toList();
+        BigDecimal firstQualMin = qualMinScores.stream().min(Comparator.naturalOrder()).orElse(null);
+        BigDecimal topQualMin = qualMinScores.stream().max(Comparator.naturalOrder()).orElse(null);
+        return ObdxCompetitorEventScore.of(eventScore, band.min(), firstQualMin, topQualMin,
+                totalScore, maxPossibleTotal);
     }
 
     private BigDecimal computeAvg(List<BigDecimal> scores, ObdxAvgMethod method, int judgeCount) {
