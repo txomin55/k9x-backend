@@ -99,8 +99,9 @@ class UpdateObdxScoreServiceCaseTest {
     }
 
     @Test
-    void throws_exception_when_user_is_not_collector() {
+    void throws_exception_when_user_is_neither_collector_nor_event_creator() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
         when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("other@k9x.io");
 
         assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
@@ -110,8 +111,22 @@ class UpdateObdxScoreServiceCaseTest {
     }
 
     @Test
+    void saves_aggregate_when_user_is_event_creator_even_though_not_collector() {
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
+        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX_FCI_GRADE_3.1_V0"))
+                .thenReturn(List.of(new BigDecimal("7.5")));
+
+        serviceCase.updateScore("event-1", COMMAND, "user-1");
+
+        verify(saveCompetitionPersistencePort).save(any());
+        verifyNoInteractions(getObdxEventCollectorPersistencePort);
+    }
+
+    @Test
     void throws_exception_when_score_is_not_allowed() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
         when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("user@k9x.io");
         when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX_FCI_GRADE_3.1_V0"))
                 .thenReturn(List.of(new BigDecimal("5"), new BigDecimal("6")));

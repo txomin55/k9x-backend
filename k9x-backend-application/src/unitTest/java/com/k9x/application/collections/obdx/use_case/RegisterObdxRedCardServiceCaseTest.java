@@ -81,14 +81,26 @@ class RegisterObdxRedCardServiceCaseTest {
     }
 
     @Test
-    void throws_exception_when_user_is_not_collector() {
+    void throws_exception_when_user_is_neither_collector_nor_event_creator() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
         when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("other@k9x.io");
 
         assertThatThrownBy(() -> serviceCase.registerRedCard("event-1", COMMAND, "user@k9x.io"))
                 .isInstanceOf(ObdxUserNotCollectorException.class);
 
         verifyNoInteractions(saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void saves_aggregate_when_user_is_event_creator_even_though_not_collector() {
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
+
+        serviceCase.registerRedCard("event-1", COMMAND, "user-1");
+
+        verify(saveCompetitionPersistencePort).save(any());
+        verifyNoInteractions(getObdxEventCollectorPersistencePort);
     }
 
     @Test

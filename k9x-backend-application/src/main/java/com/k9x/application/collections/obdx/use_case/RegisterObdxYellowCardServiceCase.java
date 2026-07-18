@@ -29,16 +29,25 @@ public class RegisterObdxYellowCardServiceCase {
         if (competitionId == null) {
             throw new EventNotFoundException();
         }
-        assertUserIsCollector(eventId, command.judgeId(), userEmail);
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
+        assertUserIsCollectorOrEventCreator(eventId, command.judgeId(), userEmail, competition);
         competition.registerYellowCard(eventId,
                 new YellowCardData(command.judgeId(), command.exerciseId(), command.dogId()),
                 userEmail, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }
 
-    private void assertUserIsCollector(String eventId, String judgeId, String userEmail) {
+    /**
+     * A card may be registered by the judge's collector or by the event creator. The collector is a
+     * per-event×judge relationship resolved from persistence, while the event creator is known to the
+     * aggregate, so both sources are consulted here.
+     */
+    private void assertUserIsCollectorOrEventCreator(String eventId, String judgeId, String userEmail,
+                                                     CompetitionAggregate competition) {
+        if (competition.isEventCreatedBy(eventId, userEmail)) {
+            return;
+        }
         String collectorId = getObdxEventCollectorPersistencePort.getCollectorId(eventId, judgeId);
         if (collectorId == null || !collectorId.equals(userEmail)) {
             throw new ObdxUserNotCollectorException();

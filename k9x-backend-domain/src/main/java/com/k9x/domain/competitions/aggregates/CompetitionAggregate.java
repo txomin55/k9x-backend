@@ -68,6 +68,16 @@ public final class CompetitionAggregate {
         return List.copyOf(changes);
     }
 
+    /**
+     * Whether the given user created the event. Used by the application layer to authorize event-creator
+     * operations (e.g. scoring) without duplicating the snapshot navigation. Unknown events return
+     * {@code false}.
+     */
+    public boolean isEventCreatedBy(String eventId, String userId) {
+        EventSnapshot event = findEvent(eventId);
+        return event != null && event.creator().equals(userId);
+    }
+
     public void update(CompetitionUpdateData data, String userId, long now) {
         assertCompetitionMutableBy(userId);
         assertCompetitionUpdatable(now);

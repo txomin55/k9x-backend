@@ -37,17 +37,26 @@ public class UpdateObdxScoreServiceCase {
         if (competitionId == null) {
             throw new EventNotFoundException();
         }
-        assertUserIsCollector(eventId, command.judgeId(), userEmail);
-        assertScoreAllowed(command.exerciseId(), command.score());
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
+        assertUserIsCollectorOrEventCreator(eventId, command.judgeId(), userEmail, competition);
+        assertScoreAllowed(command.exerciseId(), command.score());
         competition.updateScore(eventId,
                 new ScoreUpdateData(command.judgeId(), command.exerciseId(), command.dogId(), command.score()),
                 userEmail, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }
 
-    private void assertUserIsCollector(String eventId, String judgeId, String userEmail) {
+    /**
+     * The score may be recorded by the judge's collector or by the event creator. The collector is a
+     * per-event×judge relationship resolved from persistence, while the event creator is known to the
+     * aggregate, so both sources are consulted here.
+     */
+    private void assertUserIsCollectorOrEventCreator(String eventId, String judgeId, String userEmail,
+                                                     CompetitionAggregate competition) {
+        if (competition.isEventCreatedBy(eventId, userEmail)) {
+            return;
+        }
         String collectorId = getObdxEventCollectorPersistencePort.getCollectorId(eventId, judgeId);
         if (collectorId == null || !collectorId.equals(userEmail)) {
             throw new ObdxUserNotCollectorException();
