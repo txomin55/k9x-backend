@@ -3,6 +3,7 @@ package com.k9x.infrastructure.out.postgres.collections;
 import com.k9x.application.collections.port.GetCollectionListPersistencePort;
 import com.k9x.application.collections.use_case.dto.FetchCollectionDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeDTO;
+import com.k9x.domain.shared.UtcDates;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.*;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventJudges;
@@ -31,6 +32,11 @@ public class GetCollectionListJooqAdapter implements GetCollectionListPersistenc
         Judges j = Tables.JUDGES;
         Users u = Tables.USERS;
 
+        // A stage is visible from the whole UTC day of its date_from until the whole UTC day of its
+        // date_to (day-based, matching the detail flow's isAfterUtcDay expiry semantics).
+        long dayStart = UtcDates.startOfUtcDay(nowMillis);
+        long dayEnd = UtcDates.endOfUtcDay(nowMillis);
+
         var records = dsl.select(e.ID, e.NAME, e.DISCIPLINE, s.NAME, c.NAME, j.ID, j.NAME)
                 .from(e)
                 .join(s).on(s.ID.eq(e.STAGE_ID).and(s.DELETED_AT.isNull()))
@@ -39,7 +45,8 @@ public class GetCollectionListJooqAdapter implements GetCollectionListPersistenc
                 .join(j).on(j.ID.eq(ej.JUDGE_ID).and(j.DELETED_AT.isNull()))
                 .join(u).on(u.ID.eq(ej.COLLECTOR_ID))
                 .where(u.EMAIL.eq(collectorEmail))
-                .and(s.DATE_TO.greaterOrEqual(nowMillis))
+                .and(s.DATE_FROM.lessOrEqual(dayEnd))
+                .and(s.DATE_TO.greaterOrEqual(dayStart))
                 .and(e.DELETED_AT.isNull())
                 .fetch();
 
