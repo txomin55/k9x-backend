@@ -7,6 +7,12 @@ spring:
   jooq:
     sql-dialect: POSTGRES
 
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 management:
   endpoint:
     health:
