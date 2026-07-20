@@ -8,3 +8,9 @@
 /.claire/
 /k9x-backend-infrastructure/src/main/generated/
 /gradle/
+
+# New Relic Java agent: binaries are downloaded at build time
+# (Dockerfile / `./gradlew unzipNewrelic`). Only the custom config is tracked,
+# so the Docker build can COPY it into the image.
+/newrelic/*
+!/newrelic/newrelic.yml

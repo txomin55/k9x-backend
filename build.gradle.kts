@@ -1,6 +1,21 @@
+import de.undercouch.gradle.tasks.download.Download
+
 plugins {
     id("org.springframework.boot") version "4.1.0" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
+    id("de.undercouch.download") version "5.3.0"
+}
+
+val downloadNewrelic by tasks.registering(Download::class) {
+    mkdir("newrelic")
+    src("https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip")
+    dest(file("newrelic"))
+}
+
+tasks.register<Copy>("unzipNewrelic") {
+    dependsOn(downloadNewrelic)
+    from(zipTree(file("newrelic/newrelic-java.zip")))
+    into(rootDir)
 }
 
 allprojects {

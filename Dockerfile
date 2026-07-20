@@ -19,9 +19,13 @@ ARG GPR_USER
 ARG GPR_KEY
 ARG SPRING_PROFILES_ACTIVE
 
-RUN ./gradlew :k9x-backend-loader:bootJar -PspringProfilesActive="$SPRING_PROFILES_ACTIVE" \
+# Also downloads and unzips the New Relic Java agent into ./newrelic/.
+RUN ./gradlew :k9x-backend-loader:bootJar unzipNewrelic -PspringProfilesActive="$SPRING_PROFILES_ACTIVE" \
     -Pgpr.user="$GPR_USER" -Pgpr.key="$GPR_KEY" \
     -x test
+
+# Override the agent's bundled default config with the project's custom one.
+COPY newrelic/newrelic.yml newrelic/newrelic.yml
 
 #
 # Package stage
@@ -31,6 +35,8 @@ LABEL maintainer="txomin.sirera@gmail.com"
 LABEL version="1.0"
 VOLUME /tmp/k9x-backend
 COPY --from=build /home/k9x-backend/k9x-backend-loader/build/libs/*.jar /usr/local/lib/k9x-backend.jar
+COPY --from=build /home/k9x-backend/newrelic/newrelic.jar /usr/local/lib/newrelic/newrelic.jar
+COPY --from=build /home/k9x-backend/newrelic/newrelic.yml /usr/local/lib/newrelic/newrelic.yml
 EXPOSE 4000
 
-ENTRYPOINT ["java", "-jar", "/usr/local/lib/k9x-backend.jar"]
+ENTRYPOINT ["java", "-javaagent:/usr/local/lib/newrelic/newrelic.jar", "-jar", "/usr/local/lib/k9x-backend.jar"]
