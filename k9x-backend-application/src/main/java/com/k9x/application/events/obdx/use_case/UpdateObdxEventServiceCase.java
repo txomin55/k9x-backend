@@ -10,10 +10,10 @@ import com.k9x.application.events.obdx.exceptions.ObdxDuplicateExerciseException
 import com.k9x.application.events.obdx.exceptions.ObdxDuplicateJudgeException;
 import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeNotFoundException;
 import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeRequiredException;
-import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
+import com.k9x.domain.disciplines.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
-import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.disciplines.obdx.ObdxConfigurationsRankThresholds;
+import com.k9x.domain.disciplines.obdx.ObdxEventRank;
+import com.k9x.domain.disciplines.obdx.ObdxScoreAveraging;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
@@ -30,6 +30,7 @@ import com.k9x.domain.shared.UtcDates;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,39 +71,16 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
 
         CompetitionSnapshot snapshot = getCompetitionPersistencePort.getCompetition(competitionId);
         CompetitionAggregate competition = CompetitionAggregate.of(snapshot);
-        RankResult rank = computeRank(command, competitorDogs, snapshot.country());
-        competition.updateObdxEventInfo(id, toUpdateData(command, rank.rankScore(), rank.international()),
+        List<String> competitorCountries = command.competitors().stream()
+                .map(c -> competitorDogs.get(c.dogId()))
+                .filter(dog -> dog != null)
+                .map(Dog::getCountry)
+                .toList();
+        boolean international = ObdxEventRank.isInternational(competitorCountries, snapshot.country());
+        Integer rankScore = ObdxEventRank.eventScore(command.configurationId(), command.competitors().size(), international);
+        competition.updateObdxEventInfo(id, toUpdateData(command, rankScore, international),
                 userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
-    }
-
-    private record RankResult(Integer rankScore, boolean international) {
-    }
-
-    /**
-     * Computes what the OBDX event persists for its rank: the numeric {@code rankScore} and the
-     * {@code international} flag. The rank <em>letter</em> is not stored — it is derived from these on read
-     * (see {@code EventSnapshot#rank()}).
-     *
-     * <p>The tier comes from the number of competitors; the international flag is set when at least one
-     * competitor's (dog's) country differs from the event's country — the country of its owning competition;
-     * competitors with no country are ignored. The configuration's band places the score within the 0–1000
-     * scale (see {@link ObdxConfigurationsRankThresholds#eventScore(int, boolean)}); when the configuration
-     * declares no band the score is {@code null}.
-     */
-    private RankResult computeRank(UpdateObdxEventCommand command, Map<String, Dog> competitorDogs, String eventCountry) {
-        boolean international = command.competitors().stream()
-                .map(c -> competitorDogs.get(c.dogId()))
-                .anyMatch(dog -> dog != null && isForeign(dog.getCountry(), eventCountry));
-        ObdxConfigurationsRankThresholds band = ObdxConfigurationsRankThresholds.fromConfigurationId(command.configurationId());
-        Integer rankScore = band == null ? null
-                : band.eventScore(command.competitors().size(), international);
-        return new RankResult(rankScore, international);
-    }
-
-    private boolean isForeign(String competitorCountry, String eventCountry) {
-        return competitorCountry != null && !competitorCountry.isBlank()
-                && !competitorCountry.equalsIgnoreCase(eventCountry);
     }
 
     private ObdxEventUpdateData toUpdateData(UpdateObdxEventCommand command, Integer rankScore, boolean international) {
@@ -176,15 +154,14 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
     }
 
     /**
-     * MID_AVG discards the single highest and lowest score per exercise, so every exercise needs at
-     * least 4 assigned judges for that to be meaningful — otherwise it degenerates into (near-)AVG.
+     * MID_AVG discards the single highest and lowest score per exercise, so every exercise needs enough
+     * assigned judges for that to be meaningful (see {@link ObdxScoreAveraging#hasEnoughJudges}) — otherwise it
+     * degenerates into (near-)AVG.
      */
     private void assertEnoughJudgesForMidAvg(UpdateObdxEventCommand command) {
-        if (command.scoreCalculation() != ObdxAvgMethod.MID_AVG) {
-            return;
-        }
         command.exercises().forEach(e -> {
-            if (e.judgeIds() != null && e.judgeIds().size() < 4) {
+            if (e.judgeIds() != null
+                    && !ObdxScoreAveraging.hasEnoughJudges(command.scoreCalculation(), e.judgeIds().size())) {
                 throw new ObdxNotEnoughJudgesException();
             }
         });

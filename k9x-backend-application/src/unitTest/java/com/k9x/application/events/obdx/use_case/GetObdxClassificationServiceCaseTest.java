@@ -1,6 +1,6 @@
 package com.k9x.application.events.obdx.use_case;
 
-import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
+import com.k9x.domain.disciplines.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationExerciseScoreDTO;

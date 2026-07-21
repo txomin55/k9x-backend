@@ -34,6 +34,32 @@ public final class ObdxCompetitorEventScore {
     }
 
     /**
+     * The competitor's ranking score for an event, or {@code null} when it cannot be computed: the event has no
+     * rank score, the competitor has no score, there is no attainable maximum, or the configuration defines no
+     * rank band. When computable it delegates to {@link #of(int, int, BigDecimal, BigDecimal, BigDecimal, BigDecimal)}
+     * with the configuration's band floor and qualification knees.
+     *
+     * @param eventScore    the event's own rank score, or {@code null} when the event has none.
+     * @param configurationId the event's configuration id (resolves the rank band).
+     * @param firstQualMin  the lowest qualification threshold, or {@code null} when there is no scale.
+     * @param topQualMin    the highest qualification threshold (the knee), or {@code null}.
+     * @param total         the competitor's achieved weighted total score.
+     * @param max           the maximum attainable weighted total score for the event.
+     * @param hasScore      whether the competitor has any recorded score.
+     */
+    public static BigDecimal ofEvent(Integer eventScore, String configurationId, BigDecimal firstQualMin,
+                                     BigDecimal topQualMin, BigDecimal total, BigDecimal max, boolean hasScore) {
+        if (eventScore == null || !hasScore || max == null || max.compareTo(BigDecimal.ZERO) == 0) {
+            return null;
+        }
+        ObdxConfigurationsRankThresholds band = ObdxConfigurationsRankThresholds.fromConfigurationId(configurationId);
+        if (band == null) {
+            return null;
+        }
+        return of(eventScore, band.min(), firstQualMin, topQualMin, total, max);
+    }
+
+    /**
      * @param eventScore    the event's own rank score (the ceiling a 100% competitor reaches).
      * @param configBandMin the configuration's rank band floor.
      * @param firstQualMin  the lowest qualification threshold (absolute total score); {@code null} when the

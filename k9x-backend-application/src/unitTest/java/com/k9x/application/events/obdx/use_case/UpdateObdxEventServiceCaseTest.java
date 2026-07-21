@@ -11,7 +11,7 @@ import com.k9x.application.events.obdx.exceptions.ObdxDuplicateExerciseException
 import com.k9x.application.events.obdx.exceptions.ObdxDuplicateJudgeException;
 import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeNotFoundException;
 import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeRequiredException;
-import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
+import com.k9x.domain.disciplines.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;

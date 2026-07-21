@@ -11,6 +11,7 @@ import com.k9x.application.collections.use_case.dto.FetchCollectionCompetitorDTO
 import com.k9x.application.collections.use_case.dto.FetchCollectionExerciseDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionJudgeWithCollectorDTO;
 import com.k9x.application.collections.use_case.dto.FetchCollectionScoreDTO;
+import com.k9x.domain.disciplines.obdx.ObdxCards;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.events.status.EventCompetitorStatus;
 
@@ -100,6 +101,6 @@ public class GetObdxCollectionServiceCase {
                 .filter(s -> dogId.equals(s.dogId()) && s.yellowCard() != null)
                 .count();
         boolean hasRedCard = scores.stream().anyMatch(s -> dogId.equals(s.dogId()) && s.redCard() != null);
-        return yellowCardCount < 2 && !hasRedCard;
+        return !ObdxCards.isDisqualified(yellowCardCount, hasRedCard);
     }
 }

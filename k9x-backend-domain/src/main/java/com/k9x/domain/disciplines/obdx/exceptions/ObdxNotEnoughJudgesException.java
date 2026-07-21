@@ -1,4 +1,4 @@
-package com.k9x.application.events.obdx.exceptions;
+package com.k9x.domain.disciplines.obdx.exceptions;
 
 import com.k9x.domain.exceptions.DomainException;
 import com.k9x.domain.exceptions.error.ErrorEnum;

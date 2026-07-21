@@ -8,6 +8,7 @@ import com.k9x.domain.events.valueobjects.Score;
 import com.k9x.domain.shared.UtcDates;
 
 import com.k9x.domain.disciplines.obdx.LiveExcludedExercise;
+import com.k9x.domain.disciplines.obdx.ObdxCards;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.disciplines.obdx.ObdxRank;
 
@@ -154,7 +155,7 @@ public record EventSnapshot(
      * remaining exercises.
      */
     public boolean isDisqualified(String dogId) {
-        return yellowCardCount(dogId) >= 2 || hasRedCard(dogId);
+        return ObdxCards.isDisqualified(yellowCardCount(dogId), hasRedCard(dogId));
     }
 
     /**

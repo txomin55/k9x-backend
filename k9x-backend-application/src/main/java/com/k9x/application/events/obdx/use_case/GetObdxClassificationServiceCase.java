@@ -1,13 +1,16 @@
 package com.k9x.application.events.obdx.use_case;
 
-import com.k9x.application.events.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.dto.*;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxCacobAwards;
 import com.k9x.domain.disciplines.obdx.ObdxCompetitorEventScore;
-import com.k9x.domain.disciplines.obdx.ObdxConfigurationsRankThresholds;
+import com.k9x.domain.disciplines.obdx.ObdxQualification;
+import com.k9x.domain.disciplines.obdx.ObdxRanking;
+import com.k9x.domain.disciplines.obdx.ObdxScoreAveraging;
+import com.k9x.domain.disciplines.obdx.ObdxScoreRating;
 import com.k9x.domain.events.status.ClassificationCompetitorStatus;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
@@ -16,7 +19,6 @@ import com.k9x.domain.events.valueobjects.EventJudge;
 import com.k9x.domain.events.valueobjects.Score;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,13 +26,6 @@ public class GetObdxClassificationServiceCase {
 
     private final GetObdxClassificationConfigPort getObdxClassificationConfigPort;
     private final ClassificationCacheManagerPort classificationCacheManagerPort;
-
-    private static final BigDecimal YELLOW_CARD_PENALTY = BigDecimal.TEN;
-    private static final BigDecimal CACOB_MIN_SCORE_RATING = new BigDecimal("80");
-    /** Fallback qualification when the total score does not reach the lowest configured tier. */
-    private static final String NOT_CLASSIFIED_QUALIFICATION = "NC";
-    /** Qualification for a competitor that is disqualified (red card / second yellow) or not competing. */
-    private static final String DISQUALIFIED_QUALIFICATION = "DISQ";
 
     public GetObdxClassificationServiceCase(
             GetObdxClassificationConfigPort getObdxClassificationConfigPort,
@@ -139,6 +134,7 @@ public class GetObdxClassificationServiceCase {
             fciConfirmedByDog.put(competitor.dogId(), competitor.threeFciGenerationsConfirmed());
         }
 
+        List<ObdxQualification.Tier> qualificationTiers = qualificationTiers(config);
         Long scoresLastUpdate = null;
 
         for (FetchClassificationRawRowDTO row : rawRows) {
@@ -166,7 +162,7 @@ public class GetObdxClassificationServiceCase {
             }
 
             if (row.score() != null) {
-                BigDecimal judgeScoreRating = percentageOfMax(row.score(), config.maxAllowedScore());
+                BigDecimal judgeScoreRating = ObdxScoreRating.percentageOfMax(row.score(), config.maxAllowedScore());
                 List<FetchClassificationJudgeScoreDTO> exerciseScores = judgeScoresByDogExercise.get(row.dogId()).get(row.exerciseId());
                 exerciseScores.add(new FetchClassificationJudgeScoreDTO(row.judgeId(), row.judgeName(), row.score(), judgeScoreRating, true));
                 scoresLastUpdate = scoresLastUpdate == null
@@ -194,19 +190,21 @@ public class GetObdxClassificationServiceCase {
                         .getOrDefault(dogId, Map.of()).getOrDefault(exerciseId, List.of());
                 FetchClassificationRedCardDTO exerciseRedCard = redCardByDogExercise
                         .getOrDefault(dogId, Map.of()).get(exerciseId);
-                // exerciseScore is the maximum attainable for this exercise (highest allowed score * coef); it is a
-                // constant reference. totalScore is what the competitor has actually achieved: the judges' average
-                // (or mid-avg) times the coef, which is 0 while the exercise has no scores, minus a flat penalty
+                // maxExerciseScore is the maximum attainable for this exercise (highest allowed score * coef); it is a
+                // constant reference. weightedScore is what the competitor has actually achieved: the judges' average
+                // (or mid-avg) times the coef, which is null while the exercise has no scores, minus a flat penalty
                 // if a yellow card was stamped for this exercise (never below zero).
-                BigDecimal maxExerciseScore = config.maxAllowedScore().multiply(coef).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal maxExerciseScore = ObdxScoreRating.maxExerciseScore(config.maxAllowedScore(), coef);
                 BigDecimal weightedScore = scores.isEmpty() ? null
-                        : computeAvg(scores, event.scoreCalculation(), judgeCountByExercise.getOrDefault(exerciseId, 0))
-                        .multiply(coef).setScale(2, RoundingMode.HALF_UP);
+                        : ObdxScoreRating.weightedScore(
+                        ObdxScoreAveraging.average(scores, event.scoreCalculation(),
+                                judgeCountByExercise.getOrDefault(exerciseId, 0)),
+                        coef);
                 if (weightedScore != null && !exerciseYellowCards.isEmpty()) {
-                    weightedScore = weightedScore.subtract(YELLOW_CARD_PENALTY).max(BigDecimal.ZERO);
+                    weightedScore = ObdxScoreRating.applyYellowCardPenalty(weightedScore);
                 }
                 BigDecimal exerciseScoreRating = weightedScore == null ? null
-                        : percentageOfMax(weightedScore, maxExerciseScore);
+                        : ObdxScoreRating.percentageOfMax(weightedScore, maxExerciseScore);
 
                 if (weightedScore != null) {
                     computedTotal = computedTotal.add(weightedScore);
@@ -222,8 +220,9 @@ public class GetObdxClassificationServiceCase {
 
             BigDecimal totalScore = computedTotal;
 
-            BigDecimal maxPossibleTotal = computeMaxPossibleTotal(config, exercisePositions.keySet());
-            BigDecimal competitorScoreRating = percentageOfMax(totalScore, maxPossibleTotal);
+            BigDecimal maxPossibleTotal = ObdxScoreRating.maxPossibleTotal(
+                    config.maxAllowedScore(), config.coefByExerciseId(), exercisePositions.keySet());
+            BigDecimal competitorScoreRating = ObdxScoreRating.percentageOfMax(totalScore, maxPossibleTotal);
 
             ClassificationCompetitorStatus status;
             if (event.isCompetitorSettled(dogId)) {
@@ -236,8 +235,12 @@ public class GetObdxClassificationServiceCase {
 
             boolean disqualifiedOrNotCompeting = event.isDisqualified(dogId) || event.isNotCompeting(dogId);
             boolean hasScore = anyExerciseScored;
-            String qualification = resolveQualification(config, totalScore, disqualifiedOrNotCompeting, hasScore);
-            BigDecimal rankScore = competitorRankScore(event, config, totalScore, maxPossibleTotal, hasScore);
+            String qualification = ObdxQualification.resolve(qualificationTiers, totalScore, disqualifiedOrNotCompeting, hasScore);
+            BigDecimal rankScore = ObdxCompetitorEventScore.ofEvent(
+                    event.rankScore(), event.configurationId(),
+                    ObdxQualification.minThreshold(qualificationTiers),
+                    ObdxQualification.maxThreshold(qualificationTiers),
+                    totalScore, maxPossibleTotal, hasScore);
 
             competitors.add(new FetchClassificationCompetitorDTO(
                     dogId, meta.dogName(), meta.dogBreed(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
@@ -259,52 +262,25 @@ public class GetObdxClassificationServiceCase {
                 event.scoreCalculation() == null ? null : event.scoreCalculation().name(), judges);
     }
 
-    /**
-     * Awards CACOB/CACIOB (and their reserve RCACOB/RCACIOB) when the event enables them. A competitor "qualifies"
-     * when its dog has {@code threeFciGenerationsConfirmed} and its score rating is above
-     * {@link #CACOB_MIN_SCORE_RATING}. The main award only goes to the overall winner ({@code position() == 1})
-     * if it qualifies — no substitute winner is promoted when it doesn't. The reserve award goes to the next
-     * qualifying competitor found walking down the ranking, skipping the main award's recipient if there was one;
-     * when the winner didn't qualify (so no main award was granted to anyone), the reserve simply goes to the
-     * first qualifying competitor in the ranking, whatever their position.
-     */
-    private void assignCacobAwards(List<FetchClassificationCompetitorDTO> competitors, List<String> eventAwards,
-                                   Map<String, Boolean> fciConfirmedByDog) {
-        if (eventAwards == null) {
-            return;
+    /** Maps the federation config's qualification thresholds to the domain qualification tiers. */
+    private List<ObdxQualification.Tier> qualificationTiers(ObdxClassificationConfigDTO config) {
+        if (config.qualifications() == null) {
+            return List.of();
         }
-        if (eventAwards.contains("CACOB")) {
-            assignCacobAward(competitors, fciConfirmedByDog, "CACOB", "RCACOB");
-        }
-        if (eventAwards.contains("CACIOB")) {
-            assignCacobAward(competitors, fciConfirmedByDog, "CACIOB", "RCACIOB");
-        }
+        return config.qualifications().stream()
+                .map(t -> new ObdxQualification.Tier(t.id(), t.minScore()))
+                .toList();
     }
 
-    private void assignCacobAward(List<FetchClassificationCompetitorDTO> competitors,
-                                  Map<String, Boolean> fciConfirmedByDog, String mainAward, String reserveAward) {
-        List<Integer> qualifyingIndexes = new ArrayList<>();
-        for (int i = 0; i < competitors.size(); i++) {
-            FetchClassificationCompetitorDTO competitor = competitors.get(i);
-            if (Boolean.TRUE.equals(fciConfirmedByDog.get(competitor.dogId()))
-                    && competitor.scoreRating() != null
-                    && competitor.scoreRating().compareTo(CACOB_MIN_SCORE_RATING) > 0) {
-                qualifyingIndexes.add(i);
-            }
-        }
-        if (qualifyingIndexes.isEmpty()) {
-            return;
-        }
-
-        int reserveCandidate = 0;
-        int firstIndex = qualifyingIndexes.get(0);
-        if (competitors.get(firstIndex).position() == 1) {
-            addAward(competitors, firstIndex, mainAward);
-            reserveCandidate = 1;
-        }
-        if (reserveCandidate < qualifyingIndexes.size()) {
-            addAward(competitors, qualifyingIndexes.get(reserveCandidate), reserveAward);
-        }
+    /** Builds the CACOB/CACIOB candidates in ranking order and applies the awards the domain policy assigns. */
+    private void assignCacobAwards(List<FetchClassificationCompetitorDTO> competitors, List<String> eventAwards,
+                                   Map<String, Boolean> fciConfirmedByDog) {
+        List<ObdxCacobAwards.Candidate> candidates = competitors.stream()
+                .map(c -> new ObdxCacobAwards.Candidate(
+                        Boolean.TRUE.equals(fciConfirmedByDog.get(c.dogId())), c.scoreRating(), c.position()))
+                .toList();
+        ObdxCacobAwards.assign(candidates, eventAwards)
+                .forEach((index, awards) -> awards.forEach(award -> addAward(competitors, index, award)));
     }
 
     private void addAward(List<FetchClassificationCompetitorDTO> competitors, int index, String award) {
@@ -318,111 +294,13 @@ public class GetObdxClassificationServiceCase {
     }
 
     /**
-     * Text qualification (calificativo) for the competitor, resolved in this order, independently of the numeric
-     * total score for the first two cases:
-     * <ol>
-     *     <li>a disqualified (red card / second yellow) or not-competing competitor is
-     *     {@link #DISQUALIFIED_QUALIFICATION} (DISQ);</li>
-     *     <li>a competitor with no recorded score has no qualification yet ({@code null});</li>
-     *     <li>otherwise it is the id of the highest configured tier whose {@code minScore} the total score reaches,
-     *     or {@link #NOT_CLASSIFIED_QUALIFICATION} (NC) when it reaches none.</li>
-     * </ol>
-     * Returns {@code null} when the federation configuration defines no qualification scale, so the field stays
-     * absent for grades that don't use it.
-     */
-    private String resolveQualification(ObdxClassificationConfigDTO config, BigDecimal totalScore,
-                                        boolean disqualifiedOrNotCompeting, boolean hasScore) {
-        List<ObdxClassificationConfigDTO.QualificationThreshold> tiers = config.qualifications();
-        if (tiers == null || tiers.isEmpty()) {
-            return null;
-        }
-        if (disqualifiedOrNotCompeting) {
-            return DISQUALIFIED_QUALIFICATION;
-        }
-        if (!hasScore) {
-            return null;
-        }
-        return tiers.stream()
-                .filter(t -> t.minScore() != null && totalScore.compareTo(t.minScore()) >= 0)
-                .max(Comparator.comparing(ObdxClassificationConfigDTO.QualificationThreshold::minScore))
-                .map(ObdxClassificationConfigDTO.QualificationThreshold::id)
-                .orElse(NOT_CLASSIFIED_QUALIFICATION);
-    }
-
-    /**
-     * Maximum attainable total for the competitor: summed over the exercises that actually belong to the event
-     * (not every exercise defined in the federation config), so it matches the totalScore numerator and yields a
-     * 0-100 rating.
-     */
-    private BigDecimal computeMaxPossibleTotal(ObdxClassificationConfigDTO config, Collection<String> eventExerciseIds) {
-        return eventExerciseIds.stream()
-                .map(id -> config.maxAllowedScore().multiply(
-                        config.coefByExerciseId().getOrDefault(id, BigDecimal.ONE)))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private BigDecimal percentageOfMax(BigDecimal score, BigDecimal max) {
-        if (max.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
-        return score.divide(max, 4, RoundingMode.HALF_UP)
-                .multiply(new BigDecimal("100")).setScale(2, RoundingMode.HALF_UP);
-    }
-
-    /**
-     * The competitor's own ranking score (see {@link ObdxCompetitorEventScore}): merit-based, bounded by the
-     * event's own {@code rankScore} and driven by how far the competitor climbs through the configuration's
-     * qualification tiers (with the knee at the highest qualification). Returns {@code null} when the event has
-     * no rank score, the competitor has no score, or there is no attainable maximum / no configuration band.
-     */
-    private BigDecimal competitorRankScore(EventSnapshot event, ObdxClassificationConfigDTO config,
-                                           BigDecimal totalScore, BigDecimal maxPossibleTotal, boolean hasScore) {
-        Integer eventScore = event.rankScore();
-        if (eventScore == null || !hasScore || maxPossibleTotal == null
-                || maxPossibleTotal.compareTo(BigDecimal.ZERO) == 0) {
-            return null;
-        }
-        ObdxConfigurationsRankThresholds band =
-                ObdxConfigurationsRankThresholds.fromConfigurationId(event.configurationId());
-        if (band == null) {
-            return null;
-        }
-        List<BigDecimal> qualMinScores = config.qualifications().stream()
-                .map(ObdxClassificationConfigDTO.QualificationThreshold::minScore)
-                .filter(Objects::nonNull)
-                .toList();
-        BigDecimal firstQualMin = qualMinScores.stream().min(Comparator.naturalOrder()).orElse(null);
-        BigDecimal topQualMin = qualMinScores.stream().max(Comparator.naturalOrder()).orElse(null);
-        return ObdxCompetitorEventScore.of(eventScore, band.min(), firstQualMin, topQualMin,
-                totalScore, maxPossibleTotal);
-    }
-
-    private BigDecimal computeAvg(List<BigDecimal> scores, ObdxAvgMethod method, int judgeCount) {
-        if (scores.isEmpty()) return BigDecimal.ZERO;
-        if (method == ObdxAvgMethod.MID_AVG) {
-            if (judgeCount < 4) throw new ObdxNotEnoughJudgesException();
-            if (scores.size() >= 4) {
-                List<BigDecimal> trimmed = new ArrayList<>(scores);
-                trimmed.remove(Collections.min(trimmed));
-                trimmed.remove(Collections.max(trimmed));
-                return average(trimmed);
-            }
-        }
-        return average(scores);
-    }
-
-    private BigDecimal average(List<BigDecimal> values) {
-        BigDecimal sum = values.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-        return sum.divide(BigDecimal.valueOf(values.size()), 4, RoundingMode.HALF_UP);
-    }
-
-    /**
-     * Flags each judge score with whether it actually applied to {@link #computeAvg}: under MID_AVG the single
-     * highest and single lowest score are dropped regardless of how many judges have scored so far (a tie at
-     * an extreme only excludes one occurrence, matching {@link #computeAvg}'s removal once it does trim at 4+
-     * scores); everything else — including every score under AVG — applies.
+     * Flags each judge score with whether it actually applied to the exercise average: under MID_AVG the single
+     * highest and single lowest score are dropped (see {@link ObdxScoreAveraging#excludedIndexes}); everything
+     * else — including every score under AVG — applies.
      */
     private List<FetchClassificationJudgeScoreDTO> withApplies(List<FetchClassificationJudgeScoreDTO> judgeEntries,
                                                                 ObdxAvgMethod method) {
-        Set<Integer> excluded = excludedJudgeIndexes(
+        Set<Integer> excluded = ObdxScoreAveraging.excludedIndexes(
                 judgeEntries.stream().map(FetchClassificationJudgeScoreDTO::score).toList(), method);
         if (excluded.isEmpty()) {
             return judgeEntries;
@@ -434,30 +312,6 @@ public class GetObdxClassificationServiceCase {
                     !excluded.contains(i)));
         }
         return result;
-    }
-
-    private Set<Integer> excludedJudgeIndexes(List<BigDecimal> scores, ObdxAvgMethod method) {
-        if (method != ObdxAvgMethod.MID_AVG || scores.isEmpty()) {
-            return Set.of();
-        }
-        List<BigDecimal> working = new ArrayList<>(scores);
-        List<Integer> indices = new ArrayList<>();
-        for (int i = 0; i < scores.size(); i++) {
-            indices.add(i);
-        }
-
-        int minPos = working.indexOf(Collections.min(working));
-        int minOriginalIndex = indices.remove(minPos);
-        working.remove(minPos);
-
-        if (working.isEmpty()) {
-            return Set.of(minOriginalIndex);
-        }
-
-        int maxPos = working.indexOf(Collections.max(working));
-        int maxOriginalIndex = indices.remove(maxPos);
-
-        return new HashSet<>(List.of(minOriginalIndex, maxOriginalIndex));
     }
 
     private void assignPositions(List<FetchClassificationCompetitorDTO> competitors,
@@ -481,18 +335,8 @@ public class GetObdxClassificationServiceCase {
         }
     }
 
-    /**
-     * Ranking tier used as the primary sort key: regular competitors first, then red-carded (disqualified)
-     * competitors ordered by score among themselves, then not-competing competitors last.
-     */
     private int rankingTier(FetchClassificationCompetitorDTO competitor) {
-        if (competitor.notCompeting()) {
-            return 2;
-        }
-        if (hasRedCard(competitor)) {
-            return 1;
-        }
-        return 0;
+        return ObdxRanking.tier(competitor.notCompeting(), hasRedCard(competitor));
     }
 
     private boolean hasRedCard(FetchClassificationCompetitorDTO competitor) {
