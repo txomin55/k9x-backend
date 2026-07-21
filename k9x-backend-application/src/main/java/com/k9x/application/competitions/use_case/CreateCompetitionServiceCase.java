@@ -3,9 +3,10 @@ package com.k9x.application.competitions.use_case;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.application.utils.date.DateUtils;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 
-public class CreateCompetitionServiceCase {
+public class CreateCompetitionServiceCase implements TransactionalUseCase {
 
     private final SaveCompetitionPersistencePort saveCompetitionPersistencePort;
 

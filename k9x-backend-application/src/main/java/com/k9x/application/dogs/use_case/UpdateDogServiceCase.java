@@ -5,9 +5,10 @@ import com.k9x.application.dogs.port.payload.UpdateDogPersistencePayload;
 import com.k9x.application.dogs.use_case.command.UpdateDogCommand;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.dogs.aggregates.Dog;
 
-public class UpdateDogServiceCase {
+public class UpdateDogServiceCase implements TransactionalUseCase {
 
     private final GetDogPersistencePort getDogPersistencePort;
     private final UpdateDogPersistencePort updateDogPersistencePort;

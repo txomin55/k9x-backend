@@ -6,8 +6,9 @@ import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.utils.auth.AuthAssertions;
+import com.k9x.application.shared.TransactionalUseCase;
 
-public class DeleteEventServiceCase {
+public class DeleteEventServiceCase implements TransactionalUseCase {
 
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final SaveCompetitionPersistencePort saveCompetitionPersistencePort;

@@ -4,9 +4,10 @@ import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.application.utils.auth.AuthAssertions;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 
-public class DeleteCompetitionServiceCase {
+public class DeleteCompetitionServiceCase implements TransactionalUseCase {
 
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final SaveCompetitionPersistencePort saveCompetitionPersistencePort;

@@ -8,7 +8,6 @@ import com.k9x.domain.competitions.commands.ObdxExerciseItem;
 import com.k9x.domain.competitions.commands.ObdxJudgeItem;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,8 +15,11 @@ import java.util.List;
 import static com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.*;
 
 /**
- * Persists a {@link CompetitionAggregate} by replaying its pending changes inside a single
- * transaction, emitting only the SQL affected by each change.
+ * Persists a {@link CompetitionAggregate} by replaying its pending changes, emitting only the SQL
+ * affected by each change. Atomicity is provided by the surrounding use-case transaction (opened by
+ * the transactional advisor over {@code com.k9x.application..use_case}), so all changes replayed here
+ * commit or roll back together with the rest of the use case. This adapter therefore issues plain
+ * statements on the transaction-aware {@link DSLContext} and does not open its own transaction.
  */
 public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePort {
 
@@ -29,12 +31,9 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
 
     @Override
     public void save(CompetitionAggregate competition) {
-        dsl.transaction(cfg -> {
-            DSLContext ctx = DSL.using(cfg);
-            for (CompetitionChange change : competition.pendingChanges()) {
-                apply(ctx, change);
-            }
-        });
+        for (CompetitionChange change : competition.pendingChanges()) {
+            apply(dsl, change);
+        }
     }
 
     private void apply(DSLContext ctx, CompetitionChange change) {

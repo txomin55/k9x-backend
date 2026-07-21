@@ -5,9 +5,10 @@ import com.k9x.application.dogs.port.CreateDogPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.dogs.aggregates.Sex;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
-public class CreateDogServiceCase {
+public class CreateDogServiceCase implements TransactionalUseCase {
 
     private final CreateDogPersistencePort createDogPersistencePort;
     private final GetDogPersistencePort getDogPersistencePort;

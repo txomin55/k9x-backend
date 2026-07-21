@@ -25,6 +25,7 @@ import com.k9x.domain.competitions.commands.ObdxJudgeItem;
 import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.shared.UtcDates;
 
 import java.util.HashSet;
@@ -33,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class UpdateObdxEventServiceCase {
+public class UpdateObdxEventServiceCase implements TransactionalUseCase {
 
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final SaveCompetitionPersistencePort saveCompetitionPersistencePort;

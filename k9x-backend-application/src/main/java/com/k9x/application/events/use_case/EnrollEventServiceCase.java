@@ -5,12 +5,13 @@ import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.events.obdx.use_case.BihGuards;
 import com.k9x.application.events.obdx.use_case.command.EnrollObdxEventCommand;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 
-public class EnrollEventServiceCase {
+public class EnrollEventServiceCase implements TransactionalUseCase {
 
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final SaveCompetitionPersistencePort saveCompetitionPersistencePort;

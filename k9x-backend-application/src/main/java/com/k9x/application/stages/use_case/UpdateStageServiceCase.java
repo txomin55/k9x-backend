@@ -8,9 +8,10 @@ import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.competitions.commands.StageUpdateData;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.application.utils.auth.AuthAssertions;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.shared.UtcDates;
 
-public class UpdateStageServiceCase {
+public class UpdateStageServiceCase implements TransactionalUseCase {
 
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final SaveCompetitionPersistencePort saveCompetitionPersistencePort;

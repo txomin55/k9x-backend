@@ -6,9 +6,10 @@ import com.k9x.application.events.obdx.use_case.command.UpdateNotCompetingComman
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.application.utils.auth.AuthAssertions;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 
-public class UpdateNotCompetingServiceCase {
+public class UpdateNotCompetingServiceCase implements TransactionalUseCase {
 
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final SaveCompetitionPersistencePort saveCompetitionPersistencePort;

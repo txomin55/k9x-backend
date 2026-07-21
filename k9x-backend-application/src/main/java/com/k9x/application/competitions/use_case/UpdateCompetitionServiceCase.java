@@ -8,9 +8,10 @@ import com.k9x.application.competitions.use_case.dto.Coordinates;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.application.utils.auth.AuthAssertions;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.competitions.commands.CompetitionUpdateData;
 
-public class UpdateCompetitionServiceCase {
+public class UpdateCompetitionServiceCase implements TransactionalUseCase {
 
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final GeoCoordinatesPort geoCoordinatesPort;

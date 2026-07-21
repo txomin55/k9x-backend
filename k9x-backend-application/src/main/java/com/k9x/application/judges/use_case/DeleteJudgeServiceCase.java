@@ -5,8 +5,9 @@ import com.k9x.application.judges.port.GetJudgePersistencePort;
 import com.k9x.domain.judges.aggregates.Judge;
 import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.application.utils.date.DateUtils;
+import com.k9x.application.shared.TransactionalUseCase;
 
-public class DeleteJudgeServiceCase {
+public class DeleteJudgeServiceCase implements TransactionalUseCase {
 
     private final GetJudgePersistencePort getJudgePersistencePort;
     private final DeleteJudgePersistencePort deleteJudgePersistencePort;

@@ -5,12 +5,13 @@ import com.k9x.application.users.use_case.command.LoginCommand;
 import com.k9x.application.users.use_case.dto.AuthTokenDTO;
 import com.k9x.application.users.use_case.dto.LoginDTO;
 import com.k9x.application.users.use_case.dto.ValidatedIdTokenDTO;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 import java.time.Duration;
 import java.util.Optional;
 
-public class LoginServiceCase {
+public class LoginServiceCase implements TransactionalUseCase {
 
     private final ValidateIdTokenPort validateIdTokenPort;
     private final ExchangeAuthorizationCodePort exchangeAuthorizationCodePort;

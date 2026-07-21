@@ -8,9 +8,10 @@ import com.k9x.application.events.obdx.port.GetObdxEventCollectorPersistencePort
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.competitions.commands.YellowCardData;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 
-public class RegisterObdxYellowCardServiceCase {
+public class RegisterObdxYellowCardServiceCase implements TransactionalUseCase {
 
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final GetObdxEventCollectorPersistencePort getObdxEventCollectorPersistencePort;

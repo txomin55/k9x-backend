@@ -5,9 +5,10 @@ import com.k9x.application.judges.use_case.command.UpdateJudgeCommand;
 import com.k9x.application.judges.port.GetJudgePersistencePort;
 import com.k9x.application.judges.port.UpdateJudgePersistencePort;
 import com.k9x.application.utils.auth.AuthAssertions;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.judges.aggregates.Judge;
 
-public class UpdateJudgeServiceCase {
+public class UpdateJudgeServiceCase implements TransactionalUseCase {
 
     private final GetJudgePersistencePort getJudgePersistencePort;
     private final UpdateJudgePersistencePort updateJudgePersistencePort;

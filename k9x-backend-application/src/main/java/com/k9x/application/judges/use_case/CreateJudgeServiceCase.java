@@ -3,8 +3,9 @@ package com.k9x.application.judges.use_case;
 import com.k9x.application.judges.port.CreateJudgePersistencePort;
 import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.application.utils.date.DateUtils;
+import com.k9x.application.shared.TransactionalUseCase;
 
-public class CreateJudgeServiceCase {
+public class CreateJudgeServiceCase implements TransactionalUseCase {
 
     private final CreateJudgePersistencePort createJudgePersistencePort;
 

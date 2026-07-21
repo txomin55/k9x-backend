@@ -10,12 +10,13 @@ import com.k9x.application.events.obdx.use_case.command.UpdateObdxScoreCommand;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.competitions.commands.ScoreUpdateData;
+import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-public class UpdateObdxScoreServiceCase {
+public class UpdateObdxScoreServiceCase implements TransactionalUseCase {
 
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final GetObdxEventCollectorPersistencePort getObdxEventCollectorPersistencePort;
