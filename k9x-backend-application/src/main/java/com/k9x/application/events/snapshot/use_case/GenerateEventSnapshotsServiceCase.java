@@ -1,5 +1,6 @@
 package com.k9x.application.events.snapshot.use_case;
 
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.snapshot.port.GetPendingSnapshotEventsPersistencePort;
 import com.k9x.application.events.snapshot.port.SaveObdxSnapshotPersistencePort;
@@ -13,6 +14,7 @@ import com.k9x.domain.shared.UtcDates;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Persists a classification snapshot for every event whose stage has already finished and that does not yet
@@ -69,7 +71,17 @@ public class GenerateEventSnapshotsServiceCase {
                         : classification.obdx().competitors().stream()
                                 .map(c -> new ObdxCompetitorPosition(c.dogId(), (short) c.position(), c.rankScore()))
                                 .toList();
-                saveObdxSnapshotPersistencePort.save(pending.eventId(), now, classification.obdx(), competitors);
+                // Event-level summary of every award actually granted across all competitors (e.g. CACIOB +
+                // RCACIOB), deduplicated in ranking order. Persisted onto k9x.events.granted_awards.
+                List<String> grantedAwards = classification.obdx() == null ? List.of()
+                        : classification.obdx().competitors().stream()
+                                .map(FetchClassificationCompetitorDTO::awards)
+                                .filter(Objects::nonNull)
+                                .flatMap(List::stream)
+                                .distinct()
+                                .toList();
+                saveObdxSnapshotPersistencePort.save(pending.eventId(), now, classification.obdx(), competitors,
+                        grantedAwards);
             }
         }
     }

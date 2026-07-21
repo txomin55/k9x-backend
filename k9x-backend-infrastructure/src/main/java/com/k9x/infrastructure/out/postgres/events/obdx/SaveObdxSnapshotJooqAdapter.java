@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.snapshot.port.SaveObdxSnapshotPersistencePort;
 import com.k9x.application.events.snapshot.port.payload.ObdxCompetitorPosition;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventSnapshot;
 import org.jooq.DSLContext;
 import org.jooq.JSON;
@@ -16,10 +17,11 @@ import java.util.List;
 import static com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
 
 /**
- * Persists an OBDX event snapshot atomically: the per-competitor position and rank score, plus the snapshot
- * marker row, all inside one {@code dsl.transaction} so they commit or roll back together. The marker insert is
- * {@code ON CONFLICT DO NOTHING} so a concurrent run keeps the first snapshot; the competitor updates are
- * idempotent, so a retry after a failure simply re-stamps the same values.
+ * Persists an OBDX event snapshot atomically: the per-competitor position and rank score, the event-level
+ * granted-awards list, plus the snapshot marker row, all inside one {@code dsl.transaction} so they commit or
+ * roll back together. The marker insert is {@code ON CONFLICT DO NOTHING} so a concurrent run keeps the first
+ * snapshot; the competitor updates and the granted-awards update are idempotent, so a retry after a failure
+ * simply re-stamps the same values.
  */
 public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistencePort {
 
@@ -33,7 +35,7 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
 
     @Override
     public void save(String eventId, long snapshotAt, FetchObdxClassificationDTO obdx,
-                     List<ObdxCompetitorPosition> competitors) {
+                     List<ObdxCompetitorPosition> competitors, List<String> grantedAwards) {
         String json = serialize(eventId, obdx);
 
         dsl.transaction(cfg -> {
@@ -49,6 +51,11 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
             if (!batch.isEmpty()) {
                 ctx.batch(batch).execute();
             }
+
+            ctx.update(Tables.EVENTS)
+                    .set(Tables.EVENTS.GRANTED_AWARDS, grantedAwards.toArray(String[]::new))
+                    .where(Tables.EVENTS.ID.eq(eventId))
+                    .execute();
 
             EventSnapshot es = EventSnapshot.EVENT_SNAPSHOT;
             ctx.insertInto(es)

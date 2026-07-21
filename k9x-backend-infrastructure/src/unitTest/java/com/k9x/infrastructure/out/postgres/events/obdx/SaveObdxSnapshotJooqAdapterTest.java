@@ -47,10 +47,13 @@ class SaveObdxSnapshotJooqAdapterTest {
 
         new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, obdx(),
                 List.of(new ObdxCompetitorPosition("dog-1", (short) 1, new BigDecimal("475.50")),
-                        new ObdxCompetitorPosition("dog-2", (short) 3, null)));
+                        new ObdxCompetitorPosition("dog-2", (short) 3, null)),
+                List.of("CACIOB", "RCACIOB"));
 
         assertThat(sqls).anyMatch(s -> s.contains("update \"obdx\".\"event_competitors\"")
                 && s.contains("\"position\"") && s.contains("\"rank_score\""));
+        assertThat(sqls).anyMatch(s -> s.contains("update \"k9x\".\"events\"")
+                && s.contains("\"granted_awards\""));
         assertThat(sqls).anyMatch(s -> s.contains("insert into \"obdx\".\"event_snapshot\"")
                 && s.contains("on conflict") && s.contains("do nothing"));
     }
@@ -61,9 +64,10 @@ class SaveObdxSnapshotJooqAdapterTest {
         DSLContext dsl = capturingDsl(sqls);
 
         new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, obdx(),
-                List.of());
+                List.of(), List.of());
 
         assertThat(sqls).noneMatch(s -> s.contains("update \"obdx\".\"event_competitors\""));
+        assertThat(sqls).anyMatch(s -> s.contains("update \"k9x\".\"events\""));
         assertThat(sqls).anyMatch(s -> s.contains("insert into \"obdx\".\"event_snapshot\""));
     }
 }

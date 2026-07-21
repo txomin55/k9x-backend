@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -57,6 +58,12 @@ class GenerateEventSnapshotsServiceCaseTest {
                 List.of(), List.of(), null, rankScore);
     }
 
+    private FetchClassificationCompetitorDTO competitorWithAwards(String dogId, int position, List<String> awards) {
+        return new FetchClassificationCompetitorDTO(dogId, dogId, "Border Collie", "o", "h", "t", "ES",
+                (short) 5, (short) 7, position, null, null, false, "OK", false, false, false,
+                List.of(), awards, null, null);
+    }
+
     @Test
     void does_nothing_when_there_are_no_pending_events() {
         when(getPendingSnapshotEventsPersistencePort.getFinishedEventsWithoutSnapshot(anyLong()))
@@ -79,8 +86,24 @@ class GenerateEventSnapshotsServiceCaseTest {
 
         serviceCase.generateSnapshots();
 
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(o1), eq(List.of()));
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(o2), eq(List.of()));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(o1), eq(List.of()), eq(List.of()));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(o2), eq(List.of()), eq(List.of()));
+    }
+
+    @Test
+    void persists_the_deduplicated_union_of_granted_awards() {
+        FetchObdxClassificationDTO obdx = obdx(
+                competitorWithAwards("dog-1", 1, List.of("CACIOB")),
+                competitorWithAwards("dog-2", 2, List.of("RCACIOB")),
+                competitorWithAwards("dog-3", 3, List.of()));
+        when(getPendingSnapshotEventsPersistencePort.getFinishedEventsWithoutSnapshot(anyLong()))
+                .thenReturn(List.of(new PendingSnapshotEventDTO("evt-1", "obdx")));
+        when(getEventClassificationServiceCase.getClassification("evt-1")).thenReturn(classification("evt-1", obdx));
+
+        serviceCase.generateSnapshots();
+
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(obdx), anyList(),
+                eq(List.of("CACIOB", "RCACIOB")));
     }
 
     @Test
@@ -99,7 +122,7 @@ class GenerateEventSnapshotsServiceCaseTest {
                 new ObdxCompetitorPosition("dog-1", (short) 1, new BigDecimal("475.50")),
                 new ObdxCompetitorPosition("dog-2", (short) 1, new BigDecimal("475.50")),
                 new ObdxCompetitorPosition("dog-3", (short) 3, new BigDecimal("410.00")));
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(obdx), eq(expected));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(obdx), eq(expected), eq(List.of()));
     }
 
     @Test
@@ -110,7 +133,7 @@ class GenerateEventSnapshotsServiceCaseTest {
 
         serviceCase.generateSnapshots();
 
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), isNull(), eq(List.of()));
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), isNull(), eq(List.of()), eq(List.of()));
     }
 
     @Test
@@ -124,8 +147,8 @@ class GenerateEventSnapshotsServiceCaseTest {
         serviceCase.generateSnapshots();
 
         verify(getEventClassificationServiceCase, never()).getClassification("evt-1");
-        verify(saveObdxSnapshotPersistencePort, never()).save(eq("evt-1"), anyLong(), any(), any());
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(o2), eq(List.of()));
+        verify(saveObdxSnapshotPersistencePort, never()).save(eq("evt-1"), anyLong(), any(), any(), any());
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(o2), eq(List.of()), eq(List.of()));
     }
 
     @Test
@@ -140,7 +163,7 @@ class GenerateEventSnapshotsServiceCaseTest {
 
         serviceCase.generateSnapshots();
 
-        verify(saveObdxSnapshotPersistencePort, never()).save(eq("evt-1"), anyLong(), any(), any());
-        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(o2), eq(List.of()));
+        verify(saveObdxSnapshotPersistencePort, never()).save(eq("evt-1"), anyLong(), any(), any(), any());
+        verify(saveObdxSnapshotPersistencePort).save(eq("evt-2"), anyLong(), eq(o2), eq(List.of()), eq(List.of()));
     }
 }
