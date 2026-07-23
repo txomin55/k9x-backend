@@ -2,7 +2,6 @@ package com.k9x.infrastructure.in.rest.endpoints.stages;
 
 import com.k9x.application.stages.use_case.GetStageServiceCase;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailCompetitorDTO;
-import com.k9x.infrastructure.in.rest.mapper.AwardResponseMapper;
 import com.k9x.oas.stub.api.StagesFetchOneApiDelegate;
 import com.k9x.oas.stub.model.IdNameDTO;
 import com.k9x.oas.stub.model.StageDetailResponseDTO;
@@ -43,7 +42,7 @@ public class GetStage implements StagesFetchOneApiDelegate {
                                 e.status(),
                                 e.enrollmentOpened(),
                                 e.enrollmentDeadline() != null ? e.enrollmentDeadline() : null,
-                                AwardResponseMapper.toIdNameList(e.awards()),
+                                e.awards().stream().map(a -> new IdNameDTO(a, a)).toList(),
                                 e.rank()))
                         .toList(),
                 List.of(),

@@ -9,4 +9,8 @@ public record FetchClassificationCompetitorDTO(
         boolean tied, String status,
         Boolean bih, Boolean reserve, boolean notCompeting, List<FetchClassificationExerciseScoreDTO> exercises,
         List<String> awards, String qualification, BigDecimal rankScore) {
+
+    public FetchClassificationCompetitorDTO {
+        awards = awards == null ? List.of() : awards;
+    }
 }

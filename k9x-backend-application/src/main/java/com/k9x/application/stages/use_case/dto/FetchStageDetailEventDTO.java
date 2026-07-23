@@ -7,4 +7,8 @@ public record FetchStageDetailEventDTO(String id, String name, String discipline
                                        List<FetchStageDetailCompetitorDTO> competitors, String status,
                                        boolean enrollmentOpened, Long enrollmentDeadline, List<String> awards,
                                        String rank) {
+
+    public FetchStageDetailEventDTO {
+        awards = awards == null ? List.of() : awards;
+    }
 }

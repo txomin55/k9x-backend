@@ -42,7 +42,7 @@ public class GetFederationsConfigurations implements SecuredDisciplinesFetchAllB
     private List<FederationConfigurationsResponseDTO> mapFederations(List<ConfigurationsDTO> configurations) {
         return configurations.stream()
                 .map(f -> new FederationConfigurationsResponseDTO(
-                        new FederationConfigurationResponseDTO(f.info().id(), f.info().name(), f.info().country()),
+                        new FederationConfigurationResponseDTO(f.info().id(), f.info().name()),
                         f.configurations().stream()
                                 .map(c -> new ConfigurationResponseDTO(c.id(), c.name(),
                                         c.exercises().stream()

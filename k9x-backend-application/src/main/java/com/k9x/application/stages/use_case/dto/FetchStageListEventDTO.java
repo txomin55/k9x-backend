@@ -5,4 +5,8 @@ import java.util.List;
 public record FetchStageListEventDTO(String id, String name, String disciplineId, int competitorCount, String status,
                                      boolean enrollmentOpened, Long enrollmentDeadline, List<String> awards,
                                      String rank) {
+
+    public FetchStageListEventDTO {
+        awards = awards == null ? List.of() : awards;
+    }
 }

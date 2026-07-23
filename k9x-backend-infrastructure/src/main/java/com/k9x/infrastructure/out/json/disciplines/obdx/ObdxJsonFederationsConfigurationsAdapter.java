@@ -11,17 +11,8 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ObdxJsonFederationsConfigurationsAdapter implements GetObdxFederationsConfigurationsPort {
-
-    // TODO: country was dropped from configuration.json; kept as a static per-federation mapping for now.
-    private static final Map<String, String> COUNTRY_BY_FEDERATION = Map.of(
-            "cpc", "PT",
-            "fci", "EU",
-            "rsce", "ES",
-            "enci", "IT");
-    private static final String DEFAULT_COUNTRY = "EU";
 
     private final ObdxFederationsConfigurationsCache cache;
     private final MessageSource messageSource;
@@ -34,13 +25,10 @@ public class ObdxJsonFederationsConfigurationsAdapter implements GetObdxFederati
     @Override
     public List<ConfigurationsDTO> getConfigurations() {
         LinkedHashMap<String, List<ConfigurationDTO>> byFederation = new LinkedHashMap<>();
-        LinkedHashMap<String, String> countryByFederation = new LinkedHashMap<>();
 
         for (ObdxFederationsConfigurationsCache.Entry entry : cache.getAll()) {
             String federationKey = entry.federationKey();
             var config = entry.configuration();
-            countryByFederation.putIfAbsent(federationKey,
-                    COUNTRY_BY_FEDERATION.getOrDefault(federationKey, DEFAULT_COUNTRY));
             List<ExerciseDTO> exercises = config.exercises().stream()
                     .map(e -> new ExerciseDTO(e.id(), translate(e.id())))
                     .toList();
@@ -50,16 +38,15 @@ public class ObdxJsonFederationsConfigurationsAdapter implements GetObdxFederati
 
         return byFederation.entrySet().stream()
                 .map(entry -> new ConfigurationsDTO(
-                        federationInfo(entry.getKey(), countryByFederation.get(entry.getKey())),
+                        federationInfo(entry.getKey()),
                         entry.getValue()))
                 .toList();
     }
 
-    private FederationInfoDTO federationInfo(String key, String country) {
+    private FederationInfoDTO federationInfo(String key) {
         return new FederationInfoDTO(
                 key.toUpperCase(),
-                translate("federation." + key + ".name", key),
-                country);
+                translate("federation." + key + ".name", key));
     }
 
     private String translate(String id) {

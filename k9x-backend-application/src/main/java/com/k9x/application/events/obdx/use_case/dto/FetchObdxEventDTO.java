@@ -7,4 +7,8 @@ import java.util.List;
 public record FetchObdxEventDTO(String id, String name, String stageId, String stageName, String discipline,
                                 String status, Long enrollmentDeadline, ObdxAvgMethod scoreCalculation,
                                 List<String> awards) {
+
+    public FetchObdxEventDTO {
+        awards = awards == null ? List.of() : awards;
+    }
 }
