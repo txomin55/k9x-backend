@@ -471,6 +471,19 @@ class CompetitionAggregateTest {
     }
 
     @Test
+    void enrollDog_throws_when_dog_is_already_enrolled() {
+        EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i",
+                (short) 1, null, true, false, null, null, null);
+        EventSnapshot eventWithCompetitors = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, FUTURE,
+                0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of(), List.of(), null, null);
+        CompetitionAggregate aggregate =
+                CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(eventWithCompetitors)));
+
+        assertThrows(DogAlreadyEnrolledException.class,
+                () -> aggregate.enrollDog("evt-1", "dog-1", false, OWNER, NOW));
+    }
+
+    @Test
     void updateObdxEventInfo_throws_when_user_is_not_event_creator() {
         EventSnapshot otherEvent = new EventSnapshot("evt-1", null, null, "Event", "stage-1", "other", null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null);

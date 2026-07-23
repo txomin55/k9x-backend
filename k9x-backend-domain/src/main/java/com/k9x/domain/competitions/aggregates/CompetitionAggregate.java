@@ -78,6 +78,30 @@ public final class CompetitionAggregate {
         return event != null && event.creator().equals(userId);
     }
 
+    /**
+     * The event's creator, or {@code null} when the event is unknown. Used by the application layer to
+     * address a post-enrollment notification without re-reading the aggregate.
+     */
+    public String eventCreator(String eventId) {
+        EventSnapshot event = findEvent(eventId);
+        return event == null ? null : event.creator();
+    }
+
+    /**
+     * The id of the stage that owns the event, or {@code null} when the event is unknown.
+     */
+    public String stageIdOfEvent(String eventId) {
+        StageSnapshot stage = findStageOfEvent(eventId);
+        return stage == null ? null : stage.id();
+    }
+
+    /**
+     * The id of the competition this aggregate wraps.
+     */
+    public String competitionId() {
+        return snapshot == null ? null : snapshot.id();
+    }
+
     public void update(CompetitionUpdateData data, String userId, long now) {
         assertCompetitionMutableBy(userId);
         assertCompetitionUpdatable(now);
@@ -165,6 +189,9 @@ public final class CompetitionAggregate {
         }
         if (!stage.enrollmentOpened(event, now)) {
             throw new EnrollmentClosedException();
+        }
+        if (isDogEnrolled(event, dogId)) {
+            throw new DogAlreadyEnrolledException();
         }
         changes.add(new DogEnrolled(eventId, dogId, bih, nextStartNumber(event), now));
     }
@@ -477,6 +504,11 @@ public final class CompetitionAggregate {
                 .filter(e -> e.id().equals(eventId))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private boolean isDogEnrolled(EventSnapshot event, String dogId) {
+        return event.competitors() != null
+                && event.competitors().stream().anyMatch(c -> c.dogId().equals(dogId));
     }
 
     private EventCompetitor findCompetitor(EventSnapshot event, String dogId) {

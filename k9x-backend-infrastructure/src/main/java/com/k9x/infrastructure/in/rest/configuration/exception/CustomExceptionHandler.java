@@ -36,7 +36,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     final ResponseEntity<CustomError> handleCustomException(DomainException ex, Locale locale) {
 
-        log.warn("Domain exception [{}] args={}", ex.getId(), ex.getArgs());
+        log.warn("Domain exception [{}] args={}", ex.getId(), ex.getArgs(), ex);
         CustomError error = new CustomError(
                 messageSource.getMessage(ex.getId(), ex.getArgs(), locale), HttpStatus.PRECONDITION_FAILED.value());
         return new ResponseEntity<>(error, HttpStatus.PRECONDITION_FAILED);
