@@ -88,6 +88,14 @@ public final class CompetitionAggregate {
     }
 
     /**
+     * The event's display name, or {@code null} when the event is unknown.
+     */
+    public String eventName(String eventId) {
+        EventSnapshot event = findEvent(eventId);
+        return event == null ? null : event.name();
+    }
+
+    /**
      * The id of the stage that owns the event, or {@code null} when the event is unknown.
      */
     public String stageIdOfEvent(String eventId) {
@@ -96,10 +104,25 @@ public final class CompetitionAggregate {
     }
 
     /**
+     * The display name of the stage that owns the event, or {@code null} when the event is unknown.
+     */
+    public String stageNameOfEvent(String eventId) {
+        StageSnapshot stage = findStageOfEvent(eventId);
+        return stage == null ? null : stage.name();
+    }
+
+    /**
      * The id of the competition this aggregate wraps.
      */
     public String competitionId() {
         return snapshot == null ? null : snapshot.id();
+    }
+
+    /**
+     * The display name of the competition this aggregate wraps.
+     */
+    public String competitionName() {
+        return snapshot == null ? null : snapshot.name();
     }
 
     public void update(CompetitionUpdateData data, String userId, long now) {

@@ -53,11 +53,14 @@ public class EnrollEventServiceCase implements TransactionalUseCase {
         if (creator == null || creator.equals(enrollerUserId)) {
             return;
         }
-        // Only ids: the frontend maps type + metadata to the displayed text and the URL to open.
+        // Ids + display names: the frontend maps type + metadata to the displayed text and the URL.
         pushNotifier.notify(creator, new PushNotification(NotificationType.NEW_ENROLL, Map.of(
                 "competition_id", competition.competitionId(),
+                "competition_name", competition.competitionName(),
                 "stage_id", competition.stageIdOfEvent(eventId),
+                "stage_name", competition.stageNameOfEvent(eventId),
                 "event_id", eventId,
+                "event_name", competition.eventName(eventId),
                 "dog_id", dogId)));
     }
 }
