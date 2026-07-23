@@ -15,6 +15,18 @@ CREATE TABLE k9x.organizers
     CONSTRAINT organizers_user_fk FOREIGN KEY (user_id) REFERENCES k9x.users (id)
 );
 
+CREATE TABLE k9x.push_subscriptions
+(
+    endpoint    VARCHAR(500) NOT NULL,
+    user_id     VARCHAR(255) NOT NULL,
+    auth        VARCHAR(255) NOT NULL,
+    p256dh      VARCHAR(255) NOT NULL,
+    created_at  BIGINT       NOT NULL,
+    last_update BIGINT       NOT NULL,
+    CONSTRAINT push_subscriptions_pkey PRIMARY KEY (endpoint),
+    CONSTRAINT push_subscriptions_user_fk FOREIGN KEY (user_id) REFERENCES k9x.users (id)
+);
+
 CREATE TABLE k9x.dogs
 (
     id                          VARCHAR(255) NOT NULL,

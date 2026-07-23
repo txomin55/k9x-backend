@@ -1,6 +1,7 @@
 package com.k9x.configuration.secured.users;
 
 import com.k9x.application.users.use_case.LogoutServiceCase;
+import com.k9x.application.users.use_case.RegisterPushSubscriptionServiceCase;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.configuration.session.RefreshTokenCookie;
 import com.k9x.infrastructure.in.rest.endpoints.secured.users.GetUserData;
@@ -18,8 +19,8 @@ public class SecuredUserEndpointConfiguration {
     }
 
     @Bean
-    public RegisterPush registerPush() {
-        return new RegisterPush();
+    public RegisterPush registerPush(RegisterPushSubscriptionServiceCase registerPushSubscriptionServiceCase, UserInfoDTO userInfoDTO) {
+        return new RegisterPush(registerPushSubscriptionServiceCase, userInfoDTO);
     }
 
     @Bean

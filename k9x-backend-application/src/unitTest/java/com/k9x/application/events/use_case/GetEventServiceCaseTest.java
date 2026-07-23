@@ -6,17 +6,17 @@ import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
 import com.k9x.application.disciplines.use_case.dto.ExerciseDTO;
 import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
-import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
-import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
+import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.events.valueobjects.EventExercise;
 import com.k9x.domain.events.valueobjects.EventJudge;
-import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
+import com.k9x.domain.stages.aggregates.StageSnapshot;
+import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -111,7 +111,7 @@ class GetEventServiceCaseTest {
         when(getCompetitionPersistencePort.getCompetition("comp-1"))
                 .thenReturn(competition(richEvent(), "user-1", null));
         when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of(
-                new ConfigurationsDTO(new FederationInfoDTO("fed-1", "Federation", "ES"),
+                new ConfigurationsDTO(new FederationInfoDTO("fed-1", "Federation"),
                         List.of(new ConfigurationDTO("cfg-1", "Config 1", List.of(new ExerciseDTO("ex-1", "Exercise 1")))))));
 
         FetchEventDetailDTO result = serviceCase.getEvent("event-1", "user-1", true);

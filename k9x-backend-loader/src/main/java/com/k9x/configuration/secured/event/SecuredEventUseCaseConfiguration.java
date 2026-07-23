@@ -13,6 +13,7 @@ import com.k9x.application.events.use_case.CreateEventServiceCase;
 import com.k9x.application.events.use_case.DeleteEventServiceCase;
 import com.k9x.application.events.use_case.EnrollEventServiceCase;
 import com.k9x.application.events.use_case.GetEventServiceCase;
+import com.k9x.application.notifications.port.PushNotifier;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,8 +45,9 @@ public class SecuredEventUseCaseConfiguration {
     @Bean
     public EnrollEventServiceCase enrollEventServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
                                                          SaveCompetitionPersistencePort saveCompetitionPersistencePort,
-                                                         GetDogPersistencePort getDogPersistencePort) {
-        return new EnrollEventServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort, getDogPersistencePort);
+                                                         GetDogPersistencePort getDogPersistencePort,
+                                                         PushNotifier pushNotifier) {
+        return new EnrollEventServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort, getDogPersistencePort, pushNotifier);
     }
 
     @Bean

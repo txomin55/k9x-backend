@@ -5,6 +5,9 @@ import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.events.obdx.exceptions.BihNotAllowedForSexException;
 import com.k9x.application.events.obdx.use_case.command.EnrollObdxEventCommand;
+import com.k9x.application.notifications.port.PushNotifier;
+import com.k9x.application.notifications.valueobjects.NotificationType;
+import com.k9x.application.notifications.valueobjects.PushNotification;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.dogs.aggregates.Dog;
@@ -16,11 +19,13 @@ import com.k9x.domain.events.exceptions.EventNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -39,11 +44,14 @@ class EnrollEventServiceCaseTest {
     @Mock
     private GetDogPersistencePort getDogPersistencePort;
 
+    @Mock
+    private PushNotifier pushNotifier;
+
     private EnrollEventServiceCase serviceCase;
 
     @BeforeEach
     void setUp() {
-        serviceCase = new EnrollEventServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort, getDogPersistencePort);
+        serviceCase = new EnrollEventServiceCase(getCompetitionPersistencePort, saveCompetitionPersistencePort, getDogPersistencePort, pushNotifier);
     }
 
     private CompetitionSnapshot competition() {
@@ -66,13 +74,30 @@ class EnrollEventServiceCaseTest {
     }
 
     @Test
-    void saves_aggregate_when_all_validations_pass() {
+    void saves_aggregate_and_does_not_notify_when_creator_self_enrolls() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
+        // event creator is "user-1" (see competition()), and the enroller is also "user-1"
         serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false), "user-1");
 
         verify(saveCompetitionPersistencePort).save(any());
+        verifyNoInteractions(pushNotifier);
+    }
+
+    @Test
+    void notifies_event_creator_when_a_different_user_enrolls() {
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
+
+        serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false), "handler-2");
+
+        verify(saveCompetitionPersistencePort).save(any());
+        ArgumentCaptor<PushNotification> notificationCaptor = ArgumentCaptor.forClass(PushNotification.class);
+        verify(pushNotifier).notify(org.mockito.ArgumentMatchers.eq("user-1"), notificationCaptor.capture());
+        PushNotification notification = notificationCaptor.getValue();
+        assertThat(notification.type()).isEqualTo(NotificationType.NEW_ENROLL);
+        assertThat(notification.metadata()).containsEntry("event_id", "event-1").containsEntry("dog_id", "dog-1");
     }
 
     @Test

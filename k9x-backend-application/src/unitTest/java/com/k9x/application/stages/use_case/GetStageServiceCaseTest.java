@@ -5,13 +5,13 @@ import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfiguration
 import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
 import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
-import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
-import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailDTO;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
-import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
+import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
+import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,7 +96,7 @@ class GetStageServiceCaseTest {
 
         ConfigurationDTO config = new ConfigurationDTO("obdx-1", "Obedience", List.of());
         ConfigurationsDTO federation = new ConfigurationsDTO(
-                new FederationInfoDTO("FED", "Federation", "ES"), List.of(config));
+                new FederationInfoDTO("FED", "Federation"), List.of(config));
 
         when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(stage));
@@ -118,7 +118,7 @@ class GetStageServiceCaseTest {
 
         ConfigurationDTO config = new ConfigurationDTO("obdx-1", "Obedience", List.of());
         ConfigurationsDTO federation = new ConfigurationsDTO(
-                new FederationInfoDTO("FED", "Federation", "ES"), List.of(config));
+                new FederationInfoDTO("FED", "Federation"), List.of(config));
 
         when(getCompetitionPersistencePort.competitionIdByStage("s-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition(stage));
