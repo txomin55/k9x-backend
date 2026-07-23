@@ -1,6 +1,7 @@
 package com.k9x.configuration.notifications;
 
 import com.k9x.application.notifications.port.PushNotifier;
+import com.k9x.application.notifications.port.SaveNotificationPersistencePort;
 import com.k9x.application.notifications.port.SendPushNotificationPort;
 import com.k9x.application.users.port.DeletePushSubscriptionPersistencePort;
 import com.k9x.application.users.port.GetPushSubscriptionsPersistencePort;
@@ -36,9 +37,11 @@ public class NotificationConfiguration {
     public PushNotifier pushNotifier(
             GetPushSubscriptionsPersistencePort getPushSubscriptionsPersistencePort,
             DeletePushSubscriptionPersistencePort deletePushSubscriptionPersistencePort,
-            SendPushNotificationPort sendPushNotificationPort
+            SendPushNotificationPort sendPushNotificationPort,
+            SaveNotificationPersistencePort saveNotificationPersistencePort
     ) {
         return new AsyncPushNotifier(
-                getPushSubscriptionsPersistencePort, deletePushSubscriptionPersistencePort, sendPushNotificationPort);
+                getPushSubscriptionsPersistencePort, deletePushSubscriptionPersistencePort,
+                sendPushNotificationPort, saveNotificationPersistencePort);
     }
 }

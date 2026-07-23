@@ -181,4 +181,15 @@ CREATE TABLE obdx.event_snapshot
     snapshot  JSON         NOT NULL,
     CONSTRAINT event_snapshot_pkey PRIMARY KEY (event_id),
     CONSTRAINT event_snapshot_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id)
-)
+);
+
+CREATE TABLE k9x.notifications
+(
+    id         BIGINT GENERATED ALWAYS AS IDENTITY,
+    user_id    VARCHAR(255) NOT NULL,
+    event_type VARCHAR(50)  NOT NULL,
+    metadata   TEXT         NOT NULL,
+    created_at BIGINT       NOT NULL,
+    CONSTRAINT notifications_pkey PRIMARY KEY (id),
+    CONSTRAINT notifications_user_fk FOREIGN KEY (user_id) REFERENCES k9x.users (id)
+);

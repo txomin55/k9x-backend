@@ -44,10 +44,10 @@ public class EnrollEventServiceCase implements TransactionalUseCase {
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
         competition.enrollDog(eventId, command.dogId(), command.bih(), userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
-        notifyCreator(competition, eventId, command.dogId(), userId);
+        notifyCreator(competition, eventId, userId);
     }
 
-    private void notifyCreator(CompetitionAggregate competition, String eventId, String dogId, String enrollerUserId) {
+    private void notifyCreator(CompetitionAggregate competition, String eventId, String enrollerUserId) {
         String creator = competition.eventCreator(eventId);
         // Don't notify the creator when they enroll into their own event.
         if (creator == null || creator.equals(enrollerUserId)) {
@@ -60,7 +60,6 @@ public class EnrollEventServiceCase implements TransactionalUseCase {
                 "stage_id", competition.stageIdOfEvent(eventId),
                 "stage_name", competition.stageNameOfEvent(eventId),
                 "event_id", eventId,
-                "event_name", competition.eventName(eventId),
-                "dog_id", dogId)));
+                "event_name", competition.eventName(eventId))));
     }
 }

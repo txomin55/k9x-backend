@@ -1,7 +1,9 @@
 package com.k9x.infrastructure.out.push;
 
 import com.k9x.application.notifications.port.PushNotifier;
+import com.k9x.application.notifications.port.SaveNotificationPersistencePort;
 import com.k9x.application.notifications.port.SendPushNotificationPort;
+import com.k9x.application.notifications.port.payload.SaveNotificationPersistencePayload;
 import com.k9x.application.notifications.valueobjects.PushDeliveryStatus;
 import com.k9x.application.notifications.valueobjects.PushNotification;
 import com.k9x.application.users.port.DeletePushSubscriptionPersistencePort;
@@ -36,14 +38,17 @@ public class AsyncPushNotifier implements PushNotifier {
     private final GetPushSubscriptionsPersistencePort getPushSubscriptionsPersistencePort;
     private final DeletePushSubscriptionPersistencePort deletePushSubscriptionPersistencePort;
     private final SendPushNotificationPort sendPushNotificationPort;
+    private final SaveNotificationPersistencePort saveNotificationPersistencePort;
     private final ExecutorService executor;
 
     public AsyncPushNotifier(GetPushSubscriptionsPersistencePort getPushSubscriptionsPersistencePort,
                              DeletePushSubscriptionPersistencePort deletePushSubscriptionPersistencePort,
-                             SendPushNotificationPort sendPushNotificationPort) {
+                             SendPushNotificationPort sendPushNotificationPort,
+                             SaveNotificationPersistencePort saveNotificationPersistencePort) {
         this.getPushSubscriptionsPersistencePort = getPushSubscriptionsPersistencePort;
         this.deletePushSubscriptionPersistencePort = deletePushSubscriptionPersistencePort;
         this.sendPushNotificationPort = sendPushNotificationPort;
+        this.saveNotificationPersistencePort = saveNotificationPersistencePort;
         this.executor = Executors.newFixedThreadPool(2, runnable -> {
             Thread thread = new Thread(runnable, "push-notifier");
             thread.setDaemon(true);
@@ -72,6 +77,7 @@ public class AsyncPushNotifier implements PushNotifier {
                 log.log(Level.INFO, "No push subscriptions for {0}", recipientUserId);
                 return;
             }
+            saveNotificationPersistencePort.save(SaveNotificationPersistencePayload.from(recipientUserId, notification));
             log.log(Level.INFO, "Sending {0} push to {1} subscription(s) of {2}",
                     notification.type(), subscriptions.size(), recipientUserId);
             subscriptions.forEach(subscription -> {
