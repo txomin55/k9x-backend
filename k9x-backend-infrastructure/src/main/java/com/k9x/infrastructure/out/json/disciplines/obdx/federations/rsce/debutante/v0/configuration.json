@@ -1,14 +1,13 @@
 {
-  "id": "OBDX_RSCE_DEBUTANTE.V0",
+  "id": "OBDX.RSCE_DEBUTANTE.V0",
   "description": "RSCE debutante version 20/05/2026",
-  "country": "ES",
   "break_tie": [
-    "OBDX_RSCE_DEBUTANTE.1_V0",
-    "OBDX_RSCE_DEBUTANTE.3_V0",
-    "OBDX_RSCE_DEBUTANTE.9_V0"
+    "OBDX.RSCE_DEBUTANTE.1_V0",
+    "OBDX.RSCE_DEBUTANTE.3_V0",
+    "OBDX.RSCE_DEBUTANTE.9_V0"
   ],
   "break_tie_tie": [
-    "OBDX_RSCE_DEBUTANTE.9_V0"
+    "OBDX.RSCE_DEBUTANTE.9_V0"
   ],
   "allowed_values": [
     0,
@@ -40,39 +39,39 @@
   ],
   "exercises": [
     {
-      "id": "OBDX_RSCE_DEBUTANTE.1_V0",
+      "id": "OBDX.RSCE_DEBUTANTE.1_V0",
       "coef": 3
     },
     {
-      "id": "OBDX_RSCE_DEBUTANTE.2_V0",
+      "id": "OBDX.RSCE_DEBUTANTE.2_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_RSCE_DEBUTANTE.3_V0",
+      "id": "OBDX.RSCE_DEBUTANTE.3_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_RSCE_DEBUTANTE.4_V0",
+      "id": "OBDX.RSCE_DEBUTANTE.4_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_RSCE_DEBUTANTE.5_V0",
+      "id": "OBDX.RSCE_DEBUTANTE.5_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_RSCE_DEBUTANTE.6_V0",
+      "id": "OBDX.RSCE_DEBUTANTE.6_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_RSCE_DEBUTANTE.7_V0",
+      "id": "OBDX.RSCE_DEBUTANTE.7_V0",
       "coef": 3
     },
     {
-      "id": "OBDX_RSCE_DEBUTANTE.8_V0",
+      "id": "OBDX.RSCE_DEBUTANTE.8_V0",
       "coef": 3
     },
     {
-      "id": "OBDX_RSCE_DEBUTANTE.9_V0",
+      "id": "OBDX.RSCE_DEBUTANTE.9_V0",
       "coef": 2
     }
   ]

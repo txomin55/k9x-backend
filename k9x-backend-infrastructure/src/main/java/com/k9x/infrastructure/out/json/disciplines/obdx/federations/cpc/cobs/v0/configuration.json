@@ -1,7 +1,6 @@
 {
-  "id": "CPC_COBS.V0",
+  "id": "OBDX.CPC_COBS.V0",
   "description": "CPC COBS version 20/05/2026",
-  "country": "PT",
   "break_tie": [],
   "break_tie_tie": [],
   "allowed_values": [
@@ -43,35 +42,35 @@
   ],
   "exercises": [
     {
-      "id": "OBDX_CPC_COBS.1_V0",
+      "id": "OBDX.CPC_COBS.1_V0",
       "coef": 1
     },
     {
-      "id": "OBDX_CPC_COBS.2_V0",
+      "id": "OBDX.CPC_COBS.2_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_CPC_COBS.3_V0",
+      "id": "OBDX.CPC_COBS.3_V0",
       "coef": 3
     },
     {
-      "id": "OBDX_CPC_COBS.4_V0",
+      "id": "OBDX.CPC_COBS.4_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_CPC_COBS.5_V0",
+      "id": "OBDX.CPC_COBS.5_V0",
       "coef": 3
     },
     {
-      "id": "OBDX_CPC_COBS.6_V0",
+      "id": "OBDX.CPC_COBS.6_V0",
       "coef": 2
     },
     {
-      "id": "OBDX_CPC_COBS.7_V0",
+      "id": "OBDX.CPC_COBS.7_V0",
       "coef": 2
     },
     {
-      "id": "OBDX_CPC_COBS.8_V0",
+      "id": "OBDX.CPC_COBS.8_V0",
       "coef": 1
     }
   ]

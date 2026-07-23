@@ -19,10 +19,10 @@ class EventSnapshotTest {
     private static final long FUTURE = Instant.parse("2030-01-01T00:00:00Z").toEpochMilli();
     private static final String DOG = "dog-1";
     private static final String JUDGE = "judge-1";
-    private static final String INDIVIDUAL_1 = "OBDX_FCI_GRADE_2.2_V0";
-    private static final String INDIVIDUAL_2 = "OBDX_FCI_GRADE_2.9_V0";
-    private static final String GROUP_STAY = "OBDX_FCI_GRADE_2.1_V0";
-    private static final String GENERAL_IMPRESSION = "OBDX_FCI_GRADE_2.10_V0";
+    private static final String INDIVIDUAL_1 = "OBDX.FCI_GRADE_2.2_V0";
+    private static final String INDIVIDUAL_2 = "OBDX.FCI_GRADE_2.9_V0";
+    private static final String GROUP_STAY = "OBDX.FCI_GRADE_2.1_V0";
+    private static final String GENERAL_IMPRESSION = "OBDX.FCI_GRADE_2.10_V0";
 
     private EventSnapshot event(List<EventExercise> exercises, List<Score> scores) {
         EventCompetitor competitor = new EventCompetitor(DOG, "Rex", null, null, null, null, null, null,

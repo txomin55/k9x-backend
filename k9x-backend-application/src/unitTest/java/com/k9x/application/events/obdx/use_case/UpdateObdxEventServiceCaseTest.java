@@ -255,7 +255,7 @@ class UpdateObdxEventServiceCaseTest {
     void computes_rank_score_within_the_configuration_band_and_flags_international() {
         // CPC_COBS band is [100, 200]; two competitors -> E tier; one from FR while the event is in ES ->
         // international. score = 100 + round(1/5 * 0.9 * 100) + round(0.1 * 100) = 100 + 18 + 10 = 128.
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "CPC_COBS.V0", 1735689600000L,
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "OBDX.CPC_COBS.V0", 1735689600000L,
                 ObdxAvgMethod.AVG,
                 List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, false),
                         new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, false)),

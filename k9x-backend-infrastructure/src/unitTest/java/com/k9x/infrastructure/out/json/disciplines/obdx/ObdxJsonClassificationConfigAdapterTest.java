@@ -20,7 +20,7 @@ class ObdxJsonClassificationConfigAdapterTest {
 
     @Test
     void loads_qualification_scale_for_grades() {
-        ObdxClassificationConfigDTO config = adapter.getConfig("OBDX_RSCE_DEBUTANTE.V0");
+        ObdxClassificationConfigDTO config = adapter.getConfig("OBDX.RSCE_DEBUTANTE.V0");
 
         assertThat(config.qualifications())
                 .extracting(ObdxClassificationConfigDTO.QualificationThreshold::id,
@@ -33,7 +33,7 @@ class ObdxJsonClassificationConfigAdapterTest {
 
     @Test
     void loads_qualification_scale_for_cobs() {
-        ObdxClassificationConfigDTO config = adapter.getConfig("CPC_COBS.V0");
+        ObdxClassificationConfigDTO config = adapter.getConfig("OBDX.CPC_COBS.V0");
 
         assertThat(config.qualifications())
                 .extracting(ObdxClassificationConfigDTO.QualificationThreshold::id)

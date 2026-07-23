@@ -27,37 +27,37 @@ import java.util.stream.Collectors;
  */
 public enum LiveExcludedExercise {
     // Group stays
-    CPC_COBS_7("OBDX_CPC_COBS.7"),
-    RSCE_GRADE_1_1("OBDX_RSCE_GRADE_1.1"),
-    FCI_GRADE_3_1("OBDX_FCI_GRADE_3.1"),
-    FCI_GRADE_3_2("OBDX_FCI_GRADE_3.2"),
-    FCI_GRADE_2_1("OBDX_FCI_GRADE_2.1"),
+    CPC_COBS_7("OBDX.CPC_COBS.7"),
+    RSCE_GRADE_1_1("OBDX.RSCE_GRADE_1.1"),
+    FCI_GRADE_3_1("OBDX.FCI_GRADE_3.1"),
+    FCI_GRADE_3_2("OBDX.FCI_GRADE_3.2"),
+    FCI_GRADE_2_1("OBDX.FCI_GRADE_2.1"),
+    FCI_GRADE_1_1("OBDX.FCI_GRADE_1.1"),
     // General impression
-    RSCE_DEBUTANTE_9("OBDX_RSCE_DEBUTANTE.9"),
-    FCI_GRADE_1_9("OBDX_FCI_GRADE_1.9"),
-    FCI_GRADE_2_10("OBDX_FCI_GRADE_2.10");
+    FCI_GRADE_1_9("OBDX.FCI_GRADE_1.9"),
+    FCI_GRADE_2_10("OBDX.FCI_GRADE_2.10");
 
-    /** Trailing version token of an exercise id, e.g. the {@code _V0} in {@code OBDX_FCI_GRADE_2.1_V0}. */
+    /**
+     * Trailing version token of an exercise id, e.g. the {@code _V0} in {@code OBDX.FCI_GRADE_2.1_V0}.
+     */
     private static final Pattern VERSION_SUFFIX = Pattern.compile("_V\\d+$");
-
+    private static final Set<String> BASE_IDS = Arrays.stream(values())
+            .map(LiveExcludedExercise::baseId)
+            .collect(Collectors.toUnmodifiableSet());
     private final String baseId;
 
     LiveExcludedExercise(String baseId) {
         this.baseId = baseId;
     }
 
-    public String baseId() {
-        return baseId;
-    }
-
-    private static final Set<String> BASE_IDS = Arrays.stream(values())
-            .map(LiveExcludedExercise::baseId)
-            .collect(Collectors.toUnmodifiableSet());
-
     public static boolean isExcluded(String exerciseId) {
         if (exerciseId == null) {
             return false;
         }
         return BASE_IDS.contains(VERSION_SUFFIX.matcher(exerciseId).replaceFirst(""));
+    }
+
+    public String baseId() {
+        return baseId;
     }
 }

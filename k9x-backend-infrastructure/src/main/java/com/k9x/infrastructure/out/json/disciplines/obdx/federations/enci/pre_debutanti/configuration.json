@@ -1,0 +1,68 @@
+{
+  "id": "OBDX.ENCI_PREDEBUTTANTI.V0",
+  "description": "ENCI predebuttanti version 23/07/2026",
+  "break_tie": [],
+  "break_tie_tie": [],
+  "allowed_values": [
+    0,
+    5,
+    5.5,
+    6,
+    6.5,
+    7,
+    7.5,
+    8,
+    8.5,
+    9,
+    9.5,
+    10
+  ],
+  "qualifications": [
+    {
+      "id": "EXC",
+      "min_score": 80
+    },
+    {
+      "id": "MB",
+      "min_score": 70
+    },
+    {
+      "id": "B",
+      "min_score": 60
+    }
+  ],
+  "exercises": [
+    {
+      "id": "OBDX.ENCI_PREDEBUTTANTI.1_V0",
+      "coef": 1
+    },
+    {
+      "id": "OBDX.ENCI_PREDEBUTTANTI.2_V0",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.ENCI_PREDEBUTTANTI.3_V0",
+      "coef": 1
+    },
+    {
+      "id": "OBDX.ENCI_PREDEBUTTANTI.4_V0",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.ENCI_PREDEBUTTANTI.5_V0",
+      "coef": 1
+    },
+    {
+      "id": "OBDX.ENCI_PREDEBUTTANTI.6_V0",
+      "coef": 1
+    },
+    {
+      "id": "OBDX.ENCI_PREDEBUTTANTI.7_V0",
+      "coef": 1
+    },
+    {
+      "id": "OBDX.ENCI_PREDEBUTTANTI.8_V0",
+      "coef": 1
+    }
+  ]
+}

@@ -13,14 +13,14 @@ import java.util.regex.Pattern;
  * leaving the top slice ({@code S}, 901–1000) for the manually seeded exceptional rank.
  */
 public enum ObdxConfigurationsRankThresholds {
-    RSCE_DEBUTANTE("OBDX_RSCE_DEBUTANTE", 100, 200),
-    CPC_COBS("CPC_COBS", 100, 200),
-    FCI_GRADE_1("OBDX_FCI_GRADE_1", 201, 400),
-    RSCE_GRADE_1("OBDX_RSCE_GRADE_1", 201, 400),
-    FCI_GRADE_2("OBDX_FCI_GRADE_2", 401, 600),
-    FCI_GRADE_3("OBDX_FCI_GRADE_3", 601, 900);
+    RSCE_DEBUTANTE("OBDX.RSCE_DEBUTANTE", 100, 200),
+    CPC_COBS("OBDX.CPC_COBS", 100, 200),
+    FCI_GRADE_1("OBDX.FCI_GRADE_1", 201, 400),
+    RSCE_GRADE_1("OBDX.RSCE_GRADE_1", 201, 400),
+    FCI_GRADE_2("OBDX.FCI_GRADE_2", 401, 600),
+    FCI_GRADE_3("OBDX.FCI_GRADE_3", 601, 900);
 
-    /** Strips the trailing {@code .V<n>} version suffix, e.g. {@code OBDX_FCI_GRADE_3.V0 -> OBDX_FCI_GRADE_3}. */
+    /** Strips the trailing {@code .V<n>} version suffix, e.g. {@code OBDX.FCI_GRADE_3.V0 -> OBDX.FCI_GRADE_3}. */
     private static final Pattern VERSION_SUFFIX = Pattern.compile("\\.V\\d+$");
 
     private static final int TIER_COUNT = 5;

@@ -25,7 +25,7 @@ class GetObdxRedCardServiceCaseTest {
 
     @Test
     void returns_red_card_from_persistence() {
-        FetchObdxRedCardDTO redCard = new FetchObdxRedCardDTO("OBDX_FCI_GRADE_3.1_V0", "judge-1", "Judge One", 1000L);
+        FetchObdxRedCardDTO redCard = new FetchObdxRedCardDTO("OBDX.FCI_GRADE_3.1_V0", "judge-1", "Judge One", 1000L);
         when(getObdxRedCardPersistencePort.getRedCard("event-1", "dog-1")).thenReturn(redCard);
 
         assertThat(serviceCase.getRedCard("event-1", "dog-1")).isEqualTo(redCard);

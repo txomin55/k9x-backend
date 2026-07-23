@@ -11,8 +11,17 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ObdxJsonFederationsConfigurationsAdapter implements GetObdxFederationsConfigurationsPort {
+
+    // TODO: country was dropped from configuration.json; kept as a static per-federation mapping for now.
+    private static final Map<String, String> COUNTRY_BY_FEDERATION = Map.of(
+            "cpc", "PT",
+            "fci", "EU",
+            "rsce", "ES",
+            "enci", "IT");
+    private static final String DEFAULT_COUNTRY = "EU";
 
     private final ObdxFederationsConfigurationsCache cache;
     private final MessageSource messageSource;
@@ -30,7 +39,8 @@ public class ObdxJsonFederationsConfigurationsAdapter implements GetObdxFederati
         for (ObdxFederationsConfigurationsCache.Entry entry : cache.getAll()) {
             String federationKey = entry.federationKey();
             var config = entry.configuration();
-            countryByFederation.putIfAbsent(federationKey, config.country());
+            countryByFederation.putIfAbsent(federationKey,
+                    COUNTRY_BY_FEDERATION.getOrDefault(federationKey, DEFAULT_COUNTRY));
             List<ExerciseDTO> exercises = config.exercises().stream()
                     .map(e -> new ExerciseDTO(e.id(), translate(e.id())))
                     .toList();

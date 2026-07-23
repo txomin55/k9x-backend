@@ -1,11 +1,10 @@
 {
-  "id": "OBDX_FCI_GRADE_3.V0",
+  "id": "OBDX.FCI_GRADE_3.V0",
   "description": "FCI grade 3 version 20/05/2026",
-  "country": "EU",
   "break_tie": [
-    "OBDX_FCI_GRADE_3.3_V0",
-    "OBDX_FCI_GRADE_3.5_V0",
-    "OBDX_FCI_GRADE_3.6_V0"
+    "OBDX.FCI_GRADE_3.3_V0",
+    "OBDX.FCI_GRADE_3.5_V0",
+    "OBDX.FCI_GRADE_3.6_V0"
   ],
   "break_tie_tie": [],
   "allowed_values": [
@@ -23,49 +22,58 @@
     10
   ],
   "qualifications": [
-    { "id": "EXC", "min_score": 256 },
-    { "id": "MB", "min_score": 224 },
-    { "id": "B", "min_score": 192 }
+    {
+      "id": "EXC",
+      "min_score": 256
+    },
+    {
+      "id": "MB",
+      "min_score": 224
+    },
+    {
+      "id": "B",
+      "min_score": 192
+    }
   ],
   "exercises": [
     {
-      "id": "OBDX_FCI_GRADE_3.1_V0",
+      "id": "OBDX.FCI_GRADE_3.1_V0",
       "coef": 2
     },
     {
-      "id": "OBDX_FCI_GRADE_3.2_V0",
+      "id": "OBDX.FCI_GRADE_3.2_V0",
       "coef": 2
     },
     {
-      "id": "OBDX_FCI_GRADE_3.3_V0",
+      "id": "OBDX.FCI_GRADE_3.3_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_FCI_GRADE_3.4_V0",
+      "id": "OBDX.FCI_GRADE_3.4_V0",
       "coef": 3
     },
     {
-      "id": "OBDX_FCI_GRADE_3.5_V0",
+      "id": "OBDX.FCI_GRADE_3.5_V0",
       "coef": 3
     },
     {
-      "id": "OBDX_FCI_GRADE_3.6_V0",
+      "id": "OBDX.FCI_GRADE_3.6_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_FCI_GRADE_3.7_V0",
+      "id": "OBDX.FCI_GRADE_3.7_V0",
       "coef": 3
     },
     {
-      "id": "OBDX_FCI_GRADE_3.8_V0",
+      "id": "OBDX.FCI_GRADE_3.8_V0",
       "coef": 4
     },
     {
-      "id": "OBDX_FCI_GRADE_3.9_V0",
+      "id": "OBDX.FCI_GRADE_3.9_V0",
       "coef": 3
     },
     {
-      "id": "OBDX_FCI_GRADE_3.10_V0",
+      "id": "OBDX.FCI_GRADE_3.10_V0",
       "coef": 4
     }
   ]

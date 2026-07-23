@@ -93,4 +93,10 @@ subprojects {
     tasks.named("check") {
         dependsOn(tasks.named("unitTest"))
     }
+
+    // All tests live in `src/unitTest`, so the default `test` suite is empty. Bind `unitTest` to
+    // `test` as well so `./gradlew test` runs the unit tests.
+    tasks.named("test") {
+        dependsOn(tasks.named("unitTest"))
+    }
 }

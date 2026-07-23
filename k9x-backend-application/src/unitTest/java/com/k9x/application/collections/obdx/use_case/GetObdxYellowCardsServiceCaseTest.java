@@ -28,8 +28,8 @@ class GetObdxYellowCardsServiceCaseTest {
     @Test
     void returns_yellow_cards_from_persistence() {
         List<FetchObdxYellowCardDTO> yellowCards = List.of(
-                new FetchObdxYellowCardDTO("OBDX_FCI_GRADE_3.1_V0", "judge-1", "Judge One", 1000L),
-                new FetchObdxYellowCardDTO("OBDX_FCI_GRADE_3.1_V0", "judge-1", "Judge One", 2000L));
+                new FetchObdxYellowCardDTO("OBDX.FCI_GRADE_3.1_V0", "judge-1", "Judge One", 1000L),
+                new FetchObdxYellowCardDTO("OBDX.FCI_GRADE_3.1_V0", "judge-1", "Judge One", 2000L));
         when(getObdxYellowCardsPersistencePort.getYellowCards("event-1", "dog-1")).thenReturn(yellowCards);
 
         assertThat(serviceCase.getYellowCards("event-1", "dog-1")).isEqualTo(yellowCards);

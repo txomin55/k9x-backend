@@ -10,11 +10,11 @@ class ObdxConfigurationsRankThresholdsTest {
     @Test
     void resolves_band_from_configuration_id_ignoring_the_version_suffix() {
         assertEquals(ObdxConfigurationsRankThresholds.FCI_GRADE_3,
-                ObdxConfigurationsRankThresholds.fromConfigurationId("OBDX_FCI_GRADE_3.V0"));
+                ObdxConfigurationsRankThresholds.fromConfigurationId("OBDX.FCI_GRADE_3.V0"));
         assertEquals(ObdxConfigurationsRankThresholds.FCI_GRADE_3,
-                ObdxConfigurationsRankThresholds.fromConfigurationId("OBDX_FCI_GRADE_3.V7"));
+                ObdxConfigurationsRankThresholds.fromConfigurationId("OBDX.FCI_GRADE_3.V7"));
         assertEquals(ObdxConfigurationsRankThresholds.CPC_COBS,
-                ObdxConfigurationsRankThresholds.fromConfigurationId("CPC_COBS"));
+                ObdxConfigurationsRankThresholds.fromConfigurationId("OBDX.CPC_COBS"));
         assertNull(ObdxConfigurationsRankThresholds.fromConfigurationId("UNKNOWN.V0"));
         assertNull(ObdxConfigurationsRankThresholds.fromConfigurationId(null));
     }

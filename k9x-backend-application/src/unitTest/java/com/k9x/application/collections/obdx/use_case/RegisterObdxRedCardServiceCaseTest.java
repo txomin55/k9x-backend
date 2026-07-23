@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 class RegisterObdxRedCardServiceCaseTest {
 
     private static final RegisterObdxRedCardCommand COMMAND = new RegisterObdxRedCardCommand(
-            "judge-1", "OBDX_FCI_GRADE_3.1_V0", "dog-1");
+            "judge-1", "OBDX.FCI_GRADE_3.1_V0", "dog-1");
 
     @Mock
     private GetCompetitionPersistencePort getCompetitionPersistencePort;
@@ -49,7 +49,7 @@ class RegisterObdxRedCardServiceCaseTest {
     }
 
     private static final List<EventExercise> EXERCISES = List.of(
-            new EventExercise("OBDX_FCI_GRADE_3.1_V0", (short) 1, List.of(), List.of("judge-1")));
+            new EventExercise("OBDX.FCI_GRADE_3.1_V0", (short) 1, List.of(), List.of("judge-1")));
 
     private CompetitionSnapshot competition() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
@@ -63,7 +63,7 @@ class RegisterObdxRedCardServiceCaseTest {
     private CompetitionSnapshot competitionWithRedCardAlreadyRegistered() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), EXERCISES, List.of(),
-                List.of(new Score("OBDX_FCI_GRADE_3.1_V0", "judge-1", "dog-1", null, 0L, null, 1000L)), List.of(), null, null);
+                List.of(new Score("OBDX.FCI_GRADE_3.1_V0", "judge-1", "dog-1", null, 0L, null, 1000L)), List.of(), null, null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
@@ -123,7 +123,7 @@ class RegisterObdxRedCardServiceCaseTest {
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
         RegisterObdxRedCardCommand unassigned = new RegisterObdxRedCardCommand(
-                "judge-1", "OBDX_FCI_GRADE_3.9_V0", "dog-1");
+                "judge-1", "OBDX.FCI_GRADE_3.9_V0", "dog-1");
         assertThatThrownBy(() -> serviceCase.registerRedCard("event-1", unassigned, "user@k9x.io"))
                 .isInstanceOf(ExerciseJudgeNotAssignedException.class);
 
