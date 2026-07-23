@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
  * leaving the top slice ({@code S}, 901–1000) for the manually seeded exceptional rank.
  */
 public enum ObdxConfigurationsRankThresholds {
+    ENCI_PRE_DEBUTANTI("OBDX.ENCI_PREDEBUTTANTI", 50, 100),
+    ENCI_DEBUTANTI("OBDX.ENCI_DEBUTTANTI", 100, 200),
     RSCE_DEBUTANTE("OBDX.RSCE_DEBUTANTE", 100, 200),
     CPC_COBS("OBDX.CPC_COBS", 100, 200),
     FCI_GRADE_1("OBDX.FCI_GRADE_1", 201, 400),
@@ -20,7 +22,9 @@ public enum ObdxConfigurationsRankThresholds {
     FCI_GRADE_2("OBDX.FCI_GRADE_2", 401, 600),
     FCI_GRADE_3("OBDX.FCI_GRADE_3", 601, 900);
 
-    /** Strips the trailing {@code .V<n>} version suffix, e.g. {@code OBDX.FCI_GRADE_3.V0 -> OBDX.FCI_GRADE_3}. */
+    /**
+     * Strips the trailing {@code .V<n>} version suffix, e.g. {@code OBDX.FCI_GRADE_3.V0 -> OBDX.FCI_GRADE_3}.
+     */
     private static final Pattern VERSION_SUFFIX = Pattern.compile("\\.V\\d+$");
 
     private static final int TIER_COUNT = 5;
@@ -35,27 +39,6 @@ public enum ObdxConfigurationsRankThresholds {
         this.configurationKey = configurationKey;
         this.min = min;
         this.max = max;
-    }
-
-    public int min() {
-        return min;
-    }
-
-    public int max() {
-        return max;
-    }
-
-    /**
-     * The event's automatic {@code rank_score} within this configuration's band: the competitor-count tier
-     * (1–5) contributes {@code tier/5} of the band's lower 90%, and the international flag adds a flat 10% of
-     * the band width on top, so {@code score = min + round(tier/5 · 0.9·range) + (international ? round(0.1·range) : 0)}.
-     */
-    public int eventScore(int competitorCount, boolean international) {
-        int range = max - min;
-        int tier = tierFromCompetitorCount(competitorCount);
-        int tierPoints = (int) Math.round(((double) tier / TIER_COUNT) * TIERS_SHARE * range);
-        int internationalPoints = international ? (int) Math.round(INTERNATIONAL_SHARE * range) : 0;
-        return min + tierPoints + internationalPoints;
     }
 
     /**
@@ -93,5 +76,26 @@ public enum ObdxConfigurationsRankThresholds {
             }
         }
         return null;
+    }
+
+    public int min() {
+        return min;
+    }
+
+    public int max() {
+        return max;
+    }
+
+    /**
+     * The event's automatic {@code rank_score} within this configuration's band: the competitor-count tier
+     * (1–5) contributes {@code tier/5} of the band's lower 90%, and the international flag adds a flat 10% of
+     * the band width on top, so {@code score = min + round(tier/5 · 0.9·range) + (international ? round(0.1·range) : 0)}.
+     */
+    public int eventScore(int competitorCount, boolean international) {
+        int range = max - min;
+        int tier = tierFromCompetitorCount(competitorCount);
+        int tierPoints = (int) Math.round(((double) tier / TIER_COUNT) * TIERS_SHARE * range);
+        int internationalPoints = international ? (int) Math.round(INTERNATIONAL_SHARE * range) : 0;
+        return min + tierPoints + internationalPoints;
     }
 }
