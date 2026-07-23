@@ -59,7 +59,8 @@ public class GetStage implements StagesFetchOneApiDelegate {
                         c.handler(),
                         c.country(),
                         c.team(),
-                        resolveBreed(c.breed())))
+                        resolveBreed(c.breed()),
+                        c.verified()))
                 .toList();
     }
 

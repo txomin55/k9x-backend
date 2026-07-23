@@ -61,7 +61,8 @@ public class GetStageServiceCase {
                                         : e.competitors().stream()
                                         .map(c -> new FetchStageDetailCompetitorDTO(
                                                 c.dogId(), c.dogName(), c.owner(), c.handler(),
-                                                c.country(), c.team(), c.breed()))
+                                                c.country(), c.team(), c.breed(),
+                                                c.verified() != null && c.verified()))
                                         .toList(),
                                 e.status(now, stage.dateTo()).name(),
                                 stage.enrollmentOpened(e, now),
