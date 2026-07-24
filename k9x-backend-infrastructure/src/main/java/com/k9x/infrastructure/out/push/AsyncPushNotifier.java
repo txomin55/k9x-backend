@@ -72,12 +72,14 @@ public class AsyncPushNotifier implements PushNotifier {
 
     private void deliver(String recipientUserId, PushNotification notification) {
         try {
+            // Persist the notification unconditionally so it is always readable in the user's inbox,
+            // even when they have no push subscriptions and no push is actually delivered.
+            saveNotificationPersistencePort.save(SaveNotificationPersistencePayload.from(recipientUserId, notification));
             List<PushSubscriptionTargetDTO> subscriptions = getPushSubscriptionsPersistencePort.getByUserId(recipientUserId);
             if (subscriptions.isEmpty()) {
                 log.log(Level.INFO, "No push subscriptions for {0}", recipientUserId);
                 return;
             }
-            saveNotificationPersistencePort.save(SaveNotificationPersistencePayload.from(recipientUserId, notification));
             log.log(Level.INFO, "Sending {0} push to {1} subscription(s) of {2}",
                     notification.type(), subscriptions.size(), recipientUserId);
             subscriptions.forEach(subscription -> {

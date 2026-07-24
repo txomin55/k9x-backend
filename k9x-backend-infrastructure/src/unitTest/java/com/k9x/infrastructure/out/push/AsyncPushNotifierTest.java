@@ -64,11 +64,15 @@ class AsyncPushNotifierTest {
     }
 
     @Test
-    void does_not_persist_notification_row_when_recipient_has_no_subscriptions() {
+    void persists_notification_row_even_when_recipient_has_no_subscriptions() {
         when(getPushSubscriptionsPersistencePort.getByUserId("creator-1")).thenReturn(List.of());
 
         notifier.notify("creator-1", notification);
 
-        verify(saveNotificationPersistencePort, after(300).never()).save(any());
+        verify(saveNotificationPersistencePort, timeout(1000)).save(payloadCaptor.capture());
+        SaveNotificationPersistencePayload saved = payloadCaptor.getValue();
+        assertThat(saved.userId()).isEqualTo("creator-1");
+        assertThat(saved.type()).isEqualTo(NotificationType.NEW_ENROLL);
+        verify(sendPushNotificationPort, after(300).never()).send(any(), any());
     }
 }

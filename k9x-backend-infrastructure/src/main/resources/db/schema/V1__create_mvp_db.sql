@@ -190,6 +190,7 @@ CREATE TABLE k9x.notifications
     event_type VARCHAR(50)  NOT NULL,
     metadata   TEXT         NOT NULL,
     created_at BIGINT       NOT NULL,
+    seen       BOOLEAN      NOT NULL DEFAULT FALSE,
     CONSTRAINT notifications_pkey PRIMARY KEY (id),
     CONSTRAINT notifications_user_fk FOREIGN KEY (user_id) REFERENCES k9x.users (id)
 );
