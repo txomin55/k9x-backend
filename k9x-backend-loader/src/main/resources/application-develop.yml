@@ -12,3 +12,8 @@ k9x-backend:
     refresh-cookie:
       same-site: "Lax"
       secure: false
+
+# Local only: el cron de snapshots corre cada 2 minutos en lugar de a las 01:00 UTC.
+k9x:
+  snapshot:
+    cron: "0 /2 * * * *"
