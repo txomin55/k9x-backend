@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -28,7 +29,7 @@ class GetNotificationListServiceCaseTest {
     @Test
     void returns_only_the_requesting_users_notifications() {
         List<NotificationDTO> stored = List.of(
-                new NotificationDTO("1", 1700000000000L, "{\"event_id\":\"event-1\"}", false));
+                new NotificationDTO("1", 1700000000000L, "NEW_ENROLL", Map.of("event_id", "event-1"), false));
         when(getNotificationListPersistencePort.getByUserId("creator-1")).thenReturn(stored);
 
         List<NotificationDTO> result = serviceCase.getNotifications("creator-1");

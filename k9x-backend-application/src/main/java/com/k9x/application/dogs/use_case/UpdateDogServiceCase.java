@@ -1,11 +1,12 @@
 package com.k9x.application.dogs.use_case;
 
-import com.k9x.application.dogs.exceptions.DogChipAlreadyExistsException;
+import com.k9x.application.dogs.exceptions.DogIdentityAlreadyExistsException;
 import com.k9x.application.dogs.port.payload.UpdateDogPersistencePayload;
 import com.k9x.application.dogs.use_case.command.UpdateDogCommand;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
 import com.k9x.application.shared.TransactionalUseCase;
+import com.k9x.application.utils.text.Identifiers;
 import com.k9x.domain.dogs.aggregates.Dog;
 
 public class UpdateDogServiceCase implements TransactionalUseCase {
@@ -27,9 +28,12 @@ public class UpdateDogServiceCase implements TransactionalUseCase {
     }
 
     private void assertIdentityNotUsedByAnotherDog(String dogId, String identity) {
+        if (Identifiers.isBlank(identity)) {
+            return;
+        }
         Dog existing = getDogPersistencePort.getDogByIdentity(identity);
         if (existing != null && !existing.id().equals(dogId)) {
-            throw new DogChipAlreadyExistsException();
+            throw new DogIdentityAlreadyExistsException();
         }
     }
 }

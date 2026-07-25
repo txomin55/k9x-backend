@@ -33,7 +33,8 @@ public class GetNotifications implements SecuredNotificationsFetchAllApiDelegate
         return new NotificationResponseDTO(
                 notification.id(),
                 notification.timestamp(),
-                notification.text(),
+                notification.type(),
+                notification.metadata(),
                 notification.seen());
     }
 }

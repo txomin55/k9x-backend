@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.out.postgres.notifications;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.k9x.application.notifications.use_case.dto.NotificationDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.records.NotificationsRecord;
@@ -33,7 +34,7 @@ class GetNotificationListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetNotificationListJooqAdapter(dsl).getByUserId("creator-1");
+        new GetNotificationListJooqAdapter(dsl, new ObjectMapper()).getByUserId("creator-1");
 
         assertThat(capturedSql.get())
                 .contains("from \"k9x\".\"notifications\"")
@@ -58,13 +59,14 @@ class GetNotificationListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<NotificationDTO> notifications = new GetNotificationListJooqAdapter(dsl).getByUserId("creator-1");
+        List<NotificationDTO> notifications = new GetNotificationListJooqAdapter(dsl, new ObjectMapper()).getByUserId("creator-1");
 
         assertThat(notifications).hasSize(1);
         NotificationDTO dto = notifications.get(0);
         assertThat(dto.id()).isEqualTo("42");
         assertThat(dto.timestamp()).isEqualTo(1700000000000L);
-        assertThat(dto.text()).isEqualTo("{\"event_id\":\"event-1\"}");
+        assertThat(dto.type()).isEqualTo("NEW_ENROLL");
+        assertThat(dto.metadata()).containsEntry("event_id", "event-1");
         assertThat(dto.seen()).isFalse();
     }
 }

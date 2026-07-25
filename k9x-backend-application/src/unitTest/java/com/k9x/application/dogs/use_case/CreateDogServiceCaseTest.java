@@ -1,6 +1,7 @@
 package com.k9x.application.dogs.use_case;
 
 import com.k9x.application.dogs.exceptions.DogChipAlreadyExistsException;
+import com.k9x.application.dogs.exceptions.DogIdentityAlreadyExistsException;
 import com.k9x.application.dogs.port.CreateDogPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
@@ -60,7 +61,7 @@ class CreateDogServiceCaseTest {
         when(getDogPersistencePort.getDogByIdentity("id")).thenReturn(mock(com.k9x.domain.dogs.aggregates.Dog.class));
 
         assertThatThrownBy(() -> serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", "user-1", "handler-1", "user-1", "team", "ES", null, null, null, false))
-                .isInstanceOf(DogChipAlreadyExistsException.class);
+                .isInstanceOf(DogIdentityAlreadyExistsException.class);
 
         verifyNoInteractions(createDogPersistencePort);
     }

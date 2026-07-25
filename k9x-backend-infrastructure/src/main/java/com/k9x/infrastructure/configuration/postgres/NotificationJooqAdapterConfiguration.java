@@ -26,8 +26,8 @@ public class NotificationJooqAdapterConfiguration {
     }
 
     @Bean
-    public GetNotificationListPersistencePort getNotificationListPersistencePort() {
-        return new GetNotificationListJooqAdapter(dsl);
+    public GetNotificationListPersistencePort getNotificationListPersistencePort(ObjectMapper objectMapper) {
+        return new GetNotificationListJooqAdapter(dsl, objectMapper);
     }
 
     @Bean

@@ -1,7 +1,7 @@
 package com.k9x.application.dogs.use_case;
 
 import com.k9x.application.dogs.exceptions.DogAlreadyDeletedException;
-import com.k9x.application.dogs.exceptions.DogChipAlreadyExistsException;
+import com.k9x.application.dogs.exceptions.DogIdentityAlreadyExistsException;
 import com.k9x.application.dogs.exceptions.DogNotFoundException;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
@@ -96,7 +96,7 @@ class UpdateDogServiceCaseTest {
         when(getDogPersistencePort.getDogByIdentity("new-id")).thenReturn(otherDog);
 
         assertThatThrownBy(() -> serviceCase.updateDog("dog-1", new UpdateDogCommand("Rex", "img", "Lab", "new-id", "user-1", "handler-1", "team", "ES", null, null, null), "user-1", false))
-                .isInstanceOf(DogChipAlreadyExistsException.class);
+                .isInstanceOf(DogIdentityAlreadyExistsException.class);
 
         verifyNoInteractions(updateDogPersistencePort);
     }

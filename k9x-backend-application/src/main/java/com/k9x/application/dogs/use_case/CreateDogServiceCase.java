@@ -1,11 +1,13 @@
 package com.k9x.application.dogs.use_case;
 
 import com.k9x.application.dogs.exceptions.DogChipAlreadyExistsException;
+import com.k9x.application.dogs.exceptions.DogIdentityAlreadyExistsException;
 import com.k9x.application.dogs.port.CreateDogPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
-import com.k9x.application.utils.date.DateUtils;
-import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.application.shared.TransactionalUseCase;
+import com.k9x.application.utils.date.DateUtils;
+import com.k9x.application.utils.text.Identifiers;
+import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 
 public class CreateDogServiceCase implements TransactionalUseCase {
@@ -37,14 +39,14 @@ public class CreateDogServiceCase implements TransactionalUseCase {
     }
 
     private void assertChipNotUsedByActiveDog(String id) {
-        if (getDogPersistencePort.getDog(id) != null) {
+        if (Identifiers.isPresent(id) && getDogPersistencePort.getDog(id) != null) {
             throw new DogChipAlreadyExistsException();
         }
     }
 
     private void assertIdentityNotUsedByActiveDog(String identity) {
-        if (getDogPersistencePort.getDogByIdentity(identity) != null) {
-            throw new DogChipAlreadyExistsException();
+        if (Identifiers.isPresent(identity) && getDogPersistencePort.getDogByIdentity(identity) != null) {
+            throw new DogIdentityAlreadyExistsException();
         }
     }
 }
