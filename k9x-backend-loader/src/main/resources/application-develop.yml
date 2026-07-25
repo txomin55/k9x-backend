@@ -16,4 +16,4 @@ k9x-backend:
 # Local only: el cron de snapshots corre cada 2 minutos en lugar de a las 01:00 UTC.
 k9x:
   snapshot:
-    cron: "0 /2 * * * *"
+    cron: "0 */2 * * * *"
