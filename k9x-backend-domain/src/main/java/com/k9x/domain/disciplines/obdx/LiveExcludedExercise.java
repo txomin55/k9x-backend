@@ -34,6 +34,8 @@ public enum LiveExcludedExercise {
     FCI_GRADE_2_1("OBDX.FCI_GRADE_2.1"),
     FCI_GRADE_1_1("OBDX.FCI_GRADE_1.1"),
     // General impression
+    CPC_COBS_8("OBDX.CPC_COBS.8"),
+    RSCE_DEBUTANTE_9("OBDX.RSCE_DEBUTANTE.9"),
     FCI_GRADE_1_9("OBDX.FCI_GRADE_1.9"),
     FCI_GRADE_2_10("OBDX.FCI_GRADE_2.10");
 
