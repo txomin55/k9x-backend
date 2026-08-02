@@ -122,6 +122,9 @@ Se recomienda exponer `nivel`, `frescura` e `índice` por separado, para que la 
 | **Nadie desaparece** | El suelo de 0.01 (> 0) garantiza que todo competidor con al menos una prueba conserva un índice, por pequeño que sea. |
 | **Viejas glorias** | Un competidor que dejó de competir se hunde hacia casi cero por la frescura. El índice premia a los **actuales**, no el pasado. |
 
+> **Persistencia.** El flag **provisional** no se persiste: se calcula **al vuelo en lectura**, contando las
+> filas del historial del perro en `k9x.dog_rank` (`provisional = filas < 2`). No hay columna para él.
+
 ---
 
 ## 6. Decisiones descartadas (para no volver a ellas)
@@ -159,6 +162,9 @@ forma = (media reciente de puntuaciones del competidor − media histórica) / m
 ```
 
 Se muestra al lado del índice (ej. "forma: −4%"). No modifica el índice; lo complementa.
+
+> **Persistencia.** Igual que el flag provisional, la **forma** no se persiste: se calcula **al vuelo en
+> lectura** a partir del historial de `k9x.dog_rank` (medias reciente e histórica). No hay columna para ella.
 
 ---
 

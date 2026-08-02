@@ -45,9 +45,22 @@ CREATE TABLE k9x.dogs
     sex                         VARCHAR(10),
     withers_cm                  INTEGER,
     three_fci_generations_confirmed BOOLEAN,
+    rank                        INTEGER,
     CONSTRAINT dogs_pkey PRIMARY KEY (id),
     CONSTRAINT k9x_dogs_sex_check
-        CHECK (sex IS NULL OR sex IN ('MALE', 'FEMALE'))
+        CHECK (sex IS NULL OR sex IN ('MALE', 'FEMALE')),
+    CONSTRAINT k9x_dogs_rank_check
+        CHECK (rank IS NULL OR rank BETWEEN 0 AND 1000)
+);
+
+CREATE TABLE k9x.dog_rank
+(
+    dog_id     VARCHAR(255) NOT NULL,
+    discipline VARCHAR(50)  NOT NULL,
+    rank       NUMERIC(6, 2) NOT NULL,
+    timestamp  BIGINT       NOT NULL,
+    CONSTRAINT dog_rank_pkey PRIMARY KEY (dog_id, discipline, timestamp),
+    CONSTRAINT dog_rank_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
 );
 
 CREATE TABLE k9x.judges
@@ -121,6 +134,7 @@ CREATE TABLE obdx.event_competitors
     dog_id        VARCHAR(255) NOT NULL,
     position      SMALLINT,
     rank_score    NUMERIC(6, 2),
+    total_score   NUMERIC(6, 2),
     start_number  SMALLINT,
     competitor_number SMALLINT,
     verified      BOOLEAN,

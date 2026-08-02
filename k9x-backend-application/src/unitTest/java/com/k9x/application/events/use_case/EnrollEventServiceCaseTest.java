@@ -97,7 +97,13 @@ class EnrollEventServiceCaseTest {
         verify(pushNotifier).notify(org.mockito.ArgumentMatchers.eq("user-1"), notificationCaptor.capture());
         PushNotification notification = notificationCaptor.getValue();
         assertThat(notification.type()).isEqualTo(NotificationType.NEW_ENROLL);
-        assertThat(notification.metadata()).containsEntry("event_id", "event-1").containsEntry("dog_id", "dog-1");
+        assertThat(notification.metadata())
+                .containsEntry("competition_id", "comp-1")
+                .containsEntry("competition_name", "WC")
+                .containsEntry("stage_id", "stage-1")
+                .containsEntry("stage_name", "Stage 1")
+                .containsEntry("event_id", "event-1")
+                .containsEntry("event_name", "Event 1");
     }
 
     @Test

@@ -5,11 +5,15 @@ import com.k9x.application.dogs.port.DeleteDogPersistencePort;
 import com.k9x.application.dogs.port.GetDogListPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
+import com.k9x.application.dogs.rank.port.GetDogRankHistoryPersistencePort;
+import com.k9x.application.dogs.rank.port.UpdateDogRanksPersistencePort;
 import com.k9x.infrastructure.out.postgres.dogs.CreateDogJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.DeleteDogJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.GetDogJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.GetDogListJooqAdapter;
+import com.k9x.infrastructure.out.postgres.dogs.GetDogRankHistoryJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.UpdateDogJooqAdapter;
+import com.k9x.infrastructure.out.postgres.dogs.UpdateDogRanksJooqAdapter;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,5 +50,15 @@ public class DogJooqAdapterConfiguration {
     @Bean
     public UpdateDogPersistencePort updateDogPersistencePort() {
         return new UpdateDogJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetDogRankHistoryPersistencePort getDogRankHistoryPersistencePort() {
+        return new GetDogRankHistoryJooqAdapter(dsl);
+    }
+
+    @Bean
+    public UpdateDogRanksPersistencePort updateDogRanksPersistencePort() {
+        return new UpdateDogRanksJooqAdapter(dsl);
     }
 }

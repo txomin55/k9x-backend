@@ -69,7 +69,8 @@ public class GenerateEventSnapshotsServiceCase {
                 // retried on the next run (the writes are idempotent, so a retry re-stamps the same values).
                 List<ObdxCompetitorPosition> competitors = classification.obdx() == null ? List.of()
                         : classification.obdx().competitors().stream()
-                                .map(c -> new ObdxCompetitorPosition(c.dogId(), (short) c.position(), c.rankScore()))
+                                .map(c -> new ObdxCompetitorPosition(c.dogId(), (short) c.position(),
+                                        c.totalScore(), c.rankScore()))
                                 .toList();
                 // Event-level summary of every award actually granted across all competitors (e.g. CACIOB +
                 // RCACIOB), deduplicated in ranking order. Persisted onto k9x.events.granted_awards.

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.snapshot.port.SaveObdxSnapshotPersistencePort;
 import com.k9x.application.events.snapshot.port.payload.ObdxCompetitorPosition;
+import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventSnapshot;
 import org.jooq.DSLContext;
@@ -17,11 +18,12 @@ import java.util.List;
 import static com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
 
 /**
- * Persists an OBDX event snapshot atomically: the per-competitor position and rank score, the event-level
- * granted-awards list, plus the snapshot marker row, all inside one {@code dsl.transaction} so they commit or
- * roll back together. The marker insert is {@code ON CONFLICT DO NOTHING} so a concurrent run keeps the first
- * snapshot; the competitor updates and the granted-awards update are idempotent, so a retry after a failure
- * simply re-stamps the same values.
+ * Persists an OBDX event snapshot atomically: the per-competitor position and rank score, the dog's OBDX
+ * rank history row ({@code k9x.dog_rank}), the event-level granted-awards list, plus the snapshot marker row,
+ * all inside one {@code dsl.transaction} so they commit or roll back together. The marker insert is
+ * {@code ON CONFLICT DO NOTHING} so a concurrent run keeps the first snapshot; the competitor updates and the
+ * granted-awards update are idempotent, and the dog-rank inserts also do nothing on conflict (same dog,
+ * discipline and timestamp), so a retry after a failure simply re-stamps the same values.
  */
 public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistencePort {
 
@@ -45,11 +47,26 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
                     .map(c -> ctx.update(EVENT_COMPETITORS)
                             .set(EVENT_COMPETITORS.POSITION, c.position())
                             .set(EVENT_COMPETITORS.RANK_SCORE, c.rankScore())
+                            .set(EVENT_COMPETITORS.TOTAL_SCORE, c.totalScore())
                             .where(EVENT_COMPETITORS.EVENT_ID.eq(eventId)
                                     .and(EVENT_COMPETITORS.DOG_ID.eq(c.dogId()))))
                     .toList();
             if (!batch.isEmpty()) {
                 ctx.batch(batch).execute();
+            }
+
+            List<? extends Query> rankHistory = competitors.stream()
+                    .filter(c -> c.rankScore() != null)
+                    .map(c -> ctx.insertInto(Tables.DOG_RANK)
+                            .set(Tables.DOG_RANK.DOG_ID, c.dogId())
+                            .set(Tables.DOG_RANK.DISCIPLINE, Discipline.OBDX.name())
+                            .set(Tables.DOG_RANK.RANK, c.rankScore())
+                            .set(Tables.DOG_RANK.TIMESTAMP, snapshotAt)
+                            .onConflict(Tables.DOG_RANK.DOG_ID, Tables.DOG_RANK.DISCIPLINE, Tables.DOG_RANK.TIMESTAMP)
+                            .doNothing())
+                    .toList();
+            if (!rankHistory.isEmpty()) {
+                ctx.batch(rankHistory).execute();
             }
 
             ctx.update(Tables.EVENTS)

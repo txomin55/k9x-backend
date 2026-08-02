@@ -21,6 +21,8 @@ class LiveExcludedExerciseTest {
     void excludes_configured_general_impression() {
         assertTrue(LiveExcludedExercise.isExcluded("OBDX.FCI_GRADE_1.9_V0"));
         assertTrue(LiveExcludedExercise.isExcluded("OBDX.FCI_GRADE_2.10_V0"));
+        assertTrue(LiveExcludedExercise.isExcluded("OBDX.CPC_COBS.8_V0"));
+        assertTrue(LiveExcludedExercise.isExcluded("OBDX.RSCE_DEBUTANTE.9_V0"));
     }
 
     @Test
@@ -34,9 +36,8 @@ class LiveExcludedExerciseTest {
         assertFalse(LiveExcludedExercise.isExcluded("OBDX.FCI_GRADE_3.3_V0"));
         assertFalse(LiveExcludedExercise.isExcluded("OBDX.FCI_GRADE_2.9_V0"));
         assertFalse(LiveExcludedExercise.isExcluded("OBDX.CPC_COBS.1_V0"));
-        // general impression not in the enum (RSCE grade 1 / CPC) must not be excluded
+        // general impression not in the enum (RSCE grade 1) must not be excluded
         assertFalse(LiveExcludedExercise.isExcluded("OBDX.RSCE_GRADE_1.10_V0"));
-        assertFalse(LiveExcludedExercise.isExcluded("OBDX.CPC_COBS.8_V0"));
         assertFalse(LiveExcludedExercise.isExcluded("ex-1"));
         assertFalse(LiveExcludedExercise.isExcluded(null));
     }

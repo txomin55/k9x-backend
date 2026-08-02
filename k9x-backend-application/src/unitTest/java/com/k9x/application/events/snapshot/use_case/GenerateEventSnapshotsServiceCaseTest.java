@@ -52,9 +52,10 @@ class GenerateEventSnapshotsServiceCaseTest {
                 "obdx", "cfg", "Cfg", null, obdx, "A+");
     }
 
-    private FetchClassificationCompetitorDTO competitor(String dogId, int position, BigDecimal rankScore) {
+    private FetchClassificationCompetitorDTO competitor(String dogId, int position, BigDecimal totalScore,
+                                                        BigDecimal rankScore) {
         return new FetchClassificationCompetitorDTO(dogId, dogId, "Border Collie", "o", "h", "t", "ES",
-                (short) 5, (short) 7, position, null, null, false, "OK", false, false, false,
+                (short) 5, (short) 7, position, totalScore, null, false, "OK", false, false, false,
                 List.of(), List.of(), null, rankScore);
     }
 
@@ -109,9 +110,9 @@ class GenerateEventSnapshotsServiceCaseTest {
     @Test
     void persists_the_tie_aware_positions_and_rank_scores_with_the_snapshot() {
         FetchObdxClassificationDTO obdx = obdx(
-                competitor("dog-1", 1, new BigDecimal("475.50")),
-                competitor("dog-2", 1, new BigDecimal("475.50")),
-                competitor("dog-3", 3, new BigDecimal("410.00")));
+                competitor("dog-1", 1, new BigDecimal("250.00"), new BigDecimal("475.50")),
+                competitor("dog-2", 1, new BigDecimal("250.00"), new BigDecimal("475.50")),
+                competitor("dog-3", 3, new BigDecimal("245.00"), new BigDecimal("410.00")));
         when(getPendingSnapshotEventsPersistencePort.getFinishedEventsWithoutSnapshot(anyLong()))
                 .thenReturn(List.of(new PendingSnapshotEventDTO("evt-1", "obdx")));
         when(getEventClassificationServiceCase.getClassification("evt-1")).thenReturn(classification("evt-1", obdx));
@@ -119,9 +120,9 @@ class GenerateEventSnapshotsServiceCaseTest {
         serviceCase.generateSnapshots();
 
         List<ObdxCompetitorPosition> expected = List.of(
-                new ObdxCompetitorPosition("dog-1", (short) 1, new BigDecimal("475.50")),
-                new ObdxCompetitorPosition("dog-2", (short) 1, new BigDecimal("475.50")),
-                new ObdxCompetitorPosition("dog-3", (short) 3, new BigDecimal("410.00")));
+                new ObdxCompetitorPosition("dog-1", (short) 1, new BigDecimal("250.00"), new BigDecimal("475.50")),
+                new ObdxCompetitorPosition("dog-2", (short) 1, new BigDecimal("250.00"), new BigDecimal("475.50")),
+                new ObdxCompetitorPosition("dog-3", (short) 3, new BigDecimal("245.00"), new BigDecimal("410.00")));
         verify(saveObdxSnapshotPersistencePort).save(eq("evt-1"), anyLong(), eq(obdx), eq(expected), eq(List.of()));
     }
 

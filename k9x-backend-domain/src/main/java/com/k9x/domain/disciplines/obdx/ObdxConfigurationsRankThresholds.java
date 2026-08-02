@@ -13,8 +13,8 @@ import java.util.regex.Pattern;
  * leaving the top slice ({@code S}, 901–1000) for the manually seeded exceptional rank.
  */
 public enum ObdxConfigurationsRankThresholds {
-    ENCI_PRE_DEBUTANTI("OBDX.ENCI_PREDEBUTTANTI", 50, 100),
-    ENCI_DEBUTANTI("OBDX.ENCI_DEBUTTANTI", 100, 200),
+    ENCI_PRE_DEBUTTANTI("OBDX.ENCI_PREDEBUTTANTI", 50, 100),
+    ENCI_DEBUTTANTI("OBDX.ENCI_DEBUTTANTI", 100, 200),
     RSCE_DEBUTANTE("OBDX.RSCE_DEBUTANTE", 100, 200),
     CPC_COBS("OBDX.CPC_COBS", 100, 200),
     FCI_GRADE_1("OBDX.FCI_GRADE_1", 201, 400),

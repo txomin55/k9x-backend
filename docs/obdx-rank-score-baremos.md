@@ -22,7 +22,22 @@ rank_score = min + round(tier/5 · 0.9·range) + (internacional ? round(0.1·ran
 
 ---
 
-## CPC_COBS · OBDX_RSCE_DEBUTANTE — franja `[100, 200]` (range 100)
+## OBDX_ENCI_PREDEBUTTANTI — franja `[50, 100]` (range 50)
+
+Toda la franja cae en el rango global **E** → letra siempre `E`/`E+`. Es la franja más estrecha (range 50),
+así que el bonus internacional es solo `+5`.
+
+| Nº competidores (tier) | Nacional | Internacional |
+|---|---|---|
+| < 5 (1) | 59 (E) | 64 (E+) |
+| 5–9 (2) | 68 (E) | 73 (E+) |
+| 10–19 (3) | 77 (E) | 82 (E+) |
+| 20–34 (4) | 86 (E) | 91 (E+) |
+| ≥ 35 (5) | 95 (E) | 100 (E+) |
+
+---
+
+## OBDX_ENCI_DEBUTTANTI · CPC_COBS · OBDX_RSCE_DEBUTANTE — franja `[100, 200]` (range 100)
 
 Toda la franja cae en el rango global **E**, así que la letra es siempre `E`/`E+`; el nº de competidores solo
 mueve el número.
@@ -84,7 +99,8 @@ tier 4 sube a `A`. El máximo automático es **900** (`A+`); **nunca llega a `S`
 
 | Configuración | Franja | Letra(s) posibles |
 |---|---|---|
-| CPC_COBS, OBDX_RSCE_DEBUTANTE | 100–200 | E / E+ |
+| OBDX_ENCI_PREDEBUTTANTI | 50–100 | E / E+ |
+| OBDX_ENCI_DEBUTTANTI, CPC_COBS, OBDX_RSCE_DEBUTANTE | 100–200 | E / E+ |
 | OBDX_FCI_GRADE_1, OBDX_RSCE_GRADE_1 | 201–400 | D / D+ |
 | OBDX_FCI_GRADE_2 | 401–600 | C / C+ |
 | OBDX_FCI_GRADE_3 | 601–900 | B / B+ / A / A+ |
