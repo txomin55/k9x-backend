@@ -19,10 +19,10 @@ import java.util.List;
 /**
  * Persists an OBDX event snapshot atomically: the per-competitor results
  * ({@code obdx.snap_event_competitors_results}: position, total score and rank score), the dog's OBDX rank
- * history row ({@code k9x.snap_dog_rank}), the event-level granted-awards list, plus the snapshot marker row
+ * history row ({@code k9x.snap_dog_rank}), plus the snapshot marker row
  * ({@code obdx.snap_event_classification}), all inside one {@code dsl.transaction} so they commit or roll back
- * together. Every insert is {@code ON CONFLICT DO NOTHING} and the granted-awards update is idempotent, so a
- * concurrent run keeps the first snapshot and a retry after a failure simply re-stamps the same values.
+ * together. Every insert is {@code ON CONFLICT DO NOTHING}, so a concurrent run keeps the first snapshot and a
+ * retry after a failure simply re-stamps the same values.
  */
 public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistencePort {
 
@@ -36,7 +36,7 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
 
     @Override
     public void save(String eventId, long snapshotAt, long applyingAt, FetchObdxClassificationDTO obdx,
-                     List<ObdxCompetitorPosition> competitors, List<String> grantedAwards) {
+                     List<ObdxCompetitorPosition> competitors) {
         String json = serialize(eventId, obdx);
 
         dsl.transaction(cfg -> {
@@ -75,11 +75,6 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
             if (!rankHistory.isEmpty()) {
                 ctx.batch(rankHistory).execute();
             }
-
-            ctx.update(Tables.EVENTS)
-                    .set(Tables.EVENTS.GRANTED_AWARDS, grantedAwards.toArray(String[]::new))
-                    .where(Tables.EVENTS.ID.eq(eventId))
-                    .execute();
 
             SnapEventClassification es = SnapEventClassification.SNAP_EVENT_CLASSIFICATION;
             ctx.insertInto(es)

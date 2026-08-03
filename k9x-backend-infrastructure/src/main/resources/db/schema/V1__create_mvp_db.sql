@@ -107,7 +107,6 @@ CREATE TABLE k9x.events
     created_at          BIGINT       NOT NULL,
     deleted_at          BIGINT,
     awards              VARCHAR(50)[],
-    granted_awards      VARCHAR(50)[],
     rank_score          INTEGER,
     international        BOOLEAN,
     CONSTRAINT k9x_events_pkey PRIMARY KEY (id),
