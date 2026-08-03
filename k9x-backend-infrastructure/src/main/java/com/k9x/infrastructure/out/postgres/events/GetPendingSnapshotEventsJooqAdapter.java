@@ -5,7 +5,7 @@ import com.k9x.application.events.snapshot.use_case.dto.PendingSnapshotEventDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Events;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Stages;
-import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventSnapshot;
+import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.SnapEventClassification;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 
@@ -23,7 +23,7 @@ public class GetPendingSnapshotEventsJooqAdapter implements GetPendingSnapshotEv
     public List<PendingSnapshotEventDTO> getFinishedEventsWithoutSnapshot(long startOfTodayUtcMillis) {
         Events e = Tables.EVENTS;
         Stages s = Tables.STAGES;
-        EventSnapshot es = EventSnapshot.EVENT_SNAPSHOT;
+        SnapEventClassification es = SnapEventClassification.SNAP_EVENT_CLASSIFICATION;
 
         return dsl.select(e.ID, e.DISCIPLINE)
                 .from(e)

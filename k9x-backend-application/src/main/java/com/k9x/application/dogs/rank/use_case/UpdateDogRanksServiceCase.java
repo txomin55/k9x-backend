@@ -18,7 +18,7 @@ import java.util.Map;
 
 /**
  * Recomputes {@code k9x.dogs.rank} for every dog with OBDX rank history as the competitor index of
- * {@code K9X_indice_nivel_spec.md}: the age-weighted mean of the dog's whole {@code k9x.dog_rank} history
+ * {@code K9X_indice_nivel_spec.md}: the age-weighted mean of the dog's whole {@code k9x.snap_dog_rank} history
  * (level) scaled by how recent its latest result is (freshness) — see {@link DogRankIndex}. Meant to be
  * triggered by a scheduler every 15 days. The history itself is never modified: the index is a pure function
  * of it, recomputed from scratch on each run. Dogs without any history keep a {@code null} rank; a dog that

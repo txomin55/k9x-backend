@@ -50,11 +50,12 @@ class SaveObdxSnapshotJooqAdapterTest {
                         new ObdxCompetitorPosition("dog-2", (short) 3, null, null)),
                 List.of("CACIOB", "RCACIOB"));
 
-        assertThat(sqls).anyMatch(s -> s.contains("update \"obdx\".\"event_competitors\"")
-                && s.contains("\"position\"") && s.contains("\"rank_score\"") && s.contains("\"total_score\""));
+        assertThat(sqls).anyMatch(s -> s.contains("insert into \"obdx\".\"snap_event_competitors_results\"")
+                && s.contains("\"position\"") && s.contains("\"rank_score\"") && s.contains("\"total_score\"")
+                && s.contains("on conflict") && s.contains("do nothing"));
         assertThat(sqls).anyMatch(s -> s.contains("update \"k9x\".\"events\"")
                 && s.contains("\"granted_awards\""));
-        assertThat(sqls).anyMatch(s -> s.contains("insert into \"obdx\".\"event_snapshot\"")
+        assertThat(sqls).anyMatch(s -> s.contains("insert into \"obdx\".\"snap_event_classification\"")
                 && s.contains("on conflict") && s.contains("do nothing"));
     }
 
@@ -69,7 +70,7 @@ class SaveObdxSnapshotJooqAdapterTest {
                 List.of());
 
         List<String> dogRankInserts = sqls.stream()
-                .filter(s -> s.contains("insert into \"k9x\".\"dog_rank\""))
+                .filter(s -> s.contains("insert into \"k9x\".\"snap_dog_rank\""))
                 .toList();
         assertThat(dogRankInserts).hasSize(1);
         assertThat(dogRankInserts.get(0))
@@ -85,8 +86,8 @@ class SaveObdxSnapshotJooqAdapterTest {
         new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, obdx(),
                 List.of(), List.of());
 
-        assertThat(sqls).noneMatch(s -> s.contains("update \"obdx\".\"event_competitors\""));
+        assertThat(sqls).noneMatch(s -> s.contains("insert into \"obdx\".\"snap_event_competitors_results\""));
         assertThat(sqls).anyMatch(s -> s.contains("update \"k9x\".\"events\""));
-        assertThat(sqls).anyMatch(s -> s.contains("insert into \"obdx\".\"event_snapshot\""));
+        assertThat(sqls).anyMatch(s -> s.contains("insert into \"obdx\".\"snap_event_classification\""));
     }
 }

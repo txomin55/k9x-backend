@@ -45,7 +45,7 @@ class GetPendingSnapshotEventsJooqAdapterTest {
                 .contains("\"k9x\".\"events\".\"deleted_at\" is null")
                 .contains("\"k9x\".\"stages\".\"date_to\" < ?")
                 .contains("not exists")
-                .contains("\"obdx\".\"event_snapshot\"");
+                .contains("\"obdx\".\"snap_event_classification\"");
         assertThat(capturedBindings.get()).contains(1000L);
     }
 

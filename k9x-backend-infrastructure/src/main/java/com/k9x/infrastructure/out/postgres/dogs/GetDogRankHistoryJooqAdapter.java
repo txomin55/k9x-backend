@@ -3,7 +3,7 @@ package com.k9x.infrastructure.out.postgres.dogs;
 import com.k9x.application.dogs.rank.port.GetDogRankHistoryPersistencePort;
 import com.k9x.application.dogs.rank.use_case.dto.FetchDogRankDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
-import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.DogRank;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.SnapDogRank;
 import org.jooq.DSLContext;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class GetDogRankHistoryJooqAdapter implements GetDogRankHistoryPersistenc
 
     @Override
     public List<FetchDogRankDTO> getDogRankHistory(String discipline) {
-        DogRank dr = Tables.DOG_RANK;
+        SnapDogRank dr = Tables.SNAP_DOG_RANK;
         return dsl.select(dr.DOG_ID, dr.RANK, dr.TIMESTAMP)
                 .from(dr)
                 .where(dr.DISCIPLINE.eq(discipline))

@@ -123,7 +123,7 @@ Se recomienda exponer `nivel`, `frescura` e `índice` por separado, para que la 
 | **Viejas glorias** | Un competidor que dejó de competir se hunde hacia casi cero por la frescura. El índice premia a los **actuales**, no el pasado. |
 
 > **Persistencia.** El flag **provisional** no se persiste: se calcula **al vuelo en lectura**, contando las
-> filas del historial del perro en `k9x.dog_rank` (`provisional = filas < 2`). No hay columna para él.
+> filas del historial del perro en `k9x.snap_dog_rank` (`provisional = filas < 2`). No hay columna para él.
 
 ---
 
@@ -164,7 +164,7 @@ forma = (media reciente de puntuaciones del competidor − media histórica) / m
 Se muestra al lado del índice (ej. "forma: −4%"). No modifica el índice; lo complementa.
 
 > **Persistencia.** Igual que el flag provisional, la **forma** no se persiste: se calcula **al vuelo en
-> lectura** a partir del historial de `k9x.dog_rank` (medias reciente e histórica). No hay columna para ella.
+> lectura** a partir del historial de `k9x.snap_dog_rank` (medias reciente e histórica). No hay columna para ella.
 
 ---
 

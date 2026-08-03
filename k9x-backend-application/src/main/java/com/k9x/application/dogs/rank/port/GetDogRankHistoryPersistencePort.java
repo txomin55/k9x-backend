@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface GetDogRankHistoryPersistencePort {
 
-    /** Every {@code k9x.dog_rank} row for the given discipline (the full history of every dog). */
+    /** Every {@code k9x.snap_dog_rank} row for the given discipline (the full history of every dog). */
     List<FetchDogRankDTO> getDogRankHistory(String discipline);
 }

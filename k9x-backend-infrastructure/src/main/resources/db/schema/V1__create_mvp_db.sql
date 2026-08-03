@@ -53,14 +53,14 @@ CREATE TABLE k9x.dogs
         CHECK (rank IS NULL OR rank BETWEEN 0 AND 1000)
 );
 
-CREATE TABLE k9x.dog_rank
+CREATE TABLE k9x.snap_dog_rank
 (
     dog_id     VARCHAR(255) NOT NULL,
     discipline VARCHAR(50)  NOT NULL,
     rank       NUMERIC(6, 2) NOT NULL,
     timestamp  BIGINT       NOT NULL,
-    CONSTRAINT dog_rank_pkey PRIMARY KEY (dog_id, discipline, timestamp),
-    CONSTRAINT dog_rank_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
+    CONSTRAINT snap_dog_rank_pkey PRIMARY KEY (dog_id, discipline, timestamp),
+    CONSTRAINT snap_dog_rank_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
 );
 
 CREATE TABLE k9x.judges
@@ -132,9 +132,6 @@ CREATE TABLE obdx.event_competitors
 (
     event_id      VARCHAR(255) NOT NULL,
     dog_id        VARCHAR(255) NOT NULL,
-    position      SMALLINT,
-    rank_score    NUMERIC(6, 2),
-    total_score   NUMERIC(6, 2),
     start_number  SMALLINT,
     competitor_number SMALLINT,
     verified      BOOLEAN,
@@ -145,6 +142,18 @@ CREATE TABLE obdx.event_competitors
     CONSTRAINT obdx_event_competitors_pkey PRIMARY KEY (event_id, dog_id),
     CONSTRAINT obdx_event_competitors_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
     CONSTRAINT obdx_event_competitors_dogs_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
+);
+
+CREATE TABLE obdx.snap_event_competitors_results
+(
+    event_id    VARCHAR(255) NOT NULL,
+    dog_id      VARCHAR(255) NOT NULL,
+    position    SMALLINT,
+    total_score NUMERIC(6, 2),
+    rank_score  NUMERIC(6, 2),
+    CONSTRAINT snap_event_competitors_results_pkey PRIMARY KEY (event_id, dog_id),
+    CONSTRAINT snap_event_competitors_results_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
+    CONSTRAINT snap_event_competitors_results_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
 );
 
 CREATE TABLE obdx.event_judges
@@ -188,13 +197,13 @@ CREATE TABLE obdx.event_scores
     CONSTRAINT obdx_event_scores_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
 );
 
-CREATE TABLE obdx.event_snapshot
+CREATE TABLE obdx.snap_event_classification
 (
     event_id  VARCHAR(255) NOT NULL,
     timestamp BIGINT       NOT NULL,
     snapshot  JSON         NOT NULL,
-    CONSTRAINT event_snapshot_pkey PRIMARY KEY (event_id),
-    CONSTRAINT event_snapshot_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id)
+    CONSTRAINT snap_event_classification_pkey PRIMARY KEY (event_id),
+    CONSTRAINT snap_event_classification_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id)
 );
 
 CREATE TABLE k9x.notifications

@@ -2,7 +2,7 @@ package com.k9x.infrastructure.out.postgres.events.obdx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
-import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventSnapshot;
+import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.SnapEventClassification;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.JSON;
@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class GetObdxEventSnapshotJooqAdapterTest {
 
-    private static final EventSnapshot ES = EventSnapshot.EVENT_SNAPSHOT;
+    private static final SnapEventClassification ES = SnapEventClassification.SNAP_EVENT_CLASSIFICATION;
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Test

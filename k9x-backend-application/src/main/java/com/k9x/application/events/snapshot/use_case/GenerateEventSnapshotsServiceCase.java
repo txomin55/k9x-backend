@@ -63,10 +63,11 @@ public class GenerateEventSnapshotsServiceCase {
             case OBDX -> {
                 FetchClassificationDTO classification =
                         getEventClassificationServiceCase.getClassification(pending.eventId());
-                // Persist the already-computed (tie-aware) ranking into event_competitors (position + the
-                // competitor's own rank_score) together with the snapshot marker, atomically: the port writes
-                // both inside one transaction, so a failure leaves the event without a snapshot and it is
-                // retried on the next run (the writes are idempotent, so a retry re-stamps the same values).
+                // Persist the already-computed (tie-aware) ranking into snap_event_competitors_results
+                // (position + total score + the competitor's own rank_score) together with the snapshot
+                // marker, atomically: the port writes both inside one transaction, so a failure leaves the
+                // event without a snapshot and it is retried on the next run (the writes are idempotent, so a
+                // retry re-stamps the same values).
                 List<ObdxCompetitorPosition> competitors = classification.obdx() == null ? List.of()
                         : classification.obdx().competitors().stream()
                                 .map(c -> new ObdxCompetitorPosition(c.dogId(), (short) c.position(),

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.snapshot.port.GetObdxEventSnapshotPersistencePort;
-import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventSnapshot;
+import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.SnapEventClassification;
 import org.jooq.DSLContext;
 import org.jooq.JSON;
 
@@ -22,7 +22,7 @@ public class GetObdxEventSnapshotJooqAdapter implements GetObdxEventSnapshotPers
 
     @Override
     public Optional<FetchObdxClassificationDTO> getSnapshot(String eventId) {
-        EventSnapshot es = EventSnapshot.EVENT_SNAPSHOT;
+        SnapEventClassification es = SnapEventClassification.SNAP_EVENT_CLASSIFICATION;
         JSON json = dsl.select(es.SNAPSHOT)
                 .from(es)
                 .where(es.EVENT_ID.eq(eventId))
