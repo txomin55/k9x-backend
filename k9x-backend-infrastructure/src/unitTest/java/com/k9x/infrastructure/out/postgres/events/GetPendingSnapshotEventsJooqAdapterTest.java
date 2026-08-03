@@ -3,6 +3,7 @@ package com.k9x.infrastructure.out.postgres.events;
 import com.k9x.application.events.snapshot.use_case.dto.PendingSnapshotEventDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Events;
+import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Stages;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -22,7 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GetPendingSnapshotEventsJooqAdapterTest {
 
     private static final Events E = Tables.EVENTS;
-    private static final Field<?>[] FIELDS = {E.ID, E.DISCIPLINE};
+    private static final Stages S = Tables.STAGES;
+    private static final Field<?>[] FIELDS = {E.ID, E.DISCIPLINE, S.DATE_TO};
 
     @Test
     void generates_sql_filtering_finished_stages_without_snapshot() {
@@ -57,9 +59,11 @@ class GetPendingSnapshotEventsJooqAdapterTest {
             Record r1 = mockDsl.newRecord(FIELDS);
             r1.set(E.ID, "evt-1");
             r1.set(E.DISCIPLINE, "obdx");
+            r1.set(S.DATE_TO, 900L);
             Record r2 = mockDsl.newRecord(FIELDS);
             r2.set(E.ID, "evt-2");
             r2.set(E.DISCIPLINE, "obdx");
+            r2.set(S.DATE_TO, 950L);
             result.add(r1);
             result.add(r2);
             return new MockResult[]{new MockResult(2, result)};
@@ -70,8 +74,8 @@ class GetPendingSnapshotEventsJooqAdapterTest {
                 new GetPendingSnapshotEventsJooqAdapter(dsl).getFinishedEventsWithoutSnapshot(1000L);
 
         assertThat(pending).containsExactly(
-                new PendingSnapshotEventDTO("evt-1", "obdx"),
-                new PendingSnapshotEventDTO("evt-2", "obdx"));
+                new PendingSnapshotEventDTO("evt-1", "obdx", 900L),
+                new PendingSnapshotEventDTO("evt-2", "obdx", 950L));
     }
 
     @Test

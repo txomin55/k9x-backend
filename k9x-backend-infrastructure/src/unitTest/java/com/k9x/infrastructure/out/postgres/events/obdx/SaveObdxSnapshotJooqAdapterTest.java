@@ -45,7 +45,7 @@ class SaveObdxSnapshotJooqAdapterTest {
         List<String> sqls = Collections.synchronizedList(new ArrayList<>());
         DSLContext dsl = capturingDsl(sqls);
 
-        new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, obdx(),
+        new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, 1699000000000L, obdx(),
                 List.of(new ObdxCompetitorPosition("dog-1", (short) 1, new BigDecimal("245.00"), new BigDecimal("475.50")),
                         new ObdxCompetitorPosition("dog-2", (short) 3, null, null)),
                 List.of("CACIOB", "RCACIOB"));
@@ -64,7 +64,7 @@ class SaveObdxSnapshotJooqAdapterTest {
         List<String> sqls = Collections.synchronizedList(new ArrayList<>());
         DSLContext dsl = capturingDsl(sqls);
 
-        new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, obdx(),
+        new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, 1699000000000L, obdx(),
                 List.of(new ObdxCompetitorPosition("dog-1", (short) 1, new BigDecimal("245.00"), new BigDecimal("475.50")),
                         new ObdxCompetitorPosition("dog-2", (short) 3, null, null)),
                 List.of());
@@ -74,7 +74,7 @@ class SaveObdxSnapshotJooqAdapterTest {
                 .toList();
         assertThat(dogRankInserts).hasSize(1);
         assertThat(dogRankInserts.get(0))
-                .contains("\"discipline\"").contains("\"rank\"").contains("\"timestamp\"")
+                .contains("\"discipline\"").contains("\"event_id\"").contains("\"rank\"").contains("\"timestamp\"")
                 .contains("on conflict").contains("do nothing");
     }
 
@@ -83,7 +83,7 @@ class SaveObdxSnapshotJooqAdapterTest {
         List<String> sqls = Collections.synchronizedList(new ArrayList<>());
         DSLContext dsl = capturingDsl(sqls);
 
-        new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, obdx(),
+        new SaveObdxSnapshotJooqAdapter(dsl, new ObjectMapper()).save("evt-1", 1700000000000L, 1699000000000L, obdx(),
                 List.of(), List.of());
 
         assertThat(sqls).noneMatch(s -> s.contains("insert into \"obdx\".\"snap_event_competitors_results\""));

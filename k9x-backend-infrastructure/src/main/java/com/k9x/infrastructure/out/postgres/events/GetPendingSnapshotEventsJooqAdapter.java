@@ -25,12 +25,12 @@ public class GetPendingSnapshotEventsJooqAdapter implements GetPendingSnapshotEv
         Stages s = Tables.STAGES;
         SnapEventClassification es = SnapEventClassification.SNAP_EVENT_CLASSIFICATION;
 
-        return dsl.select(e.ID, e.DISCIPLINE)
+        return dsl.select(e.ID, e.DISCIPLINE, s.DATE_TO)
                 .from(e)
                 .join(s).on(s.ID.eq(e.STAGE_ID).and(s.DELETED_AT.isNull()))
                 .where(e.DELETED_AT.isNull())
                 .and(s.DATE_TO.lt(startOfTodayUtcMillis))
                 .andNotExists(DSL.selectOne().from(es).where(es.EVENT_ID.eq(e.ID)))
-                .fetch(r -> new PendingSnapshotEventDTO(r.get(e.ID), r.get(e.DISCIPLINE)));
+                .fetch(r -> new PendingSnapshotEventDTO(r.get(e.ID), r.get(e.DISCIPLINE), r.get(s.DATE_TO)));
     }
 }

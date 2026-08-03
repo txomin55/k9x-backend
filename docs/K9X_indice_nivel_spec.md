@@ -254,6 +254,64 @@ Sobre los índices ya calculados, ordenar de mayor a menor con una cadena de `Co
 
 ---
 
+## 10. Implementación en K9X: tablas snap y doble timestamp
+
+El índice está materializado sobre una cadena de tablas `snap_*` (escritas **solo** por crons, append-only,
+inserts idempotentes):
+
+| Tabla | Qué guarda | Quién la escribe |
+|---|---|---|
+| `obdx.snap_event_competitors_results` | La foto del evento: position, total_score, rank_score por competidor | Cron diario de snapshot |
+| `k9x.snap_dog_rank` | El historial crudo del perro: su rank_score por evento y disciplina (el insumo del índice) | Cron diario, misma transacción |
+| `obdx.snap_event_classification` | El JSON de la clasificación + el marcador de "evento ya congelado" | Cron diario, misma transacción |
+| `k9x.snap_dog_index_history` | La línea temporal del índice por (perro, disciplina): registros `EVENT` y `TIME_DEGRADATION` con metadata JSON | Cron quincenal |
+
+Toda tabla snap lleva **dos timestamps** con contrato fijo:
+
+- **`timestamp`** — el instante de la **persistencia**. Solo auditoría: nadie lo usa para calcular nada.
+- **`applying_timestamp`** — el instante **al que aplica el dato**: el fin de la etapa del evento
+  (`stages.date_to`) para todo lo derivado de un evento, o el momento de la evaluación en los registros de
+  degradación. El índice, la frescura, el orden temporal y el "qué es nuevo" usan **solo** este campo.
+
+Gracias a esa separación, snapshotear hoy un evento de hace años produce historia correcta: el dato queda
+fechado en su momento real, no en el de la ingesta.
+
+---
+
+## 11. Ingesta de eventos históricos (backfill)
+
+Para añadir una prueba pasada (p. ej. eventos previos al Trofeu) **no se toca ninguna tabla snap**; basta con
+crear el evento como si fuera real:
+
+1. `k9x.competitions` + `k9x.stages` con las **fechas reales** de la prueba (`date_to` será el
+   `applying_timestamp` de todo lo derivado).
+2. `k9x.events`: `discipline`, un `configuration_id` **existente en código** (los `configuration.json` de
+   `.../disciplines/obdx/federations/` y las franjas de `ObdxConfigurationsRankThresholds` — no hay tablas de
+   configuración) y **⚠️ `rank_score` + `international` puestos a mano**: esa fórmula corre al guardar el
+   evento por la API, no en el cron. Sin `rank_score`, los competidores no puntúan y el evento no afecta al
+   índice.
+3. `obdx.event_judges`, `obdx.event_exercises` (con los jueces asignados por ejercicio: la clasificación solo
+   lee scores de pares juez+ejercicio listados ahí), `obdx.event_competitors` y `obdx.event_scores`.
+
+A partir de ahí, todo es automático: el cron diario ve la etapa terminada sin marcador y congela el evento
+(`timestamp` = hoy, `applying_timestamp` = fecha real), y el cron quincenal integra los resultados — registro
+`EVENT` en la fecha real, nivel recalculado con la antigüedad real y degradación contada desde la última
+prueba real del perro.
+
+**Dos matices:**
+
+- **La historia ya escrita no se reescribe.** Si un perro ya tiene registros en `snap_dog_index_history` y se
+  ingesta un evento *anterior* a ellos, el evento sí entra en `snap_dog_rank` y pondera en todos los cálculos
+  futuros, pero su punto `EVENT` no se materializa (el replay salta lo anterior al último registro) y los
+  registros pasados conservan su valor. Solución: **borrar las filas de `snap_dog_index_history` de los perros
+  afectados** — el replay es idempotente y la siguiente pasada del cron reconstruye la línea temporal completa
+  ya con el evento antiguo en su sitio. Orden ideal: backfill primero, historia después.
+- **Los meses de degradación intermedios no se materializan retroactivamente**: tras el backfill, el primer
+  registro `TIME_DEGRADATION` salta directamente al mes de inactividad actual (valor correcto; sin puntos
+  intermedios en la gráfica).
+
+---
+
 ## Resumen en una frase
 
 > El índice es **nivel × frescura**, calculado sobre las `puntuacionEventoCompetidor` (caja negra) de un competidor: el *nivel* es su media ponderada por antigüedad (meseta de 10 meses, decayendo hasta 0.01 en el mes 70); la *frescura* es una curva propia evaluada en la prueba más reciente, con arranque algo más brusco (10–18 meses), que hunde a los inactivos hacia casi cero pero se recupera al volver a competir. Con menos de 2 pruebas se marca provisional, y nadie desaparece nunca.

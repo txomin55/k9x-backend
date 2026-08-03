@@ -1,6 +1,6 @@
 package com.k9x.configuration.dogrank;
 
-import com.k9x.application.dogs.rank.use_case.UpdateDogRanksServiceCase;
+import com.k9x.application.dogs.rank.use_case.GenerateDogRankHistoryServiceCase;
 import com.k9x.infrastructure.in.scheduler.DogRankScheduler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class DogRankSchedulerConfiguration {
 
     @Bean
-    public DogRankScheduler dogRankScheduler(UpdateDogRanksServiceCase updateDogRanksServiceCase) {
-        return new DogRankScheduler(updateDogRanksServiceCase);
+    public DogRankScheduler dogRankScheduler(GenerateDogRankHistoryServiceCase generateDogRankHistoryServiceCase) {
+        return new DogRankScheduler(generateDogRankHistoryServiceCase);
     }
 }

@@ -82,8 +82,8 @@ public class GenerateEventSnapshotsServiceCase {
                                 .flatMap(List::stream)
                                 .distinct()
                                 .toList();
-                saveObdxSnapshotPersistencePort.save(pending.eventId(), now, classification.obdx(), competitors,
-                        grantedAwards);
+                saveObdxSnapshotPersistencePort.save(pending.eventId(), now, pending.stageEndAt(),
+                        classification.obdx(), competitors, grantedAwards);
             }
         }
     }

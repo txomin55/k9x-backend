@@ -1,23 +1,23 @@
 package com.k9x.infrastructure.in.scheduler;
 
-import com.k9x.application.dogs.rank.use_case.UpdateDogRanksServiceCase;
+import com.k9x.application.dogs.rank.use_case.GenerateDogRankHistoryServiceCase;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
- * Inbound adapter that triggers the periodic refresh of {@code k9x.dogs.rank} (the competitor index over the
- * {@code k9x.snap_dog_rank} history). Runs every 15 days by default — 02:00 UTC on the 1st and 16th of each
- * month — override with the {@code k9x.dog-rank.cron} property.
+ * Inbound adapter that triggers the periodic append to {@code k9x.snap_dog_index_history} (the competitor index
+ * timeline: new event results and inactivity degradations). Runs every 15 days by default — 02:00 UTC on the
+ * 1st and 16th of each month — override with the {@code k9x.dog-rank.cron} property.
  */
 public class DogRankScheduler {
 
-    private final UpdateDogRanksServiceCase updateDogRanksServiceCase;
+    private final GenerateDogRankHistoryServiceCase generateDogRankHistoryServiceCase;
 
-    public DogRankScheduler(UpdateDogRanksServiceCase updateDogRanksServiceCase) {
-        this.updateDogRanksServiceCase = updateDogRanksServiceCase;
+    public DogRankScheduler(GenerateDogRankHistoryServiceCase generateDogRankHistoryServiceCase) {
+        this.generateDogRankHistoryServiceCase = generateDogRankHistoryServiceCase;
     }
 
     @Scheduled(cron = "${k9x.dog-rank.cron:0 0 2 1,16 * *}", zone = "UTC")
-    public void updateDogRanks() {
-        updateDogRanksServiceCase.updateDogRanks();
+    public void generateDogRankHistory() {
+        generateDogRankHistoryServiceCase.generateDogRankHistory();
     }
 }

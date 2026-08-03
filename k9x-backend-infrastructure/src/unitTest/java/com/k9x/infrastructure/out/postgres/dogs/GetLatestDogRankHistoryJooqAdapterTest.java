@@ -1,6 +1,6 @@
 package com.k9x.infrastructure.out.postgres.dogs;
 
-import com.k9x.application.dogs.rank.use_case.dto.FetchDogRankDTO;
+import com.k9x.application.dogs.rank.use_case.dto.FetchLatestDogRankHistoryDTO;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -12,21 +12,21 @@ import org.jooq.tools.jdbc.MockDataProvider;
 import org.jooq.tools.jdbc.MockResult;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables.SNAP_DOG_RANK;
+import static com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables.SNAP_DOG_INDEX_HISTORY;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GetDogRankHistoryJooqAdapterTest {
+class GetLatestDogRankHistoryJooqAdapterTest {
 
     private final List<String> sqls = new ArrayList<>();
 
     private DSLContext dslReturning(Object[]... rows) {
         MockDataProvider provider = ctx -> {
             sqls.add(ctx.sql());
-            Field<?>[] fields = {SNAP_DOG_RANK.DOG_ID, SNAP_DOG_RANK.RANK, SNAP_DOG_RANK.TIMESTAMP};
+            Field<?>[] fields = {SNAP_DOG_INDEX_HISTORY.DOG_ID, SNAP_DOG_INDEX_HISTORY.DISCIPLINE, SNAP_DOG_INDEX_HISTORY.RANK,
+                    SNAP_DOG_INDEX_HISTORY.APPLYING_TIMESTAMP};
             Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(fields);
             for (Object[] row : rows) {
                 Record record = DSL.using(SQLDialect.POSTGRES).newRecord(fields);
@@ -39,20 +39,17 @@ class GetDogRankHistoryJooqAdapterTest {
     }
 
     @Test
-    void fetches_the_full_history_for_the_discipline() {
-        DSLContext dsl = dslReturning(
-                new Object[]{"dog-1", new BigDecimal("773.14"), 1690000000000L},
-                new Object[]{"dog-1", new BigDecimal("650.00"), 1700000000000L});
+    void fetches_the_latest_history_record_per_dog() {
+        DSLContext dsl = dslReturning(new Object[]{"dog-1", "OBDX", 760, 1700000000000L});
 
-        List<FetchDogRankDTO> history = new GetDogRankHistoryJooqAdapter(dsl).getDogRankHistory("OBDX");
+        List<FetchLatestDogRankHistoryDTO> latest = new GetLatestDogRankHistoryJooqAdapter(dsl).getLatestHistory();
 
-        assertThat(history).containsExactly(
-                new FetchDogRankDTO("dog-1", new BigDecimal("773.14"), 1690000000000L),
-                new FetchDogRankDTO("dog-1", new BigDecimal("650.00"), 1700000000000L));
+        assertThat(latest).containsExactly(new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 760, 1700000000000L));
         assertThat(sqls).hasSize(1);
         assertThat(sqls.get(0))
-                .contains("\"k9x\".\"snap_dog_rank\"")
-                .contains("\"discipline\"")
-                .contains("order by");
+                .contains("distinct on")
+                .contains("\"k9x\".\"snap_dog_index_history\"")
+                .contains("\"applying_timestamp\"")
+                .contains("desc");
     }
 }

@@ -13,7 +13,10 @@ k9x-backend:
       same-site: "Lax"
       secure: false
 
-# Local only: el cron de snapshots corre cada 2 minutos en lugar de a las 01:00 UTC.
+# Local only: los crons corren cada 2 minutos en lugar de su horario real
+# (snapshots: 01:00 UTC diario; dog rank: día 1 y 16 a las 02:00 UTC).
 k9x:
   snapshot:
+    cron: "0 */2 * * * *"
+  dog-rank:
     cron: "0 */2 * * * *"

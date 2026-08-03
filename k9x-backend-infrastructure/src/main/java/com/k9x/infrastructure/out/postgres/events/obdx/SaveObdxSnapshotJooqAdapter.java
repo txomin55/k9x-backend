@@ -35,7 +35,7 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
     }
 
     @Override
-    public void save(String eventId, long snapshotAt, FetchObdxClassificationDTO obdx,
+    public void save(String eventId, long snapshotAt, long applyingAt, FetchObdxClassificationDTO obdx,
                      List<ObdxCompetitorPosition> competitors, List<String> grantedAwards) {
         String json = serialize(eventId, obdx);
 
@@ -50,6 +50,8 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
                             .set(results.POSITION, c.position())
                             .set(results.TOTAL_SCORE, c.totalScore())
                             .set(results.RANK_SCORE, c.rankScore())
+                            .set(results.TIMESTAMP, snapshotAt)
+                            .set(results.APPLYING_TIMESTAMP, applyingAt)
                             .onConflict(results.EVENT_ID, results.DOG_ID)
                             .doNothing())
                     .toList();
@@ -62,10 +64,12 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
                     .map(c -> ctx.insertInto(Tables.SNAP_DOG_RANK)
                             .set(Tables.SNAP_DOG_RANK.DOG_ID, c.dogId())
                             .set(Tables.SNAP_DOG_RANK.DISCIPLINE, Discipline.OBDX.name())
+                            .set(Tables.SNAP_DOG_RANK.EVENT_ID, eventId)
                             .set(Tables.SNAP_DOG_RANK.RANK, c.rankScore())
                             .set(Tables.SNAP_DOG_RANK.TIMESTAMP, snapshotAt)
+                            .set(Tables.SNAP_DOG_RANK.APPLYING_TIMESTAMP, applyingAt)
                             .onConflict(Tables.SNAP_DOG_RANK.DOG_ID, Tables.SNAP_DOG_RANK.DISCIPLINE,
-                                    Tables.SNAP_DOG_RANK.TIMESTAMP)
+                                    Tables.SNAP_DOG_RANK.EVENT_ID)
                             .doNothing())
                     .toList();
             if (!rankHistory.isEmpty()) {
@@ -81,6 +85,7 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
             ctx.insertInto(es)
                     .set(es.EVENT_ID, eventId)
                     .set(es.TIMESTAMP, snapshotAt)
+                    .set(es.APPLYING_TIMESTAMP, applyingAt)
                     .set(es.SNAPSHOT, JSON.valueOf(json))
                     .onConflict(es.EVENT_ID)
                     .doNothing()

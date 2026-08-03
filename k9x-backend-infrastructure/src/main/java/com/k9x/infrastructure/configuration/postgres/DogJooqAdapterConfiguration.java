@@ -1,19 +1,22 @@
 package com.k9x.infrastructure.configuration.postgres;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.k9x.application.dogs.port.CreateDogPersistencePort;
 import com.k9x.application.dogs.port.DeleteDogPersistencePort;
 import com.k9x.application.dogs.port.GetDogListPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
-import com.k9x.application.dogs.rank.port.GetDogRankHistoryPersistencePort;
-import com.k9x.application.dogs.rank.port.UpdateDogRanksPersistencePort;
+import com.k9x.application.dogs.rank.port.CreateDogRankHistoryPersistencePort;
+import com.k9x.application.dogs.rank.port.GetDogRankEventResultsPersistencePort;
+import com.k9x.application.dogs.rank.port.GetLatestDogRankHistoryPersistencePort;
 import com.k9x.infrastructure.out.postgres.dogs.CreateDogJooqAdapter;
+import com.k9x.infrastructure.out.postgres.dogs.CreateDogRankHistoryJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.DeleteDogJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.GetDogJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.GetDogListJooqAdapter;
-import com.k9x.infrastructure.out.postgres.dogs.GetDogRankHistoryJooqAdapter;
+import com.k9x.infrastructure.out.postgres.dogs.GetDogRankEventResultsJooqAdapter;
+import com.k9x.infrastructure.out.postgres.dogs.GetLatestDogRankHistoryJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.UpdateDogJooqAdapter;
-import com.k9x.infrastructure.out.postgres.dogs.UpdateDogRanksJooqAdapter;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,12 +56,17 @@ public class DogJooqAdapterConfiguration {
     }
 
     @Bean
-    public GetDogRankHistoryPersistencePort getDogRankHistoryPersistencePort() {
-        return new GetDogRankHistoryJooqAdapter(dsl);
+    public GetDogRankEventResultsPersistencePort getDogRankEventResultsPersistencePort() {
+        return new GetDogRankEventResultsJooqAdapter(dsl);
     }
 
     @Bean
-    public UpdateDogRanksPersistencePort updateDogRanksPersistencePort() {
-        return new UpdateDogRanksJooqAdapter(dsl);
+    public GetLatestDogRankHistoryPersistencePort getLatestDogRankHistoryPersistencePort() {
+        return new GetLatestDogRankHistoryJooqAdapter(dsl);
+    }
+
+    @Bean
+    public CreateDogRankHistoryPersistencePort createDogRankHistoryPersistencePort(ObjectMapper objectMapper) {
+        return new CreateDogRankHistoryJooqAdapter(dsl, objectMapper);
     }
 }

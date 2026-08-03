@@ -45,22 +45,9 @@ CREATE TABLE k9x.dogs
     sex                         VARCHAR(10),
     withers_cm                  INTEGER,
     three_fci_generations_confirmed BOOLEAN,
-    rank                        INTEGER,
     CONSTRAINT dogs_pkey PRIMARY KEY (id),
     CONSTRAINT k9x_dogs_sex_check
-        CHECK (sex IS NULL OR sex IN ('MALE', 'FEMALE')),
-    CONSTRAINT k9x_dogs_rank_check
-        CHECK (rank IS NULL OR rank BETWEEN 0 AND 1000)
-);
-
-CREATE TABLE k9x.snap_dog_rank
-(
-    dog_id     VARCHAR(255) NOT NULL,
-    discipline VARCHAR(50)  NOT NULL,
-    rank       NUMERIC(6, 2) NOT NULL,
-    timestamp  BIGINT       NOT NULL,
-    CONSTRAINT snap_dog_rank_pkey PRIMARY KEY (dog_id, discipline, timestamp),
-    CONSTRAINT snap_dog_rank_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
+        CHECK (sex IS NULL OR sex IN ('MALE', 'FEMALE'))
 );
 
 CREATE TABLE k9x.judges
@@ -127,6 +114,33 @@ CREATE TABLE k9x.events
     CONSTRAINT k9x_events_fk FOREIGN KEY (stage_id) REFERENCES k9x.stages (id)
 );
 
+CREATE TABLE k9x.snap_dog_rank
+(
+    dog_id             VARCHAR(255) NOT NULL,
+    discipline         VARCHAR(50)  NOT NULL,
+    event_id           VARCHAR(255) NOT NULL,
+    rank               NUMERIC(6, 2) NOT NULL,
+    timestamp          BIGINT       NOT NULL,
+    applying_timestamp BIGINT       NOT NULL,
+    CONSTRAINT snap_dog_rank_pkey PRIMARY KEY (dog_id, discipline, event_id),
+    CONSTRAINT snap_dog_rank_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id),
+    CONSTRAINT snap_dog_rank_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id)
+);
+
+CREATE TABLE k9x.snap_dog_index_history
+(
+    dog_id             VARCHAR(255) NOT NULL,
+    discipline         VARCHAR(50)  NOT NULL,
+    rank               INTEGER      NOT NULL,
+    timestamp          BIGINT       NOT NULL,
+    applying_timestamp BIGINT       NOT NULL,
+    metadata           TEXT         NOT NULL,
+    CONSTRAINT snap_dog_index_history_pkey PRIMARY KEY (dog_id, discipline, applying_timestamp),
+    CONSTRAINT snap_dog_index_history_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id),
+    CONSTRAINT k9x_snap_dog_index_history_rank_check
+        CHECK (rank BETWEEN 0 AND 1000)
+);
+
 CREATE SCHEMA obdx;
 CREATE TABLE obdx.event_competitors
 (
@@ -146,11 +160,13 @@ CREATE TABLE obdx.event_competitors
 
 CREATE TABLE obdx.snap_event_competitors_results
 (
-    event_id    VARCHAR(255) NOT NULL,
-    dog_id      VARCHAR(255) NOT NULL,
-    position    SMALLINT,
-    total_score NUMERIC(6, 2),
-    rank_score  NUMERIC(6, 2),
+    event_id           VARCHAR(255) NOT NULL,
+    dog_id             VARCHAR(255) NOT NULL,
+    position           SMALLINT,
+    total_score        NUMERIC(6, 2),
+    rank_score         NUMERIC(6, 2),
+    timestamp          BIGINT       NOT NULL,
+    applying_timestamp BIGINT       NOT NULL,
     CONSTRAINT snap_event_competitors_results_pkey PRIMARY KEY (event_id, dog_id),
     CONSTRAINT snap_event_competitors_results_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
     CONSTRAINT snap_event_competitors_results_dog_fk FOREIGN KEY (dog_id) REFERENCES k9x.dogs (id)
@@ -199,9 +215,10 @@ CREATE TABLE obdx.event_scores
 
 CREATE TABLE obdx.snap_event_classification
 (
-    event_id  VARCHAR(255) NOT NULL,
-    timestamp BIGINT       NOT NULL,
-    snapshot  JSON         NOT NULL,
+    event_id           VARCHAR(255) NOT NULL,
+    timestamp          BIGINT       NOT NULL,
+    applying_timestamp BIGINT       NOT NULL,
+    snapshot           JSON         NOT NULL,
     CONSTRAINT snap_event_classification_pkey PRIMARY KEY (event_id),
     CONSTRAINT snap_event_classification_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id)
 );

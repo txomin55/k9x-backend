@@ -1,8 +1,9 @@
 package com.k9x.configuration.dogrank;
 
-import com.k9x.application.dogs.rank.port.GetDogRankHistoryPersistencePort;
-import com.k9x.application.dogs.rank.port.UpdateDogRanksPersistencePort;
-import com.k9x.application.dogs.rank.use_case.UpdateDogRanksServiceCase;
+import com.k9x.application.dogs.rank.port.CreateDogRankHistoryPersistencePort;
+import com.k9x.application.dogs.rank.port.GetDogRankEventResultsPersistencePort;
+import com.k9x.application.dogs.rank.port.GetLatestDogRankHistoryPersistencePort;
+import com.k9x.application.dogs.rank.use_case.GenerateDogRankHistoryServiceCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,9 +11,13 @@ import org.springframework.context.annotation.Configuration;
 public class DogRankUseCaseConfiguration {
 
     @Bean
-    public UpdateDogRanksServiceCase updateDogRanksServiceCase(
-            GetDogRankHistoryPersistencePort getDogRankHistoryPersistencePort,
-            UpdateDogRanksPersistencePort updateDogRanksPersistencePort) {
-        return new UpdateDogRanksServiceCase(getDogRankHistoryPersistencePort, updateDogRanksPersistencePort);
+    public GenerateDogRankHistoryServiceCase generateDogRankHistoryServiceCase(
+            GetDogRankEventResultsPersistencePort getDogRankEventResultsPersistencePort,
+            GetLatestDogRankHistoryPersistencePort getLatestDogRankHistoryPersistencePort,
+            CreateDogRankHistoryPersistencePort createDogRankHistoryPersistencePort) {
+        return new GenerateDogRankHistoryServiceCase(
+                getDogRankEventResultsPersistencePort,
+                getLatestDogRankHistoryPersistencePort,
+                createDogRankHistoryPersistencePort);
     }
 }

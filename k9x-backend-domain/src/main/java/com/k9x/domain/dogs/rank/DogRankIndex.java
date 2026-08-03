@@ -20,7 +20,12 @@ import java.util.List;
  */
 public final class DogRankIndex {
 
-    private static final double PLATEAU_MONTHS = 10.0;
+    /** Full-weight plateau: results younger than this many months carry no degradation at all. */
+    public static final int PLATEAU_MONTHS_THRESHOLD = 10;
+    /** Month where both curves hit the permanent 0.01 floor; beyond it nothing degrades further. */
+    public static final int FLOOR_MONTHS_THRESHOLD = 70;
+
+    private static final double PLATEAU_MONTHS = PLATEAU_MONTHS_THRESHOLD;
     private static final double FLOOR = 0.01;
     private static final double DAYS_PER_MONTH = 30.4375;
     private static final double MILLIS_PER_DAY = 86_400_000.0;
@@ -92,6 +97,11 @@ public final class DogRankIndex {
             }
         }
         return FLOOR;
+    }
+
+    /** Whole months elapsed between two instants (floor of the fractional month count, never negative). */
+    public static int wholeMonthsBetween(long from, long to) {
+        return (int) monthsBetween(from, to);
     }
 
     private static double monthsBetween(long from, long to) {

@@ -11,9 +11,12 @@ import java.util.List;
  * together with the snapshot marker row holding the OBDX classification payload (only the heavy computed part;
  * event metadata is recovered on read). All writes for an event happen in a single transaction, so a failure
  * leaves the event without a snapshot and it is retried on the next run.
+ *
+ * <p>{@code snapshotAt} is the persistence instant (audit only); {@code applyingAt} is the instant the results
+ * apply to — the event's stage end — and is what every consumer (index, degradation, ordering) uses.
  */
 public interface SaveObdxSnapshotPersistencePort {
 
-    void save(String eventId, long snapshotAt, FetchObdxClassificationDTO obdx,
+    void save(String eventId, long snapshotAt, long applyingAt, FetchObdxClassificationDTO obdx,
               List<ObdxCompetitorPosition> competitors, List<String> grantedAwards);
 }

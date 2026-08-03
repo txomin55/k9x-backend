@@ -141,23 +141,23 @@ VALUES -- Classe 1 -> event_1783770421009
 -- Frozen per-competitor results (cron-written table); dogs without any score have no row.
 -- position and total_score ("Média" total) come from the individual scoresheet PDFs (FOLHA DE
 -- PONTUAÇÃO INDIVIDUAL, one per dorsal); position ranks total_score desc within each event.
-INSERT INTO obdx.snap_event_competitors_results (event_id, dog_id, position, total_score, rank_score)
+INSERT INTO obdx.snap_event_competitors_results (event_id, dog_id, position, total_score, rank_score, timestamp, applying_timestamp)
 VALUES -- Classe 1 -> event_1783770421009
-       ('event_1783770421009', '621XXXXXXXXXXXX', 1, 241.50, 225.90),
+       ('event_1783770421009', '621XXXXXXXXXXXX', 1, 241.50, 225.90, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999),
        -- Classe 2 -> event_1783770430523
-       ('event_1783770430523', '622XXXXXXXXXXXX', 1, 224.50, 418.59),
-       ('event_1783770430523', '620095300051547', 2, 214.50, 414.28),
-       ('event_1783770430523', '623XXXXXXXXXXXX', 3, 164.50, 400),
+       ('event_1783770430523', '622XXXXXXXXXXXX', 1, 224.50, 418.59, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999),
+       ('event_1783770430523', '620095300051547', 2, 214.50, 414.28, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999),
+       ('event_1783770430523', '623XXXXXXXXXXXX', 3, 164.50, 400, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999),
        -- Classe 3 -> event_1783770452508
-       ('event_1783770452508', '978000040086211', 1, 259.50, 674.28),
-       ('event_1783770452508', '380260102376914', 2, 201.50, 618.94),
-       ('event_1783770452508', '945000001842619', 3, 188.50, 600),
-       ('event_1783770452508', '620098500124755', 4, 156.00, 600),
+       ('event_1783770452508', '978000040086211', 1, 259.50, 674.28, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999),
+       ('event_1783770452508', '380260102376914', 2, 201.50, 618.94, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999),
+       ('event_1783770452508', '945000001842619', 3, 188.50, 600, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999),
+       ('event_1783770452508', '620098500124755', 4, 156.00, 600, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999),
        -- COBS -> event_1783770408793
-       ('event_1783770408793', '963XXXXXXXXXXXX', 1, 188.50, 134.60),
-       ('event_1783770408793', '992XXXXXXXXXXXX', 2, 172.00, 132.54),
-       ('event_1783770408793', '624XXXXXXXXXXXX', 3, 160.00, 131.14),
-       ('event_1783770408793', '956XXXXXXXXXXXX', 4, 140.00, 121.96);
+       ('event_1783770408793', '963XXXXXXXXXXXX', 1, 188.50, 134.60, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999),
+       ('event_1783770408793', '992XXXXXXXXXXXX', 2, 172.00, 132.54, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999),
+       ('event_1783770408793', '624XXXXXXXXXXXX', 3, 160.00, 131.14, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999),
+       ('event_1783770408793', '956XXXXXXXXXXXX', 4, 140.00, 121.96, FLOOR(EXTRACT(EPOCH FROM now()) * 1000), 1783814399999);
 
 -- ---------------------------------------------------------------------------
 -- 4) Event scores: the raw per-exercise score (the "Juiz 1" column) from each
