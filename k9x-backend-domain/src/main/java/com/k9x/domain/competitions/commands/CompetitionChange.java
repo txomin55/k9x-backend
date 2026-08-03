@@ -7,7 +7,7 @@ package com.k9x.domain.competitions.commands;
  */
 public sealed interface CompetitionChange permits
         CompetitionCreated, CompetitionUpdated, CompetitionDeleted,
-        StageCreated, StageRenamed, StageDeleted,
+        StageCreated, StageUpdated, StageDeleted,
         EventCreated, EventDeleted, DogEnrolled,
         ObdxEventInfoUpdated, ScoreUpdated, CompetitorNotCompetingUpdated, YellowCardRegistered,
         RedCardRegistered {

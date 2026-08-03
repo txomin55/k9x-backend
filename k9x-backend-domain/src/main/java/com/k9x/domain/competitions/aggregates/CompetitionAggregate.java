@@ -32,6 +32,9 @@ import java.util.Objects;
  */
 public final class CompetitionAggregate {
 
+    private static final String SMOKE_TEST_PREFIX = "--SMOKE--";
+    private static final String SMOKE_TEST_CREATOR = "k9x.support@gmail.com";
+
     private final CompetitionSnapshot snapshot;
     private final List<CompetitionChange> changes = new ArrayList<>();
 
@@ -137,7 +140,9 @@ public final class CompetitionAggregate {
 
     public void delete(String userId, long now) {
         assertCompetitionMutableBy(userId);
-        assertCompetitionDeletable(now);
+        if (!isSmokeTestCompetition()) {
+            assertCompetitionDeletable(now);
+        }
 
         changes.add(new CompetitionDeleted(snapshot.id(), now));
         if (snapshot.stages() != null) {
@@ -159,14 +164,33 @@ public final class CompetitionAggregate {
                 userId, now));
     }
 
-    public void renameStage(String stageId, StageUpdateData data, String userId, long now) {
+    public void updateStage(String stageId, StageUpdateData data, String userId, long now) {
         StageSnapshot stage = requireActiveStage(stageId, userId);
         assertStageOwnedBy(stage, userId);
         assertCompetitionMutableBy(userId);
         assertStageUpdatable(stage, now);
         assertStageDateRange(data.dateFrom(), data.dateTo());
+        assertEventDeadlinesBeforeStageStart(stage, data.dateFrom());
 
-        changes.add(new StageRenamed(stageId, data.name(), data.dateFrom(), data.dateTo(), now));
+        changes.add(new StageUpdated(stageId, data.name(), data.dateFrom(), data.dateTo(), now));
+    }
+
+    /**
+     * Re-dating a stage must keep every (active) event's enrollment deadline before the new start day —
+     * the same invariant enforced when the deadline is set. Otherwise moving a future stage onto today
+     * would leave enrollment open on an already-running stage (Enroll and Classification showing at once).
+     */
+    private void assertEventDeadlinesBeforeStageStart(StageSnapshot stage, Long dateFrom) {
+        if (stage.events() == null) {
+            return;
+        }
+        boolean violated = stage.events().stream()
+                .filter(e -> e.deletedAt() == null)
+                .anyMatch(e -> e.enrollmentDeadline() != null
+                        && !UtcDates.isBeforeUtcDay(e.enrollmentDeadline(), dateFrom));
+        if (violated) {
+            throw new EnrollmentDeadlineAfterStageStartException();
+        }
     }
 
     // ---- EventSnapshot mutations -------------------------------------------------------------------------
@@ -375,6 +399,16 @@ public final class CompetitionAggregate {
         if (snapshot.status(now) != CompetitionStatus.CREATED) {
             throw new CompetitionCannotBeUpdatedException();
         }
+    }
+
+    /**
+     * The smoke-test suite creates real data (prefixed {@code --SMOKE--}, owned by the support account) and
+     * cleans it up afterwards, including competitions that scoring has already moved to STARTED. Those are
+     * exempt from the status-based delete restriction so the cleanup can remove everything it created.
+     */
+    private boolean isSmokeTestCompetition() {
+        return snapshot.name() != null && snapshot.name().startsWith(SMOKE_TEST_PREFIX)
+                && SMOKE_TEST_CREATOR.equals(snapshot.creator());
     }
 
     /**

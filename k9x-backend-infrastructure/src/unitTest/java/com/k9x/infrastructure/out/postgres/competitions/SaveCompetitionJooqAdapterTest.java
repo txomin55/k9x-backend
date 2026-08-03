@@ -134,7 +134,7 @@ class SaveCompetitionJooqAdapterTest {
     void emits_update_for_stage_renamed() {
         givenCapturingDsl();
         CompetitionAggregate competition = aggregateWithActiveStage();
-        competition.renameStage("stage-123", new StageUpdateData("Renamed", 1L, 2L), "user", NOW);
+        competition.updateStage("stage-123", new StageUpdateData("Renamed", 1L, 2L), "user", NOW);
 
         new SaveCompetitionJooqAdapter(dsl).save(competition);
 
@@ -268,7 +268,7 @@ class SaveCompetitionJooqAdapterTest {
         givenCapturingDsl();
         CompetitionAggregate competition = aggregateWithActiveStage();
         competition.createStage(new NewStageData("stage-new", "New", FUTURE_FROM, FUTURE_TO), "user", NOW);
-        competition.renameStage("stage-123", new StageUpdateData("Renamed", 1L, 2L), "user", NOW);
+        competition.updateStage("stage-123", new StageUpdateData("Renamed", 1L, 2L), "user", NOW);
         competition.deleteStage("stage-123", "user", NOW);
 
         new SaveCompetitionJooqAdapter(dsl).save(competition);

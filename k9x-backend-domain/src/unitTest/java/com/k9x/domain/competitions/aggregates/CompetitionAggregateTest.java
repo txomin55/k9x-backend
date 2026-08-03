@@ -29,6 +29,7 @@ class CompetitionAggregateTest {
     private static final long NOW = Instant.parse("2024-06-15T12:00:00Z").toEpochMilli();
     private static final long FUTURE = Instant.parse("2030-01-01T00:00:00Z").toEpochMilli();
     private static final String OWNER = "user-1";
+    private static final String SMOKE_CREATOR = "k9x.support@gmail.com";
 
     private StageSnapshot activeStage(String creator, Long deletedAt) {
         return new StageSnapshot("stage-1", "Stage 1", "comp-1", creator, FUTURE, FUTURE, 0L, 0L, deletedAt, List.of());
@@ -144,6 +145,51 @@ class CompetitionAggregateTest {
     }
 
     @Test
+    void delete_allows_started_smoke_competition_owned_by_support_account() {
+        EventSnapshot started = new EventSnapshot("evt-1", "cfg-1", "obdx", "Open", "stage-1", SMOKE_CREATOR,
+                null, 0L, 0L, null, null, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null);
+        StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", SMOKE_CREATOR, FUTURE, FUTURE,
+                0L, 0L, null, List.of(started));
+        CompetitionSnapshot smoke = new CompetitionSnapshot("comp-1", "--SMOKE-- Competition 1 (0803-120000)",
+                SMOKE_CREATOR, "Org", "ES", "desc", "addr", null, null, 0L, 0L, null, List.of(startedStage));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(smoke);
+
+        aggregate.delete(SMOKE_CREATOR, NOW);
+
+        assertEquals(3, aggregate.pendingChanges().size());
+        assertInstanceOf(CompetitionDeleted.class, aggregate.pendingChanges().getFirst());
+    }
+
+    @Test
+    void delete_throws_when_smoke_prefixed_competition_is_not_owned_by_support_account() {
+        EventSnapshot started = new EventSnapshot("evt-1", "cfg-1", "obdx", "Open", "stage-1", OWNER,
+                null, 0L, 0L, null, null, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null);
+        StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, FUTURE,
+                0L, 0L, null, List.of(started));
+        CompetitionSnapshot prefixedOnly = new CompetitionSnapshot("comp-1", "--SMOKE-- Competition 1 (0803-120000)",
+                OWNER, "Org", "ES", "desc", "addr", null, null, 0L, 0L, null, List.of(startedStage));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(prefixedOnly);
+
+        assertThrows(CompetitionCannotBeDeletedException.class, () -> aggregate.delete(OWNER, NOW));
+    }
+
+    @Test
+    void delete_throws_when_support_account_competition_has_no_smoke_prefix() {
+        EventSnapshot started = new EventSnapshot("evt-1", "cfg-1", "obdx", "Open", "stage-1", SMOKE_CREATOR,
+                null, 0L, 0L, null, null, List.of(), List.of(), List.of(),
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null);
+        StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", SMOKE_CREATOR, FUTURE, FUTURE,
+                0L, 0L, null, List.of(started));
+        CompetitionSnapshot unprefixed = new CompetitionSnapshot("comp-1", "World Cup",
+                SMOKE_CREATOR, "Org", "ES", "desc", "addr", null, null, 0L, 0L, null, List.of(startedStage));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(unprefixed);
+
+        assertThrows(CompetitionCannotBeDeletedException.class, () -> aggregate.delete(SMOKE_CREATOR, NOW));
+    }
+
+    @Test
     void delete_throws_when_a_stage_has_a_non_created_event() {
         EventSnapshot started = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
@@ -203,7 +249,7 @@ class CompetitionAggregateTest {
                 () -> aggregate.createStage(new NewStageData("s", "S", FUTURE, FUTURE), OWNER, NOW));
     }
 
-    // ---- renameStage ----------------------------------------------------------------------------
+    // ---- updateStage ----------------------------------------------------------------------------
 
     @Test
     void createStage_records_stage_created() {
@@ -219,55 +265,74 @@ class CompetitionAggregateTest {
     }
 
     @Test
-    void renameStage_throws_when_stage_not_found() {
+    void updateStage_throws_when_stage_not_found() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
         assertThrows(StageNotFoundException.class,
-                () -> aggregate.renameStage("missing", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
+                () -> aggregate.updateStage("missing", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
     }
 
     @Test
-    void renameStage_throws_when_stage_is_deleted() {
+    void updateStage_throws_when_stage_is_deleted() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, NOW)));
         assertThrows(StageAlreadyDeletedException.class,
-                () -> aggregate.renameStage("stage-1", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
+                () -> aggregate.updateStage("stage-1", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
     }
 
     @Test
-    void renameStage_throws_when_user_is_not_stage_creator() {
+    void updateStage_throws_when_user_is_not_stage_creator() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage("other", null)));
         assertThrows(UnauthorizedResourceException.class,
-                () -> aggregate.renameStage("stage-1", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
+                () -> aggregate.updateStage("stage-1", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
     }
 
     @Test
-    void renameStage_throws_when_stage_is_finished() {
+    void updateStage_throws_when_stage_is_finished() {
         StageSnapshot finishedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, 0L, 0L, 0L, 0L, null, List.of());
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, finishedStage));
         assertThrows(StageCannotBeUpdatedException.class,
-                () -> aggregate.renameStage("stage-1", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
+                () -> aggregate.updateStage("stage-1", new StageUpdateData("X", 1L, 2L), OWNER, NOW));
     }
 
     @Test
-    void renameStage_throws_when_date_to_is_before_date_from() {
+    void updateStage_throws_when_date_to_is_before_date_from() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
         assertThrows(StageDateToBeforeDateFromException.class,
-                () -> aggregate.renameStage("stage-1", new StageUpdateData("X", NOW, PAST), OWNER, NOW));
+                () -> aggregate.updateStage("stage-1", new StageUpdateData("X", NOW, PAST), OWNER, NOW));
     }
 
     // ---- deleteStage ----------------------------------------------------------------------------
 
     @Test
-    void renameStage_records_stage_renamed() {
+    void updateStage_records_stage_renamed() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, activeStage(OWNER, null)));
 
-        aggregate.renameStage("stage-1", new StageUpdateData("Renamed", 10L, 20L), OWNER, NOW);
+        aggregate.updateStage("stage-1", new StageUpdateData("Renamed", 10L, 20L), OWNER, NOW);
 
-        StageRenamed change = assertInstanceOf(StageRenamed.class, onlyChange(aggregate));
+        StageUpdated change = assertInstanceOf(StageUpdated.class, onlyChange(aggregate));
         assertEquals("stage-1", change.id());
         assertEquals("Renamed", change.name());
         assertEquals(10L, change.dateFrom());
         assertEquals(20L, change.dateTo());
         assertEquals(NOW, change.lastUpdate());
+    }
+
+    @Test
+    void updateStage_throws_when_event_enrollment_deadline_not_before_new_dates() {
+        StageSnapshot stage = openEnrollmentStage(eventWithEnrollmentDeadline(FUTURE));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stage));
+
+        assertThrows(EnrollmentDeadlineAfterStageStartException.class,
+                () -> aggregate.updateStage("stage-1", new StageUpdateData("Renamed", FUTURE, FUTURE), OWNER, NOW));
+    }
+
+    @Test
+    void updateStage_records_stage_renamed_when_event_enrollment_deadline_before_new_dates() {
+        StageSnapshot stage = openEnrollmentStage(eventWithEnrollmentDeadline(NOW));
+        CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stage));
+
+        aggregate.updateStage("stage-1", new StageUpdateData("Renamed", FUTURE, FUTURE), OWNER, NOW);
+
+        assertInstanceOf(StageUpdated.class, onlyChange(aggregate));
     }
 
     @Test

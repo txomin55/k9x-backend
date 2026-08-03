@@ -30,7 +30,7 @@ public class UpdateStageServiceCase implements TransactionalUseCase {
         }
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
-        competition.renameStage(stageId,
+        competition.updateStage(stageId,
                 new StageUpdateData(command.name(), UtcDates.startOfUtcDay(command.dateFrom()),
                         UtcDates.endOfUtcDay(command.dateTo())),
                 userId, DateUtils.nowUtcMillis());

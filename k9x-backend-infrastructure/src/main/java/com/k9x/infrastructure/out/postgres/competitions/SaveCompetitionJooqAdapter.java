@@ -42,7 +42,7 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
             case CompetitionUpdated c -> updateCompetition(ctx, c);
             case CompetitionDeleted c -> softDeleteCompetition(ctx, c);
             case StageCreated c -> insertStage(ctx, c);
-            case StageRenamed c -> updateStage(ctx, c);
+            case StageUpdated c -> updateStage(ctx, c);
             case StageDeleted c -> softDeleteStage(ctx, c);
             case EventCreated c -> insertEvent(ctx, c);
             case EventDeleted c -> softDeleteEvent(ctx, c);
@@ -280,7 +280,7 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 .execute();
     }
 
-    private void updateStage(DSLContext ctx, StageRenamed c) {
+    private void updateStage(DSLContext ctx, StageUpdated c) {
         ctx.update(Tables.STAGES)
                 .set(Tables.STAGES.NAME, c.name())
                 .set(Tables.STAGES.DATE_FROM, c.dateFrom())
