@@ -33,11 +33,11 @@ import java.util.stream.Collectors;
  *       ({@code type=EVENT} + the event id in the metadata). The {@code timestamp} column always carries the
  *       persistence instant instead.</li>
  *   <li><b>Inactivity degradation</b> — no new event in the discipline, but its inactivity has crossed a new
- *       whole month beyond the {@value DogRankIndex#PLATEAU_MONTHS_THRESHOLD}-month full-weight plateau → one
- *       record with the freshly degraded index ({@code type=TIME_DEGRADATION} + the crossed month). Time
+ *       whole month beyond the {@value DogRankIndex#FRESHNESS_PLATEAU_MONTHS_THRESHOLD}-month freshness plateau
+ *       → one record with the freshly degraded index ({@code type=TIME_DEGRADATION} + the crossed month). Time
  *       degrades <em>every</em> discipline timeline of the dog, each against its own last event. Once the
- *       curve floor month ({@value DogRankIndex#FLOOR_MONTHS_THRESHOLD}) has been recorded nothing degrades
- *       further, so no more records are appended.</li>
+ *       freshness floor month ({@value DogRankIndex#FRESHNESS_FLOOR_MONTHS_THRESHOLD}) has been recorded
+ *       nothing degrades further, so no more records are appended.</li>
  * </ul>
  *
  * The history is append-only and never rewritten; a quiet run appends nothing.
@@ -110,14 +110,14 @@ public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
         }
 
         // No new event in the discipline: degrade only when its inactivity crosses a whole month beyond the
-        // plateau that the history has not recorded yet. The recorded month is derived from the latest
-        // record's applying timestamp (an EVENT record applies at the event itself -> month 0), and the floor
-        // month is recorded at most once.
+        // freshness plateau that the history has not recorded yet — freshness is the curve that keeps moving an
+        // inactive dog's index. The recorded month is derived from the latest record's applying timestamp (an
+        // EVENT record applies at the event itself -> month 0), and the floor month is recorded at most once.
         long lastEventAt = results.get(results.size() - 1).applyingTimestamp();
         int monthsInactive = Math.min(DogRankIndex.wholeMonthsBetween(lastEventAt, now),
-                DogRankIndex.FLOOR_MONTHS_THRESHOLD);
+                DogRankIndex.FRESHNESS_FLOOR_MONTHS_THRESHOLD);
         int monthsRecorded = DogRankIndex.wholeMonthsBetween(lastEventAt, latestRecordedAt);
-        if (monthsInactive >= DogRankIndex.PLATEAU_MONTHS_THRESHOLD && monthsInactive > monthsRecorded) {
+        if (monthsInactive >= DogRankIndex.FRESHNESS_PLATEAU_MONTHS_THRESHOLD && monthsInactive > monthsRecorded) {
             int rank = DogRankIndex.of(accumulated, now);
             return List.of(DogRankHistoryPayload.fromTimeDegradation(dogId, discipline, rank, now, monthsInactive));
         }

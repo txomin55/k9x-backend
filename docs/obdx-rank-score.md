@@ -12,8 +12,8 @@ La puntuación refleja lo "fuerte" que es la prueba y depende de tres factores:
 1. **La configuración** (`configuration_id`): cada configuración ocupa una **franja** `[min, max]` dentro del
    0–1000. Cuanto más alta la categoría, más alta la franja.
 2. **El número de competidores**: coloca la prueba dentro de la franja (más competidores → más arriba).
-3. **Si es internacional**: hay al menos un competidor cuyo perro es de un país distinto al de la
-   competición.
+3. **Si es internacional**: hay **suficientes** competidores cuyo perro es de un país distinto al de la
+   competición (cuántos depende del tier, ver [Umbral de internacional](#umbral-de-internacional)).
 
 ## Franjas por configuración
 
@@ -47,9 +47,28 @@ rank_score = min
 Los umbrales de tier por nº de competidores:
 `<5 → 1`, `[5,10) → 2`, `[10,20) → 3`, `[20,35) → 4`, `≥35 → 5`.
 
+## Umbral de internacional
+
+Un evento **no** es internacional por tener un único visitante extranjero: hace falta un mínimo de
+competidores extranjeros que crece con el tier (≈10 % del tramo de competidores, redondeado hacia arriba).
+Se define en [`ObdxEventRank.requiredForeignCompetitors`](../k9x-backend-domain/src/main/java/com/k9x/domain/disciplines/obdx/ObdxEventRank.java):
+
+| Nº competidores (tier) | Extranjeros necesarios |
+|---|---|
+| < 5 (1) | 1 |
+| 5–9 (2) | 2 |
+| 10–19 (3) | 2 |
+| 20–34 (4) | 3 |
+| ≥ 35 (5) | 4 |
+
+Un competidor cuenta como **extranjero** cuando su perro tiene país y ese país difiere (sin distinguir
+mayúsculas) del país de la competición; los perros sin país no cuentan como extranjeros, pero **sí** cuentan
+para el nº total de competidores que fija el tier.
+
 ### Ejemplo
 
-`CPC_COBS` (franja `[100, 200]`, `range = 100`), **3 competidores** (→ tier 1) con **1 internacional**:
+`CPC_COBS` (franja `[100, 200]`, `range = 100`), **3 competidores** (→ tier 1) con **1 internacional**
+(suficiente en tier 1):
 
 ```
 100 + round(1/5 · 0.9 · 100)  + round(0.1 · 100)

@@ -11,8 +11,9 @@ rank_score = min + round(tier/5 · 0.9·range) + (internacional ? round(0.1·ran
 
 - **Tier por nº de competidores (1–5):** `<5 → 1`, `5–9 → 2`, `10–19 → 3`, `20–34 → 4`, `≥35 → 5`.
   Es solo una **capa** para posicionar dentro de la franja; **no** es la letra `rank`.
-- **Internacional:** al menos un competidor de país distinto al de la competición → `+10 %` del range **y**
-  sufijo `+`.
+- **Internacional:** suficientes competidores de país distinto al de la competición → `+10 %` del range **y**
+  sufijo `+`. El mínimo de extranjeros depende del tier (≈10 % del tramo, redondeado hacia arriba):
+  `tier 1 → 1`, `tier 2 → 2`, `tier 3 → 2`, `tier 4 → 3`, `tier 5 → 4`.
 - **Letra (rango global del score):** `E ≤200`, `D 201–400`, `C 401–600`, `B 601–800`, `A 801–900`,
   `S 901–1000`.
 - **Tope automático 900**; `901–1000` es la letra `S`, **manual** y siempre internacional (`S+`), nunca la

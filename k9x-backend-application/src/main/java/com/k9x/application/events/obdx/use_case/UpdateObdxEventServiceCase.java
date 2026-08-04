@@ -71,10 +71,11 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
 
         CompetitionSnapshot snapshot = getCompetitionPersistencePort.getCompetition(competitionId);
         CompetitionAggregate competition = CompetitionAggregate.of(snapshot);
+        // One entry per competitor (null when the dog or its country is unknown) so the list size is the
+        // event's competitor count — the international threshold depends on it.
         List<String> competitorCountries = command.competitors().stream()
                 .map(c -> competitorDogs.get(c.dogId()))
-                .filter(dog -> dog != null)
-                .map(Dog::getCountry)
+                .map(dog -> dog == null ? null : dog.getCountry())
                 .toList();
         boolean international = ObdxEventRank.isInternational(competitorCountries, snapshot.country());
         Integer rankScore = ObdxEventRank.eventScore(command.configurationId(), command.competitors().size(), international);

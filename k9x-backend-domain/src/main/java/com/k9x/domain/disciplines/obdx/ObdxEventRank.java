@@ -7,8 +7,9 @@ import java.util.Collection;
  * and the {@code international} flag. The rank <em>letter</em> is not stored — it is derived from these on read
  * (see {@link ObdxRank}).
  *
- * <p>The tier comes from the number of competitors; the international flag is set when at least one competitor's
- * (dog's) country differs from the event's country. The configuration's band places the score within the
+ * <p>The tier comes from the number of competitors; the international flag is set when enough competitors'
+ * (dogs') countries differ from the event's country — how many is enough depends on the tier (see
+ * {@link #requiredForeignCompetitors(int)}). The configuration's band places the score within the
  * 0–1000 scale (see {@link ObdxConfigurationsRankThresholds#eventScore(int, boolean)}); when the configuration
  * declares no band the score is {@code null}.
  */
@@ -26,9 +27,28 @@ public final class ObdxEventRank {
                 && !competitorCountry.equalsIgnoreCase(eventCountry);
     }
 
-    /** Whether at least one of the competitors' countries is foreign relative to the event's country. */
+    /**
+     * How many foreign competitors an event needs to count as international, by competitor-count tier
+     * (see {@link ObdxConfigurationsRankThresholds#tierFromCompetitorCount(int)}): roughly 10% of the tier's
+     * size, rounded up — {@code tier 1 → 1, tier 2 → 2, tier 3 → 2, tier 4 → 3, tier 5 → 4}. A bigger event
+     * needs more foreign competitors before the flag is earned; a single visitor is no longer enough.
+     */
+    private static final int[] REQUIRED_FOREIGN_BY_TIER = {1, 2, 2, 3, 4};
+
+    /** The number of foreign competitors required for an event of this size to count as international. */
+    public static int requiredForeignCompetitors(int competitorCount) {
+        return REQUIRED_FOREIGN_BY_TIER[ObdxConfigurationsRankThresholds.tierFromCompetitorCount(competitorCount) - 1];
+    }
+
+    /**
+     * Whether the event is international: at least {@link #requiredForeignCompetitors(int)} of its competitors
+     * have a country that is foreign relative to the event's country. The collection carries one entry per
+     * competitor (a {@code null} entry for a competitor with no known country), so its size is the event's
+     * competitor count.
+     */
     public static boolean isInternational(Collection<String> competitorCountries, String eventCountry) {
-        return competitorCountries.stream().anyMatch(country -> isForeign(country, eventCountry));
+        long foreign = competitorCountries.stream().filter(country -> isForeign(country, eventCountry)).count();
+        return foreign >= requiredForeignCompetitors(competitorCountries.size());
     }
 
     /**

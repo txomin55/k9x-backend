@@ -65,13 +65,14 @@ class GenerateDogRankHistoryServiceCaseTest {
 
         List<DogRankHistoryPayload> records = generatedRecords();
         assertThat(records).hasSize(2);
-        assertThat(records.get(0).rank()).isEqualTo(820);
+        // first record: only one of the three level slots filled -> (820 + 201 + 201) / 3
+        assertThat(records.get(0).rank()).isEqualTo(407);
         assertThat(records.get(0).applyingTimestamp()).isEqualTo(first);
         assertThat(records.get(0).timestamp()).isGreaterThanOrEqualTo(now);
         assertThat(records.get(0).metadata())
                 .isEqualTo(Map.of("type", "EVENT", "eventId", "evt-1"));
-        // second record: index over both results at evt-2's time -> mean 735, freshness 1.0
-        assertThat(records.get(1).rank()).isEqualTo(735);
+        // second record: two slots filled at evt-2's time -> (820 + 650 + 201) / 3, freshness 1.0
+        assertThat(records.get(1).rank()).isEqualTo(557);
         assertThat(records.get(1).metadata())
                 .isEqualTo(Map.of("type", "EVENT", "eventId", "evt-2"));
     }
@@ -79,8 +80,8 @@ class GenerateDogRankHistoryServiceCaseTest {
     @Test
     void appends_nothing_while_the_history_is_up_to_date_and_inside_the_plateau() {
         long now = DateUtils.nowUtcMillis();
-        // ~9.5 months inactive: still inside the 10-month plateau, no degradation yet.
-        long eventAt = now - 9 * MILLIS_PER_MONTH - 15 * MILLIS_PER_DAY;
+        // ~5.5 months inactive: still inside the 6-month freshness plateau, no degradation yet.
+        long eventAt = now - 5 * MILLIS_PER_MONTH - 15 * MILLIS_PER_DAY;
         when(getDogRankEventResultsPersistencePort.getEventResults()).thenReturn(List.of(
                 new FetchDogRankEventResultDTO("dog-1", "OBDX", "evt-1", new BigDecimal("800.00"), eventAt)));
         when(getLatestDogRankHistoryPersistencePort.getLatestHistory()).thenReturn(List.of(
@@ -94,33 +95,34 @@ class GenerateDogRankHistoryServiceCaseTest {
     @Test
     void appends_a_time_degradation_record_when_a_month_past_the_plateau_is_crossed() {
         long now = DateUtils.nowUtcMillis();
-        // 10 months and a day inactive: first degradation record, slightly below the raw 800.
-        long eventAt = now - 10 * MILLIS_PER_MONTH - MILLIS_PER_DAY;
+        // 6 months and a day inactive: first degradation record, just off the plateau.
+        long eventAt = now - 6 * MILLIS_PER_MONTH - MILLIS_PER_DAY;
         when(getDogRankEventResultsPersistencePort.getEventResults()).thenReturn(List.of(
                 new FetchDogRankEventResultDTO("dog-1", "OBDX", "evt-1", new BigDecimal("800.00"), eventAt)));
         when(getLatestDogRankHistoryPersistencePort.getLatestHistory()).thenReturn(List.of(
-                new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 800, eventAt)));
+                new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 401, eventAt)));
 
         serviceCase.generateDogRankHistory();
 
         List<DogRankHistoryPayload> records = generatedRecords();
         assertThat(records).hasSize(1);
         DogRankHistoryPayload record = records.get(0);
-        assertThat(record.rank()).isBetween(795, 799);
+        // one slot filled -> level 400.67, freshness barely off 1.0
+        assertThat(record.rank()).isBetween(396, 401);
         assertThat(record.applyingTimestamp()).isGreaterThanOrEqualTo(now);
         assertThat(record.timestamp()).isGreaterThanOrEqualTo(now);
-        assertThat(record.metadata()).isEqualTo(Map.of("type", "TIME_DEGRADATION", "month", "10"));
+        assertThat(record.metadata()).isEqualTo(Map.of("type", "TIME_DEGRADATION", "month", "6"));
     }
 
     @Test
     void does_not_repeat_a_degradation_month_already_recorded() {
         long now = DateUtils.nowUtcMillis();
-        long eventAt = now - 10 * MILLIS_PER_MONTH - 5 * MILLIS_PER_DAY;
-        long degradedAt = now - 2 * MILLIS_PER_DAY; // month 10 already recorded three days after crossing
+        long eventAt = now - 6 * MILLIS_PER_MONTH - 5 * MILLIS_PER_DAY;
+        long degradedAt = now - 2 * MILLIS_PER_DAY; // month 6 already recorded three days after crossing
         when(getDogRankEventResultsPersistencePort.getEventResults()).thenReturn(List.of(
                 new FetchDogRankEventResultDTO("dog-1", "OBDX", "evt-1", new BigDecimal("800.00"), eventAt)));
         when(getLatestDogRankHistoryPersistencePort.getLatestHistory()).thenReturn(List.of(
-                new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 799, degradedAt)));
+                new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 400, degradedAt)));
 
         serviceCase.generateDogRankHistory();
 
@@ -136,14 +138,14 @@ class GenerateDogRankHistoryServiceCaseTest {
                 new FetchDogRankEventResultDTO("dog-1", "OBDX", "evt-1", new BigDecimal("800.00"), oldEventAt),
                 new FetchDogRankEventResultDTO("dog-1", "OBDX", "evt-2", new BigDecimal("800.00"), now)));
         when(getLatestDogRankHistoryPersistencePort.getLatestHistory()).thenReturn(List.of(
-                new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 736, degradedAt)));
+                new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 294, degradedAt)));
 
         serviceCase.generateDogRankHistory();
 
         List<DogRankHistoryPayload> records = generatedRecords();
         assertThat(records).hasSize(1);
-        // freshness snaps back to 1.0; level still averages the year-old 800 with the fresh 800 -> 800
-        assertThat(records.get(0).rank()).isEqualTo(800);
+        // freshness snaps back to 1.0; the year-old 800 keeps 0.90 of its weight -> (800 + 720 + 201) / 3
+        assertThat(records.get(0).rank()).isEqualTo(574);
         assertThat(records.get(0).metadata())
                 .isEqualTo(Map.of("type", "EVENT", "eventId", "evt-2"));
     }
@@ -165,13 +167,13 @@ class GenerateDogRankHistoryServiceCaseTest {
         assertThat(records).hasSize(2);
         assertThat(records).anySatisfy(record -> {
             assertThat(record.discipline()).isEqualTo("AGILITY");
-            assertThat(record.rank()).isEqualTo(850);
+            assertThat(record.rank()).isEqualTo(417);            // (850 + 201 + 201) / 3
             assertThat(record.applyingTimestamp()).isEqualTo(agilityAt);
             assertThat(record.metadata()).isEqualTo(Map.of("type", "EVENT", "eventId", "evt-agility"));
         });
         assertThat(records).anySatisfy(record -> {
             assertThat(record.discipline()).isEqualTo("OBDX");
-            assertThat(record.rank()).isEqualTo(600);
+            assertThat(record.rank()).isEqualTo(334);            // (600 + 201 + 201) / 3
             assertThat(record.metadata()).isEqualTo(Map.of("type", "EVENT", "eventId", "evt-obdx"));
         });
     }
@@ -179,33 +181,33 @@ class GenerateDogRankHistoryServiceCaseTest {
     @Test
     void time_degrades_every_discipline_against_its_own_last_event() {
         long now = DateUtils.nowUtcMillis();
-        long obdxAt = now - 10 * MILLIS_PER_MONTH - MILLIS_PER_DAY;    // crossed the plateau -> degrades
+        long obdxAt = now - 6 * MILLIS_PER_MONTH - MILLIS_PER_DAY;     // crossed the plateau -> degrades
         long agilityAt = now - 2 * MILLIS_PER_MONTH;                    // still fresh -> untouched
         when(getDogRankEventResultsPersistencePort.getEventResults()).thenReturn(List.of(
                 new FetchDogRankEventResultDTO("dog-1", "OBDX", "evt-obdx", new BigDecimal("800.00"), obdxAt),
                 new FetchDogRankEventResultDTO("dog-1", "AGILITY", "evt-agility", new BigDecimal("850.00"), agilityAt)));
         when(getLatestDogRankHistoryPersistencePort.getLatestHistory()).thenReturn(List.of(
-                new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 800, obdxAt),
-                new FetchLatestDogRankHistoryDTO("dog-1", "AGILITY", 850, agilityAt)));
+                new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 401, obdxAt),
+                new FetchLatestDogRankHistoryDTO("dog-1", "AGILITY", 417, agilityAt)));
 
         serviceCase.generateDogRankHistory();
 
         List<DogRankHistoryPayload> records = generatedRecords();
         assertThat(records).hasSize(1);
         assertThat(records.get(0).discipline()).isEqualTo("OBDX");
-        assertThat(records.get(0).rank()).isBetween(795, 799);
-        assertThat(records.get(0).metadata()).isEqualTo(Map.of("type", "TIME_DEGRADATION", "month", "10"));
+        assertThat(records.get(0).rank()).isBetween(396, 401);
+        assertThat(records.get(0).metadata()).isEqualTo(Map.of("type", "TIME_DEGRADATION", "month", "6"));
     }
 
     @Test
     void stops_degrading_once_the_curve_floor_month_is_recorded() {
         long now = DateUtils.nowUtcMillis();
-        long eventAt = now - 80 * MILLIS_PER_MONTH;
-        long floorRecordedAt = eventAt + 71 * MILLIS_PER_MONTH; // month 70+ already recorded
+        long eventAt = now - 70 * MILLIS_PER_MONTH;
+        long floorRecordedAt = eventAt + 59 * MILLIS_PER_MONTH; // the freshness floor month (58) already recorded
         when(getDogRankEventResultsPersistencePort.getEventResults()).thenReturn(List.of(
                 new FetchDogRankEventResultDTO("dog-1", "OBDX", "evt-1", new BigDecimal("800.00"), eventAt)));
         when(getLatestDogRankHistoryPersistencePort.getLatestHistory()).thenReturn(List.of(
-                new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 8, floorRecordedAt)));
+                new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 1, floorRecordedAt)));
 
         serviceCase.generateDogRankHistory();
 
