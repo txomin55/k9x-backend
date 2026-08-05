@@ -1,5 +1,6 @@
 package com.k9x.configuration.authentication;
 
+import com.k9x.application.subscriptions.port.CreateUserSubscriptionsPersistencePort;
 import com.k9x.application.users.port.CreateUserPersistencePort;
 import com.k9x.application.users.port.ExchangeAuthorizationCodePort;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
@@ -63,6 +64,7 @@ public class AuthenticationUseCaseConfiguration {
             JwtTokenGeneratorPort jwtTokenGeneratorPort,
             GetUserInfoPersistencePort getUserInfoPersistencePort,
             CreateUserPersistencePort createUserPersistencePort,
+            CreateUserSubscriptionsPersistencePort createUserSubscriptionsPersistencePort,
             AccessTokenIssuer accessTokenIssuer,
             SecurityProperties securityProperties
     ) {
@@ -73,6 +75,7 @@ public class AuthenticationUseCaseConfiguration {
                 jwtTokenGeneratorPort,
                 getUserInfoPersistencePort,
                 createUserPersistencePort,
+                createUserSubscriptionsPersistencePort,
                 accessTokenIssuer,
                 securityProperties.jwtRefreshTtlDays()
         );

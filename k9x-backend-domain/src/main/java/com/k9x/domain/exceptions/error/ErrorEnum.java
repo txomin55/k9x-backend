@@ -49,7 +49,9 @@ public enum ErrorEnum {
     DUPLICATE_DOG_IN_EVENT("error.duplicate_dog_in_event"),
     EXERCISE_JUDGE_NOT_FOUND("error.exercise_judge_not_found"),
     EXERCISE_JUDGE_REQUIRED("error.exercise_judge_required"),
-    EXERCISE_JUDGE_NOT_ASSIGNED("error.exercise_judge_not_assigned");
+    EXERCISE_JUDGE_NOT_ASSIGNED("error.exercise_judge_not_assigned"),
+    SUBSCRIPTION_KIND_NOT_SUPPORTED("error.subscription_kind_not_supported"),
+    EVENT_FINISHED("error.event_finished");
 
     private final String id;
 

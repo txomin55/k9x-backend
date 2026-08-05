@@ -1,5 +1,6 @@
 package com.k9x.application.users.use_case;
 
+import com.k9x.application.subscriptions.port.CreateUserSubscriptionsPersistencePort;
 import com.k9x.application.users.port.*;
 import com.k9x.application.users.use_case.command.LoginCommand;
 import com.k9x.application.users.use_case.dto.AuthTokenDTO;
@@ -19,6 +20,7 @@ public class LoginServiceCase implements TransactionalUseCase {
     private final JwtTokenGeneratorPort jwtTokenGeneratorPort;
     private final GetUserInfoPersistencePort getUserInfoPersistencePort;
     private final CreateUserPersistencePort createUserPersistencePort;
+    private final CreateUserSubscriptionsPersistencePort createUserSubscriptionsPersistencePort;
     private final AccessTokenIssuer accessTokenIssuer;
     private final Duration refreshTtl;
 
@@ -29,6 +31,7 @@ public class LoginServiceCase implements TransactionalUseCase {
             JwtTokenGeneratorPort jwtTokenGeneratorPort,
             GetUserInfoPersistencePort getUserInfoPersistencePort,
             CreateUserPersistencePort createUserPersistencePort,
+            CreateUserSubscriptionsPersistencePort createUserSubscriptionsPersistencePort,
             AccessTokenIssuer accessTokenIssuer,
             long refreshTtlDays
     ) {
@@ -38,6 +41,7 @@ public class LoginServiceCase implements TransactionalUseCase {
         this.jwtTokenGeneratorPort = jwtTokenGeneratorPort;
         this.getUserInfoPersistencePort = getUserInfoPersistencePort;
         this.createUserPersistencePort = createUserPersistencePort;
+        this.createUserSubscriptionsPersistencePort = createUserSubscriptionsPersistencePort;
         this.accessTokenIssuer = accessTokenIssuer;
         this.refreshTtl = Duration.ofDays(refreshTtlDays);
     }
@@ -64,6 +68,7 @@ public class LoginServiceCase implements TransactionalUseCase {
 
         if (getUserInfoPersistencePort.findById(userEmail) == null) {
             createUserPersistencePort.createUser(userEmail, validatedToken.image());
+            createUserSubscriptionsPersistencePort.createUserSubscriptions(userEmail);
         }
 
         return new LoginDTO(jwtToken, refreshToken);

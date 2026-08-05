@@ -13,6 +13,7 @@ import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.exceptions.EventAlreadyDeletedException;
+import com.k9x.domain.events.exceptions.EventFinishedException;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.domain.events.exceptions.EventNotInStageException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
@@ -79,6 +80,14 @@ class CreateStageNotificationsServiceCaseTest {
                 Long.MAX_VALUE, 0L, 0L, null, List.of(event("event-3", "stage-2", "user-1", null)));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
                 0L, 0L, null, List.of(stageOne, stageTwo));
+    }
+
+    /** Stage 1 as a stage whose last day is long past, so its events are FINISHED. */
+    private CompetitionSnapshot competitionWithFinishedStage() {
+        StageSnapshot finishedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, 0L, 0L, 0L,
+                null, List.of(event("event-1", "stage-1", "user-1", null)));
+        return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
+                0L, 0L, null, List.of(finishedStage));
     }
 
     private void stageOneExists() {
@@ -159,6 +168,18 @@ class CreateStageNotificationsServiceCaseTest {
         assertThatThrownBy(() -> serviceCase.createStageNotifications(
                 "stage-1", announcement("event-1"), "other-user", true))
                 .isInstanceOf(UnauthorizedResourceException.class);
+
+        verifyNothingWritten();
+    }
+
+    @Test
+    void throws_exception_when_the_event_has_already_finished() {
+        when(getCompetitionPersistencePort.competitionIdByStage("stage-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionWithFinishedStage());
+
+        assertThatThrownBy(() -> serviceCase.createStageNotifications(
+                "stage-1", announcement("event-1"), "user-1", true))
+                .isInstanceOf(EventFinishedException.class);
 
         verifyNothingWritten();
     }

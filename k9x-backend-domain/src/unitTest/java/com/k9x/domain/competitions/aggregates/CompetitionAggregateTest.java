@@ -826,7 +826,11 @@ class CompetitionAggregateTest {
     }
 
     private CompetitionAggregate withStageEvents(Long stageDeletedAt, EventSnapshot... events) {
-        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, FUTURE, 0L, 0L,
+        return withStageEvents(stageDeletedAt, FUTURE, events);
+    }
+
+    private CompetitionAggregate withStageEvents(Long stageDeletedAt, long stageDateTo, EventSnapshot... events) {
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, stageDateTo, 0L, 0L,
                 stageDeletedAt, List.of(events));
         return CompetitionAggregate.of(competition(OWNER, null, stage));
     }
@@ -856,7 +860,7 @@ class CompetitionAggregateTest {
     void assertEventNotifiableBy_passes_for_an_active_event_of_the_stage_created_by_the_user() {
         CompetitionAggregate aggregate = withStageEvents(null, notifiableEvent("evt-1", OWNER, null));
 
-        assertDoesNotThrow(() -> aggregate.assertEventNotifiableBy("evt-1", "stage-1", OWNER));
+        assertDoesNotThrow(() -> aggregate.assertEventNotifiableBy("evt-1", "stage-1", OWNER, NOW));
     }
 
     @Test
@@ -864,7 +868,7 @@ class CompetitionAggregateTest {
         CompetitionAggregate aggregate = withStageEvents(null, notifiableEvent("evt-1", OWNER, null));
 
         assertThrows(EventNotInStageException.class,
-                () -> aggregate.assertEventNotifiableBy("evt-1", "stage-2", OWNER));
+                () -> aggregate.assertEventNotifiableBy("evt-1", "stage-2", OWNER, NOW));
     }
 
     @Test
@@ -872,7 +876,7 @@ class CompetitionAggregateTest {
         CompetitionAggregate aggregate = withStageEvents(null, notifiableEvent("evt-1", OWNER, null));
 
         assertThrows(EventNotFoundException.class,
-                () -> aggregate.assertEventNotifiableBy("evt-unknown", "stage-1", OWNER));
+                () -> aggregate.assertEventNotifiableBy("evt-unknown", "stage-1", OWNER, NOW));
     }
 
     @Test
@@ -880,7 +884,7 @@ class CompetitionAggregateTest {
         CompetitionAggregate aggregate = withStageEvents(null, notifiableEvent("evt-1", OWNER, NOW));
 
         assertThrows(EventAlreadyDeletedException.class,
-                () -> aggregate.assertEventNotifiableBy("evt-1", "stage-1", OWNER));
+                () -> aggregate.assertEventNotifiableBy("evt-1", "stage-1", OWNER, NOW));
     }
 
     @Test
@@ -888,7 +892,43 @@ class CompetitionAggregateTest {
         CompetitionAggregate aggregate = withStageEvents(null, notifiableEvent("evt-1", "other-user", null));
 
         assertThrows(UnauthorizedResourceException.class,
-                () -> aggregate.assertEventNotifiableBy("evt-1", "stage-1", OWNER));
+                () -> aggregate.assertEventNotifiableBy("evt-1", "stage-1", OWNER, NOW));
+    }
+
+    @Test
+    void assertEventNotifiableBy_throws_when_the_event_has_finished() {
+        CompetitionAggregate aggregate = withStageEvents(null, PAST, notifiableEvent("evt-1", OWNER, null));
+
+        assertThrows(EventFinishedException.class,
+                () -> aggregate.assertEventNotifiableBy("evt-1", "stage-1", OWNER, NOW));
+    }
+
+    @Test
+    void assertEventSubscribable_passes_for_an_active_running_event_of_any_user() {
+        CompetitionAggregate aggregate = withStageEvents(null, notifiableEvent("evt-1", "other-user", null));
+
+        assertDoesNotThrow(() -> aggregate.assertEventSubscribable("evt-1", NOW));
+    }
+
+    @Test
+    void assertEventSubscribable_throws_when_the_event_has_finished() {
+        CompetitionAggregate aggregate = withStageEvents(null, PAST, notifiableEvent("evt-1", OWNER, null));
+
+        assertThrows(EventFinishedException.class, () -> aggregate.assertEventSubscribable("evt-1", NOW));
+    }
+
+    @Test
+    void assertEventSubscribable_throws_when_event_is_unknown() {
+        CompetitionAggregate aggregate = withStageEvents(null, notifiableEvent("evt-1", OWNER, null));
+
+        assertThrows(EventNotFoundException.class, () -> aggregate.assertEventSubscribable("evt-unknown", NOW));
+    }
+
+    @Test
+    void assertEventSubscribable_throws_when_event_is_deleted() {
+        CompetitionAggregate aggregate = withStageEvents(null, notifiableEvent("evt-1", OWNER, NOW));
+
+        assertThrows(EventAlreadyDeletedException.class, () -> aggregate.assertEventSubscribable("evt-1", NOW));
     }
 
 }

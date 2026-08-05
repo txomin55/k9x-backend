@@ -7,8 +7,9 @@ public interface GetEventRecipientsPersistencePort {
 
     /**
      * The distinct users to notify about the given events: the owners of the dogs currently on their
-     * rosters. Derived on read rather than kept in a subscription table, so a deleted dog or a transferred
-     * ownership can never leave a stale recipient behind.
+     * rosters, plus the users subscribed to any of those events. The roster half is derived on read rather
+     * than kept in a subscription table, so a deleted dog or a transferred ownership can never leave a
+     * stale recipient behind; the subscribed half is the user's explicit opt-in.
      */
     Set<String> getRecipientIds(List<String> eventIds);
 }

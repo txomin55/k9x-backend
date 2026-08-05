@@ -132,11 +132,12 @@ public final class CompetitionAggregate {
 
     /**
      * Authorizes addressing a notification to an event's competitors: the event must be active, must belong
-     * to the given stage, and must have been created by the user. Navigating the aggregate here keeps the
+     * to the given stage, must have been created by the user, and must not have finished — there is nothing
+     * left to announce to the competitors of a closed event. Navigating the aggregate here keeps the
      * application layer from re-deriving the stage↔event relationship.
      */
-    public void assertEventNotifiableBy(String eventId, String stageId, String userId) {
-        EventSnapshot event = requireActiveEvent(eventId, userId);
+    public void assertEventNotifiableBy(String eventId, String stageId, String userId, long now) {
+        EventSnapshot event = requireActiveEvent(eventId);
         StageSnapshot stage = findStageOfEvent(eventId);
         if (stage == null || !stage.id().equals(stageId)) {
             throw new EventNotInStageException();
@@ -144,6 +145,19 @@ public final class CompetitionAggregate {
         if (!event.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
+        assertEventNotFinished(event, stage, now);
+    }
+
+    /**
+     * Authorizes subscribing to an event's notifications: the event must be active and still running. Any
+     * user may subscribe (no creator check) — subscriptions are opt-in interest, not ownership — but a
+     * finished event will never emit another notification, so subscribing to it is rejected.
+     */
+    public void assertEventSubscribable(String eventId, long now) {
+        EventSnapshot event = requireActiveEvent(eventId);
+        StageSnapshot stage = findStageOfEvent(eventId);
+        assert stage != null;
+        assertEventNotFinished(event, stage, now);
     }
 
     /**
@@ -247,7 +261,7 @@ public final class CompetitionAggregate {
     }
 
     public void deleteEvent(String eventId, String userId, long now) {
-        EventSnapshot event = requireActiveEvent(eventId, userId);
+        EventSnapshot event = requireActiveEvent(eventId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
         assertEventDeletable(event, stage, now);
@@ -259,7 +273,7 @@ public final class CompetitionAggregate {
     }
 
     public void enrollDog(String eventId, String dogId, boolean bih, String userId, long now) {
-        EventSnapshot event = requireActiveEvent(eventId, userId);
+        EventSnapshot event = requireActiveEvent(eventId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
 
@@ -292,7 +306,7 @@ public final class CompetitionAggregate {
     }
 
     public void updateObdxEventInfo(String eventId, ObdxEventUpdateData data, String userId, long now) {
-        EventSnapshot event = requireActiveEvent(eventId, userId);
+        EventSnapshot event = requireActiveEvent(eventId);
 
         if (!event.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
@@ -312,7 +326,7 @@ public final class CompetitionAggregate {
      * competitor that is already not competing is rejected with {@link CompetitorAlreadyNotCompetingException}.
      */
     public void updateCompetitorNotCompeting(String eventId, String dogId, boolean notCompeting, String userId, long now) {
-        EventSnapshot event = requireActiveEvent(eventId, userId);
+        EventSnapshot event = requireActiveEvent(eventId);
 
         if (!event.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
@@ -325,7 +339,7 @@ public final class CompetitionAggregate {
     }
 
     public void updateScore(String eventId, ScoreUpdateData data, String userId, long now) {
-        EventSnapshot event = requireActiveEvent(eventId, userId);
+        EventSnapshot event = requireActiveEvent(eventId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
         if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
@@ -345,7 +359,7 @@ public final class CompetitionAggregate {
     }
 
     public void registerYellowCard(String eventId, YellowCardData data, String userId, long now) {
-        EventSnapshot event = requireActiveEvent(eventId, userId);
+        EventSnapshot event = requireActiveEvent(eventId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
         if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
@@ -371,7 +385,7 @@ public final class CompetitionAggregate {
     }
 
     public void registerRedCard(String eventId, RedCardData data, String userId, long now) {
-        EventSnapshot event = requireActiveEvent(eventId, userId);
+        EventSnapshot event = requireActiveEvent(eventId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
         if (UtcDates.isBeforeUtcDay(now, stage.dateFrom())) {
@@ -535,7 +549,7 @@ public final class CompetitionAggregate {
                 .forEach(e -> changes.add(new EventDeleted(e.id(), now)));
     }
 
-    private EventSnapshot requireActiveEvent(String eventId, String userId) {
+    private EventSnapshot requireActiveEvent(String eventId) {
         EventSnapshot event = findEvent(eventId);
         if (event == null) {
             throw new EventNotFoundException();
@@ -544,6 +558,17 @@ public final class CompetitionAggregate {
             throw new EventAlreadyDeletedException();
         }
         return event;
+    }
+
+    /**
+     * A finished event is closed for anything notification-related: its competitors have nothing left to be
+     * told about, so neither announcements nor new subscriptions are accepted. FINISHED is derived (see
+     * {@link EventSnapshot#status(long, long)}) from the recorded scores and the stage's {@code dateTo}.
+     */
+    private void assertEventNotFinished(EventSnapshot event, StageSnapshot stage, long now) {
+        if (event.status(now, stage.dateTo()) == EventStatus.FINISHED) {
+            throw new EventFinishedException();
+        }
     }
 
     private void assertEventDeletable(EventSnapshot event, StageSnapshot stage, long now) {

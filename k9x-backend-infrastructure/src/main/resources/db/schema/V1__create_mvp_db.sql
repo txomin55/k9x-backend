@@ -250,3 +250,11 @@ CREATE TABLE k9x.events_event_notifications
     CONSTRAINT events_event_notifications_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
     CONSTRAINT events_event_notifications_notification_fk FOREIGN KEY (event_notification_id) REFERENCES k9x.event_notifications (id)
 );
+
+CREATE TABLE k9x.user_subscriptions
+(
+    user_id   VARCHAR(255)       NOT NULL,
+    event_ids VARCHAR(255) ARRAY NOT NULL,
+    CONSTRAINT user_subscriptions_pkey PRIMARY KEY (user_id),
+    CONSTRAINT user_subscriptions_user_fk FOREIGN KEY (user_id) REFERENCES k9x.users (id)
+);

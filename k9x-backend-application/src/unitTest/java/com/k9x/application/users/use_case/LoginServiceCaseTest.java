@@ -1,5 +1,6 @@
 package com.k9x.application.users.use_case;
 
+import com.k9x.application.subscriptions.port.CreateUserSubscriptionsPersistencePort;
 import com.k9x.application.users.port.CreateUserPersistencePort;
 import com.k9x.application.users.port.ExchangeAuthorizationCodePort;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
@@ -46,6 +47,9 @@ class LoginServiceCaseTest {
     @Mock
     private CreateUserPersistencePort createUserPersistencePort;
 
+    @Mock
+    private CreateUserSubscriptionsPersistencePort createUserSubscriptionsPersistencePort;
+
     private LoginServiceCase serviceCase;
 
     @BeforeEach
@@ -59,6 +63,7 @@ class LoginServiceCaseTest {
                 jwtTokenGeneratorPort,
                 getUserInfoPersistencePort,
                 createUserPersistencePort,
+                createUserSubscriptionsPersistencePort,
                 accessTokenIssuer,
                 30L
         );
@@ -123,6 +128,7 @@ class LoginServiceCaseTest {
         serviceCase.login(new LoginCommand("code-1"));
 
         verify(createUserPersistencePort).createUser("user@test.com", "http://img/u.png");
+        verify(createUserSubscriptionsPersistencePort).createUserSubscriptions("user@test.com");
     }
 
     @Test
@@ -137,5 +143,6 @@ class LoginServiceCaseTest {
         serviceCase.login(new LoginCommand("code-1"));
 
         verify(createUserPersistencePort, never()).createUser(any(), any());
+        verify(createUserSubscriptionsPersistencePort, never()).createUserSubscriptions(any());
     }
 }

@@ -12,6 +12,7 @@ import com.k9x.application.notifications.valueobjects.NotificationType;
 import com.k9x.application.notifications.valueobjects.PushNotification;
 import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.application.utils.auth.AuthAssertions;
+import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
 
@@ -69,8 +70,9 @@ public class CreateStageNotificationsServiceCase implements TransactionalUseCase
         // Validate everything before the first write, so a rejected request leaves no partial announcement
         // behind and sends no pushes.
         String stageName = competition.activeStageName(stageId);
+        long now = DateUtils.nowUtcMillis();
         for (String eventId : distinctEventIds(commands)) {
-            competition.assertEventNotifiableBy(eventId, stageId, userId);
+            competition.assertEventNotifiableBy(eventId, stageId, userId, now);
         }
 
         List<Recipient> pending = new ArrayList<>();
