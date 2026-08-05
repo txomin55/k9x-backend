@@ -13,8 +13,10 @@ import org.springframework.context.annotation.Configuration;
 public class StageUseCaseConfiguration {
 
     @Bean
-    public GetStageListServiceCase getStageListServiceCase(GetStageListPersistencePort getStageListPersistencePort) {
-        return new GetStageListServiceCase(getStageListPersistencePort);
+    public GetStageListServiceCase getStageListServiceCase(
+            GetStageListPersistencePort getStageListPersistencePort,
+            GetStageNotificationsPersistencePort getStageNotificationsPersistencePort) {
+        return new GetStageListServiceCase(getStageListPersistencePort, getStageNotificationsPersistencePort);
     }
 
     @Bean

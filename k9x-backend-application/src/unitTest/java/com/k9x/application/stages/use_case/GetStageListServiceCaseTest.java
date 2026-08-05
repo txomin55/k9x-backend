@@ -1,5 +1,6 @@
 package com.k9x.application.stages.use_case;
 
+import com.k9x.application.notifications.port.GetStageNotificationsPersistencePort;
 import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
@@ -31,6 +32,9 @@ class GetStageListServiceCaseTest {
 
     @Mock
     private GetStageListPersistencePort getStageListPersistencePort;
+
+    @Mock
+    private GetStageNotificationsPersistencePort getStageNotificationsPersistencePort;
 
     private GetStageListServiceCase serviceCase;
 
@@ -68,7 +72,7 @@ class GetStageListServiceCaseTest {
 
     @BeforeEach
     void setUp() {
-        serviceCase = new GetStageListServiceCase(getStageListPersistencePort);
+        serviceCase = new GetStageListServiceCase(getStageListPersistencePort, getStageNotificationsPersistencePort);
     }
 
     @Test
