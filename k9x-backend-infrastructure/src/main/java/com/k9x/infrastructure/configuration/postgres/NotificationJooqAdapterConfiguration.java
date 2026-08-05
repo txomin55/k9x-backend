@@ -3,11 +3,13 @@ package com.k9x.infrastructure.configuration.postgres;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.k9x.application.notifications.port.GetEventRecipientsPersistencePort;
 import com.k9x.application.notifications.port.GetNotificationListPersistencePort;
+import com.k9x.application.notifications.port.GetStageNotificationsPersistencePort;
 import com.k9x.application.notifications.port.MarkNotificationsSeenPersistencePort;
 import com.k9x.application.notifications.port.SaveEventNotificationPersistencePort;
 import com.k9x.application.notifications.port.SaveNotificationPersistencePort;
 import com.k9x.infrastructure.out.postgres.notifications.GetEventRecipientsJooqAdapter;
 import com.k9x.infrastructure.out.postgres.notifications.GetNotificationListJooqAdapter;
+import com.k9x.infrastructure.out.postgres.notifications.GetStageNotificationsJooqAdapter;
 import com.k9x.infrastructure.out.postgres.notifications.MarkNotificationsSeenJooqAdapter;
 import com.k9x.infrastructure.out.postgres.notifications.SaveEventNotificationJooqAdapter;
 import com.k9x.infrastructure.out.postgres.notifications.SaveNotificationJooqAdapter;
@@ -47,5 +49,10 @@ public class NotificationJooqAdapterConfiguration {
     @Bean
     public GetEventRecipientsPersistencePort getEventRecipientsPersistencePort() {
         return new GetEventRecipientsJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetStageNotificationsPersistencePort getStageNotificationsPersistencePort() {
+        return new GetStageNotificationsJooqAdapter(dsl);
     }
 }

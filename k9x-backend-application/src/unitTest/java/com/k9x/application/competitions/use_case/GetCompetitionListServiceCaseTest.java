@@ -1,6 +1,7 @@
 package com.k9x.application.competitions.use_case;
 
 import com.k9x.application.competitions.port.GetCompetitionListPersistencePort;
+import com.k9x.application.notifications.port.GetStageNotificationsPersistencePort;
 import com.k9x.application.competitions.use_case.dto.FetchCompetitionDTO;
 import com.k9x.application.competitions.use_case.dto.FetchEventDTO;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
@@ -31,11 +32,15 @@ class GetCompetitionListServiceCaseTest {
     @Mock
     private GetCompetitionListPersistencePort getCompetitionListPersistencePort;
 
+    @Mock
+    private GetStageNotificationsPersistencePort getStageNotificationsPersistencePort;
+
     private GetCompetitionListServiceCase serviceCase;
 
     @BeforeEach
     void setUp() {
-        serviceCase = new GetCompetitionListServiceCase(getCompetitionListPersistencePort);
+        serviceCase = new GetCompetitionListServiceCase(getCompetitionListPersistencePort,
+                getStageNotificationsPersistencePort);
     }
 
     private CompetitionSnapshot competition(String id, List<StageSnapshot> stages) {

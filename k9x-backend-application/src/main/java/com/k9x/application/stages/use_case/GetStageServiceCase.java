@@ -4,6 +4,7 @@ import com.k9x.application.competitions.CompetitionNavigator;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
+import com.k9x.application.notifications.port.GetStageNotificationsPersistencePort;
 import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailCompetitorDTO;
@@ -23,11 +24,14 @@ public class GetStageServiceCase {
 
     private final GetCompetitionPersistencePort getCompetitionPersistencePort;
     private final GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
+    private final GetStageNotificationsPersistencePort getStageNotificationsPersistencePort;
 
     public GetStageServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
-                               GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort) {
+                               GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort,
+                               GetStageNotificationsPersistencePort getStageNotificationsPersistencePort) {
         this.getCompetitionPersistencePort = getCompetitionPersistencePort;
         this.getObdxFederationsConfigurationsPort = getObdxFederationsConfigurationsPort;
+        this.getStageNotificationsPersistencePort = getStageNotificationsPersistencePort;
     }
 
     public FetchStageDetailDTO getStage(String id) {
@@ -67,7 +71,10 @@ public class GetStageServiceCase {
                                 e.status(now, stage.dateTo()).name(),
                                 stage.enrollmentOpened(e, now),
                                 e.enrollmentDeadline(), e.awards(), e.rank()))
-                        .toList());
+                        .toList(),
+                // Announcements live outside the competition aggregate, so they are read through their own port.
+                getStageNotificationsPersistencePort.getByStageIds(java.util.List.of(id))
+                        .getOrDefault(id, java.util.List.of()));
     }
 
     private Map<String, String> buildConfigNameMap() {

@@ -8,6 +8,7 @@ import com.k9x.application.competitions.use_case.CreateCompetitionServiceCase;
 import com.k9x.application.competitions.use_case.DeleteCompetitionServiceCase;
 import com.k9x.application.competitions.use_case.GetCompetitionListServiceCase;
 import com.k9x.application.competitions.use_case.UpdateCompetitionServiceCase;
+import com.k9x.application.notifications.port.GetStageNotificationsPersistencePort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,7 +34,10 @@ public class SecuredCompetitionUseCaseConfiguration {
     }
 
     @Bean
-    public GetCompetitionListServiceCase getCompetitionListServiceCase(GetCompetitionListPersistencePort getCompetitionListPersistencePort) {
-        return new GetCompetitionListServiceCase(getCompetitionListPersistencePort);
+    public GetCompetitionListServiceCase getCompetitionListServiceCase(
+            GetCompetitionListPersistencePort getCompetitionListPersistencePort,
+            GetStageNotificationsPersistencePort getStageNotificationsPersistencePort) {
+        return new GetCompetitionListServiceCase(getCompetitionListPersistencePort,
+                getStageNotificationsPersistencePort);
     }
 }

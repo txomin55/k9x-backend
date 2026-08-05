@@ -7,6 +7,7 @@ import com.k9x.oas.stub.model.IdNameDTO;
 import com.k9x.oas.stub.model.StageDetailResponseDTO;
 import com.k9x.oas.stub.model.StageEventDetailCompetitorResponseDTO;
 import com.k9x.oas.stub.model.StageEventDetailResponseDTO;
+import com.k9x.oas.stub.model.StageNotificationResponseDTO;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +46,9 @@ public class GetStage implements StagesFetchOneApiDelegate {
                                 e.awards().stream().map(a -> new IdNameDTO(a, a)).toList(),
                                 e.rank()))
                         .toList(),
-                List.of(),
+                stage.notifications().stream()
+                        .map(n -> new StageNotificationResponseDTO(n.timestamp(), n.eventIds(), n.content()))
+                        .toList(),
                 stage.address(),
                 stage.organizer(),
                 stage.status()));
