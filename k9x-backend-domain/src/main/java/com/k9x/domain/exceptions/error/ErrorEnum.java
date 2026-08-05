@@ -22,6 +22,7 @@ public enum ErrorEnum {
     ENROLLMENT_CLOSED("error.enrollment_closed"),
     ENROLLMENT_DEADLINE_AFTER_STAGE_START("error.enrollment_deadline_after_stage_start"),
     EVENT_NOT_FOUND("error.event_not_found"),
+    EVENT_NOT_IN_STAGE("error.event_not_in_stage"),
     EVENT_ALREADY_DELETED("error.event_already_deleted"),
     EVENT_CANNOT_BE_CREATED("error.event_cannot_be_created"),
     EVENT_CANNOT_BE_DELETED("error.event_cannot_be_deleted"),

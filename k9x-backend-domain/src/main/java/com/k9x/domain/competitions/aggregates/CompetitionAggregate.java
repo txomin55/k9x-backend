@@ -115,6 +115,38 @@ public final class CompetitionAggregate {
     }
 
     /**
+     * The display name of an active stage, for use as notification metadata. Unlike
+     * {@link #stageNameOfEvent(String)} this resolves the stage directly instead of through one of its
+     * events, and rejects unknown or soft-deleted stages rather than returning {@code null}.
+     */
+    public String activeStageName(String stageId) {
+        StageSnapshot stage = findStage(stageId);
+        if (stage == null) {
+            throw new StageNotFoundException();
+        }
+        if (stage.deletedAt() != null) {
+            throw new StageAlreadyDeletedException();
+        }
+        return stage.name();
+    }
+
+    /**
+     * Authorizes addressing a notification to an event's competitors: the event must be active, must belong
+     * to the given stage, and must have been created by the user. Navigating the aggregate here keeps the
+     * application layer from re-deriving the stage↔event relationship.
+     */
+    public void assertEventNotifiableBy(String eventId, String stageId, String userId) {
+        EventSnapshot event = requireActiveEvent(eventId, userId);
+        StageSnapshot stage = findStageOfEvent(eventId);
+        if (stage == null || !stage.id().equals(stageId)) {
+            throw new EventNotInStageException();
+        }
+        if (!event.creator().equals(userId)) {
+            throw new UnauthorizedResourceException();
+        }
+    }
+
+    /**
      * The id of the competition this aggregate wraps.
      */
     public String competitionId() {

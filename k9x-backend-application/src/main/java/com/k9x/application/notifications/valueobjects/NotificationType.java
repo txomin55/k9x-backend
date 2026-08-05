@@ -6,5 +6,10 @@ package com.k9x.application.notifications.valueobjects;
  * concern.
  */
 public enum NotificationType {
-    NEW_ENROLL
+    NEW_ENROLL,
+    /**
+     * Free-text announcement sent by an organizer to the competitors of one or more of a stage's events.
+     * Its text cannot be derived from the type, so it travels in the metadata under {@code content}.
+     */
+    EVENT_NOTIFICATION
 }

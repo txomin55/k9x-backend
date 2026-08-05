@@ -75,4 +75,28 @@ class AsyncPushNotifierTest {
         assertThat(saved.type()).isEqualTo(NotificationType.NEW_ENROLL);
         verify(sendPushNotificationPort, after(300).never()).send(any(), any());
     }
+
+    @Test
+    void deliver_sends_the_push_without_recording_the_notification() {
+        when(getPushSubscriptionsPersistencePort.getByUserId("competitor-1"))
+                .thenReturn(List.of(new PushSubscriptionTargetDTO("endpoint-1", "p256dh-1", "auth-1")));
+        when(sendPushNotificationPort.send(any(), any())).thenReturn(PushDeliveryStatus.DELIVERED);
+
+        notifier.deliver("competitor-1", notification);
+
+        verify(sendPushNotificationPort, timeout(1000)).send(any(), any());
+        // The caller writes the inbox row inside its own transaction, so the notifier must not write it again.
+        verify(saveNotificationPersistencePort, never()).save(any());
+    }
+
+    @Test
+    void deliver_prunes_expired_subscriptions() {
+        when(getPushSubscriptionsPersistencePort.getByUserId("competitor-1"))
+                .thenReturn(List.of(new PushSubscriptionTargetDTO("endpoint-1", "p256dh-1", "auth-1")));
+        when(sendPushNotificationPort.send(any(), any())).thenReturn(PushDeliveryStatus.EXPIRED);
+
+        notifier.deliver("competitor-1", notification);
+
+        verify(deletePushSubscriptionPersistencePort, timeout(1000)).deleteByEndpoint("endpoint-1");
+    }
 }

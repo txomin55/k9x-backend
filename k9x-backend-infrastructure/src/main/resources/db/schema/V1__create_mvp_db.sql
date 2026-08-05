@@ -233,3 +233,20 @@ CREATE TABLE k9x.notifications
     CONSTRAINT notifications_pkey PRIMARY KEY (id),
     CONSTRAINT notifications_user_fk FOREIGN KEY (user_id) REFERENCES k9x.users (id)
 );
+
+CREATE TABLE k9x.event_notifications
+(
+    id        BIGINT GENERATED ALWAYS AS IDENTITY,
+    timestamp BIGINT NOT NULL,
+    content   TEXT   NOT NULL,
+    CONSTRAINT event_notifications_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE k9x.events_event_notifications
+(
+    event_id              VARCHAR(255) NOT NULL,
+    event_notification_id BIGINT       NOT NULL,
+    CONSTRAINT events_event_notifications_pkey PRIMARY KEY (event_id, event_notification_id),
+    CONSTRAINT events_event_notifications_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
+    CONSTRAINT events_event_notifications_notification_fk FOREIGN KEY (event_notification_id) REFERENCES k9x.event_notifications (id)
+);
