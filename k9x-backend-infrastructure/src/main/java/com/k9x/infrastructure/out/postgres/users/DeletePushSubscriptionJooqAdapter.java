@@ -18,4 +18,12 @@ public class DeletePushSubscriptionJooqAdapter implements DeletePushSubscription
                 .where(Tables.PUSH_SUBSCRIPTIONS.ENDPOINT.eq(endpoint))
                 .execute();
     }
+
+    @Override
+    public void deleteByEndpointAndUserId(String endpoint, String userId) {
+        dsl.deleteFrom(Tables.PUSH_SUBSCRIPTIONS)
+                .where(Tables.PUSH_SUBSCRIPTIONS.ENDPOINT.eq(endpoint))
+                .and(Tables.PUSH_SUBSCRIPTIONS.USER_ID.eq(userId))
+                .execute();
+    }
 }

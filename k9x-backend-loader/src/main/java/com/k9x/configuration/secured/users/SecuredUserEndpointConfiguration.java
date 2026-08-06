@@ -3,11 +3,13 @@ package com.k9x.configuration.secured.users;
 import com.k9x.application.subscriptions.use_case.GetUserSubscriptionsServiceCase;
 import com.k9x.application.users.use_case.LogoutServiceCase;
 import com.k9x.application.users.use_case.RegisterPushSubscriptionServiceCase;
+import com.k9x.application.users.use_case.RemovePushSubscriptionServiceCase;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.configuration.session.RefreshTokenCookie;
 import com.k9x.infrastructure.in.rest.endpoints.secured.users.GetUserData;
 import com.k9x.infrastructure.in.rest.endpoints.secured.users.Logout;
 import com.k9x.infrastructure.in.rest.endpoints.secured.users.RegisterPush;
+import com.k9x.infrastructure.in.rest.endpoints.secured.users.RemovePush;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,6 +24,11 @@ public class SecuredUserEndpointConfiguration {
     @Bean
     public RegisterPush registerPush(RegisterPushSubscriptionServiceCase registerPushSubscriptionServiceCase, UserInfoDTO userInfoDTO) {
         return new RegisterPush(registerPushSubscriptionServiceCase, userInfoDTO);
+    }
+
+    @Bean
+    public RemovePush removePush(RemovePushSubscriptionServiceCase removePushSubscriptionServiceCase, UserInfoDTO userInfoDTO) {
+        return new RemovePush(removePushSubscriptionServiceCase, userInfoDTO);
     }
 
     @Bean
