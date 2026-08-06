@@ -4,18 +4,22 @@ spring:
   banner:
     location: classpath:banner.txt
   profiles:
-    active: '@spring.profiles.active@'
+    # Runtime env var (Spring's native SPRING_PROFILES_ACTIVE), no longer baked in at build time.
+    active: ${SPRING_PROFILES_ACTIVE:local}
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
 
 server:
-  port: 4000
+  port: ${SERVER_PORT:4000}
 
+# Secrets have no fallback on purpose: a missing variable must fail startup instead of silently
+# booting with a value committed to the repo. Local profiles load them from a git-ignored .env
+# file (see application-local*.yml); deployed environments get them from the platform.
 k9x-backend:
   timeoutValue: 5000
   security:
-    jwt-secret: "change-me-to-a-32-byte-minimum-secret"
+    jwt-secret: ${JWT_SECRET}
     jwt-cache-ttl-minutes: 15
     jwt-refresh-ttl-days: 30
     refresh-cookie:
@@ -30,11 +34,11 @@ k9x-backend:
       user-agent: "k9x-backend/1.0 (txomin.sirera@clarity.ai)"
   login:
     google:
-      client_id: "${GOOGLE_CLIENT_ID:@google.client_id@}"
-      client_secret: "${GOOGLE_CLIENT_SECRET:@google.client_secret@}"
-      redirect_url: "${GOOGLE_REDIRECT_URL:@google.redirect_url@}"
+      client_id: ${GOOGLE_CLIENT_ID}
+      client_secret: ${GOOGLE_CLIENT_SECRET}
+      redirect_url: ${GOOGLE_REDIRECT_URL}
   push:
     vapid:
-      public-key: "${VAPID_PUBLIC_KEY:BNIMHEea0OJUDPaknHTjF2zaN4fMRh-rmtBc5FPlDy7OqHChTEK2SM_Ru1PM4rjtMCdEmaNUPd8Nr94mEkXD9b0}"
-      private-key: "${VAPID_PRIVATE_KEY:ogwPEP4WkygHksYC1tSqcPrxxNuXEIFHgbydYVBfU9E}"
-      subject: "${VAPID_SUBJECT:mailto:txomin.sirera@gmail.com}"
+      public-key: ${VAPID_PUBLIC_KEY}
+      private-key: ${VAPID_PRIVATE_KEY}
+      subject: ${VAPID_SUBJECT}

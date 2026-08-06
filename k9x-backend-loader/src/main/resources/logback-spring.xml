@@ -13,30 +13,23 @@
         </encoder>
     </appender>
 
-    <springProfile name="develop">
+    <springProfile name="local | local-remote">
         <logger name="org.springframework.web" level="DEBUG"/>
         <root level="DEBUG">
             <appender-ref ref="STDOUT"/>
         </root>
     </springProfile>
 
-    <springProfile name="local-pro">
-        <logger name="org.springframework.web" level="DEBUG"/>
-        <root level="DEBUG">
-            <appender-ref ref="STDOUT"/>
-        </root>
-    </springProfile>
-
-    <springProfile name="production">
+    <springProfile name="deployed">
         <logger name="org.springframework" level="ERROR"/>
         <root level="WARN">
             <appender-ref ref="STDOUT"/>
         </root>
     </springProfile>
 
-    <springProfile name="staging">
-        <logger name="org.springframework" level="ERROR"/>
-        <root level="WARN">
+    <!-- No profile active (e.g. tests): keep logs visible instead of silently dropping them. -->
+    <springProfile name="!local &amp; !local-remote &amp; !deployed">
+        <root level="INFO">
             <appender-ref ref="STDOUT"/>
         </root>
     </springProfile>

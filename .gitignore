@@ -4,6 +4,11 @@
 
 /gradle.properties
 /build/
+
+# Per-environment secrets, loaded by the local profiles via spring.config.import and copied by
+# hand into the deployment platform. Only the placeholder template is tracked.
+.env
+.env.*
 /.claude/
 /.claire/
 /k9x-backend-infrastructure/src/main/generated/

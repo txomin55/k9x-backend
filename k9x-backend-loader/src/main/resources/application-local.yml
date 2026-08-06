@@ -1,0 +1,30 @@
+# App running on the developer machine against the local Postgres container (see README).
+# Secrets come from the git-ignored .env.local at the repository root. Both paths are imported
+# because the working directory differs between `./gradlew bootRun` (repo root) and an IDE run
+# configuration (module directory).
+spring:
+  config:
+    import:
+      - optional:file:./.env.local[.properties]
+      - optional:file:../.env.local[.properties]
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:2345}/${POSTGRES_DATABASE:k9x-backend}
+    username: ${POSTGRES_USERNAME:admin}
+    password: ${POSTGRES_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+  jooq:
+    sql-dialect: POSTGRES
+
+k9x-backend:
+  security:
+    refresh-cookie:
+      same-site: "Lax"
+      secure: false
+
+# Local only: los crons corren cada 2 minutos en lugar de su horario real
+# (snapshots: 01:00 UTC diario; dog rank: día 1 y 16 a las 02:00 UTC).
+k9x:
+  snapshot:
+    cron: "0 */2 * * * *"
+  dog-rank:
+    cron: "0 */2 * * * *"

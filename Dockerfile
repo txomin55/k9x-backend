@@ -17,10 +17,11 @@ COPY k9x-backend-loader/ k9x-backend-loader/
 # gradle.properties is git-ignored, so it is never present in the build context.
 ARG GPR_USER
 ARG GPR_KEY
-ARG SPRING_PROFILES_ACTIVE
 
+# The image is profile-agnostic: the environment picks the profile at runtime through
+# SPRING_PROFILES_ACTIVE (set it to `deployed`), so the same jar serves staging and production.
 # Also downloads and unzips the New Relic Java agent into ./newrelic/.
-RUN ./gradlew :k9x-backend-loader:bootJar unzipNewrelic -PspringProfilesActive="$SPRING_PROFILES_ACTIVE" \
+RUN ./gradlew :k9x-backend-loader:bootJar unzipNewrelic \
     -Pgpr.user="$GPR_USER" -Pgpr.key="$GPR_KEY" \
     -x test
 

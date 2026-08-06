@@ -5,10 +5,36 @@ parts or those that must be well understood of the application have been develop
 
 ## Gradle resource filtering
 
-As using Gradle resource filtering in Spring Boot application.yml, these variables are defined as
-`'@spring.profiles.active@'`, `'@project.artifactId@'`, and `'@project.version@'` and replaced in
-`k9x-backend-loader/build.gradle.kts` during `processResources`. You can override the default profile at build time
-with `-PspringProfilesActive=production` (default is `develop`).
+As using Gradle resource filtering in Spring Boot application.yml, `'@project.artifactId@'` and `'@project.version@'`
+are replaced in `k9x-backend-loader/build.gradle.kts` during `processResources`. Only build metadata is filtered in:
+the active profile and every secret are resolved at runtime from the environment, so the jar is the same for all
+environments and contains no credentials.
+
+## Profiles and environment variables
+
+Three profiles, chosen at runtime with the `SPRING_PROFILES_ACTIVE` environment variable (defaults to `local`):
+
+| Profile | Where the app runs | Database | Notes |
+|---|---|---|---|
+| `local` | your machine | local Postgres container | DEBUG logs, swagger enabled, crons every 2 min |
+| `local-remote` | your machine | remote Supabase | DEBUG logs, swagger enabled, real cron schedule |
+| `deployed` | Render (staging, production, …) | remote Supabase | WARN logs, swagger and api-docs disabled, only the `health` actuator endpoint exposed |
+
+Staging and production share the `deployed` profile: they differ in environment variables, not in configuration files.
+
+Secrets (`JWT_SECRET`, `GOOGLE_CLIENT_*`, `VAPID_*`, `POSTGRES_*`) have no fallback in `application.yml`, so a missing
+variable fails startup instead of booting with a value committed to the repository. They live in git-ignored per
+environment files at the repository root — copy `.env.example` to get started:
+
+```
+.env.local         read at startup by application-local.yml
+.env.local-remote  read at startup by application-local-remote.yml
+.env.staging       local record of what is configured in Render (staging)
+.env.production    local record of what is configured in Render (production)
+```
+
+The two local files are loaded through `spring.config.import` and parsed as `.properties`: no quotes, no `export`.
+Each environment has its own VAPID key pair, see `docs/vapid-keys.md`.
 
 ## Logging
 
@@ -89,7 +115,8 @@ authentication token.
 The swagger UI is provided by springdoc auto-configuration on the classpath
 module).
 
-http://localhost:4000/swagger-ui.html It's configured to be run only in develop profile.
+http://localhost:4000/swagger-ui.html It's disabled in the `deployed` profile, so it is only reachable when
+running locally.
 
 ## OpenAPI
 
@@ -108,13 +135,10 @@ OpenAPI is configured via `OpenApiConfiguration`:
   the generated controllers are registered at runtime.
 - Use `http://localhost:4000/v3/api-docs/secured` for `/api/**` endpoints.
 
-## The profiles for compiling and executing the application are as follows:
+## Building
 
-* develop (local server)
-* production (IP server specified in the application-production.yml file)
-
-To compile this project, run the build from the repository root. By default, the profile used is `develop` but there are
-2 others (explained above). The build targets Java 25; for an exact JVM 25.0.2, set `JAVA_HOME` (or
+Run the build from the repository root. The build is profile-agnostic (see *Profiles and environment variables*
+above), so there is no profile flag to pass. The build targets Java 25; for an exact JVM 25.0.2, set `JAVA_HOME` (or
 `org.gradle.java.home`)
 to a JDK 25.0.2 installation.
 
@@ -127,7 +151,7 @@ Environment variables:
 Local properties (recommended):
 `gpr.user`, `gpr.key` in `gradle.properties` (do not commit real tokens).
 
-`GRADLE_USER_HOME=/tmp/gradle ./gradlew build -PspringProfilesActive=production`
+`GRADLE_USER_HOME=/tmp/gradle ./gradlew build`
 
 ## Execution
 
@@ -137,7 +161,10 @@ First execute
 
 To execute this project, you must go to the loader project and execute
 
-`GRADLE_USER_HOME=/tmp/gradle ./gradlew :k9x-backend-loader:bootRun -Dspring.profiles.active=develop`
+`GRADLE_USER_HOME=/tmp/gradle ./gradlew :k9x-backend-loader:bootRun`
+
+That uses the `local` profile and reads `.env.local`. For the remote database, run
+`SPRING_PROFILES_ACTIVE=local-remote GRADLE_USER_HOME=/tmp/gradle ./gradlew :k9x-backend-loader:bootRun`
 
 Clean gradle cache k9x
 

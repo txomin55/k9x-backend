@@ -63,6 +63,11 @@ Borra el `.pem` cuando termines si no lo necesitas.
 **La clave pública del frontend y la del backend deben ser la misma.** Si no coinciden, el navegador
 se suscribe con una clave y el backend firma con otra → el push service rechaza el envío.
 
+Cada entorno tiene **su propio par**: así una clave filtrada en local no sirve para enviar push en
+producción. Los pares viven en los `.env.<entorno>` de la raíz del repo (git-ignorados, ver
+`.env.example`): `local` y `local-remote` los lee la app al arrancar; `staging` y `production` son la
+copia local de lo que hay configurado en Render.
+
 ### Backend (Render → Environment)
 
 ```

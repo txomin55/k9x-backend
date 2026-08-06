@@ -16,34 +16,29 @@ springBoot {
     mainClass.set("com.k9x.K9xBackendApplication")
 }
 
-val springProfilesActive = (findProperty("springProfilesActive") as String?) ?: "develop"
+// Only build metadata is baked into application.yml. The active profile is chosen at runtime via
+// SPRING_PROFILES_ACTIVE, and secrets (Google, JWT, VAPID) come from the environment — see
+// .env.example — so nothing sensitive ends up inside the jar.
 val projectArtifactId: String = project.name
 val projectVersion = project.version.toString()
-// Local fallback for the Google secrets: baked in from gradle.properties at build time.
-// Empty when gradle.properties is absent (e.g. Render), where runtime env vars take over.
-val googleClientId = (findProperty("google.client_id") as String?) ?: ""
-val googleClientSecret = (findProperty("google.client_secret") as String?) ?: ""
-val googleRedirectUrl = (findProperty("google.redirect_url") as String?) ?: ""
 
 tasks.processResources {
-    inputs.property("spring.profiles.active", springProfilesActive)
     inputs.property("project.artifactId", projectArtifactId)
     inputs.property("project.version", projectVersion)
-    inputs.property("google.client_id", googleClientId)
-    inputs.property("google.client_secret", googleClientSecret)
-    inputs.property("google.redirect_url", googleRedirectUrl)
     filesMatching("application.yml") {
         filter<ReplaceTokens>(
             "tokens" to mapOf(
-                "spring.profiles.active" to springProfilesActive,
                 "project.artifactId" to projectArtifactId,
                 "project.version" to projectVersion,
-                "google.client_id" to googleClientId,
-                "google.client_secret" to googleClientSecret,
-                "google.redirect_url" to googleRedirectUrl,
             ),
             "beginToken" to "@",
             "endToken" to "@",
         )
     }
+}
+
+// `./gradlew :k9x-backend-loader:bootRun` runs from the repository root, so the local profiles find
+// the .env files that live there.
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    workingDir = rootProject.projectDir
 }
