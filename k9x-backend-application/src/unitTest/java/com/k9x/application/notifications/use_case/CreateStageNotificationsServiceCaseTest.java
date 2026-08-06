@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -270,6 +271,22 @@ class CreateStageNotificationsServiceCaseTest {
         verify(saveNotificationPersistencePort, times(2)).save(any());
         verify(pushNotifier).deliver(eq("owner-1"), any());
         verify(pushNotifier).deliver(eq("owner-2"), any());
+    }
+
+    @Test
+    void does_not_notify_the_organizer_that_created_the_announcement() {
+        stageOneExists();
+        when(getEventRecipientsPersistencePort.getRecipientIds(List.of("event-1")))
+                .thenReturn(Set.of("user-1", "owner-2"));
+
+        serviceCase.createStageNotifications("stage-1", announcement("event-1"), "user-1", true);
+
+        ArgumentCaptor<SaveNotificationPersistencePayload> captor =
+                ArgumentCaptor.forClass(SaveNotificationPersistencePayload.class);
+        verify(saveNotificationPersistencePort).save(captor.capture());
+        assertThat(captor.getValue().userId()).isEqualTo("owner-2");
+        verify(pushNotifier).deliver(eq("owner-2"), any());
+        verify(pushNotifier, never()).deliver(eq("user-1"), any());
     }
 
     @Test

@@ -27,6 +27,7 @@ public class GetObdxCollectionCompetitorsJooqAdapter implements GetObdxCollectio
                 .from(ec)
                 .join(d).on(d.ID.eq(ec.DOG_ID).and(d.DELETED_AT.isNull()))
                 .where(ec.EVENT_ID.eq(eventId))
+                .orderBy(ec.START_NUMBER.asc().nullsLast(), ec.DOG_ID.asc())
                 .fetch(r -> new FetchCollectionCompetitorDTO(
                         r.get(ec.DOG_ID),
                         r.get(d.NAME),

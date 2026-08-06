@@ -28,7 +28,8 @@ import java.util.Set;
  *
  * <p>Recipients are derived from the event rosters at send time (see
  * {@link GetEventRecipientsPersistencePort}); there is no subscription state to keep in sync. A user with
- * several dogs across the announcement's events is notified once, not once per dog or per event.
+ * several dogs across the announcement's events is notified once, not once per dog or per event. The sending
+ * organizer is always excluded — they already know what they just wrote.
  *
  * <p>The announcement, its event links and every inbox row are written inside this use case's transaction,
  * so an inbox entry is guaranteed for each recipient. Only the push delivery happens outside it —
@@ -89,6 +90,11 @@ public class CreateStageNotificationsServiceCase implements TransactionalUseCase
                     "stage_name", stageName,
                     "content", command.content()));
             for (String recipientUserId : getEventRecipientsPersistencePort.getRecipientIds(command.eventIds())) {
+                // The organizer writing the announcement does not need it back in their own inbox, even when
+                // they own an enrolled dog or subscribed to the event.
+                if (recipientUserId.equals(userId)) {
+                    continue;
+                }
                 saveNotificationPersistencePort.save(
                         SaveNotificationPersistencePayload.from(recipientUserId, notification));
                 pending.add(new Recipient(recipientUserId, notification));
