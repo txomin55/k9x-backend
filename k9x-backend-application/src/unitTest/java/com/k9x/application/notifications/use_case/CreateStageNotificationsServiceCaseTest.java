@@ -1,6 +1,7 @@
 package com.k9x.application.notifications.use_case;
 
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
+import com.k9x.application.notifications.exceptions.NotificationEventsRequiredException;
 import com.k9x.application.notifications.port.GetEventRecipientsPersistencePort;
 import com.k9x.application.notifications.port.PushNotifier;
 import com.k9x.application.notifications.port.SaveEventNotificationPersistencePort;
@@ -16,8 +17,11 @@ import com.k9x.domain.events.exceptions.EventAlreadyDeletedException;
 import com.k9x.domain.events.exceptions.EventFinishedException;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
 import com.k9x.domain.events.exceptions.EventNotInStageException;
+import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
+import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
+import com.k9x.domain.stages.exceptions.StageFinishedException;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -90,6 +94,24 @@ class CreateStageNotificationsServiceCaseTest {
                 0L, 0L, null, List.of(finishedStage));
     }
 
+    /**
+     * A running stage (its last day is far off) whose event-1 is already FINISHED — its only competitor is
+     * flagged as not competing, so every competitor is settled — while event-2 is still open, which keeps
+     * the stage itself from being FINISHED.
+     */
+    private CompetitionSnapshot competitionWithFinishedEvent() {
+        EventCompetitor notCompeting = new EventCompetitor("dog-1", "Rex", "owner-1", "handler-1", null, null,
+                null, null, null, null, null, true, null, null, null);
+        EventSnapshot finishedEvent = new EventSnapshot("event-1", null, null, "Event event-1", "stage-1",
+                "user-1", Long.MAX_VALUE, 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(notCompeting),
+                List.of(), List.of(), List.of(), List.of(), null, null);
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE,
+                Long.MAX_VALUE, 0L, 0L, null,
+                List.of(finishedEvent, event("event-2", "stage-1", "user-1", null)));
+        return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
+                0L, 0L, null, List.of(stage));
+    }
+
     private void stageOneExists() {
         when(getCompetitionPersistencePort.competitionIdByStage("stage-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
@@ -119,6 +141,29 @@ class CreateStageNotificationsServiceCaseTest {
         assertThatThrownBy(() -> serviceCase.createStageNotifications(
                 "stage-1", announcement("event-1"), "user-1", true))
                 .isInstanceOf(StageNotFoundException.class);
+
+        verifyNothingWritten();
+    }
+
+    @Test
+    void throws_exception_when_an_announcement_addresses_no_event() {
+        stageOneExists();
+
+        assertThatThrownBy(() -> serviceCase.createStageNotifications("stage-1", List.of(
+                new CreateStageNotificationCommand(List.of("event-1"), "First"),
+                new CreateStageNotificationCommand(List.of(), "Second")), "user-1", true))
+                .isInstanceOf(NotificationEventsRequiredException.class);
+
+        verifyNothingWritten();
+    }
+
+    @Test
+    void throws_exception_when_an_announcement_carries_null_events() {
+        stageOneExists();
+
+        assertThatThrownBy(() -> serviceCase.createStageNotifications("stage-1",
+                List.of(new CreateStageNotificationCommand(null, "First")), "user-1", true))
+                .isInstanceOf(NotificationEventsRequiredException.class);
 
         verifyNothingWritten();
     }
@@ -173,9 +218,38 @@ class CreateStageNotificationsServiceCaseTest {
     }
 
     @Test
-    void throws_exception_when_the_event_has_already_finished() {
+    void throws_exception_when_the_stage_has_already_finished() {
         when(getCompetitionPersistencePort.competitionIdByStage("stage-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionWithFinishedStage());
+
+        assertThatThrownBy(() -> serviceCase.createStageNotifications(
+                "stage-1", announcement("event-1"), "user-1", true))
+                .isInstanceOf(StageFinishedException.class);
+
+        verifyNothingWritten();
+    }
+
+    @Test
+    void throws_exception_when_the_stage_is_deleted() {
+        StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE,
+                Long.MAX_VALUE, 0L, 0L, 123L, List.of(event("event-1", "stage-1", "user-1", null)));
+        when(getCompetitionPersistencePort.competitionIdByStage("stage-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(
+                new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
+                        0L, 0L, null, List.of(stage)));
+
+        assertThatThrownBy(() -> serviceCase.createStageNotifications(
+                "stage-1", announcement("event-1"), "user-1", true))
+                .isInstanceOf(StageAlreadyDeletedException.class);
+
+        verifyNothingWritten();
+    }
+
+    @Test
+    void throws_exception_when_the_event_has_already_finished_within_a_running_stage() {
+        when(getCompetitionPersistencePort.competitionIdByStage("stage-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1"))
+                .thenReturn(competitionWithFinishedEvent());
 
         assertThatThrownBy(() -> serviceCase.createStageNotifications(
                 "stage-1", announcement("event-1"), "user-1", true))

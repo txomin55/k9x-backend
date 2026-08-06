@@ -115,17 +115,21 @@ public final class CompetitionAggregate {
     }
 
     /**
-     * The display name of an active stage, for use as notification metadata. Unlike
+     * The display name of a stage that can still be announced on, for use as notification metadata. Unlike
      * {@link #stageNameOfEvent(String)} this resolves the stage directly instead of through one of its
-     * events, and rejects unknown or soft-deleted stages rather than returning {@code null}.
+     * events, and rejects unknown, soft-deleted or finished stages rather than returning {@code null} — a
+     * stage nobody competes in any more has nothing left to announce.
      */
-    public String activeStageName(String stageId) {
+    public String notifiableStageName(String stageId, long now) {
         StageSnapshot stage = findStage(stageId);
         if (stage == null) {
             throw new StageNotFoundException();
         }
         if (stage.deletedAt() != null) {
             throw new StageAlreadyDeletedException();
+        }
+        if (stage.status(now) == StageStatus.FINISHED) {
+            throw new StageFinishedException();
         }
         return stage.name();
     }

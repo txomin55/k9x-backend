@@ -818,7 +818,7 @@ class CompetitionAggregateTest {
                 new EventExercise("ex-3", (short) 3, List.of(), List.of("judge-1")));
     }
 
-    // ---- activeStageName / assertEventNotifiableBy ------------------------------------------------
+    // ---- notifiableStageName / assertEventNotifiableBy ------------------------------------------------
 
     private EventSnapshot notifiableEvent(String id, String creator, Long deletedAt) {
         return new EventSnapshot(id, null, null, "Event " + id, "stage-1", creator, null, 0L, 0L, deletedAt,
@@ -836,24 +836,31 @@ class CompetitionAggregateTest {
     }
 
     @Test
-    void activeStageName_returns_the_stage_name() {
+    void notifiableStageName_returns_the_stage_name() {
         CompetitionAggregate aggregate = withStageEvents(null, notifiableEvent("evt-1", OWNER, null));
 
-        assertEquals("Stage 1", aggregate.activeStageName("stage-1"));
+        assertEquals("Stage 1", aggregate.notifiableStageName("stage-1", NOW));
     }
 
     @Test
-    void activeStageName_throws_when_stage_is_unknown() {
+    void notifiableStageName_throws_when_stage_is_unknown() {
         CompetitionAggregate aggregate = withStageEvents(null, notifiableEvent("evt-1", OWNER, null));
 
-        assertThrows(StageNotFoundException.class, () -> aggregate.activeStageName("stage-unknown"));
+        assertThrows(StageNotFoundException.class, () -> aggregate.notifiableStageName("stage-unknown", NOW));
     }
 
     @Test
-    void activeStageName_throws_when_stage_is_deleted() {
+    void notifiableStageName_throws_when_stage_is_deleted() {
         CompetitionAggregate aggregate = withStageEvents(NOW, notifiableEvent("evt-1", OWNER, null));
 
-        assertThrows(StageAlreadyDeletedException.class, () -> aggregate.activeStageName("stage-1"));
+        assertThrows(StageAlreadyDeletedException.class, () -> aggregate.notifiableStageName("stage-1", NOW));
+    }
+
+    @Test
+    void notifiableStageName_throws_when_stage_has_finished() {
+        CompetitionAggregate aggregate = withStageEvents(null, PAST, notifiableEvent("evt-1", OWNER, null));
+
+        assertThrows(StageFinishedException.class, () -> aggregate.notifiableStageName("stage-1", NOW));
     }
 
     @Test

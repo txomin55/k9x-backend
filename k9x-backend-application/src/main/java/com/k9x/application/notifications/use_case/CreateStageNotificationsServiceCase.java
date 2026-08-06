@@ -1,6 +1,7 @@
 package com.k9x.application.notifications.use_case;
 
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
+import com.k9x.application.notifications.exceptions.NotificationEventsRequiredException;
 import com.k9x.application.notifications.port.GetEventRecipientsPersistencePort;
 import com.k9x.application.notifications.port.PushNotifier;
 import com.k9x.application.notifications.port.SaveEventNotificationPersistencePort;
@@ -69,8 +70,13 @@ public class CreateStageNotificationsServiceCase implements TransactionalUseCase
 
         // Validate everything before the first write, so a rejected request leaves no partial announcement
         // behind and sends no pushes.
-        String stageName = competition.activeStageName(stageId);
         long now = DateUtils.nowUtcMillis();
+        String stageName = competition.notifiableStageName(stageId, now);
+        for (CreateStageNotificationCommand command : commands) {
+            if (command.eventIds() == null || command.eventIds().isEmpty()) {
+                throw new NotificationEventsRequiredException();
+            }
+        }
         for (String eventId : distinctEventIds(commands)) {
             competition.assertEventNotifiableBy(eventId, stageId, userId, now);
         }
@@ -95,9 +101,7 @@ public class CreateStageNotificationsServiceCase implements TransactionalUseCase
 
     private Set<String> distinctEventIds(List<CreateStageNotificationCommand> commands) {
         Set<String> eventIds = new LinkedHashSet<>();
-        commands.stream()
-                .filter(command -> command.eventIds() != null)
-                .forEach(command -> eventIds.addAll(command.eventIds()));
+        commands.forEach(command -> eventIds.addAll(command.eventIds()));
         return eventIds;
     }
 

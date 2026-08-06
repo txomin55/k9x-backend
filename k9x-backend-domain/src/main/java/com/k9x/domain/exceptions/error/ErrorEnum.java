@@ -51,7 +51,9 @@ public enum ErrorEnum {
     EXERCISE_JUDGE_REQUIRED("error.exercise_judge_required"),
     EXERCISE_JUDGE_NOT_ASSIGNED("error.exercise_judge_not_assigned"),
     SUBSCRIPTION_KIND_NOT_SUPPORTED("error.subscription_kind_not_supported"),
-    EVENT_FINISHED("error.event_finished");
+    EVENT_FINISHED("error.event_finished"),
+    STAGE_FINISHED("error.stage_finished"),
+    NOTIFICATION_EVENTS_REQUIRED("error.notification_events_required");
 
     private final String id;
 
