@@ -9,6 +9,7 @@
 # hand into the deployment platform. Only the placeholder template is tracked.
 .env
 .env.*
+!.env.example
 /.claude/
 /.claire/
 /k9x-backend-infrastructure/src/main/generated/
