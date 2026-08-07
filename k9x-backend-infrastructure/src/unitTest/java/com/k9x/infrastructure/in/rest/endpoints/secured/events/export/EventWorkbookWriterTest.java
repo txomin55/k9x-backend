@@ -154,6 +154,28 @@ class EventWorkbookWriterTest {
         }
     }
 
+    /**
+     * Guards the workbook against the shape Excel and LibreOffice refuse to open. The streaming SXSSF
+     * writer keeps every string inline and still ships an empty shared-string table; both readers then
+     * treat the file as damaged, and Excel silently rewrites cells while "repairing" it. POI itself reads
+     * that file back happily, so only the packaging can tell the two apart.
+     */
+    @Test
+    void packages_strings_in_the_shared_string_table() throws IOException {
+        try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(writer.write(event())))) {
+            String sharedStrings = null;
+            for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+                if (entry.getName().equals("xl/sharedStrings.xml")) {
+                    sharedStrings = new String(zip.readAllBytes(), StandardCharsets.UTF_8);
+                }
+            }
+
+            assertThat(sharedStrings).isNotNull();
+            assertThat(sharedStrings).doesNotContain("count=\"0\"");
+            assertThat(sharedStrings).contains("Spring Cup");
+        }
+    }
+
     @Test
     void writes_competitor_columns_in_order() throws IOException {
         try (XSSFWorkbook workbook = read(writer.write(event()))) {
