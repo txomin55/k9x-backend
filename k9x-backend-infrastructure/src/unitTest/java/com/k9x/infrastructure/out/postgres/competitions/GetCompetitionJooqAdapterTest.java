@@ -1,6 +1,7 @@
 package com.k9x.infrastructure.out.postgres.competitions;
 
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -71,6 +72,26 @@ class GetCompetitionJooqAdapterTest {
     };
 
     private static final Field<?>[] COMPETITION_ID_FIELDS = {Tables.STAGES.COMPETITION_ID};
+
+    private static final Field<?>[] COMPETITOR_FIELDS = {
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.EVENT_ID,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.DOG_ID,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.START_NUMBER,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.COMPETITOR_NUMBER,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.VERIFIED,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.NOT_COMPETING,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.BIH,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.RESERVE,
+            Tables.DOGS.NAME,
+            Tables.DOGS.OWNER,
+            Tables.DOGS.HANDLER,
+            Tables.DOGS.TEAM,
+            Tables.DOGS.COUNTRY,
+            Tables.DOGS.BREED,
+            Tables.DOGS.IDENTITY,
+            Tables.DOGS.SEX,
+            Tables.DOGS.THREE_FCI_GENERATIONS_CONFIRMED
+    };
 
     private static MockResult emptyNoFields() {
         return new MockResult(0, DSL.using(SQLDialect.POSTGRES).newResult());
@@ -181,6 +202,62 @@ class GetCompetitionJooqAdapterTest {
         var event = stage.events().getFirst();
         assertThat(event.id()).isEqualTo("event-1");
         assertThat(event.stageId()).isEqualTo("stage-1");
+    }
+
+    @Test
+    void hydrates_competitor_sex_from_the_dogs_table() {
+        MockDataProvider provider = ctx -> {
+            DSLContext mock = DSL.using(SQLDialect.POSTGRES);
+
+            if (ctx.sql().toLowerCase().contains("event_competitors")) {
+                Result<Record> competitors = mock.newResult(COMPETITOR_FIELDS);
+                Record competitor = mock.newRecord(COMPETITOR_FIELDS);
+                competitor.set(com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.EVENT_ID,
+                        "event-1");
+                competitor.set(com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.DOG_ID,
+                        "dog-1");
+                competitor.set(Tables.DOGS.NAME, "Rex");
+                competitor.set(Tables.DOGS.SEX, "MALE");
+                competitors.add(competitor);
+                return new MockResult[]{new MockResult(competitors.size(), competitors)};
+            }
+
+            Result<Record> competitions = mock.newResult(COMPETITION_FIELDS);
+            Record comp = mock.newRecord(COMPETITION_FIELDS);
+            comp.set(Tables.COMPETITIONS.ID, "comp-1");
+            comp.set(Tables.COMPETITIONS.NAME, "World Cup");
+            comp.set(Tables.COMPETITIONS.LAST_UPDATE, 10L);
+            comp.set(Tables.COMPETITIONS.CREATED_AT, 20L);
+            competitions.add(comp);
+
+            Result<Record> stages = mock.newResult(STAGE_FIELDS);
+            Record stage = mock.newRecord(STAGE_FIELDS);
+            stage.set(Tables.STAGES.ID, "stage-1");
+            stage.set(Tables.STAGES.COMPETITION_ID, "comp-1");
+            stage.set(Tables.STAGES.DATE_FROM, 1000L);
+            stage.set(Tables.STAGES.DATE_TO, 2000L);
+            stage.set(Tables.STAGES.LAST_UPDATE, 10L);
+            stage.set(Tables.STAGES.CREATED_AT, 20L);
+            stages.add(stage);
+
+            Result<Record> events = mock.newResult(EVENT_FIELDS);
+            Record event = mock.newRecord(EVENT_FIELDS);
+            event.set(Tables.EVENTS.ID, "event-1");
+            event.set(Tables.EVENTS.STAGE_ID, "stage-1");
+            event.set(Tables.EVENTS.LAST_UPDATE, 10L);
+            event.set(Tables.EVENTS.CREATED_AT, 20L);
+            events.add(event);
+
+            return new MockResult[]{routeHydrator(ctx, competitions, stages, events)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        CompetitionSnapshot competition = new GetCompetitionJooqAdapter(dsl).getCompetition("comp-1");
+
+        var competitors = competition.stages().getFirst().events().getFirst().competitors();
+        assertThat(competitors).hasSize(1);
+        assertThat(competitors.getFirst().dogId()).isEqualTo("dog-1");
+        assertThat(competitors.getFirst().sex()).isEqualTo(Sex.MALE);
     }
 
     @Test

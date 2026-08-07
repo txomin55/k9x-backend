@@ -25,7 +25,7 @@ class EventSnapshotTest {
     private static final String GENERAL_IMPRESSION = "OBDX.FCI_GRADE_2.10_V0";
 
     private EventSnapshot event(List<EventExercise> exercises, List<Score> scores) {
-        EventCompetitor competitor = new EventCompetitor(DOG, "Rex", null, null, null, null, null, null,
+        EventCompetitor competitor = new EventCompetitor(DOG, "Rex", null, null, null, null, null, null, null,
                 (short) 1, null, null, false, null, null, null);
         return new EventSnapshot("evt-1", "cfg-1", "obdx", "Event", "stage-1", "user-1", null,
                 0L, 0L, null, null, List.of(competitor), exercises, List.of(), scores, List.of(), null, null);

@@ -10,6 +10,8 @@ import com.k9x.infrastructure.in.rest.endpoints.secured.events.CreateEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.EnrollEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.GetEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.RemoveEvent;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.export.EventWorkbookWriter;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.export.ExportEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventInfo;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventNotCompeting;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxScore;
@@ -33,6 +35,17 @@ public class SecuredEventEndpointConfiguration {
     @Bean
     public GetEvent getEvent(GetEventServiceCase getEventServiceCase, UserInfoDTO userInfoDTO, MessageSource messageSource) {
         return new GetEvent(getEventServiceCase, userInfoDTO, messageSource);
+    }
+
+    @Bean
+    public EventWorkbookWriter eventWorkbookWriter(MessageSource messageSource) {
+        return new EventWorkbookWriter(messageSource);
+    }
+
+    @Bean
+    public ExportEvent exportEvent(GetEventServiceCase getEventServiceCase, UserInfoDTO userInfoDTO,
+                                   EventWorkbookWriter eventWorkbookWriter) {
+        return new ExportEvent(getEventServiceCase, userInfoDTO, eventWorkbookWriter);
     }
 
     @Bean

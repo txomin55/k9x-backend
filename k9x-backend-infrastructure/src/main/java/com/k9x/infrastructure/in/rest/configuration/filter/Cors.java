@@ -35,6 +35,9 @@ public class Cors implements Filter {
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, newrelic, traceparent, tracestate");
+        // Browsers hide every response header from cross-origin JS unless it is listed here. Without this the
+        // event export downloads under a generic fallback name, because fetch() cannot read the disposition.
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
 
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);

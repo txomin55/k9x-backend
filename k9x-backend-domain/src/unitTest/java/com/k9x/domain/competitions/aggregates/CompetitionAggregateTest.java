@@ -362,7 +362,7 @@ class CompetitionAggregateTest {
 
     @Test
     void deleteStage_throws_when_an_event_is_not_created() {
-        EventCompetitor settled = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null,
+        EventCompetitor settled = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null, null,
                 (short) 1, null, false, true, null, null, null);
         EventSnapshot finished = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(settled), List.of(), List.of(), List.of(), List.of(), null, null);
@@ -522,7 +522,7 @@ class CompetitionAggregateTest {
 
     @Test
     void enrollDog_assigns_next_start_number_after_last_enrolled_competitor() {
-        EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i",
+        EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i", null,
                 (short) 3, null, true, false, null, null, null);
         EventSnapshot eventWithCompetitors = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, FUTURE,
                 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of(), List.of(), null, null);
@@ -537,7 +537,7 @@ class CompetitionAggregateTest {
 
     @Test
     void enrollDog_throws_when_dog_is_already_enrolled() {
-        EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i",
+        EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i", null,
                 (short) 1, null, true, false, null, null, null);
         EventSnapshot eventWithCompetitors = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, FUTURE,
                 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of(), List.of(), null, null);
@@ -675,7 +675,7 @@ class CompetitionAggregateTest {
     @Test
     void updateScore_throws_when_competitor_is_not_competing() {
         EventCompetitor notCompeting = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed",
-                null, (short) 1, null, true, true, null, null, null);
+                null, null, (short) 1, null, true, true, null, null, null);
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(notCompeting), scoreExercises(), List.of(), List.of(), List.of(), null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event, FUTURE)));

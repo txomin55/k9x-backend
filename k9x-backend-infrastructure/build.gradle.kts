@@ -10,6 +10,8 @@ val k9xStubsVersion = "0.0.1-SNAPSHOT"
 val jooqVersion = "3.19.23"
 val postgresqlVersion = "42.7.11"
 val flywayDatabasePostgresqlVersion = "12.4.0"
+val poiVersion = "5.4.1"
+val commonsIoVersion = "2.18.0"
 
 dependencies {
     implementation(project(":k9x-backend-application"))
@@ -24,6 +26,11 @@ dependencies {
     implementation("com.google.http-client:google-http-client-gson:1.44.2")
     implementation("nl.martijndwars:web-push:5.1.1")
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+    implementation("org.apache.poi:poi-ooxml:$poiVersion")
+    // POI needs commons-io at runtime (SXSSFWorkbook -> UnsynchronizedByteArrayOutputStream). It comes in
+    // transitively through poi, but the IDE's Gradle import drops it and the app then dies with a
+    // NoClassDefFoundError on the first export. Declared explicitly so no toolchain can lose it.
+    implementation("commons-io:commons-io:$commonsIoVersion")
 
     runtimeOnly("org.postgresql:postgresql:$postgresqlVersion")
     implementation("org.flywaydb:flyway-core")

@@ -27,7 +27,7 @@ class EventStatusTest {
     }
 
     private static EventCompetitor competitor(String dogId, boolean notCompeting) {
-        return new EventCompetitor(dogId, dogId, "o", "h", "t", "c", "b", "i", (short) 0, null, true, notCompeting, null, null, null);
+        return new EventCompetitor(dogId, dogId, "o", "h", "t", "c", "b", "i", null, (short) 0, null, true, notCompeting, null, null, null);
     }
 
     private static EventExercise exercise(String id) {

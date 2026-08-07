@@ -2,6 +2,7 @@ package com.k9x.infrastructure.out.postgres.competitions;
 
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.domain.events.aggregates.*;
 import com.k9x.domain.events.valueobjects.*;
 import com.k9x.domain.events.status.*;
@@ -32,6 +33,17 @@ public class CompetitionHydrator {
 
     public CompetitionHydrator(DSLContext dsl) {
         this.dsl = dsl;
+    }
+
+    private static Sex toSex(String stored) {
+        if (stored == null) {
+            return null;
+        }
+        try {
+            return Sex.valueOf(stored.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private static List<String> toList(Iterable<String> values) {
@@ -178,7 +190,8 @@ public class CompetitionHydrator {
         Dogs d = Tables.DOGS;
         dsl.select(ec.EVENT_ID, ec.DOG_ID, ec.START_NUMBER, ec.COMPETITOR_NUMBER, ec.VERIFIED, ec.NOT_COMPETING, ec.BIH,
                         ec.RESERVE,
-                        d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.IDENTITY, d.THREE_FCI_GENERATIONS_CONFIRMED)
+                        d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.IDENTITY, d.SEX,
+                        d.THREE_FCI_GENERATIONS_CONFIRMED)
                 .from(ec)
                 .leftJoin(d).on(d.ID.eq(ec.DOG_ID).and(d.DELETED_AT.isNull()))
                 .where(ec.EVENT_ID.in(eventIds))
@@ -186,7 +199,7 @@ public class CompetitionHydrator {
                 .forEach(r -> result.computeIfAbsent(r.get(ec.EVENT_ID), _ -> new ArrayList<>())
                         .add(new EventCompetitor(
                                 r.get(ec.DOG_ID), r.get(d.NAME), r.get(d.OWNER), r.get(d.HANDLER), r.get(d.TEAM),
-                                r.get(d.COUNTRY), r.get(d.BREED), r.get(d.IDENTITY),
+                                r.get(d.COUNTRY), r.get(d.BREED), r.get(d.IDENTITY), toSex(r.get(d.SEX)),
                                 r.get(ec.START_NUMBER), r.get(ec.COMPETITOR_NUMBER), r.get(ec.VERIFIED),
                                 Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)), r.get(ec.BIH),
                                 r.get(ec.RESERVE),
