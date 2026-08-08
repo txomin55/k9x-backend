@@ -39,6 +39,7 @@ public class GetDogJooqAdapter implements GetDogPersistencePort {
         return new Dog(
                 r.get(Tables.DOGS.IDENTIFICATION),
                 r.get(Tables.DOGS.ORIGIN),
+                        r.get(Tables.DOGS.LICENSE),
                 r.get(Tables.DOGS.BREED),
                 r.get(Tables.DOGS.NAME),
                 r.get(Tables.DOGS.IMAGE),

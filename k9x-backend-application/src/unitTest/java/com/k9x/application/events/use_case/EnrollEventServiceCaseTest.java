@@ -67,7 +67,7 @@ class EnrollEventServiceCaseTest {
     void throws_exception_when_event_not_found() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn(null);
 
-        assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false), "user-1"))
+        assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false, null), "user-1"))
                 .isInstanceOf(EventNotFoundException.class);
 
         verifyNoInteractions(saveCompetitionPersistencePort);
@@ -79,7 +79,7 @@ class EnrollEventServiceCaseTest {
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
         // event creator is "user-1" (see competition()), and the enroller is also "user-1"
-        serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false), "user-1");
+        serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false, null), "user-1");
 
         verify(saveCompetitionPersistencePort).save(any());
         verifyNoInteractions(pushNotifier);
@@ -90,7 +90,7 @@ class EnrollEventServiceCaseTest {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
-        serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false), "handler-2");
+        serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false, null), "handler-2");
 
         verify(saveCompetitionPersistencePort).save(any());
         ArgumentCaptor<PushNotification> notificationCaptor = ArgumentCaptor.forClass(PushNotification.class);
@@ -110,10 +110,10 @@ class EnrollEventServiceCaseTest {
     void throws_exception_when_bih_true_for_male_dog() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getDogPersistencePort.getDog("dog-1"))
-                .thenReturn(new Dog("dog-1", "id", "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
+                .thenReturn(new Dog("dog-1", "id", null, "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
                         Sex.MALE, 55, null, 0L, 0L, null));
 
-        assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", true), "user-1"))
+        assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", true, null), "user-1"))
                 .isInstanceOf(BihNotAllowedForSexException.class);
 
         verifyNoInteractions(saveCompetitionPersistencePort);
@@ -130,7 +130,7 @@ class EnrollEventServiceCaseTest {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
 
-        assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false), "user-1"))
+        assertThatThrownBy(() -> serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", false, null), "user-1"))
                 .isInstanceOf(EnrollmentClosedException.class);
 
         verifyNoInteractions(saveCompetitionPersistencePort);
@@ -141,10 +141,10 @@ class EnrollEventServiceCaseTest {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
         when(getDogPersistencePort.getDog("dog-1"))
-                .thenReturn(new Dog("dog-1", "id", "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
+                .thenReturn(new Dog("dog-1", "id", null, "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
                         Sex.FEMALE, 55, null, 0L, 0L, null));
 
-        serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", true), "user-1");
+        serviceCase.enrollEvent("event-1", new EnrollObdxEventCommand("dog-1", true, null), "user-1");
 
         verify(saveCompetitionPersistencePort).save(any());
     }

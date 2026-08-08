@@ -93,7 +93,7 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
                 command.competitors().stream()
                         .map(c -> new ObdxCompetitorItem(c.dogIdentification(), c.order().shortValue(),
                                 c.competitorNumber() == null ? null : c.competitorNumber().shortValue(),
-                                c.bih(), c.reserve()))
+                                c.bih(), c.primer(), c.reserve()))
                         .toList(),
                 command.exercises().stream()
                         .map(e -> new ObdxExerciseItem(e.exerciseId(), e.order().shortValue(),

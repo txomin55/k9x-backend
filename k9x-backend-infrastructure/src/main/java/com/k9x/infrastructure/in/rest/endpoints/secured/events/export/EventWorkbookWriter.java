@@ -112,12 +112,14 @@ public class EventWorkbookWriter {
                 .toList();
     }
 
-    /** The classification never carries the origin, so it is joined back from the event detail. */
-    private Map<String, String> originsByDogIdentification(FetchEventDetailDTO event) {
+    /**
+     * The classification only carries the scores, so the enrollment row — which holds the dog's registry data
+     * (origin, license) and the primer — is joined back from the event detail.
+     */
+    private Map<String, FetchObdxEventCompetitorDTO> enrolledByDogIdentification(FetchEventDetailDTO event) {
         return event.competitors().stream()
-                .filter(c -> c.dogIdentification() != null && c.dogOrigin() != null)
-                .collect(Collectors.toMap(FetchObdxEventCompetitorDTO::dogIdentification,
-                        FetchObdxEventCompetitorDTO::dogOrigin, (a, _) -> a));
+                .filter(c -> c.dogIdentification() != null)
+                .collect(Collectors.toMap(FetchObdxEventCompetitorDTO::dogIdentification, c -> c, (a, _) -> a));
     }
 
     private void writeClassification(Workbook workbook, CellStyle headerStyle,
@@ -159,20 +161,22 @@ public class EventWorkbookWriter {
         Map<String, String> exerciseNames = event.exercises().stream()
                 .filter(e -> e.id() != null && e.name() != null)
                 .collect(Collectors.toMap(FetchEventExerciseDTO::id, FetchEventExerciseDTO::name, (a, _) -> a));
-        String origin = originsByDogIdentification(event).get(competitor.dogIdentification());
+        FetchObdxEventCompetitorDTO enrolled = enrolledByDogIdentification(event).get(competitor.dogIdentification());
 
         int rowIndex = 0;
         rowIndex = detailRow(sheet, rowIndex, "export.column.competitor_number", competitor.competitorNumber());
         rowIndex = detailRow(sheet, rowIndex, "export.column.start_number", competitor.startOrder());
         rowIndex = detailRow(sheet, rowIndex, "export.column.position", competitor.position());
         rowIndex = detailRow(sheet, rowIndex, "export.column.identification", competitor.dogIdentification());
-        rowIndex = detailRow(sheet, rowIndex, "export.column.origin", origin);
+        rowIndex = detailRow(sheet, rowIndex, "export.column.origin", enrolled == null ? null : enrolled.dogOrigin());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.license", enrolled == null ? null : enrolled.dogLicense());
         rowIndex = detailRow(sheet, rowIndex, "export.column.dog_name", competitor.dogName());
         rowIndex = detailRow(sheet, rowIndex, "export.column.breed", competitor.breed());
         rowIndex = detailRow(sheet, rowIndex, "export.column.handler", competitor.handler());
         rowIndex = detailRow(sheet, rowIndex, "export.column.team", competitor.team());
         rowIndex = detailRow(sheet, rowIndex, "export.column.country", competitor.country());
         rowIndex = detailRow(sheet, rowIndex, "export.column.bih", competitor.bih());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.primer", enrolled == null ? null : enrolled.primer());
         rowIndex = detailRow(sheet, rowIndex, "export.column.reserve", competitor.reserve());
         rowIndex++;
 
@@ -375,10 +379,11 @@ public class EventWorkbookWriter {
         writeHeader(sheet, headerStyle, List.of(
                 translate("export.column.competitor_number"), translate("export.column.start_number"),
                 translate("export.column.identification"), translate("export.column.origin"),
+                translate("export.column.license"),
                 translate("export.column.dog_name"), translate("export.column.handler"),
                 translate("export.column.reserve"), translate("export.column.sex"),
-                translate("export.column.bih"), translate("export.column.country"),
-                translate("export.column.team")));
+                translate("export.column.bih"), translate("export.column.primer"),
+                translate("export.column.country"), translate("export.column.team")));
 
         int rowIndex = 1;
         for (FetchObdxEventCompetitorDTO competitor : competitors) {
@@ -387,15 +392,17 @@ public class EventWorkbookWriter {
             setNumber(row, 1, competitor.startNumber());
             setText(row, 2, competitor.dogIdentification());
             setText(row, 3, competitor.dogOrigin());
-            setText(row, 4, competitor.dogName());
-            setText(row, 5, competitor.handler());
-            setBoolean(row, 6, competitor.reserve());
-            setText(row, 7, competitor.sex());
-            setBoolean(row, 8, competitor.bih());
-            setText(row, 9, competitor.country());
-            setText(row, 10, competitor.team());
+            setText(row, 4, competitor.dogLicense());
+            setText(row, 5, competitor.dogName());
+            setText(row, 6, competitor.handler());
+            setBoolean(row, 7, competitor.reserve());
+            setText(row, 8, competitor.sex());
+            setBoolean(row, 9, competitor.bih());
+            setText(row, 10, competitor.primer());
+            setText(row, 11, competitor.country());
+            setText(row, 12, competitor.team());
         }
-        autoSize(sheet, 11);
+        autoSize(sheet, 13);
     }
 
     private Sheet createSheet(Workbook workbook, String nameKey) {

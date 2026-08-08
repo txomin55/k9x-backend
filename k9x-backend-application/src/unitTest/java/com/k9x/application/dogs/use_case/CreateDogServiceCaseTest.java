@@ -31,7 +31,7 @@ class CreateDogServiceCaseTest {
 
     @Test
     void throws_exception_when_not_organizer_and_owner_is_null() {
-        assertThatThrownBy(() -> serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", null, "handler-1", "user-1", "team", "ES", null, null, null, false))
+        assertThatThrownBy(() -> serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", null, null, "handler-1", "user-1", "team", "ES", null, null, null, false))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(createDogPersistencePort, getDogPersistencePort);
@@ -39,7 +39,7 @@ class CreateDogServiceCaseTest {
 
     @Test
     void throws_exception_when_not_organizer_and_owner_does_not_match_user() {
-        assertThatThrownBy(() -> serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", "other-user", "handler-1", "user-1", "team", "ES", null, null, null, false))
+        assertThatThrownBy(() -> serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", null, "other-user", "handler-1", "user-1", "team", "ES", null, null, null, false))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(createDogPersistencePort, getDogPersistencePort);
@@ -49,7 +49,7 @@ class CreateDogServiceCaseTest {
     void throws_exception_when_identification_used_by_active_dog() {
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(mock(com.k9x.domain.dogs.aggregates.Dog.class));
 
-        assertThatThrownBy(() -> serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", "user-1", "handler-1", "user-1", "team", "ES", null, null, null, false))
+        assertThatThrownBy(() -> serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", null, "user-1", "handler-1", "user-1", "team", "ES", null, null, null, false))
                 .isInstanceOf(DogIdentificationAlreadyExistsException.class);
 
         verifyNoInteractions(createDogPersistencePort);
@@ -60,7 +60,7 @@ class CreateDogServiceCaseTest {
         when(getDogPersistencePort.getDog("dog-1")).thenReturn(null);
         when(getDogPersistencePort.getDogByOrigin("id")).thenReturn(mock(com.k9x.domain.dogs.aggregates.Dog.class));
 
-        assertThatThrownBy(() -> serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", "user-1", "handler-1", "user-1", "team", "ES", null, null, null, false))
+        assertThatThrownBy(() -> serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", null, "user-1", "handler-1", "user-1", "team", "ES", null, null, null, false))
                 .isInstanceOf(DogOriginAlreadyExistsException.class);
 
         verifyNoInteractions(createDogPersistencePort);
@@ -68,15 +68,15 @@ class CreateDogServiceCaseTest {
 
     @Test
     void creates_dog_when_not_organizer_and_owner_matches_user() {
-        serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", "user-1", "handler-1", "user-1", "team", "ES", null, null, null, false);
+        serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", "LIC-1", "user-1", "handler-1", "user-1", "team", "ES", null, null, null, false);
 
-        verify(createDogPersistencePort).createDog(eq("dog-1"), eq("Rex"), eq("img"), eq("Lab"), eq("id"), eq("user-1"), eq("handler-1"), eq("user-1"), eq("team"), eq("ES"), any(), any(), any(), anyLong());
+        verify(createDogPersistencePort).createDog(eq("dog-1"), eq("Rex"), eq("img"), eq("Lab"), eq("id"), eq("LIC-1"), eq("user-1"), eq("handler-1"), eq("user-1"), eq("team"), eq("ES"), any(), any(), any(), anyLong());
     }
 
     @Test
     void creates_dog_when_organizer_regardless_of_owner() {
-        serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", "other-user", "handler-1", "user-1", "team", "ES", null, null, null, true);
+        serviceCase.createDog("dog-1", "Rex", "img", "Lab", "id", "LIC-1", "other-user", "handler-1", "user-1", "team", "ES", null, null, null, true);
 
-        verify(createDogPersistencePort).createDog(eq("dog-1"), eq("Rex"), eq("img"), eq("Lab"), eq("id"), eq("other-user"), eq("handler-1"), eq("user-1"), eq("team"), eq("ES"), any(), any(), any(), anyLong());
+        verify(createDogPersistencePort).createDog(eq("dog-1"), eq("Rex"), eq("img"), eq("Lab"), eq("id"), eq("LIC-1"), eq("other-user"), eq("handler-1"), eq("user-1"), eq("team"), eq("ES"), any(), any(), any(), anyLong());
     }
 }

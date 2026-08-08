@@ -362,8 +362,8 @@ class CompetitionAggregateTest {
 
     @Test
     void deleteStage_throws_when_an_event_is_not_created() {
-        EventCompetitor settled = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null, null,
-                (short) 1, null, false, true, null, null, null);
+        EventCompetitor settled = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null, null, null,
+                (short) 1, null, false, true, null, null, null, null);
         EventSnapshot finished = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(settled), List.of(), List.of(), List.of(), List.of(), null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(finished, FUTURE)));
@@ -486,7 +486,7 @@ class CompetitionAggregateTest {
     @Test
     void enrollDog_throws_when_stage_is_expired() {
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), 1L)));
-        assertThrows(StageExpiredException.class, () -> aggregate.enrollDog("evt-1", "dog-1", false, OWNER, NOW));
+        assertThrows(StageExpiredException.class, () -> aggregate.enrollDog("evt-1", "dog-1", false, null, OWNER, NOW));
     }
 
     @Test
@@ -494,7 +494,7 @@ class CompetitionAggregateTest {
         CompetitionAggregate aggregate =
                 CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(event(null))));
 
-        assertThrows(EnrollmentClosedException.class, () -> aggregate.enrollDog("evt-1", "dog-1", false, OWNER, NOW));
+        assertThrows(EnrollmentClosedException.class, () -> aggregate.enrollDog("evt-1", "dog-1", false, null, OWNER, NOW));
     }
 
     @Test
@@ -502,7 +502,7 @@ class CompetitionAggregateTest {
         CompetitionAggregate aggregate =
                 CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(eventWithEnrollmentDeadline(PAST))));
 
-        assertThrows(EnrollmentClosedException.class, () -> aggregate.enrollDog("evt-1", "dog-1", false, OWNER, NOW));
+        assertThrows(EnrollmentClosedException.class, () -> aggregate.enrollDog("evt-1", "dog-1", false, null, OWNER, NOW));
     }
 
     @Test
@@ -510,7 +510,7 @@ class CompetitionAggregateTest {
         CompetitionAggregate aggregate =
                 CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(eventWithEnrollmentDeadline(FUTURE))));
 
-        aggregate.enrollDog("evt-1", "dog-1", true, OWNER, NOW);
+        aggregate.enrollDog("evt-1", "dog-1", true, null, OWNER, NOW);
 
         DogEnrolled change = assertInstanceOf(DogEnrolled.class, onlyChange(aggregate));
         assertEquals("evt-1", change.eventId());
@@ -522,14 +522,14 @@ class CompetitionAggregateTest {
 
     @Test
     void enrollDog_assigns_next_start_number_after_last_enrolled_competitor() {
-        EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i", null,
-                (short) 3, null, true, false, null, null, null);
+        EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i", null, null,
+                (short) 3, null, true, false, null, null, null, null);
         EventSnapshot eventWithCompetitors = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, FUTURE,
                 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of(), List.of(), null, null);
         CompetitionAggregate aggregate =
                 CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(eventWithCompetitors)));
 
-        aggregate.enrollDog("evt-1", "dog-2", false, OWNER, NOW);
+        aggregate.enrollDog("evt-1", "dog-2", false, null, OWNER, NOW);
 
         DogEnrolled change = assertInstanceOf(DogEnrolled.class, onlyChange(aggregate));
         assertEquals((short) 4, change.startNumber());
@@ -537,15 +537,15 @@ class CompetitionAggregateTest {
 
     @Test
     void enrollDog_throws_when_dog_is_already_enrolled() {
-        EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i", null,
-                (short) 1, null, true, false, null, null, null);
+        EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i", null, null,
+                (short) 1, null, true, false, null, null, null, null);
         EventSnapshot eventWithCompetitors = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, FUTURE,
                 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of(), List.of(), null, null);
         CompetitionAggregate aggregate =
                 CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(eventWithCompetitors)));
 
         assertThrows(DogAlreadyEnrolledException.class,
-                () -> aggregate.enrollDog("evt-1", "dog-1", false, OWNER, NOW));
+                () -> aggregate.enrollDog("evt-1", "dog-1", false, null, OWNER, NOW));
     }
 
     @Test
@@ -675,7 +675,7 @@ class CompetitionAggregateTest {
     @Test
     void updateScore_throws_when_competitor_is_not_competing() {
         EventCompetitor notCompeting = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed",
-                null, null, (short) 1, null, true, true, null, null, null);
+                null, null, null, (short) 1, null, true, true, null, null, null, null);
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(notCompeting), scoreExercises(), List.of(), List.of(), List.of(), null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event, FUTURE)));

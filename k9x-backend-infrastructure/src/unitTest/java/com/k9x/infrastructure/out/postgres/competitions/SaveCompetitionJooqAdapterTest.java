@@ -195,7 +195,7 @@ class SaveCompetitionJooqAdapterTest {
     void emits_insert_for_dog_enrolled() {
         givenCapturingDsl();
         CompetitionAggregate competition = aggregateWithActiveEvent();
-        competition.enrollDog("evt-1", "dog-1", false, "user-1", NOW);
+        competition.enrollDog("evt-1", "dog-1", false, null, "user-1", NOW);
 
         new SaveCompetitionJooqAdapter(dsl).save(competition);
 
@@ -207,7 +207,7 @@ class SaveCompetitionJooqAdapterTest {
         givenCapturingDsl();
         CompetitionAggregate competition = aggregateWithActiveEvent();
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "config-1", ObdxAvgMethod.MID_AVG, 1735689600000L,
-                List.of(new ObdxCompetitorItem("dog-1", (short) 1, null, true, false)),
+                List.of(new ObdxCompetitorItem("dog-1", (short) 1, null, true, null, false)),
                 List.of(new ObdxExerciseItem("exercise-1", (short) 1, new String[]{"tag1"}, new String[]{"judge-1"})),
                 List.of(new ObdxJudgeItem("judge-1", "collector@example.com")), List.of(), 900, true);
         competition.updateObdxEventInfo("evt-1", data, "user", NOW);
@@ -232,8 +232,8 @@ class SaveCompetitionJooqAdapterTest {
     @Test
     void emits_update_for_competitor_not_competing() {
         givenCapturingDsl();
-        EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null, null,
-                (short) 1, null, true, false, null, null, null);
+        EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null, null, null,
+                (short) 1, null, true, false, null, null, null, null);
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", null, NOW, NOW, null,
                 ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of(), List.of(), null, null);
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",

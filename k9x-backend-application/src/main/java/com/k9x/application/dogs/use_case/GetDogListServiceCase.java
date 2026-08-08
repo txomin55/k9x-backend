@@ -42,6 +42,7 @@ public class GetDogListServiceCase {
                                 dog.getOwner(),
                                 dog.getHandler(),
                                 dog.getOrigin(),
+                                dog.getLicense(),
                                 dog.breed(),
                                 dog.getSex(),
                                 dog.getWithersCm(),

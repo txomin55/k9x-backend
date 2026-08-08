@@ -73,6 +73,7 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                         resolveBreed(c.breed()),
                         new IdNameDTO(c.dogName(), c.dogIdentification()),
                         c.bih(),
+                        c.primer(),
                         c.reserve(),
                         // notCompeting is not surfaced here: `status` already resolves to NOT_COMPETING
                         // via EventCompetitorStatus.of(...) for the event detail endpoint.

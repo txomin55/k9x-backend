@@ -21,7 +21,8 @@ public class EnrollEvent implements SecuredEventsEnrollApiDelegate {
     public ResponseEntity<Object> doEnrollSecured(String eventId, EnrollStageEventRequestDTO enrollStageEventRequestDTO) {
         enrollEventServiceCase.enrollEvent(eventId,
                 new EnrollObdxEventCommand(enrollStageEventRequestDTO.getDogIdentification(),
-                        Boolean.TRUE.equals(enrollStageEventRequestDTO.getBih())),
+                        Boolean.TRUE.equals(enrollStageEventRequestDTO.getBih()),
+                        enrollStageEventRequestDTO.getPrimer()),
                 userDetails.getEmail());
         return ResponseEntity.ok().build();
     }

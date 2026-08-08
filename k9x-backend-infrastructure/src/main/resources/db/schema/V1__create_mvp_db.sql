@@ -31,6 +31,7 @@ CREATE TABLE k9x.dogs
 (
     identification                  VARCHAR(255) NOT NULL,
     origin                          VARCHAR(255) NOT NULL,
+    license                         VARCHAR(255),
     breed                           VARCHAR(50)  NOT NULL,
     name                            VARCHAR(255) NOT NULL,
     image                           VARCHAR(255),
@@ -151,6 +152,7 @@ CREATE TABLE obdx.event_competitors
     last_update        BIGINT       NOT NULL,
     not_competing      BOOLEAN      NOT NULL DEFAULT FALSE,
     bih                BOOLEAN,
+    primer             VARCHAR(255),
     reserve            BOOLEAN      NOT NULL DEFAULT FALSE,
     CONSTRAINT obdx_event_competitors_pkey PRIMARY KEY (event_id, dog_identification),
     CONSTRAINT obdx_event_competitors_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),

@@ -73,8 +73,8 @@ class EventWorkbookWriterTest {
         FetchObdxEventJudgeDTO judge = new FetchObdxEventJudgeDTO("judge-1", "Ana", "collector@k9x.com");
         FetchEventExerciseDTO exercise = new FetchEventExerciseDTO("ex-1", "Heelwork", 1,
                 List.of("tag-a", "tag-b"), List.of(judge));
-        FetchObdxEventCompetitorDTO competitor = new FetchObdxEventCompetitorDTO("dog-1", "Rex", "origin-999", "breed-1",
-                "Owner", "Handler", "Team A", "ES", "MALE", (short) 3, (short) 7, true, "STARTED", true, false);
+        FetchObdxEventCompetitorDTO competitor = new FetchObdxEventCompetitorDTO("dog-1", "Rex", "origin-999", "LIC-999", "breed-1",
+                "Owner", "Handler", "Team A", "ES", "MALE", (short) 3, (short) 7, true, "STARTED", true, "CART-999", false);
         FetchEventConfigurationDTO configuration = new FetchEventConfigurationDTO("OBDX.FCI_GRADE_1.V0", "Grade 1",
                 new FederationInfoDTO("FCI", "FCI"));
 
@@ -332,13 +332,15 @@ class EventWorkbookWriterTest {
             assertThat(row.getCell(1).getNumericCellValue()).isEqualTo(3d);   // position = start number
             assertThat(row.getCell(2).getStringCellValue()).isEqualTo("dog-1");
             assertThat(row.getCell(3).getStringCellValue()).isEqualTo("origin-999");
-            assertThat(row.getCell(4).getStringCellValue()).isEqualTo("Rex");
-            assertThat(row.getCell(5).getStringCellValue()).isEqualTo("Handler");
-            assertThat(row.getCell(6).getStringCellValue()).isEqualTo("no");   // reserve, as localised text
-            assertThat(row.getCell(7).getStringCellValue()).isEqualTo("MALE");
-            assertThat(row.getCell(8).getStringCellValue()).isEqualTo("yes");  // bih
-            assertThat(row.getCell(9).getStringCellValue()).isEqualTo("ES");
-            assertThat(row.getCell(10).getStringCellValue()).isEqualTo("Team A");
+            assertThat(row.getCell(4).getStringCellValue()).isEqualTo("LIC-999");
+            assertThat(row.getCell(5).getStringCellValue()).isEqualTo("Rex");
+            assertThat(row.getCell(6).getStringCellValue()).isEqualTo("Handler");
+            assertThat(row.getCell(7).getStringCellValue()).isEqualTo("no");   // reserve, as localised text
+            assertThat(row.getCell(8).getStringCellValue()).isEqualTo("MALE");
+            assertThat(row.getCell(9).getStringCellValue()).isEqualTo("yes");  // bih
+            assertThat(row.getCell(10).getStringCellValue()).isEqualTo("CART-999");  // primer
+            assertThat(row.getCell(11).getStringCellValue()).isEqualTo("ES");
+            assertThat(row.getCell(12).getStringCellValue()).isEqualTo("Team A");
         }
     }
 

@@ -58,8 +58,8 @@ class GetStageListServiceCaseTest {
     }
 
     private static EventCompetitor competitor(String dogIdentification, boolean notCompeting) {
-        return new EventCompetitor(dogIdentification, "Rex", "owner", "Handler", "Team A", "ES", "Border Collie", "ID-001", null,
-                (short) 1, null, true, notCompeting, null, null, null);
+        return new EventCompetitor(dogIdentification, "Rex", "owner", "Handler", "Team A", "ES", "Border Collie", "ID-001", null, null,
+                (short) 1, null, true, notCompeting, null, null, null, null);
     }
 
     private static EventExercise exercise(String id) {

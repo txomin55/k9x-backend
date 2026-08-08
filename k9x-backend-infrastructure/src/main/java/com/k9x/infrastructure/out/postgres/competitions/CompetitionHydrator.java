@@ -188,9 +188,9 @@ public class CompetitionHydrator {
         }
         EventCompetitors ec = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
         Dogs d = Tables.DOGS;
-        dsl.select(ec.EVENT_ID, ec.DOG_IDENTIFICATION, ec.START_NUMBER, ec.COMPETITOR_NUMBER, ec.VERIFIED, ec.NOT_COMPETING, ec.BIH,
+        dsl.select(ec.EVENT_ID, ec.DOG_IDENTIFICATION, ec.START_NUMBER, ec.COMPETITOR_NUMBER, ec.VERIFIED, ec.NOT_COMPETING, ec.BIH, ec.PRIMER,
                         ec.RESERVE,
-                        d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.ORIGIN, d.SEX,
+                        d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.ORIGIN, d.LICENSE, d.SEX,
                         d.THREE_FCI_GENERATIONS_CONFIRMED)
                 .from(ec)
                 .leftJoin(d).on(d.IDENTIFICATION.eq(ec.DOG_IDENTIFICATION).and(d.DELETED_AT.isNull()))
@@ -199,9 +199,9 @@ public class CompetitionHydrator {
                 .forEach(r -> result.computeIfAbsent(r.get(ec.EVENT_ID), _ -> new ArrayList<>())
                         .add(new EventCompetitor(
                                 r.get(ec.DOG_IDENTIFICATION), r.get(d.NAME), r.get(d.OWNER), r.get(d.HANDLER), r.get(d.TEAM),
-                                r.get(d.COUNTRY), r.get(d.BREED), r.get(d.ORIGIN), toSex(r.get(d.SEX)),
+                                r.get(d.COUNTRY), r.get(d.BREED), r.get(d.ORIGIN), r.get(d.LICENSE), toSex(r.get(d.SEX)),
                                 r.get(ec.START_NUMBER), r.get(ec.COMPETITOR_NUMBER), r.get(ec.VERIFIED),
-                                Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)), r.get(ec.BIH),
+                                Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)), r.get(ec.BIH), r.get(ec.PRIMER),
                                 r.get(ec.RESERVE),
                                 r.get(d.THREE_FCI_GENERATIONS_CONFIRMED))));
         return result;

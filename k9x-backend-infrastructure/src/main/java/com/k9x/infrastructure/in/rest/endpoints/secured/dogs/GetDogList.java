@@ -43,6 +43,7 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
                                 dog.owner(),
                                 dog.handler(),
                                 dog.origin(),
+                                dog.license(),
                                 resolveBreed(dog.breed()),
                                 dog.sex() == null ? null : dog.sex().name(),
                                 dog.withersCm(),

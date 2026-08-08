@@ -3,6 +3,7 @@ package com.k9x.domain.dogs.aggregates;
 public record Dog(
         String identification,
         String origin,
+        String license,
         String breed,
         String name,
         String image,
@@ -53,6 +54,10 @@ public record Dog(
 
     public String getOrigin() {
         return this.origin;
+    }
+
+    public String getLicense() {
+        return this.license;
     }
 
     public Sex getSex() {

@@ -25,7 +25,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
     private static final Dogs D = Tables.DOGS;
 
     private static final Field<?>[] SELECT_FIELDS = {
-            EC.DOG_IDENTIFICATION, EC.START_NUMBER, EC.COMPETITOR_NUMBER, EC.VERIFIED, EC.NOT_COMPETING, EC.BIH, EC.RESERVE,
+            EC.DOG_IDENTIFICATION, EC.START_NUMBER, EC.COMPETITOR_NUMBER, EC.VERIFIED, EC.NOT_COMPETING, EC.BIH, EC.PRIMER, EC.RESERVE,
             D.NAME, D.ORIGIN, D.BREED, D.OWNER, D.HANDLER, D.TEAM, D.COUNTRY
     };
 

@@ -276,7 +276,7 @@ public final class CompetitionAggregate {
         changes.add(new EventDeleted(eventId, now));
     }
 
-    public void enrollDog(String eventId, String dogIdentification, boolean bih, String userId, long now) {
+    public void enrollDog(String eventId, String dogIdentification, boolean bih, String primer, String userId, long now) {
         EventSnapshot event = requireActiveEvent(eventId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
@@ -290,7 +290,7 @@ public final class CompetitionAggregate {
         if (isDogEnrolled(event, dogIdentification)) {
             throw new DogAlreadyEnrolledException();
         }
-        changes.add(new DogEnrolled(eventId, dogIdentification, bih, nextStartNumber(event), now));
+        changes.add(new DogEnrolled(eventId, dogIdentification, bih, primer, nextStartNumber(event), now));
     }
 
     /**

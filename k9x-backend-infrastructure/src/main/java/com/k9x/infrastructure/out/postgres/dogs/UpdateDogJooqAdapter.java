@@ -20,6 +20,7 @@ public class UpdateDogJooqAdapter implements UpdateDogPersistencePort {
                 .set(Tables.DOGS.IMAGE, payload.image())
                 .set(Tables.DOGS.BREED, payload.breed())
                 .set(Tables.DOGS.ORIGIN, payload.origin())
+                .set(Tables.DOGS.LICENSE, payload.license())
                 .set(Tables.DOGS.OWNER, payload.owner())
                 .set(Tables.DOGS.HANDLER, payload.handler())
                 .set(Tables.DOGS.TEAM, payload.team())

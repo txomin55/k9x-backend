@@ -32,7 +32,8 @@ public class UpdateObdxEventInfo implements SecuredEventsUpdateInfoObdxApiDelega
                         body.getCompetitors() == null ? List.of() : body.getCompetitors().stream()
                                 .map(c -> new UpdateObdxEventCommand.CompetitorCommand(c.getDogIdentification(), c.getPosition(),
                                         c.getCompetitorNumber(),
-                                        Boolean.TRUE.equals(c.getBih()), Boolean.TRUE.equals(c.getReserve())))
+                                        Boolean.TRUE.equals(c.getBih()), c.getPrimer(),
+                                        Boolean.TRUE.equals(c.getReserve())))
                                 .toList(),
                         body.getExercises() == null ? List.of() : body.getExercises().stream()
                                 .map(e -> new UpdateObdxEventCommand.ExerciseCommand(e.getId(), e.getPosition(),

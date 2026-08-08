@@ -20,7 +20,7 @@ public class CreateDogServiceCase implements TransactionalUseCase {
         this.getDogPersistencePort = getDogPersistencePort;
     }
 
-    public void createDog(String identification, String name, String image, String breed, String origin,
+    public void createDog(String identification, String name, String image, String breed, String origin, String license,
                           String owner, String handler, String userId, String team, String country,
                           Sex sex, Integer withersCm, Boolean threeFciGenerationsConfirmed, boolean organizer) {
         assertUserIdMatchesOwnerWhenNoOrganizer(owner, userId, organizer);
@@ -28,7 +28,7 @@ public class CreateDogServiceCase implements TransactionalUseCase {
         assertOriginNotUsedByActiveDog(origin);
         // If the identification belongs to a soft-deleted dog, the persistence upsert reactivates that row with the
         // new data ("recover"). Only active collisions are rejected above.
-        createDogPersistencePort.createDog(identification, name, image, breed, origin, owner, handler, userId, team, country,
+        createDogPersistencePort.createDog(identification, name, image, breed, origin, license, owner, handler, userId, team, country,
                 sex, withersCm, threeFciGenerationsConfirmed, DateUtils.nowUtcMillis());
     }
 

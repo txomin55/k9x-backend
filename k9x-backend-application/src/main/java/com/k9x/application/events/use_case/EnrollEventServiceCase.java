@@ -42,7 +42,7 @@ public class EnrollEventServiceCase implements TransactionalUseCase {
         BihGuards.assertBihAllowedForSex(command.bih(), dog);
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
-        competition.enrollDog(eventId, command.dogIdentification(), command.bih(), userId, DateUtils.nowUtcMillis());
+        competition.enrollDog(eventId, command.dogIdentification(), command.bih(), command.primer(), userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
         notifyCreator(competition, eventId, userId);
     }

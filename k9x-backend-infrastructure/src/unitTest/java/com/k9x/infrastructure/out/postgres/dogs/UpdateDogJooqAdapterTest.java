@@ -34,7 +34,7 @@ class UpdateDogJooqAdapterTest {
         long lastUpdate = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
         new UpdateDogJooqAdapter(dsl).updateDog("dog-123",
-                new UpdateDogPersistencePayload("Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "team-1", "ES", Sex.FEMALE, 55, null, lastUpdate));
+                new UpdateDogPersistencePayload("Rex", "img.png", "Labrador", "K9-001", "LIC-1", "owner-1", "handler-1", "team-1", "ES", Sex.FEMALE, 55, null, lastUpdate));
 
         assertThat(capturedSql.get())
                 .contains("update \"k9x\".\"dogs\"")
@@ -42,6 +42,7 @@ class UpdateDogJooqAdapterTest {
                 .contains("\"image\" = ?")
                 .contains("\"breed\" = ?")
                 .contains("\"origin\" = ?")
+                .contains("\"license\" = ?")
                 .contains("\"owner\" = ?")
                 .contains("\"handler\" = ?")
                 .contains("\"team\" = ?")
@@ -50,6 +51,6 @@ class UpdateDogJooqAdapterTest {
                 .contains("\"withers_cm\" = ?")
                 .contains("\"last_update\" = ?")
                 .contains("where \"k9x\".\"dogs\".\"identification\" = ?");
-        assertThat(capturedBindings.get()).contains("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "team-1", "ES", "FEMALE", 55, lastUpdate);
+        assertThat(capturedBindings.get()).contains("dog-123", "Rex", "img.png", "Labrador", "K9-001", "LIC-1", "owner-1", "handler-1", "team-1", "ES", "FEMALE", 55, lastUpdate);
     }
 }

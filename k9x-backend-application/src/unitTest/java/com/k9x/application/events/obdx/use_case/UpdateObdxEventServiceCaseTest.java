@@ -190,8 +190,8 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_dog_is_duplicated() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, null, false, false),
-                        new UpdateObdxEventCommand.CompetitorCommand("dog-1", 2, null, false, false)),
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, null, false, null, false),
+                        new UpdateObdxEventCommand.CompetitorCommand("dog-1", 2, null, false, null, false)),
                 List.of(), List.of(), List.of());
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
@@ -203,10 +203,10 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_bih_true_for_male_dog() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, null, true, false)), List.of(), List.of(), List.of());
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, null, true, null, false)), List.of(), List.of(), List.of());
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getDogPersistencePort.getDog("dog-1"))
-                .thenReturn(new Dog("dog-1", "id", "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
+                .thenReturn(new Dog("dog-1", "id", null, "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
                         Sex.MALE, 55, null, 0L, 0L, null));
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
@@ -219,8 +219,8 @@ class UpdateObdxEventServiceCaseTest {
     void flags_the_event_international_when_a_competitor_is_from_another_country() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L,
                 ObdxAvgMethod.AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, false),
-                        new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, false)),
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, null, false),
+                        new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, null, false)),
                 List.of(), List.of(), List.of());
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
@@ -237,8 +237,8 @@ class UpdateObdxEventServiceCaseTest {
     void flags_the_event_national_when_every_competitor_shares_the_event_country() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L,
                 ObdxAvgMethod.AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, false),
-                        new UpdateObdxEventCommand.CompetitorCommand("dog-es-2", 2, null, false, false)),
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, null, false),
+                        new UpdateObdxEventCommand.CompetitorCommand("dog-es-2", 2, null, false, null, false)),
                 List.of(), List.of(), List.of());
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
@@ -257,8 +257,8 @@ class UpdateObdxEventServiceCaseTest {
         // international. score = 100 + round(1/5 * 0.9 * 100) + round(0.1 * 100) = 100 + 18 + 10 = 128.
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "OBDX.CPC_COBS.V0", 1735689600000L,
                 ObdxAvgMethod.AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, false),
-                        new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, false)),
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, null, false),
+                        new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, null, false)),
                 List.of(), List.of(), List.of());
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
@@ -305,7 +305,7 @@ class UpdateObdxEventServiceCaseTest {
     }
 
     private Dog dogFrom(String id, String country) {
-        return new Dog(id, "id-" + id, "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", country, "team",
+        return new Dog(id, "id-" + id, null, "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", country, "team",
                 Sex.FEMALE, 55, null, 0L, 0L, null);
     }
 }

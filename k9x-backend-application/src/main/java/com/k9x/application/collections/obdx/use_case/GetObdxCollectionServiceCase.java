@@ -52,7 +52,7 @@ public class GetObdxCollectionServiceCase {
                                 c.breed(), c.owner(), c.handler(), c.team(), c.country(), c.startNumber(),
                                 c.competitorNumber(), c.verified(),
                                 c.notCompeting(), EventCompetitorStatus.of(c.notCompeting(), c.verified()).name(),
-                                c.bih(), c.reserve(), scoresAllowed(c.dogIdentification(), c.notCompeting(), allScores)))
+                                c.bih(), c.primer(), c.reserve(), scoresAllowed(c.dogIdentification(), c.notCompeting(), allScores)))
                         .toList();
         // Only expose exercises that at least one visible judge is assigned to. For the event creator every judge
         // is visible, so all exercises remain; for a collector only the exercises their judge collects are kept.

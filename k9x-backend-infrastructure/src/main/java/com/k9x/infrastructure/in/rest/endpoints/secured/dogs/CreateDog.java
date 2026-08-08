@@ -25,6 +25,7 @@ public class CreateDog implements SecuredDogsCreateApiDelegate {
                 body.getImage(),
                 body.getBreed(),
                 body.getOrigin(),
+                body.getLicense(),
                 body.getOwner(),
                 body.getHandler(),
                 userDetails.getEmail(),

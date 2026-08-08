@@ -81,6 +81,7 @@ class GetCompetitionJooqAdapterTest {
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.VERIFIED,
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.NOT_COMPETING,
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.BIH,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.PRIMER,
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.RESERVE,
             Tables.DOGS.NAME,
             Tables.DOGS.OWNER,
@@ -89,6 +90,7 @@ class GetCompetitionJooqAdapterTest {
             Tables.DOGS.COUNTRY,
             Tables.DOGS.BREED,
             Tables.DOGS.ORIGIN,
+            Tables.DOGS.LICENSE,
             Tables.DOGS.SEX,
             Tables.DOGS.THREE_FCI_GENERATIONS_CONFIRMED
     };

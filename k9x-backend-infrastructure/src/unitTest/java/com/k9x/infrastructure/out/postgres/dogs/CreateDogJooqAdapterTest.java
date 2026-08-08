@@ -32,7 +32,7 @@ class CreateDogJooqAdapterTest {
 
         long createdAt = 1700000000000L;
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", Sex.FEMALE, 55, null, createdAt);
+        new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", null, "owner-1", "handler-1", "creator-1", "team-1", "ES", Sex.FEMALE, 55, null, createdAt);
 
         assertThat(capturedSql.get())
                 .contains("insert into \"k9x\".\"dogs\"")
@@ -41,6 +41,7 @@ class CreateDogJooqAdapterTest {
                 .contains("\"image\"")
                 .contains("\"breed\"")
                 .contains("\"origin\"")
+                .contains("\"license\"")
                 .contains("\"owner\"")
                 .contains("\"handler\"")
                 .contains("\"creator\"")
@@ -64,7 +65,7 @@ class CreateDogJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", Sex.FEMALE, 55, null, 1700000000000L);
+        new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", null, "owner-1", "handler-1", "creator-1", "team-1", "ES", Sex.FEMALE, 55, null, 1700000000000L);
 
         assertThat(capturedSql.get())
                 .contains("on conflict (\"identification\")")

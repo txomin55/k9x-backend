@@ -11,12 +11,14 @@ public record EventCompetitor(
         String country,
         String breed,
         String origin,
+        String license,
         Sex sex,
         Short startNumber,
         Short competitorNumber,
         Boolean verified,
         boolean notCompeting,
         Boolean bih,
+        String primer,
         Boolean reserve,
         Boolean threeFciGenerationsConfirmed
 ) {

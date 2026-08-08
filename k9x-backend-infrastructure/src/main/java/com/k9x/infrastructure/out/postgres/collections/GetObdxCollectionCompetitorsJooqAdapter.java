@@ -22,7 +22,7 @@ public class GetObdxCollectionCompetitorsJooqAdapter implements GetObdxCollectio
         EventCompetitors ec = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
         Dogs d = Tables.DOGS;
 
-        return dsl.select(ec.DOG_IDENTIFICATION, ec.START_NUMBER, ec.COMPETITOR_NUMBER, ec.VERIFIED, ec.NOT_COMPETING, ec.BIH, ec.RESERVE,
+        return dsl.select(ec.DOG_IDENTIFICATION, ec.START_NUMBER, ec.COMPETITOR_NUMBER, ec.VERIFIED, ec.NOT_COMPETING, ec.BIH, ec.PRIMER, ec.RESERVE,
                         d.NAME, d.ORIGIN, d.BREED, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY)
                 .from(ec)
                 .join(d).on(d.IDENTIFICATION.eq(ec.DOG_IDENTIFICATION).and(d.DELETED_AT.isNull()))
@@ -43,6 +43,7 @@ public class GetObdxCollectionCompetitorsJooqAdapter implements GetObdxCollectio
                         Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)),
                         null,
                         r.get(ec.BIH),
+                        r.get(ec.PRIMER),
                         r.get(ec.RESERVE),
                         true
                 ));

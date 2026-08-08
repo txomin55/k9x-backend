@@ -19,7 +19,7 @@ public class CreateDogJooqAdapter implements CreateDogPersistencePort {
      * collisions are rejected in the service case, so the conflict branch only ever hits deleted rows.
      */
     @Override
-    public void createDog(String identification, String name, String image, String breed, String origin,
+    public void createDog(String identification, String name, String image, String breed, String origin, String license,
                           String owner, String handler, String creator, String team, String country,
                           Sex sex, Integer withersCm, Boolean threeFciGenerationsConfirmed, long createdAt) {
         String sexName = sex == null ? null : sex.name();
@@ -29,6 +29,7 @@ public class CreateDogJooqAdapter implements CreateDogPersistencePort {
                 .set(Tables.DOGS.IMAGE, image)
                 .set(Tables.DOGS.BREED, breed)
                 .set(Tables.DOGS.ORIGIN, origin)
+                .set(Tables.DOGS.LICENSE, license)
                 .set(Tables.DOGS.OWNER, owner)
                 .set(Tables.DOGS.HANDLER, handler)
                 .set(Tables.DOGS.CREATOR, creator)
@@ -45,6 +46,7 @@ public class CreateDogJooqAdapter implements CreateDogPersistencePort {
                 .set(Tables.DOGS.IMAGE, image)
                 .set(Tables.DOGS.BREED, breed)
                 .set(Tables.DOGS.ORIGIN, origin)
+                .set(Tables.DOGS.LICENSE, license)
                 .set(Tables.DOGS.OWNER, owner)
                 .set(Tables.DOGS.HANDLER, handler)
                 .set(Tables.DOGS.CREATOR, creator)
