@@ -276,7 +276,7 @@ public final class CompetitionAggregate {
         changes.add(new EventDeleted(eventId, now));
     }
 
-    public void enrollDog(String eventId, String dogId, boolean bih, String userId, long now) {
+    public void enrollDog(String eventId, String dogIdentification, boolean bih, String userId, long now) {
         EventSnapshot event = requireActiveEvent(eventId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
@@ -287,10 +287,10 @@ public final class CompetitionAggregate {
         if (!stage.enrollmentOpened(event, now)) {
             throw new EnrollmentClosedException();
         }
-        if (isDogEnrolled(event, dogId)) {
+        if (isDogEnrolled(event, dogIdentification)) {
             throw new DogAlreadyEnrolledException();
         }
-        changes.add(new DogEnrolled(eventId, dogId, bih, nextStartNumber(event), now));
+        changes.add(new DogEnrolled(eventId, dogIdentification, bih, nextStartNumber(event), now));
     }
 
     /**
@@ -329,17 +329,17 @@ public final class CompetitionAggregate {
      * {@link EventSnapshot#status(long, long)}, i.e. equivalent to one who has finished competing. Marking a
      * competitor that is already not competing is rejected with {@link CompetitorAlreadyNotCompetingException}.
      */
-    public void updateCompetitorNotCompeting(String eventId, String dogId, boolean notCompeting, String userId, long now) {
+    public void updateCompetitorNotCompeting(String eventId, String dogIdentification, boolean notCompeting, String userId, long now) {
         EventSnapshot event = requireActiveEvent(eventId);
 
         if (!event.creator().equals(userId)) {
             throw new UnauthorizedResourceException();
         }
-        EventCompetitor competitor = findCompetitor(event, dogId);
+        EventCompetitor competitor = findCompetitor(event, dogIdentification);
         if (notCompeting && competitor.notCompeting()) {
             throw new CompetitorAlreadyNotCompetingException();
         }
-        changes.add(new CompetitorNotCompetingUpdated(eventId, dogId, notCompeting, now));
+        changes.add(new CompetitorNotCompetingUpdated(eventId, dogIdentification, notCompeting, now));
     }
 
     public void updateScore(String eventId, ScoreUpdateData data, String userId, long now) {
@@ -353,13 +353,13 @@ public final class CompetitionAggregate {
             throw new StageExpiredException();
         }
         assertJudgeAssignedToExercise(event, data.exerciseId(), data.judgeId());
-        if (event.isDisqualified(data.dogId())) {
+        if (event.isDisqualified(data.dogIdentification())) {
             throw new CompetitorDisqualifiedException();
         }
-        if (event.isNotCompeting(data.dogId())) {
+        if (event.isNotCompeting(data.dogIdentification())) {
             throw new CompetitorNotCompetingException();
         }
-        changes.add(new ScoreUpdated(eventId, data.judgeId(), data.exerciseId(), data.dogId(), data.score(), now));
+        changes.add(new ScoreUpdated(eventId, data.judgeId(), data.exerciseId(), data.dogIdentification(), data.score(), now));
     }
 
     public void registerYellowCard(String eventId, YellowCardData data, String userId, long now) {
@@ -376,15 +376,15 @@ public final class CompetitionAggregate {
         if (hasYellowCard(event, data)) {
             throw new YellowCardAlreadyRegisteredException();
         }
-        changes.add(new YellowCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogId(), now));
+        changes.add(new YellowCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogIdentification(), now));
 
         /*
          * A second yellow card disqualifies the competitor exactly like a red card (see
          * EventSnapshot#isDisqualified), so it stamps one automatically in the same exercise/judge as the
          * card that triggered it, unless one is already registered.
          */
-        if (event.yellowCardCount(data.dogId()) + 1 >= 2 && !event.hasRedCard(data.dogId())) {
-            changes.add(new RedCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogId(), now));
+        if (event.yellowCardCount(data.dogIdentification()) + 1 >= 2 && !event.hasRedCard(data.dogIdentification())) {
+            changes.add(new RedCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogIdentification(), now));
         }
     }
 
@@ -399,10 +399,10 @@ public final class CompetitionAggregate {
             throw new StageExpiredException();
         }
         assertJudgeAssignedToExercise(event, data.exerciseId(), data.judgeId());
-        if (event.hasRedCard(data.dogId())) {
+        if (event.hasRedCard(data.dogIdentification())) {
             throw new RedCardAlreadyRegisteredException();
         }
-        changes.add(new RedCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogId(), now));
+        changes.add(new RedCardRegistered(eventId, data.judgeId(), data.exerciseId(), data.dogIdentification(), now));
     }
 
     /**
@@ -427,7 +427,7 @@ public final class CompetitionAggregate {
                 .anyMatch(s -> s.yellowCard() != null
                         && s.judgeId().equals(data.judgeId())
                         && s.exerciseId().equals(data.exerciseId())
-                        && s.dogId().equals(data.dogId()));
+                        && s.dogIdentification().equals(data.dogIdentification()));
     }
 
     // ---- invariants & navigation -----------------------------------------------------------------
@@ -624,17 +624,17 @@ public final class CompetitionAggregate {
                 .orElse(null);
     }
 
-    private boolean isDogEnrolled(EventSnapshot event, String dogId) {
+    private boolean isDogEnrolled(EventSnapshot event, String dogIdentification) {
         return event.competitors() != null
-                && event.competitors().stream().anyMatch(c -> c.dogId().equals(dogId));
+                && event.competitors().stream().anyMatch(c -> c.dogIdentification().equals(dogIdentification));
     }
 
-    private EventCompetitor findCompetitor(EventSnapshot event, String dogId) {
+    private EventCompetitor findCompetitor(EventSnapshot event, String dogIdentification) {
         if (event.competitors() == null) {
             throw new CompetitorNotFoundException();
         }
         return event.competitors().stream()
-                .filter(c -> c.dogId().equals(dogId))
+                .filter(c -> c.dogIdentification().equals(dogIdentification))
                 .findFirst()
                 .orElseThrow(CompetitorNotFoundException::new);
     }

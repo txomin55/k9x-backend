@@ -36,7 +36,7 @@ class DeleteDogJooqAdapterTest {
         assertThat(capturedSql.get())
                 .contains("update \"k9x\".\"dogs\"")
                 .contains("set \"deleted_at\" = ?")
-                .contains("where \"k9x\".\"dogs\".\"id\" = ?");
+                .contains("where \"k9x\".\"dogs\".\"identification\" = ?");
         assertThat(capturedBindings.get()[0]).isEqualTo(deletedAt);
         assertThat(capturedBindings.get()[1]).isEqualTo("dog-123");
     }

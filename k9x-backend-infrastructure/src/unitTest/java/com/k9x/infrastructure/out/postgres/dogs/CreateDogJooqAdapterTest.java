@@ -36,11 +36,11 @@ class CreateDogJooqAdapterTest {
 
         assertThat(capturedSql.get())
                 .contains("insert into \"k9x\".\"dogs\"")
-                .contains("\"id\"")
+                .contains("\"identification\"")
                 .contains("\"name\"")
                 .contains("\"image\"")
                 .contains("\"breed\"")
-                .contains("\"identity\"")
+                .contains("\"origin\"")
                 .contains("\"owner\"")
                 .contains("\"handler\"")
                 .contains("\"creator\"")
@@ -54,7 +54,7 @@ class CreateDogJooqAdapterTest {
     }
 
     @Test
-    void upserts_on_chip_conflict_reactivating_deleted_dog() {
+    void upserts_on_identification_conflict_reactivating_deleted_dog() {
         AtomicReference<String> capturedSql = new AtomicReference<>();
 
         MockDataProvider provider = ctx -> {
@@ -67,7 +67,7 @@ class CreateDogJooqAdapterTest {
         new CreateDogJooqAdapter(dsl).createDog("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "creator-1", "team-1", "ES", Sex.FEMALE, 55, null, 1700000000000L);
 
         assertThat(capturedSql.get())
-                .contains("on conflict (\"id\")")
+                .contains("on conflict (\"identification\")")
                 .contains("do update")
                 .contains("\"deleted_at\" = ");
     }

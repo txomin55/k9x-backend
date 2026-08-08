@@ -52,9 +52,9 @@ class GenerateEventSnapshotsServiceCaseTest {
                 "obdx", "cfg", "Cfg", null, obdx, "A+");
     }
 
-    private FetchClassificationCompetitorDTO competitor(String dogId, int position, BigDecimal totalScore,
+    private FetchClassificationCompetitorDTO competitor(String dogIdentification, int position, BigDecimal totalScore,
                                                         BigDecimal rankScore) {
-        return new FetchClassificationCompetitorDTO(dogId, dogId, "Border Collie", "o", "h", "t", "ES",
+        return new FetchClassificationCompetitorDTO(dogIdentification, dogIdentification, "Border Collie", "o", "h", "t", "ES",
                 (short) 5, (short) 7, position, totalScore, null, false, "OK", false, false, false,
                 List.of(), List.of(), null, rankScore);
     }

@@ -32,7 +32,7 @@ public class GetObdxYellowCardsJooqAdapter implements GetObdxYellowCardsPersiste
                 .from(es)
                 .join(j).on(j.ID.eq(es.JUDGE_ID))
                 .where(es.EVENT_ID.eq(eventId))
-                .and(es.DOG_ID.eq(competitorId))
+                .and(es.DOG_IDENTIFICATION.eq(competitorId))
                 .forEach(r -> {
                     Long yellowCard = r.get(es.YELLOW_CARD);
                     if (yellowCard != null) {

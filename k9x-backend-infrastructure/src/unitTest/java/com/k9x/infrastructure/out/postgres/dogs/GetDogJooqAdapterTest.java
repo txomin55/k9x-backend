@@ -35,12 +35,12 @@ class GetDogJooqAdapterTest {
         assertThat(capturedSql.get())
                 .contains("select")
                 .contains("from \"k9x\".\"dogs\"")
-                .contains("\"k9x\".\"dogs\".\"id\" = ?")
+                .contains("\"k9x\".\"dogs\".\"identification\" = ?")
                 .contains("\"k9x\".\"dogs\".\"deleted_at\" is null");
     }
 
     @Test
-    void generates_sql_filtered_by_identity_and_not_deleted() {
+    void generates_sql_filtered_by_origin_and_not_deleted() {
         AtomicReference<String> capturedSql = new AtomicReference<>();
 
         MockDataProvider provider = ctx -> {
@@ -50,12 +50,12 @@ class GetDogJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetDogJooqAdapter(dsl).getDogByIdentity("K9-001");
+        new GetDogJooqAdapter(dsl).getDogByOrigin("K9-001");
 
         assertThat(capturedSql.get())
                 .contains("select")
                 .contains("from \"k9x\".\"dogs\"")
-                .contains("\"k9x\".\"dogs\".\"identity\" = ?")
+                .contains("\"k9x\".\"dogs\".\"origin\" = ?")
                 .contains("\"k9x\".\"dogs\".\"deleted_at\" is null");
     }
 
@@ -65,8 +65,8 @@ class GetDogJooqAdapterTest {
             DSLContext ctx = DSL.using(SQLDialect.POSTGRES);
             Result<Record> result = ctx.newResult(Tables.DOGS.fields());
             Record r = ctx.newRecord(Tables.DOGS.fields());
-            r.set(Tables.DOGS.ID, "dog-1");
-            r.set(Tables.DOGS.IDENTITY, "K9-001");
+            r.set(Tables.DOGS.IDENTIFICATION, "dog-1");
+            r.set(Tables.DOGS.ORIGIN, "K9-001");
             r.set(Tables.DOGS.BREED, "Labrador");
             r.set(Tables.DOGS.NAME, "Rex");
             r.set(Tables.DOGS.IMAGE, "img.png");
@@ -88,8 +88,8 @@ class GetDogJooqAdapterTest {
         Dog dog = new GetDogJooqAdapter(dsl).getDog("dog-1");
 
         assertThat(dog).isNotNull();
-        assertThat(dog.id()).isEqualTo("dog-1");
-        assertThat(dog.identity()).isEqualTo("K9-001");
+        assertThat(dog.identification()).isEqualTo("dog-1");
+        assertThat(dog.origin()).isEqualTo("K9-001");
         assertThat(dog.breed()).isEqualTo("Labrador");
         assertThat(dog.name()).isEqualTo("Rex");
         assertThat(dog.image()).isEqualTo("img.png");

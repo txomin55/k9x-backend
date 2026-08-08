@@ -26,8 +26,8 @@ class EventStatusTest {
                 ObdxAvgMethod.AVG, competitors, exercises, judges, scores, List.of(), null, null);
     }
 
-    private static EventCompetitor competitor(String dogId, boolean notCompeting) {
-        return new EventCompetitor(dogId, dogId, "o", "h", "t", "c", "b", "i", null, (short) 0, null, true, notCompeting, null, null, null);
+    private static EventCompetitor competitor(String dogIdentification, boolean notCompeting) {
+        return new EventCompetitor(dogIdentification, dogIdentification, "o", "h", "t", "c", "b", "i", null, (short) 0, null, true, notCompeting, null, null, null);
     }
 
     private static EventExercise exercise(String id) {
@@ -38,8 +38,8 @@ class EventStatusTest {
         return new EventJudge(id, id, null);
     }
 
-    private static Score score(String exerciseId, String judgeId, String dogId, BigDecimal value) {
-        return new Score(exerciseId, judgeId, dogId, value, 0L);
+    private static Score score(String exerciseId, String judgeId, String dogIdentification, BigDecimal value) {
+        return new Score(exerciseId, judgeId, dogIdentification, value, 0L);
     }
 
     @Test

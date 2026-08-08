@@ -41,7 +41,7 @@ class UpdateDogJooqAdapterTest {
                 .contains("\"name\" = ?")
                 .contains("\"image\" = ?")
                 .contains("\"breed\" = ?")
-                .contains("\"identity\" = ?")
+                .contains("\"origin\" = ?")
                 .contains("\"owner\" = ?")
                 .contains("\"handler\" = ?")
                 .contains("\"team\" = ?")
@@ -49,7 +49,7 @@ class UpdateDogJooqAdapterTest {
                 .contains("\"sex\" = ?")
                 .contains("\"withers_cm\" = ?")
                 .contains("\"last_update\" = ?")
-                .contains("where \"k9x\".\"dogs\".\"id\" = ?");
+                .contains("where \"k9x\".\"dogs\".\"identification\" = ?");
         assertThat(capturedBindings.get()).contains("dog-123", "Rex", "img.png", "Labrador", "K9-001", "owner-1", "handler-1", "team-1", "ES", "FEMALE", 55, lastUpdate);
     }
 }

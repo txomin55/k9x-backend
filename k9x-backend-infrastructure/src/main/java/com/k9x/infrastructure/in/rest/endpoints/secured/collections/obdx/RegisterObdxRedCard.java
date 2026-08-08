@@ -21,7 +21,7 @@ public class RegisterObdxRedCard implements SecuredEventsUpdateRedCardObdxApiDel
     public ResponseEntity<String> registerRedCard(String eventId, RegisterRedCardRequestDTO body) {
         registerObdxRedCardServiceCase.registerRedCard(
                 eventId,
-                new RegisterObdxRedCardCommand(body.getJudgeId(), body.getExerciseId(), body.getDogId()),
+                new RegisterObdxRedCardCommand(body.getJudgeId(), body.getExerciseId(), body.getDogIdentification()),
                 userDetails.getEmail());
         return ResponseEntity.ok().build();
     }

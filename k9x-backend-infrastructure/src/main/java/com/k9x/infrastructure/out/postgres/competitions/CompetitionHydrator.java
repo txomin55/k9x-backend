@@ -188,18 +188,18 @@ public class CompetitionHydrator {
         }
         EventCompetitors ec = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
         Dogs d = Tables.DOGS;
-        dsl.select(ec.EVENT_ID, ec.DOG_ID, ec.START_NUMBER, ec.COMPETITOR_NUMBER, ec.VERIFIED, ec.NOT_COMPETING, ec.BIH,
+        dsl.select(ec.EVENT_ID, ec.DOG_IDENTIFICATION, ec.START_NUMBER, ec.COMPETITOR_NUMBER, ec.VERIFIED, ec.NOT_COMPETING, ec.BIH,
                         ec.RESERVE,
-                        d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.IDENTITY, d.SEX,
+                        d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.ORIGIN, d.SEX,
                         d.THREE_FCI_GENERATIONS_CONFIRMED)
                 .from(ec)
-                .leftJoin(d).on(d.ID.eq(ec.DOG_ID).and(d.DELETED_AT.isNull()))
+                .leftJoin(d).on(d.IDENTIFICATION.eq(ec.DOG_IDENTIFICATION).and(d.DELETED_AT.isNull()))
                 .where(ec.EVENT_ID.in(eventIds))
-                .orderBy(ec.START_NUMBER.asc().nullsLast(), ec.DOG_ID.asc())
+                .orderBy(ec.START_NUMBER.asc().nullsLast(), ec.DOG_IDENTIFICATION.asc())
                 .forEach(r -> result.computeIfAbsent(r.get(ec.EVENT_ID), _ -> new ArrayList<>())
                         .add(new EventCompetitor(
-                                r.get(ec.DOG_ID), r.get(d.NAME), r.get(d.OWNER), r.get(d.HANDLER), r.get(d.TEAM),
-                                r.get(d.COUNTRY), r.get(d.BREED), r.get(d.IDENTITY), toSex(r.get(d.SEX)),
+                                r.get(ec.DOG_IDENTIFICATION), r.get(d.NAME), r.get(d.OWNER), r.get(d.HANDLER), r.get(d.TEAM),
+                                r.get(d.COUNTRY), r.get(d.BREED), r.get(d.ORIGIN), toSex(r.get(d.SEX)),
                                 r.get(ec.START_NUMBER), r.get(ec.COMPETITOR_NUMBER), r.get(ec.VERIFIED),
                                 Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)), r.get(ec.BIH),
                                 r.get(ec.RESERVE),
@@ -249,12 +249,12 @@ public class CompetitionHydrator {
             return result;
         }
         EventScores es = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_SCORES;
-        dsl.select(es.EVENT_ID, es.EXERCISE_ID, es.JUDGE_ID, es.DOG_ID, es.SCORE, es.LAST_UPDATE,
+        dsl.select(es.EVENT_ID, es.EXERCISE_ID, es.JUDGE_ID, es.DOG_IDENTIFICATION, es.SCORE, es.LAST_UPDATE,
                         es.YELLOW_CARD, es.RED_CARD)
                 .from(es)
                 .where(es.EVENT_ID.in(eventIds))
                 .forEach(r -> result.computeIfAbsent(r.get(es.EVENT_ID), _ -> new ArrayList<>())
-                        .add(new Score(r.get(es.EXERCISE_ID), r.get(es.JUDGE_ID), r.get(es.DOG_ID),
+                        .add(new Score(r.get(es.EXERCISE_ID), r.get(es.JUDGE_ID), r.get(es.DOG_IDENTIFICATION),
                                 r.get(es.SCORE), r.get(es.LAST_UPDATE),
                                 r.get(es.YELLOW_CARD), r.get(es.RED_CARD))));
         return result;

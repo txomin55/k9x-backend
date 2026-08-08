@@ -21,7 +21,7 @@ public class RegisterObdxYellowCard implements SecuredEventsUpdateYellowCardObdx
     public ResponseEntity<String> registerYellowCard(String eventId, RegisterYellowCardRequestDTO body) {
         registerObdxYellowCardServiceCase.registerYellowCard(
                 eventId,
-                new RegisterObdxYellowCardCommand(body.getJudgeId(), body.getExerciseId(), body.getDogId()),
+                new RegisterObdxYellowCardCommand(body.getJudgeId(), body.getExerciseId(), body.getDogIdentification()),
                 userDetails.getEmail());
         return ResponseEntity.ok().build();
     }

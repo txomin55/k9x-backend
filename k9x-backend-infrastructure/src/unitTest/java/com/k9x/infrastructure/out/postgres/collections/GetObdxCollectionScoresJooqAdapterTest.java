@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GetObdxCollectionScoresJooqAdapterTest {
 
     private static final Field<?>[] SELECT_FIELDS = {
-            Tables.EVENT_SCORES.DOG_ID, Tables.EVENT_SCORES.EXERCISE_ID,
+            Tables.EVENT_SCORES.DOG_IDENTIFICATION, Tables.EVENT_SCORES.EXERCISE_ID,
             Tables.EVENT_SCORES.JUDGE_ID, Tables.EVENT_SCORES.SCORE,
             Tables.EVENT_SCORES.YELLOW_CARD, Tables.EVENT_SCORES.RED_CARD
     };
@@ -51,7 +51,7 @@ class GetObdxCollectionScoresJooqAdapterTest {
             DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);
             Result<Record> result = mockDsl.newResult(SELECT_FIELDS);
             Record record = mockDsl.newRecord(SELECT_FIELDS);
-            record.set(Tables.EVENT_SCORES.DOG_ID, "dog-1");
+            record.set(Tables.EVENT_SCORES.DOG_IDENTIFICATION, "dog-1");
             record.set(Tables.EVENT_SCORES.EXERCISE_ID, "exercise-1");
             record.set(Tables.EVENT_SCORES.JUDGE_ID, "judge-1");
             record.set(Tables.EVENT_SCORES.SCORE, new BigDecimal("7.5"));
@@ -66,7 +66,7 @@ class GetObdxCollectionScoresJooqAdapterTest {
 
         assertThat(scores).hasSize(1);
         FetchCollectionScoreDTO score = scores.getFirst();
-        assertThat(score.dogId()).isEqualTo("dog-1");
+        assertThat(score.dogIdentification()).isEqualTo("dog-1");
         assertThat(score.exerciseId()).isEqualTo("exercise-1");
         assertThat(score.judgeId()).isEqualTo("judge-1");
         assertThat(score.score()).isEqualByComparingTo(new BigDecimal("7.5"));

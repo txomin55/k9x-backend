@@ -21,7 +21,7 @@ public class UpdateObdxScore implements SecuredEventsUpdateScoreObdxApiDelegate 
     public ResponseEntity<String> updateObdxScore(String eventId, UpdateCollectionScoreRequestDTO body) {
         updateObdxScoreServiceCase.updateScore(
                 eventId,
-                new UpdateObdxScoreCommand(body.getJudgeId(), body.getExerciseId(), body.getDogId(), body.getScore()),
+                new UpdateObdxScoreCommand(body.getJudgeId(), body.getExerciseId(), body.getDogIdentification(), body.getScore()),
                 userDetails.getEmail());
         return ResponseEntity.ok().build();
     }

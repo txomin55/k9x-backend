@@ -12,22 +12,22 @@ import java.util.Map;
  * ({@code type=EVENT} + {@code eventId}) or inactivity degradation ({@code type=TIME_DEGRADATION} +
  * {@code month}).
  */
-public record DogRankHistoryPayload(String dogId, String discipline, int rank, long timestamp,
+public record DogRankHistoryPayload(String dogIdentification, String discipline, int rank, long timestamp,
                                     long applyingTimestamp, Map<String, String> metadata) {
 
     public static final String TYPE_KEY = "type";
     public static final String TYPE_EVENT = "EVENT";
     public static final String TYPE_TIME_DEGRADATION = "TIME_DEGRADATION";
 
-    public static DogRankHistoryPayload fromEvent(String dogId, String discipline, int rank,
+    public static DogRankHistoryPayload fromEvent(String dogIdentification, String discipline, int rank,
                                                   long applyingTimestamp, String eventId) {
-        return new DogRankHistoryPayload(dogId, discipline, rank, DateUtils.nowUtcMillis(), applyingTimestamp,
+        return new DogRankHistoryPayload(dogIdentification, discipline, rank, DateUtils.nowUtcMillis(), applyingTimestamp,
                 Map.of(TYPE_KEY, TYPE_EVENT, "eventId", eventId));
     }
 
-    public static DogRankHistoryPayload fromTimeDegradation(String dogId, String discipline, int rank,
+    public static DogRankHistoryPayload fromTimeDegradation(String dogIdentification, String discipline, int rank,
                                                             long applyingTimestamp, int month) {
-        return new DogRankHistoryPayload(dogId, discipline, rank, DateUtils.nowUtcMillis(), applyingTimestamp,
+        return new DogRankHistoryPayload(dogIdentification, discipline, rank, DateUtils.nowUtcMillis(), applyingTimestamp,
                 Map.of(TYPE_KEY, TYPE_TIME_DEGRADATION, "month", String.valueOf(month)));
     }
 }

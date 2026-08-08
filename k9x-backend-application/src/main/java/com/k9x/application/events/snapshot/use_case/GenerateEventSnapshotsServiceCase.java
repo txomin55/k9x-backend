@@ -68,7 +68,7 @@ public class GenerateEventSnapshotsServiceCase {
                 // retry re-stamps the same values).
                 List<ObdxCompetitorPosition> competitors = classification.obdx() == null ? List.of()
                         : classification.obdx().competitors().stream()
-                                .map(c -> new ObdxCompetitorPosition(c.dogId(), (short) c.position(),
+                                .map(c -> new ObdxCompetitorPosition(c.dogIdentification(), (short) c.position(),
                                         c.totalScore(), c.rankScore()))
                                 .toList();
                 saveObdxSnapshotPersistencePort.save(pending.eventId(), now, pending.stageEndAt(),

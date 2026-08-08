@@ -64,12 +64,12 @@ public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
 
         Map<String, List<FetchDogRankEventResultDTO>> resultsByDogAndDiscipline = new LinkedHashMap<>();
         getDogRankEventResultsPersistencePort.getEventResults().forEach(result -> resultsByDogAndDiscipline
-                .computeIfAbsent(key(result.dogId(), result.discipline()), key -> new ArrayList<>())
+                .computeIfAbsent(key(result.dogIdentification(), result.discipline()), key -> new ArrayList<>())
                 .add(result));
 
         Map<String, FetchLatestDogRankHistoryDTO> latestByDogAndDiscipline =
                 getLatestDogRankHistoryPersistencePort.getLatestHistory().stream()
-                        .collect(Collectors.toMap(latest -> key(latest.dogId(), latest.discipline()),
+                        .collect(Collectors.toMap(latest -> key(latest.dogIdentification(), latest.discipline()),
                                 latest -> latest));
 
         List<DogRankHistoryPayload> records = new ArrayList<>();
@@ -82,13 +82,13 @@ public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
         log.log(Level.INFO, "Appended {0} dog index history record(s)", records.size());
     }
 
-    private String key(String dogId, String discipline) {
-        return dogId + "|" + discipline;
+    private String key(String dogIdentification, String discipline) {
+        return dogIdentification + "|" + discipline;
     }
 
     private List<DogRankHistoryPayload> recordsFor(List<FetchDogRankEventResultDTO> results,
                                                    FetchLatestDogRankHistoryDTO latest, long now) {
-        String dogId = results.get(0).dogId();
+        String dogIdentification = results.get(0).dogIdentification();
         String discipline = results.get(0).discipline();
         long latestRecordedAt = latest == null ? Long.MIN_VALUE : latest.applyingTimestamp();
 
@@ -101,7 +101,7 @@ public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
             accumulated.add(new DogRankIndex.Result(result.rank(), result.applyingTimestamp()));
             if (result.applyingTimestamp() > latestRecordedAt) {
                 int rank = DogRankIndex.of(accumulated, result.applyingTimestamp());
-                records.add(DogRankHistoryPayload.fromEvent(dogId, discipline, rank, result.applyingTimestamp(),
+                records.add(DogRankHistoryPayload.fromEvent(dogIdentification, discipline, rank, result.applyingTimestamp(),
                         result.eventId()));
             }
         }
@@ -119,7 +119,7 @@ public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
         int monthsRecorded = DogRankIndex.wholeMonthsBetween(lastEventAt, latestRecordedAt);
         if (monthsInactive >= DogRankIndex.FRESHNESS_PLATEAU_MONTHS_THRESHOLD && monthsInactive > monthsRecorded) {
             int rank = DogRankIndex.of(accumulated, now);
-            return List.of(DogRankHistoryPayload.fromTimeDegradation(dogId, discipline, rank, now, monthsInactive));
+            return List.of(DogRankHistoryPayload.fromTimeDegradation(dogIdentification, discipline, rank, now, monthsInactive));
         }
         return List.of();
     }

@@ -25,8 +25,8 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
     private static final Dogs D = Tables.DOGS;
 
     private static final Field<?>[] SELECT_FIELDS = {
-            EC.DOG_ID, EC.START_NUMBER, EC.COMPETITOR_NUMBER, EC.VERIFIED, EC.NOT_COMPETING, EC.BIH, EC.RESERVE,
-            D.NAME, D.IDENTITY, D.BREED, D.OWNER, D.HANDLER, D.TEAM, D.COUNTRY
+            EC.DOG_IDENTIFICATION, EC.START_NUMBER, EC.COMPETITOR_NUMBER, EC.VERIFIED, EC.NOT_COMPETING, EC.BIH, EC.RESERVE,
+            D.NAME, D.ORIGIN, D.BREED, D.OWNER, D.HANDLER, D.TEAM, D.COUNTRY
     };
 
     private static final Field<?>[] JOIN_FIELDS = Stream.of(
@@ -62,7 +62,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
             DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);
             Result<Record> result = mockDsl.newResult(SELECT_FIELDS);
             Record record = mockDsl.newRecord(SELECT_FIELDS);
-            record.set(EC.DOG_ID, "dog-1");
+            record.set(EC.DOG_IDENTIFICATION, "dog-1");
             record.set(EC.START_NUMBER, (short) 1);
             record.set(EC.COMPETITOR_NUMBER, (short) 7);
             record.set(EC.VERIFIED, true);
@@ -70,7 +70,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
             record.set(EC.BIH, true);
             record.set(EC.RESERVE, true);
             record.set(D.NAME, "Rex");
-            record.set(D.IDENTITY, "ID-001");
+            record.set(D.ORIGIN, "ID-001");
             record.set(D.BREED, "Border Collie");
             record.set(D.OWNER, "owner@test.com");
             record.set(D.HANDLER, "Rex Handler");
@@ -85,9 +85,9 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
 
         assertThat(competitors).hasSize(1);
         FetchCollectionCompetitorDTO comp = competitors.getFirst();
-        assertThat(comp.dogId()).isEqualTo("dog-1");
+        assertThat(comp.dogIdentification()).isEqualTo("dog-1");
         assertThat(comp.dogName()).isEqualTo("Rex");
-        assertThat(comp.dogIdentity()).isEqualTo("ID-001");
+        assertThat(comp.dogOrigin()).isEqualTo("ID-001");
         assertThat(comp.breed()).isEqualTo("Border Collie");
         assertThat(comp.owner()).isEqualTo("owner@test.com");
         assertThat(comp.handler()).isEqualTo("Rex Handler");

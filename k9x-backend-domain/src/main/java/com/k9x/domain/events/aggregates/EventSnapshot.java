@@ -100,12 +100,12 @@ public record EventSnapshot(
      * individual runs is settled even while the group stay / general impression are still pending.
      * Unknown dog ids are treated as not settled.
      */
-    public boolean isCompetitorSettled(String dogId) {
+    public boolean isCompetitorSettled(String dogIdentification) {
         if (competitors == null) {
             return false;
         }
         return competitors.stream()
-                .filter(c -> c.dogId().equals(dogId))
+                .filter(c -> c.dogIdentification().equals(dogIdentification))
                 .findFirst()
                 .map(c -> isSettled(c, false))
                 .orElse(false);
@@ -118,9 +118,9 @@ public record EventSnapshot(
      * would flip every competitor to LIVE regardless of their individual runs. A competitor that has not
      * started yet is neither {@code LIVE} nor {@code SETTLED} but pending.
      */
-    public boolean isCompetitorStarted(String dogId) {
+    public boolean isCompetitorStarted(String dogIdentification) {
         return scores != null && scores.stream()
-                .anyMatch(s -> s.score() != null && dogId.equals(s.dogId())
+                .anyMatch(s -> s.score() != null && dogIdentification.equals(s.dogIdentification())
                         && !LiveExcludedExercise.isExcluded(s.exerciseId()));
     }
 
@@ -129,12 +129,12 @@ public record EventSnapshot(
      * given exercise×judge×dog can only ever hold one yellow card, this equals the number of score rows for
      * the dog with a stamped card.
      */
-    public long yellowCardCount(String dogId) {
+    public long yellowCardCount(String dogIdentification) {
         if (scores == null) {
             return 0;
         }
         return scores.stream()
-                .filter(s -> s.yellowCard() != null && dogId.equals(s.dogId()))
+                .filter(s -> s.yellowCard() != null && dogIdentification.equals(s.dogIdentification()))
                 .count();
     }
 
@@ -142,11 +142,11 @@ public record EventSnapshot(
      * Whether the competitor already holds a red card. Only one red card can ever exist per dog in an
      * event, so this is a plain existence check rather than a count.
      */
-    public boolean hasRedCard(String dogId) {
+    public boolean hasRedCard(String dogIdentification) {
         if (scores == null) {
             return false;
         }
-        return scores.stream().anyMatch(s -> s.redCard() != null && dogId.equals(s.dogId()));
+        return scores.stream().anyMatch(s -> s.redCard() != null && dogIdentification.equals(s.dogIdentification()));
     }
 
     /**
@@ -154,19 +154,19 @@ public record EventSnapshot(
      * participation is over and it can no longer receive scores, so it is treated as settled regardless of
      * remaining exercises.
      */
-    public boolean isDisqualified(String dogId) {
-        return ObdxCards.isDisqualified(yellowCardCount(dogId), hasRedCard(dogId));
+    public boolean isDisqualified(String dogIdentification) {
+        return ObdxCards.isDisqualified(yellowCardCount(dogIdentification), hasRedCard(dogIdentification));
     }
 
     /**
      * Whether the competitor has been flagged as not competing. Unknown dog ids are treated as competing.
      */
-    public boolean isNotCompeting(String dogId) {
+    public boolean isNotCompeting(String dogIdentification) {
         if (competitors == null) {
             return false;
         }
         return competitors.stream()
-                .filter(c -> c.dogId().equals(dogId))
+                .filter(c -> c.dogIdentification().equals(dogIdentification))
                 .findFirst()
                 .map(EventCompetitor::notCompeting)
                 .orElse(false);
@@ -183,7 +183,7 @@ public record EventSnapshot(
      * treated as never settled.
      */
     private boolean isSettled(EventCompetitor competitor, boolean includeExcludedExercises) {
-        if (competitor.notCompeting() || isDisqualified(competitor.dogId())) {
+        if (competitor.notCompeting() || isDisqualified(competitor.dogIdentification())) {
             return true;
         }
         if (exercises == null || exercises.isEmpty()) {
@@ -196,7 +196,7 @@ public record EventSnapshot(
             return false;
         }
         Set<String> scoredPairs = scores == null ? Set.of() : scores.stream()
-                .filter(s -> s.score() != null && competitor.dogId().equals(s.dogId()))
+                .filter(s -> s.score() != null && competitor.dogIdentification().equals(s.dogIdentification()))
                 .map(s -> s.exerciseId() + "|" + s.judgeId())
                 .collect(Collectors.toSet());
         return relevantExercises.stream().allMatch(exercise -> {

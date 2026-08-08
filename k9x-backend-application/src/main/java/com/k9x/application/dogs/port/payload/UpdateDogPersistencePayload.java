@@ -4,14 +4,14 @@ import com.k9x.application.dogs.use_case.command.UpdateDogCommand;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.dogs.aggregates.Sex;
 
-public record UpdateDogPersistencePayload(String name, String image, String breed, String identity,
+public record UpdateDogPersistencePayload(String name, String image, String breed, String origin,
                                           String owner, String handler, String team, String country,
                                           Sex sex, Integer withersCm, Boolean threeFciGenerationsConfirmed,
                                           long lastUpdate) {
 
     public static UpdateDogPersistencePayload from(UpdateDogCommand command) {
         return new UpdateDogPersistencePayload(
-                command.name(), command.image(), command.breed(), command.identity(),
+                command.name(), command.image(), command.breed(), command.origin(),
                 command.owner(), command.handler(), command.team(), command.country(),
                 command.sex(), command.withersCm(), command.threeFciGenerationsConfirmed(), DateUtils.nowUtcMillis());
     }

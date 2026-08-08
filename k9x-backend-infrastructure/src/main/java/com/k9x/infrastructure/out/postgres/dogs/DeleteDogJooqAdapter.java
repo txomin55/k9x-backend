@@ -13,10 +13,10 @@ public class DeleteDogJooqAdapter implements DeleteDogPersistencePort {
     }
 
     @Override
-    public void deleteDog(String id, long deletedAt) {
+    public void deleteDog(String identification, long deletedAt) {
         dsl.update(Tables.DOGS)
                 .set(Tables.DOGS.DELETED_AT, deletedAt)
-                .where(Tables.DOGS.ID.eq(id))
+                .where(Tables.DOGS.IDENTIFICATION.eq(identification))
                 .execute();
     }
 }

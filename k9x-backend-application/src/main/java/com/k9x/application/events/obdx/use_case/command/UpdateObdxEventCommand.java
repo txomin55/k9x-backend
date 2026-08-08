@@ -14,7 +14,7 @@ public record UpdateObdxEventCommand(
         List<JudgeCommand> judges,
         List<String> awards
 ) {
-    public record CompetitorCommand(String dogId, Integer order, Integer competitorNumber, boolean bih, boolean reserve) {
+    public record CompetitorCommand(String dogIdentification, Integer order, Integer competitorNumber, boolean bih, boolean reserve) {
     }
 
     public record ExerciseCommand(String exerciseId, Integer order, List<String> tags, List<String> judgeIds) {

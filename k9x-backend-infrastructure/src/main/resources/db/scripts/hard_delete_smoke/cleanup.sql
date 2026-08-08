@@ -53,7 +53,7 @@ $$
            OR stage_id IN (SELECT id FROM smoke_stages);
 
         CREATE TEMP TABLE smoke_dogs AS
-        SELECT id
+        SELECT identification
         FROM k9x.dogs
         WHERE name LIKE v_prefix;
 
@@ -67,7 +67,7 @@ $$
         FROM obdx.event_scores
         WHERE event_id IN (SELECT id FROM smoke_events)
            OR judge_id IN (SELECT id FROM smoke_judges)
-           OR dog_id IN (SELECT id FROM smoke_dogs);
+           OR dog_identification IN (SELECT identification FROM smoke_dogs);
 
         DELETE
         FROM obdx.event_exercises
@@ -81,12 +81,12 @@ $$
         DELETE
         FROM obdx.event_competitors
         WHERE event_id IN (SELECT id FROM smoke_events)
-           OR dog_id IN (SELECT id FROM smoke_dogs);
+           OR dog_identification IN (SELECT identification FROM smoke_dogs);
 
         DELETE
         FROM obdx.snap_event_competitors_results
         WHERE event_id IN (SELECT id FROM smoke_events)
-           OR dog_id IN (SELECT id FROM smoke_dogs);
+           OR dog_identification IN (SELECT identification FROM smoke_dogs);
 
         DELETE
         FROM obdx.snap_event_classification
@@ -96,11 +96,11 @@ $$
         DELETE
         FROM k9x.snap_dog_rank
         WHERE event_id IN (SELECT id FROM smoke_events)
-           OR dog_id IN (SELECT id FROM smoke_dogs);
+           OR dog_identification IN (SELECT identification FROM smoke_dogs);
 
         DELETE
         FROM k9x.snap_dog_index_history
-        WHERE dog_id IN (SELECT id FROM smoke_dogs);
+        WHERE dog_identification IN (SELECT identification FROM smoke_dogs);
 
         -- 3) Aggregates — in FK order: events -> stages -> competitions.
         DELETE
@@ -118,7 +118,7 @@ $$
         -- 4) Standalone smoke entities.
         DELETE
         FROM k9x.dogs
-        WHERE id IN (SELECT id FROM smoke_dogs);
+        WHERE identification IN (SELECT identification FROM smoke_dogs);
 
         DELETE
         FROM k9x.judges

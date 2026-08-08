@@ -1,6 +1,6 @@
 package com.k9x.application.dogs.use_case;
 
-import com.k9x.application.dogs.exceptions.DogIdentityAlreadyExistsException;
+import com.k9x.application.dogs.exceptions.DogOriginAlreadyExistsException;
 import com.k9x.application.dogs.port.payload.UpdateDogPersistencePayload;
 import com.k9x.application.dogs.use_case.command.UpdateDogCommand;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
@@ -20,20 +20,20 @@ public class UpdateDogServiceCase implements TransactionalUseCase {
         this.updateDogPersistencePort = updateDogPersistencePort;
     }
 
-    public void updateDog(String dogId, UpdateDogCommand command, String userId, boolean organizer) {
-        Dog dog = getDogPersistencePort.getDog(dogId);
+    public void updateDog(String dogIdentification, UpdateDogCommand command, String userId, boolean organizer) {
+        Dog dog = getDogPersistencePort.getDog(dogIdentification);
         DogGuards.assertMutableBy(dog, userId, organizer);
-        assertIdentityNotUsedByAnotherDog(dogId, command.identity());
-        updateDogPersistencePort.updateDog(dogId, UpdateDogPersistencePayload.from(command));
+        assertOriginNotUsedByAnotherDog(dogIdentification, command.origin());
+        updateDogPersistencePort.updateDog(dogIdentification, UpdateDogPersistencePayload.from(command));
     }
 
-    private void assertIdentityNotUsedByAnotherDog(String dogId, String identity) {
-        if (Identifiers.isBlank(identity)) {
+    private void assertOriginNotUsedByAnotherDog(String dogIdentification, String origin) {
+        if (Identifiers.isBlank(origin)) {
             return;
         }
-        Dog existing = getDogPersistencePort.getDogByIdentity(identity);
-        if (existing != null && !existing.id().equals(dogId)) {
-            throw new DogIdentityAlreadyExistsException();
+        Dog existing = getDogPersistencePort.getDogByOrigin(origin);
+        if (existing != null && !existing.identification().equals(dogIdentification)) {
+            throw new DogOriginAlreadyExistsException();
         }
     }
 }

@@ -46,13 +46,13 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
             List<? extends Query> batch = competitors.stream()
                     .map(c -> ctx.insertInto(results)
                             .set(results.EVENT_ID, eventId)
-                            .set(results.DOG_ID, c.dogId())
+                            .set(results.DOG_IDENTIFICATION, c.dogIdentification())
                             .set(results.POSITION, c.position())
                             .set(results.TOTAL_SCORE, c.totalScore())
                             .set(results.RANK_SCORE, c.rankScore())
                             .set(results.TIMESTAMP, snapshotAt)
                             .set(results.APPLYING_TIMESTAMP, applyingAt)
-                            .onConflict(results.EVENT_ID, results.DOG_ID)
+                            .onConflict(results.EVENT_ID, results.DOG_IDENTIFICATION)
                             .doNothing())
                     .toList();
             if (!batch.isEmpty()) {
@@ -62,13 +62,13 @@ public class SaveObdxSnapshotJooqAdapter implements SaveObdxSnapshotPersistenceP
             List<? extends Query> rankHistory = competitors.stream()
                     .filter(c -> c.rankScore() != null)
                     .map(c -> ctx.insertInto(Tables.SNAP_DOG_RANK)
-                            .set(Tables.SNAP_DOG_RANK.DOG_ID, c.dogId())
+                            .set(Tables.SNAP_DOG_RANK.DOG_IDENTIFICATION, c.dogIdentification())
                             .set(Tables.SNAP_DOG_RANK.DISCIPLINE, Discipline.OBDX.name())
                             .set(Tables.SNAP_DOG_RANK.EVENT_ID, eventId)
                             .set(Tables.SNAP_DOG_RANK.RANK, c.rankScore())
                             .set(Tables.SNAP_DOG_RANK.TIMESTAMP, snapshotAt)
                             .set(Tables.SNAP_DOG_RANK.APPLYING_TIMESTAMP, applyingAt)
-                            .onConflict(Tables.SNAP_DOG_RANK.DOG_ID, Tables.SNAP_DOG_RANK.DISCIPLINE,
+                            .onConflict(Tables.SNAP_DOG_RANK.DOG_IDENTIFICATION, Tables.SNAP_DOG_RANK.DISCIPLINE,
                                     Tables.SNAP_DOG_RANK.EVENT_ID)
                             .doNothing())
                     .toList();

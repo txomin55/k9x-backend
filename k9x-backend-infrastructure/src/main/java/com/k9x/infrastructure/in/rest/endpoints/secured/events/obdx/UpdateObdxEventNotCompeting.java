@@ -21,7 +21,7 @@ public class UpdateObdxEventNotCompeting implements SecuredEventsUpdateNotCompet
     public ResponseEntity<String> updateObdxEventNotCompeting(String eventId, UpdateEventNotCompetingRequestDTO body) {
         updateNotCompetingServiceCase.updateNotCompeting(
                 eventId,
-                new UpdateNotCompetingCommand(body.getDogId(), Boolean.TRUE.equals(body.getNotCompeting())),
+                new UpdateNotCompetingCommand(body.getDogIdentification(), Boolean.TRUE.equals(body.getNotCompeting())),
                 userDetails.getEmail(), userDetails.isOrganizer());
         return ResponseEntity.ok().build();
     }

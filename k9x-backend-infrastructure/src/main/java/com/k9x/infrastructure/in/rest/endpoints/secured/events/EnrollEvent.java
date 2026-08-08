@@ -20,7 +20,7 @@ public class EnrollEvent implements SecuredEventsEnrollApiDelegate {
     @Override
     public ResponseEntity<Object> doEnrollSecured(String eventId, EnrollStageEventRequestDTO enrollStageEventRequestDTO) {
         enrollEventServiceCase.enrollEvent(eventId,
-                new EnrollObdxEventCommand(enrollStageEventRequestDTO.getDogId(),
+                new EnrollObdxEventCommand(enrollStageEventRequestDTO.getDogIdentification(),
                         Boolean.TRUE.equals(enrollStageEventRequestDTO.getBih())),
                 userDetails.getEmail());
         return ResponseEntity.ok().build();

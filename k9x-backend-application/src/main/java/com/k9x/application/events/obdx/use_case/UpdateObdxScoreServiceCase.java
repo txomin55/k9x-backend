@@ -43,7 +43,7 @@ public class UpdateObdxScoreServiceCase implements TransactionalUseCase {
         assertUserIsCollectorOrEventCreator(eventId, command.judgeId(), userEmail, competition);
         assertScoreAllowed(command.exerciseId(), command.score());
         competition.updateScore(eventId,
-                new ScoreUpdateData(command.judgeId(), command.exerciseId(), command.dogId(), command.score()),
+                new ScoreUpdateData(command.judgeId(), command.exerciseId(), command.dogIdentification(), command.score()),
                 userEmail, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }

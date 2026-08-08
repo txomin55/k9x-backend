@@ -67,7 +67,7 @@ public class GetEventServiceCase {
                 event.scoreCalculation(), event.awards());
 
         List<FetchObdxEventCompetitorDTO> competitors = event.competitors().stream()
-                .map(c -> new FetchObdxEventCompetitorDTO(c.dogId(), c.dogName(), c.identity(), c.breed(),
+                .map(c -> new FetchObdxEventCompetitorDTO(c.dogIdentification(), c.dogName(), c.origin(), c.breed(),
                         c.owner(), c.handler(), c.team(), c.country(),
                         c.sex() == null ? null : c.sex().name(),
                         c.startNumber(), c.competitorNumber(), c.verified(),

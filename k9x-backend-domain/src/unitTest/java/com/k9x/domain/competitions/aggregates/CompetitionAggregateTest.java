@@ -514,7 +514,7 @@ class CompetitionAggregateTest {
 
         DogEnrolled change = assertInstanceOf(DogEnrolled.class, onlyChange(aggregate));
         assertEquals("evt-1", change.eventId());
-        assertEquals("dog-1", change.dogId());
+        assertEquals("dog-1", change.dogIdentification());
         assertTrue(change.bih());
         assertEquals((short) 1, change.startNumber());
         assertEquals(NOW, change.lastUpdate());
@@ -648,7 +648,7 @@ class CompetitionAggregateTest {
         ScoreUpdated change = assertInstanceOf(ScoreUpdated.class, onlyChange(aggregate));
         assertEquals("evt-1", change.eventId());
         assertEquals("judge-1", change.judgeId());
-        assertEquals("dog-1", change.dogId());
+        assertEquals("dog-1", change.dogIdentification());
         assertEquals(BigDecimal.TEN, change.score());
     }
 
@@ -695,7 +695,7 @@ class CompetitionAggregateTest {
         assertEquals("evt-1", change.eventId());
         assertEquals("judge-1", change.judgeId());
         assertEquals("ex-1", change.exerciseId());
-        assertEquals("dog-1", change.dogId());
+        assertEquals("dog-1", change.dogIdentification());
     }
 
     @Test
@@ -735,7 +735,7 @@ class CompetitionAggregateTest {
         assertEquals("evt-1", redCard.eventId());
         assertEquals("judge-2", redCard.judgeId());
         assertEquals("ex-2", redCard.exerciseId());
-        assertEquals("dog-1", redCard.dogId());
+        assertEquals("dog-1", redCard.dogIdentification());
     }
 
     @Test
@@ -763,7 +763,7 @@ class CompetitionAggregateTest {
         assertEquals("evt-1", change.eventId());
         assertEquals("judge-1", change.judgeId());
         assertEquals("ex-1", change.exerciseId());
-        assertEquals("dog-1", change.dogId());
+        assertEquals("dog-1", change.dogIdentification());
     }
 
     @Test

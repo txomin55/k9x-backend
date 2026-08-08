@@ -48,7 +48,7 @@ public class GetEventRecipientsJooqAdapter implements GetEventRecipientsPersiste
         Events e = com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables.EVENTS;
         return dsl.selectDistinct(d.OWNER)
                 .from(ec)
-                .join(d).on(d.ID.eq(ec.DOG_ID))
+                .join(d).on(d.IDENTIFICATION.eq(ec.DOG_IDENTIFICATION))
                 .join(e).on(e.ID.eq(ec.EVENT_ID))
                 .where(ec.EVENT_ID.in(eventIds))
                 .and(d.DELETED_AT.isNull())

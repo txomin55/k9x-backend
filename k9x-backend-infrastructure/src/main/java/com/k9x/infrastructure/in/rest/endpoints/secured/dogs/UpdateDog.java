@@ -19,9 +19,9 @@ public class UpdateDog implements SecuredDogsUpdateApiDelegate {
     }
 
     @Override
-    public ResponseEntity<String> updateDogSecured(String id, UpdateDogRequestDTO body) {
-        updateDogServiceCase.updateDog(id,
-                new UpdateDogCommand(body.getName(), body.getImage(), body.getBreed(), body.getIdentity(),
+    public ResponseEntity<String> updateDogSecured(String identification, UpdateDogRequestDTO body) {
+        updateDogServiceCase.updateDog(identification,
+                new UpdateDogCommand(body.getName(), body.getImage(), body.getBreed(), body.getOrigin(),
                         body.getOwner(), body.getHandler(), body.getTeam(), body.getCountry(),
                         body.getSex() == null ? null : Sex.valueOf(body.getSex()), body.getWithersCm(),
                         body.getThreeFciGenerationsConfirmed()),

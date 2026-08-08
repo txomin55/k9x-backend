@@ -75,7 +75,7 @@ class GetCompetitionJooqAdapterTest {
 
     private static final Field<?>[] COMPETITOR_FIELDS = {
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.EVENT_ID,
-            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.DOG_ID,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.DOG_IDENTIFICATION,
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.START_NUMBER,
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.COMPETITOR_NUMBER,
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.VERIFIED,
@@ -88,7 +88,7 @@ class GetCompetitionJooqAdapterTest {
             Tables.DOGS.TEAM,
             Tables.DOGS.COUNTRY,
             Tables.DOGS.BREED,
-            Tables.DOGS.IDENTITY,
+            Tables.DOGS.ORIGIN,
             Tables.DOGS.SEX,
             Tables.DOGS.THREE_FCI_GENERATIONS_CONFIRMED
     };
@@ -214,7 +214,7 @@ class GetCompetitionJooqAdapterTest {
                 Record competitor = mock.newRecord(COMPETITOR_FIELDS);
                 competitor.set(com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.EVENT_ID,
                         "event-1");
-                competitor.set(com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.DOG_ID,
+                competitor.set(com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.DOG_IDENTIFICATION,
                         "dog-1");
                 competitor.set(Tables.DOGS.NAME, "Rex");
                 competitor.set(Tables.DOGS.SEX, "MALE");
@@ -256,7 +256,7 @@ class GetCompetitionJooqAdapterTest {
 
         var competitors = competition.stages().getFirst().events().getFirst().competitors();
         assertThat(competitors).hasSize(1);
-        assertThat(competitors.getFirst().dogId()).isEqualTo("dog-1");
+        assertThat(competitors.getFirst().dogIdentification()).isEqualTo("dog-1");
         assertThat(competitors.getFirst().sex()).isEqualTo(Sex.MALE);
     }
 

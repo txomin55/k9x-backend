@@ -1,8 +1,8 @@
 package com.k9x.domain.dogs.aggregates;
 
 public record Dog(
-        String id,
-        String identity,
+        String identification,
+        String origin,
         String breed,
         String name,
         String image,
@@ -19,8 +19,8 @@ public record Dog(
         Long deletedAt
 ) {
 
-    public String getId() {
-        return this.id;
+    public String getIdentification() {
+        return this.identification;
     }
 
     public String getName() {
@@ -51,8 +51,8 @@ public record Dog(
         return this.team;
     }
 
-    public String getIdentity() {
-        return this.identity;
+    public String getOrigin() {
+        return this.origin;
     }
 
     public Sex getSex() {

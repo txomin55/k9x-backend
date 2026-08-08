@@ -57,7 +57,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                         c.team(),
                         c.status(),
                         resolveBreed(c.breed()),
-                        new IdNameDTO(c.dogName(), c.dogId()),
+                        new IdNameDTO(c.dogName(), c.dogIdentification()),
                         c.exercises().stream()
                                 .map(e -> new StageEventClassificationExerciseScoresResponseDTO(
                                         new IdNameDTO(resolveExerciseName(e.exerciseId()), e.exerciseId()),

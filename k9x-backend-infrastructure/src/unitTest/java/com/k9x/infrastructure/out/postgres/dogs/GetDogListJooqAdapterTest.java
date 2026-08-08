@@ -37,7 +37,7 @@ class GetDogListJooqAdapterTest {
 
         assertThat(capturedSql.get())
                 .contains("""
-                        select "k9x"."dogs"."id", "k9x"."dogs"."identity", "k9x"."dogs"."breed", \
+                        select "k9x"."dogs"."identification", "k9x"."dogs"."origin", "k9x"."dogs"."breed", \
                         "k9x"."dogs"."name", "k9x"."dogs"."image", "k9x"."dogs"."owner", \
                         "k9x"."dogs"."creator", "k9x"."dogs"."country", "k9x"."dogs"."team", \
                         "k9x"."dogs"."last_update", "k9x"."dogs"."created_at", "k9x"."dogs"."deleted_at", \
@@ -123,8 +123,8 @@ class GetDogListJooqAdapterTest {
             DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);
             Result<Record> result = mockDsl.newResult(Tables.DOGS.fields());
             Record record = mockDsl.newRecord(Tables.DOGS.fields());
-            record.set(Tables.DOGS.ID, "id-1");
-            record.set(Tables.DOGS.IDENTITY, "ident-1");
+            record.set(Tables.DOGS.IDENTIFICATION, "id-1");
+            record.set(Tables.DOGS.ORIGIN, "ident-1");
             record.set(Tables.DOGS.BREED, "Labrador");
             record.set(Tables.DOGS.NAME, "Rex");
             record.set(Tables.DOGS.IMAGE, "img.png");
@@ -147,8 +147,8 @@ class GetDogListJooqAdapterTest {
 
         assertThat(dogs).hasSize(1);
         Dog dog = dogs.getFirst();
-        assertThat(dog.id()).isEqualTo("id-1");
-        assertThat(dog.identity()).isEqualTo("ident-1");
+        assertThat(dog.identification()).isEqualTo("id-1");
+        assertThat(dog.origin()).isEqualTo("ident-1");
         assertThat(dog.breed()).isEqualTo("Labrador");
         assertThat(dog.name()).isEqualTo("Rex");
         assertThat(dog.image()).isEqualTo("img.png");

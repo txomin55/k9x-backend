@@ -64,14 +64,14 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                 .map(c -> new EventCompetitorResponseDTO(
                         c.owner(),
                         c.handler(),
-                        c.dogIdentity(),
+                        c.dogOrigin(),
                         c.team(),
                         c.country(),
                         c.startNumber() != null ? c.startNumber().intValue() : null,
                         c.competitorNumber() != null ? c.competitorNumber().intValue() : null,
                         c.status(),
                         resolveBreed(c.breed()),
-                        new IdNameDTO(c.dogName(), c.dogId()),
+                        new IdNameDTO(c.dogName(), c.dogIdentification()),
                         c.bih(),
                         c.reserve(),
                         // notCompeting is not surfaced here: `status` already resolves to NOT_COMPETING

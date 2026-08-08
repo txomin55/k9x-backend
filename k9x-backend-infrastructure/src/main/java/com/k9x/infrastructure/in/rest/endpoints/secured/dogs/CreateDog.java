@@ -20,11 +20,11 @@ public class CreateDog implements SecuredDogsCreateApiDelegate {
     @Override
     public ResponseEntity<String> createDogSecured(CreateDogRequestDTO body) {
         createDogServiceCase.createDog(
-                body.getId(),
+                body.getIdentification(),
                 body.getName(),
                 body.getImage(),
                 body.getBreed(),
-                body.getIdentity(),
+                body.getOrigin(),
                 body.getOwner(),
                 body.getHandler(),
                 userDetails.getEmail(),

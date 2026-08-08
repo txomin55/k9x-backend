@@ -79,7 +79,7 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
     private void insertCompetitor(DSLContext ctx, DogEnrolled c) {
         ctx.insertInto(EVENT_COMPETITORS)
                 .set(EVENT_COMPETITORS.EVENT_ID, c.eventId())
-                .set(EVENT_COMPETITORS.DOG_ID, c.dogId())
+                .set(EVENT_COMPETITORS.DOG_IDENTIFICATION, c.dogIdentification())
                 .set(EVENT_COMPETITORS.VERIFIED, false)
                 .set(EVENT_COMPETITORS.BIH, c.bih())
                 .set(EVENT_COMPETITORS.START_NUMBER, c.startNumber())
@@ -92,11 +92,11 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 .set(EVENT_SCORES.EVENT_ID, c.eventId())
                 .set(EVENT_SCORES.EXERCISE_ID, c.exerciseId())
                 .set(EVENT_SCORES.JUDGE_ID, c.judgeId())
-                .set(EVENT_SCORES.DOG_ID, c.dogId())
+                .set(EVENT_SCORES.DOG_IDENTIFICATION, c.dogIdentification())
                 .set(EVENT_SCORES.SCORE, c.score())
                 .set(EVENT_SCORES.CREATED_AT, c.lastUpdate())
                 .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
-                .onConflict(EVENT_SCORES.EVENT_ID, EVENT_SCORES.EXERCISE_ID, EVENT_SCORES.JUDGE_ID, EVENT_SCORES.DOG_ID)
+                .onConflict(EVENT_SCORES.EVENT_ID, EVENT_SCORES.EXERCISE_ID, EVENT_SCORES.JUDGE_ID, EVENT_SCORES.DOG_IDENTIFICATION)
                 .doUpdate()
                 .set(EVENT_SCORES.SCORE, c.score())
                 .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
@@ -113,12 +113,12 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 .set(EVENT_SCORES.EVENT_ID, c.eventId())
                 .set(EVENT_SCORES.EXERCISE_ID, c.exerciseId())
                 .set(EVENT_SCORES.JUDGE_ID, c.judgeId())
-                .set(EVENT_SCORES.DOG_ID, c.dogId())
+                .set(EVENT_SCORES.DOG_IDENTIFICATION, c.dogIdentification())
                 .set(EVENT_SCORES.SCORE, (BigDecimal) null)
                 .set(EVENT_SCORES.YELLOW_CARD, c.lastUpdate())
                 .set(EVENT_SCORES.CREATED_AT, c.lastUpdate())
                 .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
-                .onConflict(EVENT_SCORES.EVENT_ID, EVENT_SCORES.EXERCISE_ID, EVENT_SCORES.JUDGE_ID, EVENT_SCORES.DOG_ID)
+                .onConflict(EVENT_SCORES.EVENT_ID, EVENT_SCORES.EXERCISE_ID, EVENT_SCORES.JUDGE_ID, EVENT_SCORES.DOG_IDENTIFICATION)
                 .doUpdate()
                 .set(EVENT_SCORES.YELLOW_CARD, c.lastUpdate())
                 .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
@@ -135,12 +135,12 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 .set(EVENT_SCORES.EVENT_ID, c.eventId())
                 .set(EVENT_SCORES.EXERCISE_ID, c.exerciseId())
                 .set(EVENT_SCORES.JUDGE_ID, c.judgeId())
-                .set(EVENT_SCORES.DOG_ID, c.dogId())
+                .set(EVENT_SCORES.DOG_IDENTIFICATION, c.dogIdentification())
                 .set(EVENT_SCORES.SCORE, (BigDecimal) null)
                 .set(EVENT_SCORES.RED_CARD, c.lastUpdate())
                 .set(EVENT_SCORES.CREATED_AT, c.lastUpdate())
                 .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
-                .onConflict(EVENT_SCORES.EVENT_ID, EVENT_SCORES.EXERCISE_ID, EVENT_SCORES.JUDGE_ID, EVENT_SCORES.DOG_ID)
+                .onConflict(EVENT_SCORES.EVENT_ID, EVENT_SCORES.EXERCISE_ID, EVENT_SCORES.JUDGE_ID, EVENT_SCORES.DOG_IDENTIFICATION)
                 .doUpdate()
                 .set(EVENT_SCORES.RED_CARD, c.lastUpdate())
                 .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
@@ -162,20 +162,20 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
 
         List<String> newExerciseIds = c.exercises().stream().map(ObdxExerciseItem::exerciseId).toList();
         List<String> newJudgeIds = c.judges().stream().map(ObdxJudgeItem::judgeId).toList();
-        List<String> newDogIds = c.competitors().stream().map(ObdxCompetitorItem::dogId).toList();
+        List<String> newDogIdentifications = c.competitors().stream().map(ObdxCompetitorItem::dogIdentification).toList();
 
         ctx.deleteFrom(EVENT_SCORES)
                 .where(EVENT_SCORES.EVENT_ID.eq(c.eventId()))
                 .and(EVENT_SCORES.EXERCISE_ID.notIn(newExerciseIds)
                         .or(EVENT_SCORES.JUDGE_ID.notIn(newJudgeIds))
-                        .or(EVENT_SCORES.DOG_ID.notIn(newDogIds)))
+                        .or(EVENT_SCORES.DOG_IDENTIFICATION.notIn(newDogIdentifications)))
                 .execute();
 
         ctx.deleteFrom(EVENT_COMPETITORS).where(EVENT_COMPETITORS.EVENT_ID.eq(c.eventId())).execute();
         for (ObdxCompetitorItem competitor : c.competitors()) {
             ctx.insertInto(EVENT_COMPETITORS)
                     .set(EVENT_COMPETITORS.EVENT_ID, c.eventId())
-                    .set(EVENT_COMPETITORS.DOG_ID, competitor.dogId())
+                    .set(EVENT_COMPETITORS.DOG_IDENTIFICATION, competitor.dogIdentification())
                     .set(EVENT_COMPETITORS.START_NUMBER, competitor.startNumber())
                     .set(EVENT_COMPETITORS.COMPETITOR_NUMBER, competitor.competitorNumber())
                     .set(EVENT_COMPETITORS.VERIFIED, true)
@@ -212,14 +212,14 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 for (ObdxJudgeItem judge : c.judges()) {
                     ctx.insertInto(EVENT_SCORES)
                             .set(EVENT_SCORES.EVENT_ID, c.eventId())
-                            .set(EVENT_SCORES.DOG_ID, competitor.dogId())
+                            .set(EVENT_SCORES.DOG_IDENTIFICATION, competitor.dogIdentification())
                             .set(EVENT_SCORES.EXERCISE_ID, exercise.exerciseId())
                             .set(EVENT_SCORES.JUDGE_ID, judge.judgeId())
                             .set(EVENT_SCORES.SCORE, (BigDecimal) null)
                             .set(EVENT_SCORES.CREATED_AT, c.lastUpdate())
                             .set(EVENT_SCORES.LAST_UPDATE, c.lastUpdate())
                             .onConflict(EVENT_SCORES.EVENT_ID, EVENT_SCORES.EXERCISE_ID,
-                                    EVENT_SCORES.JUDGE_ID, EVENT_SCORES.DOG_ID)
+                                    EVENT_SCORES.JUDGE_ID, EVENT_SCORES.DOG_IDENTIFICATION)
                             .doNothing()
                             .execute();
                 }
@@ -232,7 +232,7 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 .set(EVENT_COMPETITORS.NOT_COMPETING, c.notCompeting())
                 .set(EVENT_COMPETITORS.LAST_UPDATE, c.lastUpdate())
                 .where(EVENT_COMPETITORS.EVENT_ID.eq(c.eventId())
-                        .and(EVENT_COMPETITORS.DOG_ID.eq(c.dogId())))
+                        .and(EVENT_COMPETITORS.DOG_IDENTIFICATION.eq(c.dogIdentification())))
                 .execute();
     }
 

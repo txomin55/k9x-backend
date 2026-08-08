@@ -22,16 +22,16 @@ public class GetObdxCollectionCompetitorsJooqAdapter implements GetObdxCollectio
         EventCompetitors ec = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
         Dogs d = Tables.DOGS;
 
-        return dsl.select(ec.DOG_ID, ec.START_NUMBER, ec.COMPETITOR_NUMBER, ec.VERIFIED, ec.NOT_COMPETING, ec.BIH, ec.RESERVE,
-                        d.NAME, d.IDENTITY, d.BREED, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY)
+        return dsl.select(ec.DOG_IDENTIFICATION, ec.START_NUMBER, ec.COMPETITOR_NUMBER, ec.VERIFIED, ec.NOT_COMPETING, ec.BIH, ec.RESERVE,
+                        d.NAME, d.ORIGIN, d.BREED, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY)
                 .from(ec)
-                .join(d).on(d.ID.eq(ec.DOG_ID).and(d.DELETED_AT.isNull()))
+                .join(d).on(d.IDENTIFICATION.eq(ec.DOG_IDENTIFICATION).and(d.DELETED_AT.isNull()))
                 .where(ec.EVENT_ID.eq(eventId))
-                .orderBy(ec.START_NUMBER.asc().nullsLast(), ec.DOG_ID.asc())
+                .orderBy(ec.START_NUMBER.asc().nullsLast(), ec.DOG_IDENTIFICATION.asc())
                 .fetch(r -> new FetchCollectionCompetitorDTO(
-                        r.get(ec.DOG_ID),
+                        r.get(ec.DOG_IDENTIFICATION),
                         r.get(d.NAME),
-                        r.get(d.IDENTITY),
+                        r.get(d.ORIGIN),
                         r.get(d.BREED),
                         r.get(d.OWNER),
                         r.get(d.HANDLER),

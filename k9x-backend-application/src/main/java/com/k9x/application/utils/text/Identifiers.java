@@ -1,7 +1,7 @@
 package com.k9x.application.utils.text;
 
 /**
- * Helpers for guarding free-text identifier strings (ids, chips, identities) in the service-case layer.
+ * Helpers for guarding free-text identifier strings (ids, identifications, origins) in the service-case layer.
  * A blank identifier ({@code null} or empty/whitespace-only) is treated as "not provided", so callers never
  * run existence/collision queries against an empty value (which would spuriously match rows with empty columns).
  */

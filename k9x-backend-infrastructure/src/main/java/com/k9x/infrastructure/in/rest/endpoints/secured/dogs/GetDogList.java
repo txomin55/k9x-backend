@@ -34,7 +34,7 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
         List<DogSummaryResponseDTO> mapped = dogs.stream()
                 .map(dog ->
                         new DogSummaryResponseDTO(
-                                dog.id(),
+                                dog.identification(),
                                 dog.name(),
                                 dog.image(),
                                 dog.owned(),
@@ -42,7 +42,7 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
                                 dog.team(),
                                 dog.owner(),
                                 dog.handler(),
-                                dog.identity(),
+                                dog.origin(),
                                 resolveBreed(dog.breed()),
                                 dog.sex() == null ? null : dog.sex().name(),
                                 dog.withersCm(),

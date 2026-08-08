@@ -48,11 +48,11 @@ public class GetObdxCollectionServiceCase {
 
         List<FetchCollectionCompetitorDTO> competitors =
                 getObdxCollectionCompetitorsPersistencePort.getCompetitors(eventId).stream()
-                        .map(c -> new FetchCollectionCompetitorDTO(c.dogId(), c.dogName(), c.dogIdentity(),
+                        .map(c -> new FetchCollectionCompetitorDTO(c.dogIdentification(), c.dogName(), c.dogOrigin(),
                                 c.breed(), c.owner(), c.handler(), c.team(), c.country(), c.startNumber(),
                                 c.competitorNumber(), c.verified(),
                                 c.notCompeting(), EventCompetitorStatus.of(c.notCompeting(), c.verified()).name(),
-                                c.bih(), c.reserve(), scoresAllowed(c.dogId(), c.notCompeting(), allScores)))
+                                c.bih(), c.reserve(), scoresAllowed(c.dogIdentification(), c.notCompeting(), allScores)))
                         .toList();
         // Only expose exercises that at least one visible judge is assigned to. For the event creator every judge
         // is visible, so all exercises remain; for a collector only the exercises their judge collects are kept.
@@ -75,7 +75,7 @@ public class GetObdxCollectionServiceCase {
                                         visibleJudges.stream()
                                                 .map(judge -> new FetchCollectionJudgeScoreDTO(
                                                         scores.stream()
-                                                                .filter(s -> s.dogId().equals(comp.dogId())
+                                                                .filter(s -> s.dogIdentification().equals(comp.dogIdentification())
                                                                         && s.exerciseId().equals(ex.exerciseId())
                                                                         && s.judgeId().equals(judge.judgeId()))
                                                                 .findFirst()
@@ -93,14 +93,14 @@ public class GetObdxCollectionServiceCase {
      * A competitor can no longer receive scores once it holds a second yellow card, a red card, or is
      * flagged as not competing.
      */
-    private boolean scoresAllowed(String dogId, boolean notCompeting, List<FetchCollectionScoreDTO> scores) {
+    private boolean scoresAllowed(String dogIdentification, boolean notCompeting, List<FetchCollectionScoreDTO> scores) {
         if (notCompeting) {
             return false;
         }
         long yellowCardCount = scores.stream()
-                .filter(s -> dogId.equals(s.dogId()) && s.yellowCard() != null)
+                .filter(s -> dogIdentification.equals(s.dogIdentification()) && s.yellowCard() != null)
                 .count();
-        boolean hasRedCard = scores.stream().anyMatch(s -> dogId.equals(s.dogId()) && s.redCard() != null);
+        boolean hasRedCard = scores.stream().anyMatch(s -> dogIdentification.equals(s.dogIdentification()) && s.redCard() != null);
         return !ObdxCards.isDisqualified(yellowCardCount, hasRedCard);
     }
 }

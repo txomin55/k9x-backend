@@ -17,9 +17,9 @@ public class DeleteDogServiceCase implements TransactionalUseCase {
         this.deleteDogPersistencePort = deleteDogPersistencePort;
     }
 
-    public void deleteDog(String dogId, String userId, boolean organizer) {
-        Dog dog = getDogPersistencePort.getDog(dogId);
+    public void deleteDog(String dogIdentification, String userId, boolean organizer) {
+        Dog dog = getDogPersistencePort.getDog(dogIdentification);
         DogGuards.assertMutableBy(dog, userId, organizer);
-        deleteDogPersistencePort.deleteDog(dogId, DateUtils.nowUtcMillis());
+        deleteDogPersistencePort.deleteDog(dogIdentification, DateUtils.nowUtcMillis());
     }
 }

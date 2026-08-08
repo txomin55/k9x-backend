@@ -16,20 +16,20 @@ public class GetDogJooqAdapter implements GetDogPersistencePort {
     }
 
     @Override
-    public Dog getDog(String id) {
+    public Dog getDog(String identification) {
         return dsl.select()
                 .from(Tables.DOGS)
-                .where(Tables.DOGS.ID.eq(id))
+                .where(Tables.DOGS.IDENTIFICATION.eq(identification))
                 .and(Tables.DOGS.DELETED_AT.isNull())
                 .fetchOptional(GetDogJooqAdapter::mapDog)
                 .orElse(null);
     }
 
     @Override
-    public Dog getDogByIdentity(String identity) {
+    public Dog getDogByOrigin(String origin) {
         return dsl.select()
                 .from(Tables.DOGS)
-                .where(Tables.DOGS.IDENTITY.eq(identity))
+                .where(Tables.DOGS.ORIGIN.eq(origin))
                 .and(Tables.DOGS.DELETED_AT.isNull())
                 .fetchOptional(GetDogJooqAdapter::mapDog)
                 .orElse(null);
@@ -37,8 +37,8 @@ public class GetDogJooqAdapter implements GetDogPersistencePort {
 
     private static Dog mapDog(Record r) {
         return new Dog(
-                r.get(Tables.DOGS.ID),
-                r.get(Tables.DOGS.IDENTITY),
+                r.get(Tables.DOGS.IDENTIFICATION),
+                r.get(Tables.DOGS.ORIGIN),
                 r.get(Tables.DOGS.BREED),
                 r.get(Tables.DOGS.NAME),
                 r.get(Tables.DOGS.IMAGE),

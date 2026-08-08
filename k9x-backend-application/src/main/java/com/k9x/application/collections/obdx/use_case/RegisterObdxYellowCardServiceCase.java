@@ -34,7 +34,7 @@ public class RegisterObdxYellowCardServiceCase implements TransactionalUseCase {
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
         assertUserIsCollectorOrEventCreator(eventId, command.judgeId(), userEmail, competition);
         competition.registerYellowCard(eventId,
-                new YellowCardData(command.judgeId(), command.exerciseId(), command.dogId()),
+                new YellowCardData(command.judgeId(), command.exerciseId(), command.dogIdentification()),
                 userEmail, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }

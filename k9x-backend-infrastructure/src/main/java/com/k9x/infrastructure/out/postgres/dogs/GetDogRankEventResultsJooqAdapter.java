@@ -19,11 +19,11 @@ public class GetDogRankEventResultsJooqAdapter implements GetDogRankEventResults
     @Override
     public List<FetchDogRankEventResultDTO> getEventResults() {
         SnapDogRank dr = Tables.SNAP_DOG_RANK;
-        return dsl.select(dr.DOG_ID, dr.DISCIPLINE, dr.EVENT_ID, dr.RANK, dr.APPLYING_TIMESTAMP)
+        return dsl.select(dr.DOG_IDENTIFICATION, dr.DISCIPLINE, dr.EVENT_ID, dr.RANK, dr.APPLYING_TIMESTAMP)
                 .from(dr)
-                .orderBy(dr.DOG_ID, dr.APPLYING_TIMESTAMP)
+                .orderBy(dr.DOG_IDENTIFICATION, dr.APPLYING_TIMESTAMP)
                 .fetch(r -> new FetchDogRankEventResultDTO(
-                        r.get(dr.DOG_ID), r.get(dr.DISCIPLINE), r.get(dr.EVENT_ID),
+                        r.get(dr.DOG_IDENTIFICATION), r.get(dr.DISCIPLINE), r.get(dr.EVENT_ID),
                         r.get(dr.RANK), r.get(dr.APPLYING_TIMESTAMP)));
     }
 }

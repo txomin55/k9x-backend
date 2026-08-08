@@ -73,7 +73,7 @@ class EventWorkbookWriterTest {
         FetchObdxEventJudgeDTO judge = new FetchObdxEventJudgeDTO("judge-1", "Ana", "collector@k9x.com");
         FetchEventExerciseDTO exercise = new FetchEventExerciseDTO("ex-1", "Heelwork", 1,
                 List.of("tag-a", "tag-b"), List.of(judge));
-        FetchObdxEventCompetitorDTO competitor = new FetchObdxEventCompetitorDTO("dog-1", "Rex", "chip-999", "breed-1",
+        FetchObdxEventCompetitorDTO competitor = new FetchObdxEventCompetitorDTO("dog-1", "Rex", "origin-999", "breed-1",
                 "Owner", "Handler", "Team A", "ES", "MALE", (short) 3, (short) 7, true, "STARTED", true, false);
         FetchEventConfigurationDTO configuration = new FetchEventConfigurationDTO("OBDX.FCI_GRADE_1.V0", "Grade 1",
                 new FederationInfoDTO("FCI", "FCI"));
@@ -217,7 +217,7 @@ class EventWorkbookWriterTest {
     }
 
     @Test
-    void writes_the_classification_sheet_with_chip_score_percentage_and_acronym() throws IOException {
+    void writes_the_classification_sheet_with_identification_score_percentage_and_acronym() throws IOException {
         try (XSSFWorkbook workbook = read(writer.write(event(), classification(), COEFFICIENTS))) {
             Sheet sheet = workbook.getSheet("export.sheet.classification");
             assertThat(sheet).isNotNull();
@@ -225,8 +225,7 @@ class EventWorkbookWriterTest {
             Row row = sheet.getRow(1);
             assertThat(row.getCell(0).getNumericCellValue()).isEqualTo(1d);   // position
             assertThat(row.getCell(1).getNumericCellValue()).isEqualTo(7d);   // competitor number
-            // the chip is not part of the classification; it is joined back from the event detail
-            assertThat(row.getCell(2).getStringCellValue()).isEqualTo("chip-999");
+            assertThat(row.getCell(2).getStringCellValue()).isEqualTo("dog-1");
             assertThat(row.getCell(3).getStringCellValue()).isEqualTo("Rex");
             assertThat(row.getCell(4).getStringCellValue()).isEqualTo("Handler");
             assertThat(row.getCell(5).getStringCellValue()).isEqualTo("Team A");
@@ -243,7 +242,7 @@ class EventWorkbookWriterTest {
             assertThat(sheet).isNotNull();
 
             String flattened = flatten(sheet);
-            assertThat(flattened).contains("Rex").contains("chip-999").contains("Handler").contains("Team A");
+            assertThat(flattened).contains("Rex").contains("dog-1").contains("origin-999").contains("Handler").contains("Team A");
             // per-judge and per-exercise scores, by exercise name rather than id, then the totals
             assertThat(flattened).contains("Heelwork").contains("Ana").contains("9.5");
             assertThat(flattened).contains("285.5").contains("95.17").contains("EXC");
@@ -331,8 +330,8 @@ class EventWorkbookWriterTest {
             Row row = sheet.getRow(1);
             assertThat(row.getCell(0).getNumericCellValue()).isEqualTo(7d);   // competitor number
             assertThat(row.getCell(1).getNumericCellValue()).isEqualTo(3d);   // position = start number
-            assertThat(row.getCell(2).getStringCellValue()).isEqualTo("chip-999");
-            assertThat(row.getCell(3).getStringCellValue()).isEqualTo("dog-1");
+            assertThat(row.getCell(2).getStringCellValue()).isEqualTo("dog-1");
+            assertThat(row.getCell(3).getStringCellValue()).isEqualTo("origin-999");
             assertThat(row.getCell(4).getStringCellValue()).isEqualTo("Rex");
             assertThat(row.getCell(5).getStringCellValue()).isEqualTo("Handler");
             assertThat(row.getCell(6).getStringCellValue()).isEqualTo("no");   // reserve, as localised text

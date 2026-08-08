@@ -28,7 +28,7 @@ public class UpdateNotCompetingServiceCase implements TransactionalUseCase {
         }
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
-        competition.updateCompetitorNotCompeting(eventId, command.dogId(), command.notCompeting(), userId,
+        competition.updateCompetitorNotCompeting(eventId, command.dogIdentification(), command.notCompeting(), userId,
                 DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }

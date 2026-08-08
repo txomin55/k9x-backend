@@ -57,8 +57,8 @@ class GetStageListServiceCaseTest {
                 null, 0L, 0L, deletedAt, ObdxAvgMethod.AVG, competitors, exercises, judges, scores, List.of(), null, null);
     }
 
-    private static EventCompetitor competitor(String dogId, boolean notCompeting) {
-        return new EventCompetitor(dogId, "Rex", "owner", "Handler", "Team A", "ES", "Border Collie", "ID-001", null,
+    private static EventCompetitor competitor(String dogIdentification, boolean notCompeting) {
+        return new EventCompetitor(dogIdentification, "Rex", "owner", "Handler", "Team A", "ES", "Border Collie", "ID-001", null,
                 (short) 1, null, true, notCompeting, null, null, null);
     }
 

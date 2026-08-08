@@ -14,12 +14,12 @@ public class UpdateDogJooqAdapter implements UpdateDogPersistencePort {
     }
 
     @Override
-    public void updateDog(String id, UpdateDogPersistencePayload payload) {
+    public void updateDog(String identification, UpdateDogPersistencePayload payload) {
         dsl.update(Tables.DOGS)
                 .set(Tables.DOGS.NAME, payload.name())
                 .set(Tables.DOGS.IMAGE, payload.image())
                 .set(Tables.DOGS.BREED, payload.breed())
-                .set(Tables.DOGS.IDENTITY, payload.identity())
+                .set(Tables.DOGS.ORIGIN, payload.origin())
                 .set(Tables.DOGS.OWNER, payload.owner())
                 .set(Tables.DOGS.HANDLER, payload.handler())
                 .set(Tables.DOGS.TEAM, payload.team())
@@ -28,7 +28,7 @@ public class UpdateDogJooqAdapter implements UpdateDogPersistencePort {
                 .set(Tables.DOGS.WITHERS_CM, payload.withersCm())
                 .set(Tables.DOGS.THREE_FCI_GENERATIONS_CONFIRMED, payload.threeFciGenerationsConfirmed())
                 .set(Tables.DOGS.LAST_UPDATE, payload.lastUpdate())
-                .where(Tables.DOGS.ID.eq(id))
+                .where(Tables.DOGS.IDENTIFICATION.eq(identification))
                 .execute();
     }
 }

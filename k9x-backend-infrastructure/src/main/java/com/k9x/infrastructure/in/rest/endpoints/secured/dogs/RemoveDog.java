@@ -16,8 +16,8 @@ public class RemoveDog implements SecuredDogsRemoveApiDelegate {
     }
 
     @Override
-    public ResponseEntity<String> deleteDogSecured(String id) {
-        deleteDogServiceCase.deleteDog(id, userDetails.getEmail(), userDetails.isOrganizer());
+    public ResponseEntity<String> deleteDogSecured(String identification) {
+        deleteDogServiceCase.deleteDog(identification, userDetails.getEmail(), userDetails.isOrganizer());
         return ResponseEntity.ok().build();
     }
 }

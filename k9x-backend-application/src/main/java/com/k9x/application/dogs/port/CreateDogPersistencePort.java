@@ -4,7 +4,7 @@ import com.k9x.domain.dogs.aggregates.Sex;
 
 public interface CreateDogPersistencePort {
 
-    void createDog(String id, String name, String image, String breed, String identity,
+    void createDog(String identification, String name, String image, String breed, String origin,
                    String owner, String handler, String creator, String team, String country,
                    Sex sex, Integer withersCm, Boolean threeFciGenerationsConfirmed, long createdAt);
 }

@@ -38,11 +38,11 @@ public class EnrollEventServiceCase implements TransactionalUseCase {
         if (competitionId == null) {
             throw new EventNotFoundException();
         }
-        Dog dog = getDogPersistencePort.getDog(command.dogId());
+        Dog dog = getDogPersistencePort.getDog(command.dogIdentification());
         BihGuards.assertBihAllowedForSex(command.bih(), dog);
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
-        competition.enrollDog(eventId, command.dogId(), command.bih(), userId, DateUtils.nowUtcMillis());
+        competition.enrollDog(eventId, command.dogIdentification(), command.bih(), userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
         notifyCreator(competition, eventId, userId);
     }

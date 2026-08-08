@@ -124,11 +124,11 @@ class GetDogListServiceCaseTest {
         List<DogDTO> result = serviceCase.getDogs("user-1", false, false, false);
 
         DogDTO dto = result.getFirst();
-        assertThat(dto.id()).isEqualTo("id-1");
+        assertThat(dto.identification()).isEqualTo("id-1");
         assertThat(dto.name()).isEqualTo("Rex");
         assertThat(dto.image()).isEqualTo("img.png");
         assertThat(dto.owner()).isEqualTo("user-1");
-        assertThat(dto.identity()).isEqualTo("ident-1");
+        assertThat(dto.origin()).isEqualTo("ident-1");
         assertThat(dto.country()).isEqualTo("ES");
         assertThat(dto.team()).isEqualTo("team-1");
     }

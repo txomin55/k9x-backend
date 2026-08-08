@@ -78,10 +78,10 @@ public class GetObdxClassificationServiceCase {
                     Score s = scores.stream()
                             .filter(sc -> Objects.equals(sc.exerciseId(), ex.exerciseId())
                                     && Objects.equals(sc.judgeId(), jd.judgeId())
-                                    && Objects.equals(sc.dogId(), c.dogId()))
+                                    && Objects.equals(sc.dogIdentification(), c.dogIdentification()))
                             .findFirst().orElse(null);
                     rows.add(new FetchClassificationRawRowDTO(
-                            c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
+                            c.dogIdentification(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
                             ex.exerciseId(), ex.position() == null ? (short) 0 : ex.position(),
                             ex.tags() == null ? null : ex.tags().toArray(new String[0]),
                             jd.judgeId(), jd.judgeName(),
@@ -102,52 +102,52 @@ public class GetObdxClassificationServiceCase {
                 .stream()
                 .collect(Collectors.toMap(EventExercise::exerciseId,
                         e -> e.judges() == null ? 0 : e.judges().size(), (a, _) -> a));
-        // dogId → exerciseId → list of (judgeId, judgeName, score)
+        // dogIdentification → exerciseId → list of (judgeId, judgeName, score)
         Map<String, Map<String, List<FetchClassificationJudgeScoreDTO>>> judgeScoresByDogExercise = new LinkedHashMap<>();
-        // dogId → exerciseId → list of yellow cards stamped for that exercise (one per stamped slot, across judges)
+        // dogIdentification → exerciseId → list of yellow cards stamped for that exercise (one per stamped slot, across judges)
         Map<String, Map<String, List<FetchClassificationYellowCardDTO>>> yellowCardsByDogExercise = new LinkedHashMap<>();
-        // dogId → exerciseId → the red card stamped there, if any (only one can ever exist per dog in the event)
+        // dogIdentification → exerciseId → the red card stamped there, if any (only one can ever exist per dog in the event)
         Map<String, Map<String, FetchClassificationRedCardDTO>> redCardByDogExercise = new LinkedHashMap<>();
-        // dog metadata keyed by dogId (first row wins)
+        // dog metadata keyed by dogIdentification (first row wins)
         Map<String, FetchClassificationRawRowDTO> dogMeta = new LinkedHashMap<>();
         // exerciseId → position and tags (same for all dogs)
         Map<String, Short> exercisePositions = new LinkedHashMap<>();
         Map<String, List<String>> exerciseTags = new LinkedHashMap<>();
-        // dogId → static start order, set on enrollment
+        // dogIdentification → static start order, set on enrollment
         Map<String, Short> startOrderByDog = new LinkedHashMap<>();
-        // dogId → competitor number (dorsal), set on enrollment; independent from the start order
+        // dogIdentification → competitor number (dorsal), set on enrollment; independent from the start order
         Map<String, Short> competitorNumberByDog = new LinkedHashMap<>();
-        // dogId → best in show flag, set on enrollment
+        // dogIdentification → best in show flag, set on enrollment
         Map<String, Boolean> bihByDog = new LinkedHashMap<>();
-        // dogId → reserve flag, set on enrollment
+        // dogIdentification → reserve flag, set on enrollment
         Map<String, Boolean> reserveByDog = new LinkedHashMap<>();
-        // dogId → not competing flag, set on enrollment
+        // dogIdentification → not competing flag, set on enrollment
         Map<String, Boolean> notCompetingByDog = new LinkedHashMap<>();
-        // dogId → whether the dog has 3 FCI generations confirmed, used to resolve CACOB/CACIOB awards
+        // dogIdentification → whether the dog has 3 FCI generations confirmed, used to resolve CACOB/CACIOB awards
         Map<String, Boolean> fciConfirmedByDog = new LinkedHashMap<>();
         for (EventCompetitor competitor : (event.competitors() == null ? List.<EventCompetitor>of() : event.competitors())) {
-            startOrderByDog.put(competitor.dogId(), competitor.startNumber());
-            competitorNumberByDog.put(competitor.dogId(), competitor.competitorNumber());
-            bihByDog.put(competitor.dogId(), competitor.bih());
-            reserveByDog.put(competitor.dogId(), competitor.reserve());
-            notCompetingByDog.put(competitor.dogId(), competitor.notCompeting());
-            fciConfirmedByDog.put(competitor.dogId(), competitor.threeFciGenerationsConfirmed());
+            startOrderByDog.put(competitor.dogIdentification(), competitor.startNumber());
+            competitorNumberByDog.put(competitor.dogIdentification(), competitor.competitorNumber());
+            bihByDog.put(competitor.dogIdentification(), competitor.bih());
+            reserveByDog.put(competitor.dogIdentification(), competitor.reserve());
+            notCompetingByDog.put(competitor.dogIdentification(), competitor.notCompeting());
+            fciConfirmedByDog.put(competitor.dogIdentification(), competitor.threeFciGenerationsConfirmed());
         }
 
         List<ObdxQualification.Tier> qualificationTiers = qualificationTiers(config);
         Long scoresLastUpdate = null;
 
         for (FetchClassificationRawRowDTO row : rawRows) {
-            dogMeta.putIfAbsent(row.dogId(), row);
+            dogMeta.putIfAbsent(row.dogIdentification(), row);
             exercisePositions.putIfAbsent(row.exerciseId(), row.exercisePosition());
             exerciseTags.putIfAbsent(row.exerciseId(),
                     row.exerciseTags() != null ? Arrays.asList(row.exerciseTags()) : List.of());
 
             judgeScoresByDogExercise
-                    .computeIfAbsent(row.dogId(), _ -> new LinkedHashMap<>())
+                    .computeIfAbsent(row.dogIdentification(), _ -> new LinkedHashMap<>())
                     .computeIfAbsent(row.exerciseId(), _ -> new ArrayList<>());
             List<FetchClassificationYellowCardDTO> exerciseYellowCards = yellowCardsByDogExercise
-                    .computeIfAbsent(row.dogId(), _ -> new LinkedHashMap<>())
+                    .computeIfAbsent(row.dogIdentification(), _ -> new LinkedHashMap<>())
                     .computeIfAbsent(row.exerciseId(), _ -> new ArrayList<>());
 
             if (row.yellowCard() != null) {
@@ -157,13 +157,13 @@ public class GetObdxClassificationServiceCase {
 
             if (row.redCard() != null) {
                 redCardByDogExercise
-                        .computeIfAbsent(row.dogId(), _ -> new LinkedHashMap<>())
+                        .computeIfAbsent(row.dogIdentification(), _ -> new LinkedHashMap<>())
                         .put(row.exerciseId(), new FetchClassificationRedCardDTO(row.judgeId(), row.judgeName(), row.redCard()));
             }
 
             if (row.score() != null) {
                 BigDecimal judgeScoreRating = ObdxScoreRating.percentageOfMax(row.score(), config.maxAllowedScore());
-                List<FetchClassificationJudgeScoreDTO> exerciseScores = judgeScoresByDogExercise.get(row.dogId()).get(row.exerciseId());
+                List<FetchClassificationJudgeScoreDTO> exerciseScores = judgeScoresByDogExercise.get(row.dogIdentification()).get(row.exerciseId());
                 exerciseScores.add(new FetchClassificationJudgeScoreDTO(row.judgeId(), row.judgeName(), row.score(), judgeScoreRating, true));
                 scoresLastUpdate = scoresLastUpdate == null
                         ? row.scoreLastUpdate() : Math.max(scoresLastUpdate, row.scoreLastUpdate());
@@ -173,8 +173,8 @@ public class GetObdxClassificationServiceCase {
         List<FetchClassificationCompetitorDTO> competitors = new ArrayList<>();
         for (Map.Entry<String, Map<String, List<FetchClassificationJudgeScoreDTO>>> dogEntry
                 : judgeScoresByDogExercise.entrySet()) {
-            String dogId = dogEntry.getKey();
-            FetchClassificationRawRowDTO meta = dogMeta.get(dogId);
+            String dogIdentification = dogEntry.getKey();
+            FetchClassificationRawRowDTO meta = dogMeta.get(dogIdentification);
             BigDecimal computedTotal = BigDecimal.ZERO;
             boolean anyExerciseScored = false;
             List<FetchClassificationExerciseScoreDTO> exercises = new ArrayList<>();
@@ -187,9 +187,9 @@ public class GetObdxClassificationServiceCase {
 
                 BigDecimal coef = config.coefByExerciseId().getOrDefault(exerciseId, BigDecimal.ONE);
                 List<FetchClassificationYellowCardDTO> exerciseYellowCards = yellowCardsByDogExercise
-                        .getOrDefault(dogId, Map.of()).getOrDefault(exerciseId, List.of());
+                        .getOrDefault(dogIdentification, Map.of()).getOrDefault(exerciseId, List.of());
                 FetchClassificationRedCardDTO exerciseRedCard = redCardByDogExercise
-                        .getOrDefault(dogId, Map.of()).get(exerciseId);
+                        .getOrDefault(dogIdentification, Map.of()).get(exerciseId);
                 // maxExerciseScore is the maximum attainable for this exercise (highest allowed score * coef); it is a
                 // constant reference. weightedScore is what the competitor has actually achieved: the judges' average
                 // (or mid-avg) times the coef, which is null while the exercise has no scores, minus a flat penalty
@@ -225,15 +225,15 @@ public class GetObdxClassificationServiceCase {
             BigDecimal competitorScoreRating = ObdxScoreRating.percentageOfMax(totalScore, maxPossibleTotal);
 
             ClassificationCompetitorStatus status;
-            if (event.isCompetitorSettled(dogId)) {
+            if (event.isCompetitorSettled(dogIdentification)) {
                 status = ClassificationCompetitorStatus.SETTLED;
-            } else if (event.isCompetitorStarted(dogId)) {
+            } else if (event.isCompetitorStarted(dogIdentification)) {
                 status = ClassificationCompetitorStatus.LIVE;
             } else {
                 status = ClassificationCompetitorStatus.PENDING;
             }
 
-            boolean disqualifiedOrNotCompeting = event.isDisqualified(dogId) || event.isNotCompeting(dogId);
+            boolean disqualifiedOrNotCompeting = event.isDisqualified(dogIdentification) || event.isNotCompeting(dogIdentification);
             boolean hasScore = anyExerciseScored;
             String qualification = ObdxQualification.resolve(qualificationTiers, totalScore, disqualifiedOrNotCompeting, hasScore);
             BigDecimal rankScore = ObdxCompetitorEventScore.ofEvent(
@@ -243,10 +243,10 @@ public class GetObdxClassificationServiceCase {
                     totalScore, maxPossibleTotal, hasScore);
 
             competitors.add(new FetchClassificationCompetitorDTO(
-                    dogId, meta.dogName(), meta.dogBreed(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
-                    startOrderByDog.get(dogId), competitorNumberByDog.get(dogId), 0, totalScore, competitorScoreRating, false,
-                    status.name(), bihByDog.get(dogId), reserveByDog.get(dogId),
-                    Boolean.TRUE.equals(notCompetingByDog.get(dogId)), exercises,
+                    dogIdentification, meta.dogName(), meta.dogBreed(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),
+                    startOrderByDog.get(dogIdentification), competitorNumberByDog.get(dogIdentification), 0, totalScore, competitorScoreRating, false,
+                    status.name(), bihByDog.get(dogIdentification), reserveByDog.get(dogIdentification),
+                    Boolean.TRUE.equals(notCompetingByDog.get(dogIdentification)), exercises,
                     List.of(), qualification, rankScore));
         }
 
@@ -277,7 +277,7 @@ public class GetObdxClassificationServiceCase {
                                    Map<String, Boolean> fciConfirmedByDog) {
         List<ObdxCacobAwards.Candidate> candidates = competitors.stream()
                 .map(c -> new ObdxCacobAwards.Candidate(
-                        Boolean.TRUE.equals(fciConfirmedByDog.get(c.dogId())), c.scoreRating(), c.position()))
+                        Boolean.TRUE.equals(fciConfirmedByDog.get(c.dogIdentification())), c.scoreRating(), c.position()))
                 .toList();
         ObdxCacobAwards.assign(candidates, eventAwards)
                 .forEach((index, awards) -> awards.forEach(award -> addAward(competitors, index, award)));
@@ -288,7 +288,7 @@ public class GetObdxClassificationServiceCase {
         List<String> awards = new ArrayList<>(c.awards());
         awards.add(award);
         competitors.set(index, new FetchClassificationCompetitorDTO(
-                c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
+                c.dogIdentification(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
                 c.startOrder(), c.competitorNumber(), c.position(), c.totalScore(), c.scoreRating(), c.tied(), c.status(), c.bih(),
                 c.reserve(), c.notCompeting(), c.exercises(), awards, c.qualification(), c.rankScore()));
     }
@@ -363,7 +363,7 @@ public class GetObdxClassificationServiceCase {
     private void setPosition(List<FetchClassificationCompetitorDTO> competitors, int index, int position, boolean tied) {
         FetchClassificationCompetitorDTO c = competitors.get(index);
         competitors.set(index, new FetchClassificationCompetitorDTO(
-                c.dogId(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
+                c.dogIdentification(), c.dogName(), c.breed(), c.owner(), c.handler(), c.team(), c.country(),
                 c.startOrder(), c.competitorNumber(), position, c.totalScore(), c.scoreRating(), tied, c.status(), c.bih(),
                 c.reserve(), c.notCompeting(), c.exercises(), c.awards(), c.qualification(), c.rankScore()));
     }

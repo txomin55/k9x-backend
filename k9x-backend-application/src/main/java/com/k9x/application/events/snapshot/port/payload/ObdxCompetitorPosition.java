@@ -8,5 +8,5 @@ import java.math.BigDecimal;
  * and their own {@code rankScore} (may be {@code null} when the competitor has no score or the event carries
  * no rank score).
  */
-public record ObdxCompetitorPosition(String dogId, short position, BigDecimal totalScore, BigDecimal rankScore) {
+public record ObdxCompetitorPosition(String dogIdentification, short position, BigDecimal totalScore, BigDecimal rankScore) {
 }

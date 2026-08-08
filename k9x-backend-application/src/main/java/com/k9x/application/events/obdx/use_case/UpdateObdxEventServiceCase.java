@@ -74,7 +74,7 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
         // One entry per competitor (null when the dog or its country is unknown) so the list size is the
         // event's competitor count — the international threshold depends on it.
         List<String> competitorCountries = command.competitors().stream()
-                .map(c -> competitorDogs.get(c.dogId()))
+                .map(c -> competitorDogs.get(c.dogIdentification()))
                 .map(dog -> dog == null ? null : dog.getCountry())
                 .toList();
         boolean international = ObdxEventRank.isInternational(competitorCountries, snapshot.country());
@@ -91,7 +91,7 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
                 command.scoreCalculation(),
                 command.enrollmentDeadline() == null ? null : UtcDates.endOfUtcDay(command.enrollmentDeadline()),
                 command.competitors().stream()
-                        .map(c -> new ObdxCompetitorItem(c.dogId(), c.order().shortValue(),
+                        .map(c -> new ObdxCompetitorItem(c.dogIdentification(), c.order().shortValue(),
                                 c.competitorNumber() == null ? null : c.competitorNumber().shortValue(),
                                 c.bih(), c.reserve()))
                         .toList(),
@@ -110,7 +110,7 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
 
     private Map<String, Dog> fetchCompetitorDogs(UpdateObdxEventCommand command) {
         Map<String, Dog> dogs = new LinkedHashMap<>();
-        command.competitors().forEach(c -> dogs.put(c.dogId(), getDogPersistencePort.getDog(c.dogId())));
+        command.competitors().forEach(c -> dogs.put(c.dogIdentification(), getDogPersistencePort.getDog(c.dogIdentification())));
         return dogs;
     }
 
@@ -171,7 +171,7 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
     private void assertNoDuplicateDogs(UpdateObdxEventCommand command) {
         Set<String> seen = new HashSet<>();
         command.competitors().forEach(c -> {
-            if (!seen.add(c.dogId())) {
+            if (!seen.add(c.dogIdentification())) {
                 throw new ObdxDuplicateDogException();
             }
         });
@@ -179,7 +179,7 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
 
     private void assertBihAllowedForSex(UpdateObdxEventCommand command, Map<String, Dog> competitorDogs) {
         command.competitors().forEach(c ->
-                BihGuards.assertBihAllowedForSex(c.bih(), competitorDogs.get(c.dogId())));
+                BihGuards.assertBihAllowedForSex(c.bih(), competitorDogs.get(c.dogIdentification())));
     }
 
     private void assertCollectorsExist(UpdateObdxEventCommand command) {

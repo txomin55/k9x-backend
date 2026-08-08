@@ -33,7 +33,7 @@ public class GetDogListServiceCase {
 
         return dogs.stream()
                 .map(dog -> new DogDTO(
-                                dog.getId(),
+                                dog.getIdentification(),
                                 dog.getName(),
                                 dog.getImage(),
                                 userId.equals(dog.getOwner()) || (dog.getOwner() == null && userId.equals(dog.getCreator())),
@@ -41,7 +41,7 @@ public class GetDogListServiceCase {
                                 dog.getTeam(),
                                 dog.getOwner(),
                                 dog.getHandler(),
-                                dog.getIdentity(),
+                                dog.getOrigin(),
                                 dog.breed(),
                                 dog.getSex(),
                                 dog.getWithersCm(),

@@ -4,5 +4,5 @@ import com.k9x.application.dogs.port.payload.UpdateDogPersistencePayload;
 
 public interface UpdateDogPersistencePort {
 
-    void updateDog(String id, UpdateDogPersistencePayload payload);
+    void updateDog(String identification, UpdateDogPersistencePayload payload);
 }

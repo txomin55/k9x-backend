@@ -1,7 +1,7 @@
 package com.k9x.application.dogs.use_case;
 
-import com.k9x.application.dogs.exceptions.DogChipAlreadyExistsException;
-import com.k9x.application.dogs.exceptions.DogIdentityAlreadyExistsException;
+import com.k9x.application.dogs.exceptions.DogIdentificationAlreadyExistsException;
+import com.k9x.application.dogs.exceptions.DogOriginAlreadyExistsException;
 import com.k9x.application.dogs.port.CreateDogPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.shared.TransactionalUseCase;
@@ -20,15 +20,15 @@ public class CreateDogServiceCase implements TransactionalUseCase {
         this.getDogPersistencePort = getDogPersistencePort;
     }
 
-    public void createDog(String id, String name, String image, String breed, String identity,
+    public void createDog(String identification, String name, String image, String breed, String origin,
                           String owner, String handler, String userId, String team, String country,
                           Sex sex, Integer withersCm, Boolean threeFciGenerationsConfirmed, boolean organizer) {
         assertUserIdMatchesOwnerWhenNoOrganizer(owner, userId, organizer);
-        assertChipNotUsedByActiveDog(id);
-        assertIdentityNotUsedByActiveDog(identity);
-        // If the chip belongs to a soft-deleted dog, the persistence upsert reactivates that row with the
+        assertIdentificationNotUsedByActiveDog(identification);
+        assertOriginNotUsedByActiveDog(origin);
+        // If the identification belongs to a soft-deleted dog, the persistence upsert reactivates that row with the
         // new data ("recover"). Only active collisions are rejected above.
-        createDogPersistencePort.createDog(id, name, image, breed, identity, owner, handler, userId, team, country,
+        createDogPersistencePort.createDog(identification, name, image, breed, origin, owner, handler, userId, team, country,
                 sex, withersCm, threeFciGenerationsConfirmed, DateUtils.nowUtcMillis());
     }
 
@@ -38,15 +38,15 @@ public class CreateDogServiceCase implements TransactionalUseCase {
         }
     }
 
-    private void assertChipNotUsedByActiveDog(String id) {
-        if (Identifiers.isPresent(id) && getDogPersistencePort.getDog(id) != null) {
-            throw new DogChipAlreadyExistsException();
+    private void assertIdentificationNotUsedByActiveDog(String identification) {
+        if (Identifiers.isPresent(identification) && getDogPersistencePort.getDog(identification) != null) {
+            throw new DogIdentificationAlreadyExistsException();
         }
     }
 
-    private void assertIdentityNotUsedByActiveDog(String identity) {
-        if (Identifiers.isPresent(identity) && getDogPersistencePort.getDogByIdentity(identity) != null) {
-            throw new DogIdentityAlreadyExistsException();
+    private void assertOriginNotUsedByActiveDog(String origin) {
+        if (Identifiers.isPresent(origin) && getDogPersistencePort.getDogByOrigin(origin) != null) {
+            throw new DogOriginAlreadyExistsException();
         }
     }
 }

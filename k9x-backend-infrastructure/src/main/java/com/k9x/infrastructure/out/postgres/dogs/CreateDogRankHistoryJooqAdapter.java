@@ -31,13 +31,13 @@ public class CreateDogRankHistoryJooqAdapter implements CreateDogRankHistoryPers
         SnapDogIndexHistory h = Tables.SNAP_DOG_INDEX_HISTORY;
         List<? extends Query> batch = records.stream()
                 .map(r -> dsl.insertInto(h)
-                        .set(h.DOG_ID, r.dogId())
+                        .set(h.DOG_IDENTIFICATION, r.dogIdentification())
                         .set(h.DISCIPLINE, r.discipline())
                         .set(h.RANK, r.rank())
                         .set(h.TIMESTAMP, r.timestamp())
                         .set(h.APPLYING_TIMESTAMP, r.applyingTimestamp())
                         .set(h.METADATA, serialize(r))
-                        .onConflict(h.DOG_ID, h.DISCIPLINE, h.APPLYING_TIMESTAMP)
+                        .onConflict(h.DOG_IDENTIFICATION, h.DISCIPLINE, h.APPLYING_TIMESTAMP)
                         .doNothing())
                 .toList();
         if (!batch.isEmpty()) {
@@ -49,7 +49,7 @@ public class CreateDogRankHistoryJooqAdapter implements CreateDogRankHistoryPers
         try {
             return objectMapper.writeValueAsString(record.metadata());
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Unable to serialize dog rank history metadata for " + record.dogId(), e);
+            throw new IllegalStateException("Unable to serialize dog rank history metadata for " + record.dogIdentification(), e);
         }
     }
 }

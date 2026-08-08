@@ -26,7 +26,7 @@ class GetDogRankEventResultsJooqAdapterTest {
     private DSLContext dslReturning(Object[]... rows) {
         MockDataProvider provider = ctx -> {
             sqls.add(ctx.sql());
-            Field<?>[] fields = {SNAP_DOG_RANK.DOG_ID, SNAP_DOG_RANK.DISCIPLINE, SNAP_DOG_RANK.EVENT_ID,
+            Field<?>[] fields = {SNAP_DOG_RANK.DOG_IDENTIFICATION, SNAP_DOG_RANK.DISCIPLINE, SNAP_DOG_RANK.EVENT_ID,
                     SNAP_DOG_RANK.RANK, SNAP_DOG_RANK.TIMESTAMP};
             Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(fields);
             for (Object[] row : rows) {

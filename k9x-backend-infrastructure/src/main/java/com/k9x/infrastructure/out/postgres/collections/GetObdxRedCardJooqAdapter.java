@@ -29,7 +29,7 @@ public class GetObdxRedCardJooqAdapter implements GetObdxRedCardPersistencePort 
                 .from(es)
                 .join(j).on(j.ID.eq(es.JUDGE_ID))
                 .where(es.EVENT_ID.eq(eventId))
-                .and(es.DOG_ID.eq(competitorId))
+                .and(es.DOG_IDENTIFICATION.eq(competitorId))
                 .and(es.RED_CARD.isNotNull())
                 .fetchOne();
         if (r == null) {
