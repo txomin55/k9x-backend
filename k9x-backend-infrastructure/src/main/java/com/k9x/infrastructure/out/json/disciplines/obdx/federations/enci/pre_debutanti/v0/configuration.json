@@ -1,8 +1,14 @@
 {
   "id": "OBDX.ENCI_PREDEBUTTANTI.V0",
   "description": "ENCI predebuttanti version 23/07/2026",
-  "break_tie": [],
-  "break_tie_tie": [],
+  "break_tie": [
+    "OBDX.ENCI_PREDEBUTTANTI.2_V0",
+    "OBDX.ENCI_PREDEBUTTANTI.4_V0",
+    "OBDX.ENCI_PREDEBUTTANTI.8_V0"
+  ],
+  "break_tie_tie": [
+    "OBDX.ENCI_PREDEBUTTANTI.8_V0"
+  ],
   "allowed_values": [
     0,
     5,

@@ -1,8 +1,14 @@
 {
   "id": "OBDX.CPC_COBS.V0",
   "description": "CPC COBS version 20/05/2026",
-  "break_tie": [],
-  "break_tie_tie": [],
+  "break_tie": [
+    "OBDX.CPC_COBS.6_V0",
+    "OBDX.CPC_COBS.3_V0",
+    "OBDX.CPC_COBS.8_V0"
+  ],
+  "break_tie_tie": [
+    "OBDX.CPC_COBS.8_V0"
+  ],
   "allowed_values": [
     0,
     0.5,
