@@ -4,6 +4,8 @@ import com.k9x.application.events.obdx.use_case.*;
 import com.k9x.application.events.use_case.CreateEventServiceCase;
 import com.k9x.application.events.use_case.DeleteEventServiceCase;
 import com.k9x.application.events.use_case.EnrollEventServiceCase;
+import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
+import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
 import com.k9x.application.events.use_case.GetEventServiceCase;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.CreateEvent;
@@ -43,9 +45,12 @@ public class SecuredEventEndpointConfiguration {
     }
 
     @Bean
-    public ExportEvent exportEvent(GetEventServiceCase getEventServiceCase, UserInfoDTO userInfoDTO,
-                                   EventWorkbookWriter eventWorkbookWriter) {
-        return new ExportEvent(getEventServiceCase, userInfoDTO, eventWorkbookWriter);
+    public ExportEvent exportEvent(GetEventServiceCase getEventServiceCase,
+                                   GetEventClassificationServiceCase getEventClassificationServiceCase,
+                                   GetObdxClassificationConfigPort getObdxClassificationConfigPort,
+                                   UserInfoDTO userInfoDTO, EventWorkbookWriter eventWorkbookWriter) {
+        return new ExportEvent(getEventServiceCase, getEventClassificationServiceCase,
+                getObdxClassificationConfigPort, userInfoDTO, eventWorkbookWriter);
     }
 
     @Bean

@@ -1,6 +1,11 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.events.export;
 
 import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationExerciseScoreDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationJudgeScoreDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventJudgeDTO;
@@ -8,6 +13,8 @@ import com.k9x.application.events.use_case.dto.FetchEventConfigurationDTO;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 import com.k9x.application.events.use_case.dto.FetchEventExerciseDTO;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -19,10 +26,12 @@ import org.springframework.context.support.StaticMessageSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -31,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EventWorkbookWriterTest {
 
     private static final long DEADLINE = 1735689600000L; // 2025-01-01T00:00:00Z
+    private static final Map<String, BigDecimal> COEFFICIENTS = Map.of("ex-1", new BigDecimal("4"));
 
     private EventWorkbookWriter writer;
 
@@ -44,6 +54,8 @@ class EventWorkbookWriterTest {
         messageSource.addMessage("export.column.competitor_number", Locale.ENGLISH, "Competitor number");
         messageSource.addMessage("export.field.federation", Locale.ENGLISH, "Federation");
         messageSource.addMessage("discipline.OBDX.name", Locale.ENGLISH, "Obedience");
+        messageSource.addMessage("export.value.yes", Locale.ENGLISH, "yes");
+        messageSource.addMessage("export.value.no", Locale.ENGLISH, "no");
         messageSource.setUseCodeAsDefaultMessage(true);
 
         LocaleContextHolder.setLocale(Locale.ENGLISH);
@@ -73,9 +85,11 @@ class EventWorkbookWriterTest {
         return new XSSFWorkbook(new ByteArrayInputStream(bytes));
     }
 
+    /** Null for a missing or non-text cell, so scanning mixed rows never throws. */
     private String text(Sheet sheet, int row, int column) {
         Row r = sheet.getRow(row);
-        return r == null || r.getCell(column) == null ? null : r.getCell(column).getStringCellValue();
+        Cell cell = r == null ? null : r.getCell(column);
+        return cell == null || cell.getCellType() != CellType.STRING ? null : cell.getStringCellValue();
     }
 
     @Test
@@ -179,6 +193,134 @@ class EventWorkbookWriterTest {
         }
     }
 
+    private FetchClassificationDTO classification() {
+        FetchClassificationJudgeScoreDTO judgeScore =
+                new FetchClassificationJudgeScoreDTO("judge-1", "Ana", new BigDecimal("9.5"), null, true);
+        FetchClassificationExerciseScoreDTO exercise = new FetchClassificationExerciseScoreDTO(
+                "ex-1", (short) 1, List.of(), new BigDecimal("19.0"), new BigDecimal("19.0"),
+                new BigDecimal("95.00"), List.of(judgeScore), List.of(), null);
+        FetchClassificationCompetitorDTO competitor = new FetchClassificationCompetitorDTO(
+                "dog-1", "Rex", "breed-1", "Owner", "Handler", "Team A", "ES", (short) 3, (short) 7, 1,
+                new BigDecimal("285.5"), new BigDecimal("95.17"), false, "SETTLED", true, false, false,
+                List.of(exercise), List.of(), "EXC", null);
+        FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(0L, List.of(competitor), "MID_AVG", List.of());
+
+        return new FetchClassificationDTO("event-1", "Spring Cup", "FINISHED", "stage-1", "Stage A", "Cup",
+                "OBDX", "OBDX.FCI_GRADE_1.V0", "Grade 1", 0L, obdx, "A");
+    }
+
+    @Test
+    void omits_the_classification_sheets_when_no_classification_is_requested() throws IOException {
+        try (XSSFWorkbook workbook = read(writer.write(event(), null, Map.of()))) {
+            assertThat(workbook.getNumberOfSheets()).isEqualTo(4);
+        }
+    }
+
+    @Test
+    void writes_the_classification_sheet_with_chip_score_percentage_and_acronym() throws IOException {
+        try (XSSFWorkbook workbook = read(writer.write(event(), classification(), COEFFICIENTS))) {
+            Sheet sheet = workbook.getSheet("export.sheet.classification");
+            assertThat(sheet).isNotNull();
+
+            Row row = sheet.getRow(1);
+            assertThat(row.getCell(0).getNumericCellValue()).isEqualTo(1d);   // position
+            assertThat(row.getCell(1).getNumericCellValue()).isEqualTo(7d);   // competitor number
+            // the chip is not part of the classification; it is joined back from the event detail
+            assertThat(row.getCell(2).getStringCellValue()).isEqualTo("chip-999");
+            assertThat(row.getCell(3).getStringCellValue()).isEqualTo("Rex");
+            assertThat(row.getCell(4).getStringCellValue()).isEqualTo("Handler");
+            assertThat(row.getCell(5).getStringCellValue()).isEqualTo("Team A");
+            assertThat(row.getCell(6).getNumericCellValue()).isEqualTo(285.5d);
+            assertThat(row.getCell(7).getNumericCellValue()).isEqualTo(95.17d);
+            assertThat(row.getCell(8).getStringCellValue()).isEqualTo("EXC");
+        }
+    }
+
+    @Test
+    void writes_one_sheet_per_competitor_named_after_the_competitor_number() throws IOException {
+        try (XSSFWorkbook workbook = read(writer.write(event(), classification(), COEFFICIENTS))) {
+            Sheet sheet = workbook.getSheet("7");
+            assertThat(sheet).isNotNull();
+
+            String flattened = flatten(sheet);
+            assertThat(flattened).contains("Rex").contains("chip-999").contains("Handler").contains("Team A");
+            // per-judge and per-exercise scores, by exercise name rather than id, then the totals
+            assertThat(flattened).contains("Heelwork").contains("Ana").contains("9.5");
+            assertThat(flattened).contains("285.5").contains("95.17").contains("EXC");
+            // the individual sheet carries no ids and no per-exercise percentage
+            assertThat(flattened).doesNotContain("ex-1").doesNotContain("judge-1");
+        }
+    }
+
+    private String flatten(Sheet sheet) {
+        StringBuilder text = new StringBuilder();
+        for (Row row : sheet) {
+            for (Cell cell : row) {
+                text.append(switch (cell.getCellType()) {
+                    case STRING -> cell.getStringCellValue();
+                    case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+                    case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+                    default -> "";
+                }).append('|');
+            }
+        }
+        return text.toString();
+    }
+
+    /**
+     * The scores table is pivoted: one row per exercise with a column per judge. Two judges scoring the same
+     * exercise must land on the same row, side by side, not on two rows repeating the exercise name.
+     */
+    @Test
+    void pivots_the_scores_table_with_one_column_per_judge() throws IOException {
+        FetchObdxEventJudgeDTO second = new FetchObdxEventJudgeDTO("judge-2", "Bea", null);
+        FetchEventDetailDTO event = event();
+        FetchEventDetailDTO twoJudges = new FetchEventDetailDTO(event.obdx(), event.competitors(),
+                event.exercises(), List.of(event.judges().getFirst(), second), event.configuration());
+
+        FetchClassificationExerciseScoreDTO exercise = new FetchClassificationExerciseScoreDTO(
+                // exerciseScore is the MAXIMUM attainable (10 x coef 4); totalScore is what was achieved
+                "ex-1", (short) 1, List.of("group", "static"), new BigDecimal("40.0"), new BigDecimal("29.0"),
+                new BigDecimal("72.50"),
+                List.of(new FetchClassificationJudgeScoreDTO("judge-1", "Ana", new BigDecimal("7.5"), null, true),
+                        new FetchClassificationJudgeScoreDTO("judge-2", "Bea", new BigDecimal("7"), null, true)),
+                List.of(), null);
+        FetchClassificationCompetitorDTO competitor = new FetchClassificationCompetitorDTO(
+                "dog-1", "Rex", "breed-1", "Owner", "Handler", "Team A", "ES", (short) 3, (short) 7, 1,
+                new BigDecimal("18.0"), new BigDecimal("90.00"), false, "SETTLED", true, false, false,
+                List.of(exercise), List.of(), "EXC", null);
+        FetchClassificationDTO classification = new FetchClassificationDTO("event-1", "Spring Cup", "FINISHED",
+                "stage-1", "Stage A", "Cup", "OBDX", "OBDX.FCI_GRADE_1.V0", "Grade 1", 0L,
+                new FetchObdxClassificationDTO(0L, List.of(competitor), "MID_AVG", List.of()), "A");
+
+        try (XSSFWorkbook workbook = read(writer.write(twoJudges, classification, COEFFICIENTS))) {
+            Sheet sheet = workbook.getSheet("7");
+
+            int headerRow = -1;
+            for (Row row : sheet) {
+                if ("export.column.order".equals(text(sheet, row.getRowNum(), 0))) {
+                    headerRow = row.getRowNum();
+                }
+            }
+            assertThat(headerRow).isPositive();
+
+            // Order | Exercise | Tags | Ana | Bea | Average | Coefficient | Points
+            assertThat(text(sheet, headerRow, 3)).isEqualTo("Ana");
+            assertThat(text(sheet, headerRow, 4)).isEqualTo("Bea");
+
+            Row scores = sheet.getRow(headerRow + 1);
+            assertThat(scores.getCell(0).getNumericCellValue()).isEqualTo(1d);
+            assertThat(scores.getCell(1).getStringCellValue()).isEqualTo("Heelwork");
+            assertThat(scores.getCell(2).getStringCellValue()).isEqualTo("group, static");
+            assertThat(scores.getCell(3).getNumericCellValue()).isEqualTo(7.5d);
+            assertThat(scores.getCell(4).getNumericCellValue()).isEqualTo(7d);
+            // the average is the judges' own average, never the maximum attainable divided by the coefficient
+            assertThat(scores.getCell(5).getNumericCellValue()).isEqualTo(7.25d);
+            assertThat(scores.getCell(6).getNumericCellValue()).isEqualTo(4d);
+            assertThat(scores.getCell(7).getNumericCellValue()).isEqualTo(29.0d);
+        }
+    }
+
     @Test
     void writes_competitor_columns_in_order() throws IOException {
         try (XSSFWorkbook workbook = read(writer.write(event()))) {
@@ -193,9 +335,9 @@ class EventWorkbookWriterTest {
             assertThat(row.getCell(3).getStringCellValue()).isEqualTo("dog-1");
             assertThat(row.getCell(4).getStringCellValue()).isEqualTo("Rex");
             assertThat(row.getCell(5).getStringCellValue()).isEqualTo("Handler");
-            assertThat(row.getCell(6).getBooleanCellValue()).isFalse();       // reserve
+            assertThat(row.getCell(6).getStringCellValue()).isEqualTo("no");   // reserve, as localised text
             assertThat(row.getCell(7).getStringCellValue()).isEqualTo("MALE");
-            assertThat(row.getCell(8).getBooleanCellValue()).isTrue();        // bih
+            assertThat(row.getCell(8).getStringCellValue()).isEqualTo("yes");  // bih
             assertThat(row.getCell(9).getStringCellValue()).isEqualTo("ES");
             assertThat(row.getCell(10).getStringCellValue()).isEqualTo("Team A");
         }

@@ -1,5 +1,9 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.events.export;
 
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationExerciseScoreDTO;
+import com.k9x.application.events.obdx.use_case.dto.FetchClassificationJudgeScoreDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventJudgeDTO;
@@ -22,9 +26,15 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Renders the private event detail as an xlsx workbook with four sheets: Configuration, Judges, Exercises and
@@ -49,6 +59,16 @@ public class EventWorkbookWriter {
      * cells while doing so. An event holds a few hundred rows at most, so streaming buys nothing here.
      */
     public byte[] write(FetchEventDetailDTO event) {
+        return write(event, null, Map.of());
+    }
+
+    /**
+     * @param classification     when non-null, appends the Classification sheet plus one sheet per competitor.
+     * @param coefByExerciseId   the configuration's exercise coefficients, used to show the judges' average
+     *                           next to the weighted points. Missing entries simply leave both cells empty.
+     */
+    public byte[] write(FetchEventDetailDTO event, FetchClassificationDTO classification,
+                        Map<String, BigDecimal> coefByExerciseId) {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             CellStyle headerStyle = headerStyle(workbook);
             writeConfiguration(workbook, headerStyle, event);
@@ -56,12 +76,227 @@ public class EventWorkbookWriter {
             writeExercises(workbook, headerStyle, event.exercises());
             writeCompetitors(workbook, headerStyle, event.competitors());
 
+            List<FetchClassificationCompetitorDTO> ranked = rankedCompetitors(classification);
+            if (!ranked.isEmpty()) {
+                // The classification sheet keeps the ranking order; the per-competitor sheets are laid out by
+                // competitor number, which is the order an organizer flips through them in.
+                writeClassification(workbook, headerStyle, ranked, chipsByDogId(event));
+                for (FetchClassificationCompetitorDTO competitor : byCompetitorNumber(ranked)) {
+                    writeCompetitorDetail(workbook, headerStyle, competitor, event,
+                            coefByExerciseId == null ? Map.of() : coefByExerciseId);
+                }
+            }
+
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
             return out.toByteArray();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private List<FetchClassificationCompetitorDTO> rankedCompetitors(FetchClassificationDTO classification) {
+        if (classification == null || classification.obdx() == null
+                || classification.obdx().competitors() == null) {
+            return List.of();
+        }
+        return classification.obdx().competitors();
+    }
+
+    /** Competitor numbers are nullable; those competitors keep their ranking order at the end. */
+    private List<FetchClassificationCompetitorDTO> byCompetitorNumber(
+            List<FetchClassificationCompetitorDTO> competitors) {
+        return competitors.stream()
+                .sorted(Comparator.comparing(FetchClassificationCompetitorDTO::competitorNumber,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
+    }
+
+    /** The classification never carries the microchip, so it is joined back from the event detail. */
+    private Map<String, String> chipsByDogId(FetchEventDetailDTO event) {
+        return event.competitors().stream()
+                .filter(c -> c.dogId() != null && c.dogIdentity() != null)
+                .collect(Collectors.toMap(FetchObdxEventCompetitorDTO::dogId,
+                        FetchObdxEventCompetitorDTO::dogIdentity, (a, _) -> a));
+    }
+
+    private void writeClassification(Workbook workbook, CellStyle headerStyle,
+                                     List<FetchClassificationCompetitorDTO> competitors,
+                                     Map<String, String> chips) {
+        Sheet sheet = createSheet(workbook, "export.sheet.classification");
+        writeHeader(sheet, headerStyle, List.of(
+                translate("export.column.position"), translate("export.column.competitor_number"),
+                translate("export.column.chip"), translate("export.column.dog_name"),
+                translate("export.column.handler"), translate("export.column.team"),
+                translate("export.column.score"), translate("export.column.percentage"),
+                translate("export.column.qualification")));
+
+        int rowIndex = 1;
+        for (FetchClassificationCompetitorDTO competitor : competitors) {
+            Row row = sheet.createRow(rowIndex++);
+            setNumber(row, 0, competitor.position());
+            setNumber(row, 1, competitor.competitorNumber());
+            setText(row, 2, chips.get(competitor.dogId()));
+            setText(row, 3, competitor.dogName());
+            setText(row, 4, competitor.handler());
+            setText(row, 5, competitor.team());
+            setNumber(row, 6, competitor.totalScore());
+            setNumber(row, 7, competitor.scoreRating());
+            setText(row, 8, competitor.qualification());
+        }
+        autoSize(sheet, 9);
+    }
+
+    /**
+     * One sheet per competitor: their full record on top, then a row per exercise with one column per judge,
+     * closed by the totals. Sheets are named after the competitor number, which is what an organizer looks
+     * for on paper.
+     */
+    private void writeCompetitorDetail(Workbook workbook, CellStyle headerStyle,
+                                       FetchClassificationCompetitorDTO competitor, FetchEventDetailDTO event,
+                                       Map<String, BigDecimal> coefByExerciseId) {
+        Sheet sheet = workbook.createSheet(competitorSheetName(workbook, competitor));
+
+        Map<String, String> exerciseNames = event.exercises().stream()
+                .filter(e -> e.id() != null && e.name() != null)
+                .collect(Collectors.toMap(FetchEventExerciseDTO::id, FetchEventExerciseDTO::name, (a, _) -> a));
+        String chip = chipsByDogId(event).get(competitor.dogId());
+
+        int rowIndex = 0;
+        rowIndex = detailRow(sheet, rowIndex, "export.column.competitor_number", competitor.competitorNumber());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.start_number", competitor.startOrder());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.position", competitor.position());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.chip", chip);
+        rowIndex = detailRow(sheet, rowIndex, "export.column.identifier", competitor.dogId());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.dog_name", competitor.dogName());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.breed", competitor.breed());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.handler", competitor.handler());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.team", competitor.team());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.country", competitor.country());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.bih", competitor.bih());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.reserve", competitor.reserve());
+        rowIndex++;
+
+        // One row per exercise, one column per judge: repeating the exercise name once per judge made the
+        // sheet four times taller and hid the comparison between judges, which is the point of scoring.
+        List<FetchObdxEventJudgeDTO> judges = event.judges() == null ? List.of() : event.judges();
+        List<String> headers = new ArrayList<>();
+        headers.add(translate("export.column.order"));
+        headers.add(translate("export.column.exercise"));
+        headers.add(translate("export.column.tags"));
+        judges.forEach(judge -> headers.add(judge.judgeName()));
+        headers.add(translate("export.column.average"));
+        headers.add(translate("export.column.coefficient"));
+        headers.add(translate("export.column.points"));
+
+        Row scoresHeader = sheet.createRow(rowIndex++);
+        for (int i = 0; i < headers.size(); i++) {
+            Cell cell = scoresHeader.createCell(i);
+            cell.setCellValue(headers.get(i));
+            cell.setCellStyle(headerStyle);
+        }
+
+        int firstJudgeColumn = 3;
+        int averageColumn = firstJudgeColumn + judges.size();
+        for (FetchClassificationExerciseScoreDTO exercise : orderedExercises(competitor)) {
+            Row row = sheet.createRow(rowIndex++);
+            setNumber(row, 0, exercise.exercisePosition());
+            setText(row, 1, exerciseNames.get(exercise.exerciseId()));
+            setText(row, 2, join(exercise.tags()));
+
+            Map<String, BigDecimal> scoreByJudge = (exercise.judgeScores() == null ? List.<FetchClassificationJudgeScoreDTO>of()
+                    : exercise.judgeScores()).stream()
+                    .filter(s -> s.judgeId() != null && s.score() != null)
+                    .collect(Collectors.toMap(FetchClassificationJudgeScoreDTO::judgeId,
+                            FetchClassificationJudgeScoreDTO::score, (a, _) -> a));
+            for (int i = 0; i < judges.size(); i++) {
+                setNumber(row, firstJudgeColumn + i, scoreByJudge.get(judges.get(i).judgeId()));
+            }
+
+            // Mind the record's field names: exerciseScore() is the maximum attainable for the exercise
+            // (max allowed score x coefficient), while totalScore() is what this competitor actually scored.
+            setNumber(row, averageColumn, average(exercise.judgeScores()));
+            setNumber(row, averageColumn + 1, coefByExerciseId.get(exercise.exerciseId()));
+            setNumber(row, averageColumn + 2, exercise.totalScore());
+        }
+
+        rowIndex++;
+        rowIndex = totalRow(sheet, headerStyle, rowIndex, "export.column.total_score", competitor.totalScore());
+        rowIndex = totalRow(sheet, headerStyle, rowIndex, "export.column.percentage", competitor.scoreRating());
+        totalRow(sheet, headerStyle, rowIndex, "export.column.qualification", competitor.qualification());
+
+        autoSize(sheet, headers.size());
+    }
+
+    /**
+     * The judges' average for an exercise. Averages only the scores flagged as applying, which is what the
+     * domain already resolved: under MID_AVG the extreme scores are excluded, and they must not sway this
+     * column either. Deriving it from the weighted points instead would be wrong whenever a yellow card
+     * subtracted its flat penalty.
+     */
+    private BigDecimal average(List<FetchClassificationJudgeScoreDTO> judgeScores) {
+        List<BigDecimal> applying = (judgeScores == null ? List.<FetchClassificationJudgeScoreDTO>of() : judgeScores)
+                .stream()
+                .filter(s -> s.applies() && s.score() != null)
+                .map(FetchClassificationJudgeScoreDTO::score)
+                .toList();
+        if (applying.isEmpty()) {
+            return null;
+        }
+        return applying.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+                .divide(BigDecimal.valueOf(applying.size()), 2, RoundingMode.HALF_UP);
+    }
+
+    private List<FetchClassificationExerciseScoreDTO> orderedExercises(FetchClassificationCompetitorDTO competitor) {
+        if (competitor.exercises() == null) {
+            return List.of();
+        }
+        return competitor.exercises().stream()
+                .sorted(Comparator.comparingInt(FetchClassificationExerciseScoreDTO::exercisePosition))
+                .toList();
+    }
+
+
+    private int detailRow(Sheet sheet, int rowIndex, String labelKey, Object value) {
+        Row row = sheet.createRow(rowIndex);
+        Cell label = row.createCell(0);
+        label.setCellValue(translate(labelKey));
+        switch (value) {
+            case null -> { }
+            case Number number -> setNumber(row, 1, number);
+            case Boolean flag -> setBoolean(row, 1, flag);
+            default -> setText(row, 1, value.toString());
+        }
+        return rowIndex + 1;
+    }
+
+    private int totalRow(Sheet sheet, CellStyle headerStyle, int rowIndex, String labelKey, Object value) {
+        Row row = sheet.createRow(rowIndex);
+        Cell label = row.createCell(0);
+        label.setCellValue(translate(labelKey));
+        label.setCellStyle(headerStyle);
+        switch (value) {
+            case null -> { }
+            case Number number -> setNumber(row, 1, number);
+            default -> setText(row, 1, value.toString());
+        }
+        return rowIndex + 1;
+    }
+
+    /**
+     * Competitor numbers are the natural sheet name but are nullable and not guaranteed unique across an
+     * event, so the name falls back to the dog and is suffixed until the workbook accepts it.
+     */
+    private String competitorSheetName(Workbook workbook, FetchClassificationCompetitorDTO competitor) {
+        String base = competitor.competitorNumber() != null
+                ? String.valueOf(competitor.competitorNumber())
+                : competitor.dogName() != null ? competitor.dogName() : competitor.dogId();
+        String name = WorkbookUtil.createSafeSheetName(base == null ? "-" : base);
+        String candidate = name;
+        for (int suffix = 2; workbook.getSheet(candidate) != null; suffix++) {
+            candidate = WorkbookUtil.createSafeSheetName(name + " (" + suffix + ")");
+        }
+        return candidate;
     }
 
     private void writeConfiguration(Workbook workbook, CellStyle headerStyle, FetchEventDetailDTO event) {
@@ -203,9 +438,13 @@ public class EventWorkbookWriter {
         }
     }
 
+    /**
+     * Booleans are written as the localised "yes"/"no" rather than as Excel TRUE/FALSE cells: the workbook is
+     * read by people, and Excel renders a boolean cell in its own UI language, not the requested one.
+     */
     private void setBoolean(Row row, int column, Boolean value) {
         if (value != null) {
-            row.createCell(column).setCellValue(value);
+            row.createCell(column).setCellValue(translate(value ? "export.value.yes" : "export.value.no"));
         }
     }
 
