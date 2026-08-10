@@ -40,7 +40,7 @@ class DeleteRankingServiceCaseTest {
 
     private Ranking ranking(String creator) {
         return new Ranking(RANKING_ID, "Copa", List.of("event-1"), RankingGroupBy.INDIVIDUAL,
-                RankingIncludeBy.NONE, null, creator, 0L);
+                RankingIncludeBy.ALL, null, creator, 0L);
     }
 
     @Test

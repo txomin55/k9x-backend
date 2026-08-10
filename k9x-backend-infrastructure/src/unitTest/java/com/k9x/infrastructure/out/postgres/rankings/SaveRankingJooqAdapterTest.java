@@ -75,8 +75,8 @@ class SaveRankingJooqAdapterTest {
 
         DSLContext dsl = DSL.using(
                 new MockConnection(capturing(new AtomicReference<>(), capturedBindings)), SQLDialect.POSTGRES);
-        new SaveRankingJooqAdapter(dsl).saveRanking(payload(RankingIncludeBy.NONE, null));
+        new SaveRankingJooqAdapter(dsl).saveRanking(payload(RankingIncludeBy.ALL, null));
 
-        assertThat(capturedBindings.get()).contains("NONE").containsNull();
+        assertThat(capturedBindings.get()).contains("ALL").containsNull();
     }
 }

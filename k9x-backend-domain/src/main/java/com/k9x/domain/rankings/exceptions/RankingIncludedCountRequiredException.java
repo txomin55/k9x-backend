@@ -4,7 +4,7 @@ import com.k9x.domain.exceptions.DomainException;
 import com.k9x.domain.exceptions.error.ErrorEnum;
 
 /**
- * Thrown when an inclusion criterion other than NONE comes without a positive included count.
+ * Thrown when an inclusion criterion other than ALL comes without a positive included count.
  */
 public class RankingIncludedCountRequiredException extends DomainException {
 

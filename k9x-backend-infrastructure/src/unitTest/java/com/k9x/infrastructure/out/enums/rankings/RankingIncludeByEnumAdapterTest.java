@@ -26,13 +26,13 @@ class RankingIncludeByEnumAdapterTest {
     }
 
     @Test
-    void returns_one_entry_per_enum_constant_including_none() {
+    void returns_one_entry_per_enum_constant_including_all() {
         List<RankingCriterionDTO> result =
                 new RankingIncludeByEnumAdapter(fallingBackToTheDefault()).getIncludeBys();
 
         assertThat(result).extracting(RankingCriterionDTO::id)
                 .containsExactlyElementsOf(Arrays.stream(RankingIncludeBy.values()).map(Enum::name).toList())
-                .contains("NONE");
+                .contains("ALL");
     }
 
     @Test
@@ -47,15 +47,15 @@ class RankingIncludeByEnumAdapterTest {
     void resolves_the_label_with_the_expected_message_key() {
         MessageSource messageSource = mock(MessageSource.class);
         when(messageSource.getMessage(eq("ranking.include_by.highest.name"), isNull(), anyString(), any()))
-                .thenReturn("Mejores");
+                .thenReturn("Mejores resultados");
         when(messageSource.getMessage(eq("ranking.include_by.lowest.name"), isNull(), anyString(), any()))
-                .thenReturn("Peores");
-        when(messageSource.getMessage(eq("ranking.include_by.none.name"), isNull(), anyString(), any()))
-                .thenReturn("Sin descarte");
+                .thenReturn("Peores resultados");
+        when(messageSource.getMessage(eq("ranking.include_by.all.name"), isNull(), anyString(), any()))
+                .thenReturn("Todos los resultados");
 
         List<RankingCriterionDTO> result = new RankingIncludeByEnumAdapter(messageSource).getIncludeBys();
 
         assertThat(result).extracting(RankingCriterionDTO::name)
-                .containsExactly("Mejores", "Peores", "Sin descarte");
+                .containsExactly("Mejores resultados", "Peores resultados", "Todos los resultados");
     }
 }

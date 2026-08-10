@@ -71,7 +71,7 @@ class SaveRankingServiceCaseTest {
 
     private Ranking existingRanking(String creator) {
         return new Ranking(RANKING_ID, "Copa", List.of("event-1"), RankingGroupBy.INDIVIDUAL,
-                RankingIncludeBy.NONE, null, creator, 0L);
+                RankingIncludeBy.ALL, null, creator, 0L);
     }
 
     private void eventsAreActive(String... eventIds) {
@@ -91,7 +91,7 @@ class SaveRankingServiceCaseTest {
     @Test
     void throws_exception_when_event_ids_are_empty() {
         assertThatThrownBy(() -> serviceCase.saveRanking(
-                command(List.of(), RankingIncludeBy.NONE, null), "user-1", true))
+                command(List.of(), RankingIncludeBy.ALL, null), "user-1", true))
                 .isInstanceOf(RankingEventsRequiredException.class);
 
         verifyNoInteractions(getActiveEventIdsPersistencePort, saveRankingPersistencePort,
@@ -101,7 +101,7 @@ class SaveRankingServiceCaseTest {
     @Test
     void throws_exception_when_the_same_event_is_repeated() {
         assertThatThrownBy(() -> serviceCase.saveRanking(
-                command(List.of("event-1", "event-1"), RankingIncludeBy.NONE, null), "user-1", true))
+                command(List.of("event-1", "event-1"), RankingIncludeBy.ALL, null), "user-1", true))
                 .isInstanceOf(RankingDuplicateEventException.class);
 
         verifyNoInteractions(saveRankingPersistencePort, deleteRankingPersistencePort);
@@ -174,7 +174,7 @@ class SaveRankingServiceCaseTest {
         eventsAreActive("event-1");
         when(getRankingPersistencePort.getRanking(RANKING_ID)).thenReturn(null);
 
-        serviceCase.saveRanking(command(List.of("event-1"), RankingIncludeBy.NONE, 5), "user-1", true);
+        serviceCase.saveRanking(command(List.of("event-1"), RankingIncludeBy.ALL, 5), "user-1", true);
 
         assertThat(capturedPayload().includedCount()).isNull();
     }

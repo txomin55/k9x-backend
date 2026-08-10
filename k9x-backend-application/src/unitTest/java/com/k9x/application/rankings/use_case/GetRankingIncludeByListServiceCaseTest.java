@@ -28,7 +28,7 @@ class GetRankingIncludeByListServiceCaseTest {
 
     @Test
     void returns_the_criteria_from_the_port() {
-        List<RankingCriterionDTO> criteria = List.of(new RankingCriterionDTO("NONE", "Every result"));
+        List<RankingCriterionDTO> criteria = List.of(new RankingCriterionDTO("ALL", "Every result"));
         when(getRankingIncludeByListPort.getIncludeBys()).thenReturn(criteria);
 
         assertThat(serviceCase.getIncludeBys()).isEqualTo(criteria);
