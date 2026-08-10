@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public enum LiveExcludedExercise {
     // Group stays
     CPC_COBS_7("OBDX.CPC_COBS.7"),
-    RSCE_GRADE_1_1("OBDX.RSCE_GRADE_1.1"),
+    RSCE_GRADO_1_1("OBDX.RSCE_GRADO_1.1"),
     FCI_GRADE_3_1("OBDX.FCI_GRADE_3.1"),
     FCI_GRADE_3_2("OBDX.FCI_GRADE_3.2"),
     FCI_GRADE_2_1("OBDX.FCI_GRADE_2.1"),

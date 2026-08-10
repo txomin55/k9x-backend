@@ -53,7 +53,7 @@ mueve el número.
 
 ---
 
-## OBDX_FCI_GRADE_1 · OBDX_RSCE_GRADE_1 — franja `[201, 400]` (range 199)
+## OBDX_FCI_GRADE_1 · OBDX_RSCE_GRADO_1 — franja `[201, 400]` (range 199)
 
 Toda la franja cae en el rango global **D** → letra siempre `D`/`D+`.
 
@@ -102,7 +102,7 @@ tier 4 sube a `A`. El máximo automático es **900** (`A+`); **nunca llega a `S`
 |---|---|---|
 | OBDX_ENCI_PREDEBUTTANTI | 50–100 | E / E+ |
 | OBDX_ENCI_DEBUTTANTI, CPC_COBS, OBDX_RSCE_DEBUTANTE | 100–200 | E / E+ |
-| OBDX_FCI_GRADE_1, OBDX_RSCE_GRADE_1 | 201–400 | D / D+ |
+| OBDX_FCI_GRADE_1, OBDX_RSCE_GRADO_1 | 201–400 | D / D+ |
 | OBDX_FCI_GRADE_2 | 401–600 | C / C+ |
 | OBDX_FCI_GRADE_3 | 601–900 | B / B+ / A / A+ |
 | — (manual, seed) | 901–1000 | S / S+ |

@@ -26,7 +26,7 @@ que resuelve la franja a partir del `configuration_id` **ignorando el sufijo de 
 | Configuración | Franja |
 |---|---|
 | `OBDX_RSCE_DEBUTANTE`, `CPC_COBS` | 100 – 200 |
-| `OBDX_FCI_GRADE_1`, `OBDX_RSCE_GRADE_1` | 201 – 400 |
+| `OBDX_FCI_GRADE_1`, `OBDX_RSCE_GRADO_1` | 201 – 400 |
 | `OBDX_FCI_GRADE_2` | 401 – 600 |
 | `OBDX_FCI_GRADE_3` | 601 – 900 |
 
