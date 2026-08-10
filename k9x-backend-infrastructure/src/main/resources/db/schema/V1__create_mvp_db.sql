@@ -260,3 +260,18 @@ CREATE TABLE k9x.user_subscriptions
     CONSTRAINT user_subscriptions_pkey PRIMARY KEY (user_id),
     CONSTRAINT user_subscriptions_user_fk FOREIGN KEY (user_id) REFERENCES k9x.users (id)
 );
+
+CREATE TABLE k9x.rankings
+(
+    id             VARCHAR(255)       NOT NULL,
+    name           VARCHAR(255)       NOT NULL,
+    event_ids      VARCHAR(255) ARRAY NOT NULL,
+    group_by       VARCHAR(50)        NOT NULL,
+    include_by     VARCHAR(50)        NOT NULL,
+    included_count INTEGER,
+    creator        VARCHAR(50)        NOT NULL,
+    created_at     BIGINT             NOT NULL,
+    CONSTRAINT rankings_pkey PRIMARY KEY (id)
+);
+
+CREATE INDEX rankings_creator_idx ON k9x.rankings (creator);

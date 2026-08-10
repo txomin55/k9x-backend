@@ -53,7 +53,14 @@ public enum ErrorEnum {
     SUBSCRIPTION_KIND_NOT_SUPPORTED("error.subscription_kind_not_supported"),
     EVENT_FINISHED("error.event_finished"),
     STAGE_FINISHED("error.stage_finished"),
-    NOTIFICATION_EVENTS_REQUIRED("error.notification_events_required");
+    NOTIFICATION_EVENTS_REQUIRED("error.notification_events_required"),
+    RANKING_NOT_FOUND("error.ranking_not_found"),
+    RANKING_GROUP_BY_INVALID("error.ranking_group_by_invalid"),
+    RANKING_INCLUDE_BY_INVALID("error.ranking_include_by_invalid"),
+    RANKING_EVENTS_REQUIRED("error.ranking_events_required"),
+    RANKING_DUPLICATE_EVENT("error.ranking_duplicate_event"),
+    RANKING_EVENT_NOT_AVAILABLE("error.ranking_event_not_available"),
+    RANKING_INCLUDED_COUNT_REQUIRED("error.ranking_included_count_required");
 
     private final String id;
 
