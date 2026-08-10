@@ -1,10 +1,12 @@
 package com.k9x.infrastructure.configuration.postgres;
 
 import com.k9x.application.competitions.port.GetCompetitionListPersistencePort;
+import com.k9x.application.competitions.port.GetSelectableCompetitionsPersistencePort;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.infrastructure.out.postgres.competitions.GetCompetitionJooqAdapter;
 import com.k9x.infrastructure.out.postgres.competitions.GetCompetitionListJooqAdapter;
+import com.k9x.infrastructure.out.postgres.competitions.GetSelectableCompetitionsJooqAdapter;
 import com.k9x.infrastructure.out.postgres.competitions.SaveCompetitionJooqAdapter;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
@@ -32,5 +34,10 @@ public class CompetitionJooqAdapterConfiguration {
     @Bean
     public SaveCompetitionPersistencePort saveCompetitionPersistencePort() {
         return new SaveCompetitionJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetSelectableCompetitionsPersistencePort getSelectableCompetitionsPersistencePort() {
+        return new GetSelectableCompetitionsJooqAdapter(dsl);
     }
 }

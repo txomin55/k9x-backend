@@ -11,6 +11,8 @@ import com.k9x.application.competitions.use_case.UpdateCompetitionServiceCase;
 import com.k9x.application.notifications.port.GetStageNotificationsPersistencePort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import com.k9x.application.competitions.port.GetSelectableCompetitionsPersistencePort;
+import com.k9x.application.competitions.use_case.GetSelectableCompetitionListServiceCase;
 
 @Configuration
 public class SecuredCompetitionUseCaseConfiguration {
@@ -39,5 +41,11 @@ public class SecuredCompetitionUseCaseConfiguration {
             GetStageNotificationsPersistencePort getStageNotificationsPersistencePort) {
         return new GetCompetitionListServiceCase(getCompetitionListPersistencePort,
                 getStageNotificationsPersistencePort);
+    }
+
+    @Bean
+    public GetSelectableCompetitionListServiceCase getSelectableCompetitionListServiceCase(
+            GetSelectableCompetitionsPersistencePort getSelectableCompetitionsPersistencePort) {
+        return new GetSelectableCompetitionListServiceCase(getSelectableCompetitionsPersistencePort);
     }
 }

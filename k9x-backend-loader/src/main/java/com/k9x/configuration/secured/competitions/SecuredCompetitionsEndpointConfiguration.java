@@ -12,6 +12,8 @@ import com.k9x.infrastructure.in.rest.endpoints.secured.competitions.UpdateCompe
 import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import com.k9x.application.competitions.use_case.GetSelectableCompetitionListServiceCase;
+import com.k9x.infrastructure.in.rest.endpoints.secured.competitions.FetchSelectableCompetitions;
 
 @Configuration
 public class SecuredCompetitionsEndpointConfiguration {
@@ -35,5 +37,12 @@ public class SecuredCompetitionsEndpointConfiguration {
     @Bean
     public UpdateCompetition updateCompetition(UpdateCompetitionServiceCase updateCompetitionServiceCase, UserInfoDTO userInfoDTO) {
         return new UpdateCompetition(updateCompetitionServiceCase, userInfoDTO);
+    }
+
+    @Bean
+    public FetchSelectableCompetitions fetchSelectableCompetitions(
+            GetSelectableCompetitionListServiceCase getSelectableCompetitionListServiceCase,
+            UserInfoDTO userInfoDTO) {
+        return new FetchSelectableCompetitions(getSelectableCompetitionListServiceCase, userInfoDTO);
     }
 }

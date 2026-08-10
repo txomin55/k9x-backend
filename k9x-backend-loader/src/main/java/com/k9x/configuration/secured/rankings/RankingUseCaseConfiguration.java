@@ -5,11 +5,13 @@ import com.k9x.application.rankings.port.GetActiveEventIdsPersistencePort;
 import com.k9x.application.rankings.port.GetRankingDetailPersistencePort;
 import com.k9x.application.rankings.port.GetRankingIncludeByListPort;
 import com.k9x.application.rankings.port.GetRankingGroupByListPort;
+import com.k9x.application.rankings.port.GetRankingListPersistencePort;
 import com.k9x.application.rankings.port.GetRankingPersistencePort;
 import com.k9x.application.rankings.port.SaveRankingPersistencePort;
 import com.k9x.application.rankings.use_case.DeleteRankingServiceCase;
 import com.k9x.application.rankings.use_case.GetRankingIncludeByListServiceCase;
 import com.k9x.application.rankings.use_case.GetRankingGroupByListServiceCase;
+import com.k9x.application.rankings.use_case.GetRankingListServiceCase;
 import com.k9x.application.rankings.use_case.GetRankingServiceCase;
 import com.k9x.application.rankings.use_case.SaveRankingServiceCase;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +34,12 @@ public class RankingUseCaseConfiguration {
     public GetRankingServiceCase getRankingServiceCase(
             GetRankingDetailPersistencePort getRankingDetailPersistencePort) {
         return new GetRankingServiceCase(getRankingDetailPersistencePort);
+    }
+
+    @Bean
+    public GetRankingListServiceCase getRankingListServiceCase(
+            GetRankingListPersistencePort getRankingListPersistencePort) {
+        return new GetRankingListServiceCase(getRankingListPersistencePort);
     }
 
     @Bean

@@ -3,12 +3,14 @@ package com.k9x.infrastructure.configuration.postgres;
 import com.k9x.application.rankings.port.DeleteRankingPersistencePort;
 import com.k9x.application.rankings.port.GetActiveEventIdsPersistencePort;
 import com.k9x.application.rankings.port.GetRankingDetailPersistencePort;
+import com.k9x.application.rankings.port.GetRankingListPersistencePort;
 import com.k9x.application.rankings.port.GetRankingPersistencePort;
 import com.k9x.application.rankings.port.SaveRankingPersistencePort;
 import com.k9x.infrastructure.out.postgres.rankings.DeleteRankingJooqAdapter;
 import com.k9x.infrastructure.out.postgres.rankings.GetActiveEventIdsJooqAdapter;
 import com.k9x.infrastructure.out.postgres.rankings.GetRankingDetailJooqAdapter;
 import com.k9x.infrastructure.out.postgres.rankings.GetRankingJooqAdapter;
+import com.k9x.infrastructure.out.postgres.rankings.GetRankingListJooqAdapter;
 import com.k9x.infrastructure.out.postgres.rankings.SaveRankingJooqAdapter;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +33,11 @@ public class RankingJooqAdapterConfiguration {
     @Bean
     public GetRankingPersistencePort getRankingPersistencePort() {
         return new GetRankingJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetRankingListPersistencePort getRankingListPersistencePort() {
+        return new GetRankingListJooqAdapter(dsl);
     }
 
     @Bean
