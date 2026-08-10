@@ -4,6 +4,7 @@ import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetito
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventJudgeDTO;
 import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
+import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import com.k9x.oas.stub.api.EventsFetchClassificationApiDelegate;
 import com.k9x.oas.stub.model.*;
 import org.springframework.context.MessageSource;
@@ -16,11 +17,13 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
 
     private final GetEventClassificationServiceCase getClassificationServiceCase;
     private final MessageSource messageSource;
+    private final ReferenceNameResolver referenceNames;
 
     public GetEventClassification(GetEventClassificationServiceCase getClassificationServiceCase,
-                                  MessageSource messageSource) {
+                                  MessageSource messageSource, ReferenceNameResolver referenceNames) {
         this.getClassificationServiceCase = getClassificationServiceCase;
         this.messageSource = messageSource;
+        this.referenceNames = referenceNames;
     }
 
     @Override
@@ -28,7 +31,7 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
         FetchClassificationDTO dto = getClassificationServiceCase.getClassification(eventId);
 
         return ResponseEntity.ok(new StageEventClassificationResponseDTO(
-                resolveDiscipline(dto.disciplineId()),
+                referenceNames.discipline(dto.disciplineId()),
                 new IdNameDTO(dto.eventName(), dto.eventId()),
                 dto.rank(),
                 new IdNameDTO(dto.stageName(), dto.stageId()),
@@ -51,12 +54,12 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
             List<FetchClassificationCompetitorDTO> competitors) {
         return competitors.stream()
                 .map(c -> new StageEventClassificationItemResponseDTO(
-                        resolveCountry(c.country()),
+                        referenceNames.country(c.country()),
                         c.owner(),
                         c.handler(),
                         c.team(),
                         c.status(),
-                        resolveBreed(c.breed()),
+                        referenceNames.breed(c.breed()),
                         new IdNameDTO(c.dogName(), c.dogIdentification()),
                         c.exercises().stream()
                                 .map(e -> new StageEventClassificationExerciseScoresResponseDTO(
@@ -98,37 +101,10 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                 .toList();
     }
 
-    private IdNameDTO resolveCountry(String countryCode) {
-        if (countryCode == null) {
-            return null;
-        }
-        String name = messageSource.getMessage(
-                "country." + countryCode.toLowerCase() + ".name", null, countryCode, LocaleContextHolder.getLocale());
-        return new IdNameDTO(name, countryCode);
-    }
-
-    private IdNameDTO resolveBreed(String breedId) {
-        if (breedId == null) {
-            return null;
-        }
-        String name = messageSource.getMessage(
-                "breed." + breedId.toLowerCase() + ".name", null, breedId, LocaleContextHolder.getLocale());
-        return new IdNameDTO(name, breedId);
-    }
-
     private String resolveExerciseName(String exerciseId) {
         if (exerciseId == null) {
             return null;
         }
         return messageSource.getMessage(exerciseId, null, exerciseId, LocaleContextHolder.getLocale());
-    }
-
-    private IdNameDTO resolveDiscipline(String disciplineId) {
-        if (disciplineId == null) {
-            return null;
-        }
-        String name = messageSource.getMessage(
-                "discipline." + disciplineId + ".name", null, LocaleContextHolder.getLocale());
-        return new IdNameDTO(name, disciplineId);
     }
 }

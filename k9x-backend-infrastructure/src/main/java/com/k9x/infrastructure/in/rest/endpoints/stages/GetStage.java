@@ -2,14 +2,13 @@ package com.k9x.infrastructure.in.rest.endpoints.stages;
 
 import com.k9x.application.stages.use_case.GetStageServiceCase;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailCompetitorDTO;
+import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import com.k9x.oas.stub.api.StagesFetchOneApiDelegate;
 import com.k9x.oas.stub.model.IdNameDTO;
 import com.k9x.oas.stub.model.StageDetailResponseDTO;
 import com.k9x.oas.stub.model.StageEventDetailCompetitorResponseDTO;
 import com.k9x.oas.stub.model.StageEventDetailResponseDTO;
 import com.k9x.oas.stub.model.StageNotificationResponseDTO;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -17,11 +16,11 @@ import java.util.List;
 public class GetStage implements StagesFetchOneApiDelegate {
 
     private final GetStageServiceCase getStageServiceCase;
-    private final MessageSource messageSource;
+    private final ReferenceNameResolver referenceNames;
 
-    public GetStage(GetStageServiceCase getStageServiceCase, MessageSource messageSource) {
+    public GetStage(GetStageServiceCase getStageServiceCase, ReferenceNameResolver referenceNames) {
         this.getStageServiceCase = getStageServiceCase;
-        this.messageSource = messageSource;
+        this.referenceNames = referenceNames;
     }
 
     @Override
@@ -37,7 +36,7 @@ public class GetStage implements StagesFetchOneApiDelegate {
                         .map(e -> new StageEventDetailResponseDTO(
                                 e.id(),
                                 e.name(),
-                                resolveDiscipline(e.disciplineId()),
+                                referenceNames.discipline(e.disciplineId()),
                                 new IdNameDTO(e.configurationName(), e.configurationId()),
                                 mapCompetitors(e.competitors()),
                                 e.status(),
@@ -62,26 +61,8 @@ public class GetStage implements StagesFetchOneApiDelegate {
                         c.handler(),
                         c.country(),
                         c.team(),
-                        resolveBreed(c.breed()),
+                        referenceNames.breed(c.breed()),
                         c.verified()))
                 .toList();
-    }
-
-    private IdNameDTO resolveBreed(String breedId) {
-        if (breedId == null) {
-            return null;
-        }
-        String name = messageSource.getMessage(
-                "breed." + breedId.toLowerCase() + ".name", null, breedId, LocaleContextHolder.getLocale());
-        return new IdNameDTO(name, breedId);
-    }
-
-    private IdNameDTO resolveDiscipline(String disciplineId) {
-        if (disciplineId == null) {
-            return null;
-        }
-        String name = messageSource.getMessage(
-                "discipline." + disciplineId + ".name", null, LocaleContextHolder.getLocale());
-        return new IdNameDTO(name, disciplineId);
     }
 }

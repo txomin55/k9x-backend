@@ -3,11 +3,9 @@ package com.k9x.infrastructure.in.rest.endpoints.secured.dogs;
 import com.k9x.application.dogs.use_case.GetDogListServiceCase;
 import com.k9x.application.dogs.use_case.dto.DogDTO;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
+import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import com.k9x.oas.stub.api.SecuredDogsFetchAllApiDelegate;
 import com.k9x.oas.stub.model.DogSummaryResponseDTO;
-import com.k9x.oas.stub.model.IdNameDTO;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -16,12 +14,13 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
 
     private final GetDogListServiceCase getDogListService;
     private final UserInfoDTO userDetails;
-    private final MessageSource messageSource;
+    private final ReferenceNameResolver referenceNames;
 
-    public GetDogList(GetDogListServiceCase getDogListService, UserInfoDTO userDetails, MessageSource messageSource) {
+    public GetDogList(GetDogListServiceCase getDogListService, UserInfoDTO userDetails,
+                      ReferenceNameResolver referenceNames) {
         this.getDogListService = getDogListService;
         this.userDetails = userDetails;
-        this.messageSource = messageSource;
+        this.referenceNames = referenceNames;
     }
 
     @Override
@@ -38,13 +37,13 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
                                 dog.name(),
                                 dog.image(),
                                 dog.owned(),
-                                resolveCountry(dog.country()),
+                                referenceNames.country(dog.country()),
                                 dog.team(),
                                 dog.owner(),
                                 dog.handler(),
                                 dog.origin(),
                                 dog.license(),
-                                resolveBreed(dog.breed()),
+                                referenceNames.breed(dog.breed()),
                                 dog.sex() == null ? null : dog.sex().name(),
                                 dog.withersCm(),
                                 dog.threeFciGenerationsConfirmed()
@@ -52,23 +51,5 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
                 )
                 .toList();
         return ResponseEntity.ok(mapped);
-    }
-
-    private IdNameDTO resolveCountry(String countryCode) {
-        if (countryCode == null) {
-            return null;
-        }
-        String name = messageSource.getMessage(
-                "country." + countryCode.toLowerCase() + ".name", null, countryCode, LocaleContextHolder.getLocale());
-        return new IdNameDTO(name, countryCode);
-    }
-
-    private IdNameDTO resolveBreed(String breedId) {
-        if (breedId == null) {
-            return null;
-        }
-        String name = messageSource.getMessage(
-                "breed." + breedId.toLowerCase() + ".name", null, breedId, LocaleContextHolder.getLocale());
-        return new IdNameDTO(name, breedId);
     }
 }

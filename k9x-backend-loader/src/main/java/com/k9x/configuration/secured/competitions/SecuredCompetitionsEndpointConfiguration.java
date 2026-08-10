@@ -9,7 +9,7 @@ import com.k9x.infrastructure.in.rest.endpoints.secured.competitions.CreateCompe
 import com.k9x.infrastructure.in.rest.endpoints.secured.competitions.FetchCompetitions;
 import com.k9x.infrastructure.in.rest.endpoints.secured.competitions.RemoveCompetition;
 import com.k9x.infrastructure.in.rest.endpoints.secured.competitions.UpdateCompetition;
-import org.springframework.context.MessageSource;
+import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,8 +23,8 @@ public class SecuredCompetitionsEndpointConfiguration {
 
     @Bean
     public FetchCompetitions fetchCompetitions(GetCompetitionListServiceCase getCompetitionListServiceCase, UserInfoDTO userInfoDTO,
-                                               MessageSource messageSource) {
-        return new FetchCompetitions(getCompetitionListServiceCase, userInfoDTO, messageSource);
+                                               ReferenceNameResolver referenceNameResolver) {
+        return new FetchCompetitions(getCompetitionListServiceCase, userInfoDTO, referenceNameResolver);
     }
 
     @Bean

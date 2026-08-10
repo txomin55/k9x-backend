@@ -1,14 +1,13 @@
 package com.k9x.infrastructure.in.rest.endpoints.stages;
 
 import com.k9x.application.stages.use_case.GetStageListServiceCase;
+import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import com.k9x.oas.stub.api.StagesFetchAllApiDelegate;
 import com.k9x.oas.stub.model.CompetitionLocationDetailResponseDTO;
 import com.k9x.oas.stub.model.IdNameDTO;
 import com.k9x.oas.stub.model.StageSummaryResponseDTO;
 import com.k9x.oas.stub.model.StageEventSummaryResponseDTO;
 import com.k9x.oas.stub.model.StageNotificationResponseDTO;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
@@ -17,11 +16,11 @@ import java.util.List;
 public class GetStages implements StagesFetchAllApiDelegate {
 
     private final GetStageListServiceCase getStageListServiceCase;
-    private final MessageSource messageSource;
+    private final ReferenceNameResolver referenceNames;
 
-    public GetStages(GetStageListServiceCase getStageListServiceCase, MessageSource messageSource) {
+    public GetStages(GetStageListServiceCase getStageListServiceCase, ReferenceNameResolver referenceNames) {
         this.getStageListServiceCase = getStageListServiceCase;
-        this.messageSource = messageSource;
+        this.referenceNames = referenceNames;
     }
 
     @Override
@@ -43,7 +42,7 @@ public class GetStages implements StagesFetchAllApiDelegate {
                                         .map(e -> new StageEventSummaryResponseDTO(
                                                 e.id(),
                                                 e.name(),
-                                                resolveDiscipline(e.disciplineId()),
+                                                referenceNames.discipline(e.disciplineId()),
                                                 e.competitorCount(),
                                                 e.status(),
                                                 e.enrollmentOpened(),
@@ -58,14 +57,5 @@ public class GetStages implements StagesFetchAllApiDelegate {
                                 stage.status(),
                                 stage.organizer()))
                         .toList());
-    }
-
-    private IdNameDTO resolveDiscipline(String disciplineId) {
-        if (disciplineId == null) {
-            return null;
-        }
-        String name = messageSource.getMessage(
-                "discipline." + disciplineId + ".name", null, LocaleContextHolder.getLocale());
-        return new IdNameDTO(name, disciplineId);
     }
 }

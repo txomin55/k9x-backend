@@ -17,6 +17,7 @@ import com.k9x.infrastructure.in.rest.endpoints.secured.events.export.ExportEven
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventInfo;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventNotCompeting;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxScore;
+import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,13 +36,15 @@ public class SecuredEventEndpointConfiguration {
     }
 
     @Bean
-    public GetEvent getEvent(GetEventServiceCase getEventServiceCase, UserInfoDTO userInfoDTO, MessageSource messageSource) {
-        return new GetEvent(getEventServiceCase, userInfoDTO, messageSource);
+    public GetEvent getEvent(GetEventServiceCase getEventServiceCase, UserInfoDTO userInfoDTO,
+                             ReferenceNameResolver referenceNameResolver) {
+        return new GetEvent(getEventServiceCase, userInfoDTO, referenceNameResolver);
     }
 
     @Bean
-    public EventWorkbookWriter eventWorkbookWriter(MessageSource messageSource) {
-        return new EventWorkbookWriter(messageSource);
+    public EventWorkbookWriter eventWorkbookWriter(MessageSource messageSource,
+                                                  ReferenceNameResolver referenceNameResolver) {
+        return new EventWorkbookWriter(messageSource, referenceNameResolver);
     }
 
     @Bean

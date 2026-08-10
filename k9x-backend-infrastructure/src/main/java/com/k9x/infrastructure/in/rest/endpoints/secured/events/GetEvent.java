@@ -8,25 +8,24 @@ import com.k9x.application.events.use_case.dto.FetchEventConfigurationDTO;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 import com.k9x.application.events.use_case.dto.FetchEventExerciseDTO;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
+import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import com.k9x.oas.stub.api.SecuredEventsFetchOneApiDelegate;
 import com.k9x.oas.stub.model.*;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.Locale;
 
 public class GetEvent implements SecuredEventsFetchOneApiDelegate {
 
     private final GetEventServiceCase getEventServiceCase;
     private final UserInfoDTO userDetails;
-    private final MessageSource messageSource;
+    private final ReferenceNameResolver referenceNames;
 
-    public GetEvent(GetEventServiceCase getEventServiceCase, UserInfoDTO userDetails, MessageSource messageSource) {
+    public GetEvent(GetEventServiceCase getEventServiceCase, UserInfoDTO userDetails,
+                    ReferenceNameResolver referenceNames) {
         this.getEventServiceCase = getEventServiceCase;
         this.userDetails = userDetails;
-        this.messageSource = messageSource;
+        this.referenceNames = referenceNames;
     }
 
     @Override
@@ -48,7 +47,7 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                 new IdNameDTO(obdx.stageId(), obdx.stageName()),
                 obdx.name(),
                 obdx.status(),
-                resolveDiscipline(obdx.discipline()),
+                referenceNames.discipline(obdx.discipline()),
                 mapCompetitors(event.competitors()),
                 mapExercises(event.exercises()),
                 mapConfiguration(event.configuration()),
@@ -70,7 +69,7 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                         c.startNumber() != null ? c.startNumber().intValue() : null,
                         c.competitorNumber() != null ? c.competitorNumber().intValue() : null,
                         c.status(),
-                        resolveBreed(c.breed()),
+                        referenceNames.breed(c.breed()),
                         new IdNameDTO(c.dogName(), c.dogIdentification()),
                         c.bih(),
                         c.primer(),
@@ -104,23 +103,5 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                 : new FederationConfigurationResponseDTO(configuration.federation().id(),
                 configuration.federation().name());
         return new EventConfigurationDetailResponseDTO(configuration.id(), configuration.name(), federation);
-    }
-
-    private IdNameDTO resolveBreed(String breedId) {
-        if (breedId == null) {
-            return null;
-        }
-        String name = messageSource.getMessage(
-                "breed." + breedId.toLowerCase() + ".name", null, breedId, LocaleContextHolder.getLocale());
-        return new IdNameDTO(name, breedId);
-    }
-
-    private IdNameDTO resolveDiscipline(String disciplineId) {
-        if (disciplineId == null) {
-            return null;
-        }
-        String name = messageSource.getMessage(
-                "discipline." + disciplineId.toUpperCase(Locale.ROOT) + ".name", null, LocaleContextHolder.getLocale());
-        return new IdNameDTO(name, disciplineId);
     }
 }

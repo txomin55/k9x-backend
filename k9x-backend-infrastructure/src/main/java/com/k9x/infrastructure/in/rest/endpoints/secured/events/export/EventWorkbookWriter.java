@@ -10,6 +10,7 @@ import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventJudgeDTO;
 import com.k9x.application.events.use_case.dto.FetchEventConfigurationDTO;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 import com.k9x.application.events.use_case.dto.FetchEventExerciseDTO;
+import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -32,14 +33,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * Renders the private event detail as an xlsx workbook with four sheets: Configuration, Judges, Exercises and
  * Competitors. Sheet names and column headers are resolved through the {@link MessageSource} using the request
- * locale, the same way {@code GetEvent} resolves breed and discipline names.
+ * locale; breed, country and discipline values go through the same {@link ReferenceNameResolver} the read
+ * endpoints use, so the workbook shows the names the reader sees in the app and not the raw ids.
  */
 public class EventWorkbookWriter {
 
@@ -47,9 +48,11 @@ public class EventWorkbookWriter {
     private static final String MULTI_VALUE_SEPARATOR = ", ";
 
     private final MessageSource messageSource;
+    private final ReferenceNameResolver referenceNames;
 
-    public EventWorkbookWriter(MessageSource messageSource) {
+    public EventWorkbookWriter(MessageSource messageSource, ReferenceNameResolver referenceNames) {
         this.messageSource = messageSource;
+        this.referenceNames = referenceNames;
     }
 
     /**
@@ -171,10 +174,11 @@ public class EventWorkbookWriter {
         rowIndex = detailRow(sheet, rowIndex, "export.column.origin", enrolled == null ? null : enrolled.dogOrigin());
         rowIndex = detailRow(sheet, rowIndex, "export.column.license", enrolled == null ? null : enrolled.dogLicense());
         rowIndex = detailRow(sheet, rowIndex, "export.column.dog_name", competitor.dogName());
-        rowIndex = detailRow(sheet, rowIndex, "export.column.breed", competitor.breed());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.breed", referenceNames.breedName(competitor.breed()));
         rowIndex = detailRow(sheet, rowIndex, "export.column.handler", competitor.handler());
         rowIndex = detailRow(sheet, rowIndex, "export.column.team", competitor.team());
-        rowIndex = detailRow(sheet, rowIndex, "export.column.country", competitor.country());
+        rowIndex = detailRow(sheet, rowIndex, "export.column.country",
+                referenceNames.countryName(competitor.country()));
         rowIndex = detailRow(sheet, rowIndex, "export.column.bih", competitor.bih());
         rowIndex = detailRow(sheet, rowIndex, "export.column.primer", enrolled == null ? null : enrolled.primer());
         rowIndex = detailRow(sheet, rowIndex, "export.column.reserve", competitor.reserve());
@@ -314,7 +318,8 @@ public class EventWorkbookWriter {
         rowIndex = writeConfigurationRow(sheet, rowIndex, "export.field.event",
                 obdx == null ? null : obdx.id(), obdx == null ? null : obdx.name());
         rowIndex = writeConfigurationRow(sheet, rowIndex, "export.field.discipline",
-                obdx == null ? null : obdx.discipline(), resolveDiscipline(obdx == null ? null : obdx.discipline()));
+                obdx == null ? null : obdx.discipline(),
+                referenceNames.disciplineName(obdx == null ? null : obdx.discipline()));
         rowIndex = writeConfigurationRow(sheet, rowIndex, "export.field.federation",
                 configuration == null || configuration.federation() == null ? null : configuration.federation().id(),
                 configuration == null || configuration.federation() == null ? null : configuration.federation().name());
@@ -399,7 +404,7 @@ public class EventWorkbookWriter {
             setText(row, 8, competitor.sex());
             setBoolean(row, 9, competitor.bih());
             setText(row, 10, competitor.primer());
-            setText(row, 11, competitor.country());
+            setText(row, 11, referenceNames.countryName(competitor.country()));
             setText(row, 12, competitor.team());
         }
         autoSize(sheet, 13);
@@ -463,13 +468,6 @@ public class EventWorkbookWriter {
             return null;
         }
         return DEADLINE_FORMAT.format(Instant.ofEpochMilli(enrollmentDeadline).atZone(ZoneOffset.UTC));
-    }
-
-    private String resolveDiscipline(String disciplineId) {
-        if (disciplineId == null) {
-            return null;
-        }
-        return translate("discipline." + disciplineId.toUpperCase(Locale.ROOT) + ".name");
     }
 
     private String translate(String key) {

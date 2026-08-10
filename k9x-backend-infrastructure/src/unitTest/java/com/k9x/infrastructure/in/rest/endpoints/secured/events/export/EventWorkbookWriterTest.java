@@ -13,6 +13,7 @@ import com.k9x.application.events.use_case.dto.FetchEventConfigurationDTO;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 import com.k9x.application.events.use_case.dto.FetchEventExerciseDTO;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -54,12 +55,14 @@ class EventWorkbookWriterTest {
         messageSource.addMessage("export.column.competitor_number", Locale.ENGLISH, "Competitor number");
         messageSource.addMessage("export.field.federation", Locale.ENGLISH, "Federation");
         messageSource.addMessage("discipline.OBDX.name", Locale.ENGLISH, "Obedience");
+        messageSource.addMessage("breed.breed-1.name", Locale.ENGLISH, "Border Collie");
+        messageSource.addMessage("country.es.name", Locale.ENGLISH, "Spain");
         messageSource.addMessage("export.value.yes", Locale.ENGLISH, "yes");
         messageSource.addMessage("export.value.no", Locale.ENGLISH, "no");
         messageSource.setUseCodeAsDefaultMessage(true);
 
         LocaleContextHolder.setLocale(Locale.ENGLISH);
-        writer = new EventWorkbookWriter(messageSource);
+        writer = new EventWorkbookWriter(messageSource, new ReferenceNameResolver(messageSource));
     }
 
     @AfterEach
@@ -251,6 +254,20 @@ class EventWorkbookWriterTest {
         }
     }
 
+    /**
+     * The classification carries the breed and the country as bare ids, the same way the read endpoints get
+     * them; the workbook is read by people, so it must show the localised names instead.
+     */
+    @Test
+    void writes_the_competitor_breed_and_country_by_name_and_not_by_id() throws IOException {
+        try (XSSFWorkbook workbook = read(writer.write(event(), classification(), COEFFICIENTS))) {
+            String flattened = flatten(workbook.getSheet("7"));
+
+            assertThat(flattened).contains("Border Collie").doesNotContain("breed-1");
+            assertThat(flattened).contains("Spain");
+        }
+    }
+
     private String flatten(Sheet sheet) {
         StringBuilder text = new StringBuilder();
         for (Row row : sheet) {
@@ -339,7 +356,7 @@ class EventWorkbookWriterTest {
             assertThat(row.getCell(8).getStringCellValue()).isEqualTo("MALE");
             assertThat(row.getCell(9).getStringCellValue()).isEqualTo("yes");  // bih
             assertThat(row.getCell(10).getStringCellValue()).isEqualTo("CART-999");  // primer
-            assertThat(row.getCell(11).getStringCellValue()).isEqualTo("ES");
+            assertThat(row.getCell(11).getStringCellValue()).isEqualTo("Spain");  // country, by name and not by code
             assertThat(row.getCell(12).getStringCellValue()).isEqualTo("Team A");
         }
     }

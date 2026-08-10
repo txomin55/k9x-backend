@@ -13,6 +13,7 @@ import com.k9x.infrastructure.in.rest.endpoints.secured.collections.obdx.GetObdx
 import com.k9x.infrastructure.in.rest.endpoints.secured.collections.obdx.GetObdxYellowCards;
 import com.k9x.infrastructure.in.rest.endpoints.secured.collections.obdx.RegisterObdxRedCard;
 import com.k9x.infrastructure.in.rest.endpoints.secured.collections.obdx.RegisterObdxYellowCard;
+import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,14 +23,14 @@ public class SecuredCollectionsEndpointConfiguration {
 
     @Bean
     public GetCollection getObdxCollection(GetCollectionServiceCase getCollectionServiceCase, UserInfoDTO userInfoDTO,
-                                           MessageSource messageSource) {
-        return new GetCollection(getCollectionServiceCase, userInfoDTO, messageSource);
+                                           MessageSource messageSource, ReferenceNameResolver referenceNameResolver) {
+        return new GetCollection(getCollectionServiceCase, userInfoDTO, messageSource, referenceNameResolver);
     }
 
     @Bean
     public GetCollections getCollections(GetCollectionListServiceCase getCollectionListServiceCase, UserInfoDTO userInfoDTO,
-                                         MessageSource messageSource) {
-        return new GetCollections(getCollectionListServiceCase, userInfoDTO, messageSource);
+                                         ReferenceNameResolver referenceNameResolver) {
+        return new GetCollections(getCollectionListServiceCase, userInfoDTO, referenceNameResolver);
     }
 
     @Bean

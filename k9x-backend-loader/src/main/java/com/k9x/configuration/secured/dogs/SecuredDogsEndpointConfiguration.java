@@ -9,7 +9,7 @@ import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.CreateDog;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.GetDogList;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.RemoveDog;
 import com.k9x.infrastructure.in.rest.endpoints.secured.dogs.UpdateDog;
-import org.springframework.context.MessageSource;
+import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,7 +32,8 @@ public class SecuredDogsEndpointConfiguration {
     }
 
     @Bean
-    public GetDogList getDogList(GetDogListServiceCase getDogListServiceCase, UserInfoDTO userInfoDTO, MessageSource messageSource) {
-        return new GetDogList(getDogListServiceCase, userInfoDTO, messageSource);
+    public GetDogList getDogList(GetDogListServiceCase getDogListServiceCase, UserInfoDTO userInfoDTO,
+                                 ReferenceNameResolver referenceNameResolver) {
+        return new GetDogList(getDogListServiceCase, userInfoDTO, referenceNameResolver);
     }
 }
