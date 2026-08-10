@@ -31,6 +31,7 @@ public class GetRankingJooqAdapter implements GetRankingPersistencePort {
                         RankingGroupBy.from(r.get(Tables.RANKINGS.GROUP_BY)),
                         RankingIncludeBy.from(r.get(Tables.RANKINGS.INCLUDE_BY)),
                         r.get(Tables.RANKINGS.INCLUDED_COUNT),
+                        r.get(Tables.RANKINGS.INCLUDE_RESERVES),
                         r.get(Tables.RANKINGS.CREATOR),
                         r.get(Tables.RANKINGS.CREATED_AT)
                 )).orElse(null);

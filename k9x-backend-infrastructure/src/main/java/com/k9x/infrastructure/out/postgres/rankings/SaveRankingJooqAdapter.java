@@ -22,6 +22,7 @@ public class SaveRankingJooqAdapter implements SaveRankingPersistencePort {
                 .set(Tables.RANKINGS.GROUP_BY, payload.groupBy().name())
                 .set(Tables.RANKINGS.INCLUDE_BY, payload.includeBy().name())
                 .set(Tables.RANKINGS.INCLUDED_COUNT, payload.includedCount())
+                .set(Tables.RANKINGS.INCLUDE_RESERVES, payload.includeReserves())
                 .set(Tables.RANKINGS.CREATOR, payload.creator())
                 .set(Tables.RANKINGS.CREATED_AT, payload.createdAt())
                 .execute();

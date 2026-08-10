@@ -16,6 +16,7 @@ public record SaveRankingCommand(
         List<String> eventIds,
         RankingGroupBy groupBy,
         RankingIncludeBy includeBy,
-        Integer includedCount
+        Integer includedCount,
+        boolean includeReserves
 ) {
 }

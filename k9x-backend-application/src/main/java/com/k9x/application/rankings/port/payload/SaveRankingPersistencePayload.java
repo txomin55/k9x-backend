@@ -14,6 +14,7 @@ public record SaveRankingPersistencePayload(
         RankingGroupBy groupBy,
         RankingIncludeBy includeBy,
         Integer includedCount,
+        boolean includeReserves,
         String creator,
         long createdAt
 ) {
@@ -31,6 +32,7 @@ public record SaveRankingPersistencePayload(
                 command.groupBy(),
                 command.includeBy(),
                 command.includeBy().includesAll() ? null : command.includedCount(),
+                command.includeReserves(),
                 creator,
                 DateUtils.nowUtcMillis());
     }

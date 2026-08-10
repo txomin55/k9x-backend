@@ -22,6 +22,7 @@ public record Ranking(
         RankingGroupBy groupBy,
         RankingIncludeBy includeBy,
         Integer includedCount,
+        boolean includeReserves,
         String creator,
         long createdAt
 ) {

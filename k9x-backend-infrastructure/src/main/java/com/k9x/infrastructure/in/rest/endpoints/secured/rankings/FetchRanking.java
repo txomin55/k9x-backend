@@ -36,6 +36,7 @@ public class FetchRanking implements SecuredRankingsFetchOneApiDelegate {
                         .toList(),
                 ranking.groupBy(),
                 ranking.includeBy(),
-                ranking.includedCount());
+                ranking.includedCount(),
+                ranking.includeReserves());
     }
 }

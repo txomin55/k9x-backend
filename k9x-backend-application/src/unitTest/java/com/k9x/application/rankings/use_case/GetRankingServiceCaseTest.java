@@ -48,7 +48,7 @@ class GetRankingServiceCaseTest {
 
     @Test
     void always_scopes_the_lookup_to_the_authenticated_user() {
-        FetchRankingDTO ranking = new FetchRankingDTO(RANKING_ID, "Copa", List.of(), "INDIVIDUAL", "ALL", null);
+        FetchRankingDTO ranking = new FetchRankingDTO(RANKING_ID, "Copa", List.of(), "INDIVIDUAL", "ALL", null, true);
         when(getRankingDetailPersistencePort.getRankingDetail(RANKING_ID, "user-1")).thenReturn(ranking);
 
         assertThat(serviceCase.getRanking(RANKING_ID, "user-1", true)).contains(ranking);

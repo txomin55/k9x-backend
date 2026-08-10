@@ -29,6 +29,7 @@ public class GetRankingDetailJooqAdapter implements GetRankingDetailPersistenceP
                         Tables.RANKINGS.GROUP_BY,
                         Tables.RANKINGS.INCLUDE_BY,
                         Tables.RANKINGS.INCLUDED_COUNT,
+                        Tables.RANKINGS.INCLUDE_RESERVES,
                         Tables.EVENTS.ID,
                         Tables.EVENTS.NAME)
                 .from(Tables.RANKINGS)
@@ -59,6 +60,7 @@ public class GetRankingDetailJooqAdapter implements GetRankingDetailPersistenceP
                 events,
                 first.get(Tables.RANKINGS.GROUP_BY),
                 first.get(Tables.RANKINGS.INCLUDE_BY),
-                first.get(Tables.RANKINGS.INCLUDED_COUNT));
+                first.get(Tables.RANKINGS.INCLUDED_COUNT),
+                first.get(Tables.RANKINGS.INCLUDE_RESERVES));
     }
 }

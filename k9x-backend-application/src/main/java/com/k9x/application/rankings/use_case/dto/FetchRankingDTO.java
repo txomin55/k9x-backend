@@ -12,6 +12,7 @@ public record FetchRankingDTO(
         List<FetchRankingEventDTO> events,
         String groupBy,
         String includeBy,
-        Integer includedCount
+        Integer includedCount,
+        boolean includeReserves
 ) {
 }

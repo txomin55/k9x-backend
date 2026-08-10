@@ -62,7 +62,7 @@ class SaveRankingServiceCaseTest {
 
     private SaveRankingCommand command(List<String> eventIds, RankingIncludeBy includeBy, Integer includedCount) {
         return new SaveRankingCommand(RANKING_ID, "Copa", eventIds, RankingGroupBy.INDIVIDUAL, includeBy,
-                includedCount);
+                includedCount, true);
     }
 
     private SaveRankingCommand validCommand() {
@@ -71,7 +71,7 @@ class SaveRankingServiceCaseTest {
 
     private Ranking existingRanking(String creator) {
         return new Ranking(RANKING_ID, "Copa", List.of("event-1"), RankingGroupBy.INDIVIDUAL,
-                RankingIncludeBy.ALL, null, creator, 0L);
+                RankingIncludeBy.ALL, null, true, creator, 0L);
     }
 
     private void eventsAreActive(String... eventIds) {

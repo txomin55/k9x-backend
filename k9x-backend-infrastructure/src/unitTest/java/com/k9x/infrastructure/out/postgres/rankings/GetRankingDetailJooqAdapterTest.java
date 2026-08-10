@@ -26,6 +26,7 @@ class GetRankingDetailJooqAdapterTest {
             Tables.RANKINGS.GROUP_BY,
             Tables.RANKINGS.INCLUDE_BY,
             Tables.RANKINGS.INCLUDED_COUNT,
+            Tables.RANKINGS.INCLUDE_RESERVES,
             Tables.EVENTS.ID,
             Tables.EVENTS.NAME
     };
@@ -37,6 +38,7 @@ class GetRankingDetailJooqAdapterTest {
         record.set(Tables.RANKINGS.GROUP_BY, "TEAM");
         record.set(Tables.RANKINGS.INCLUDE_BY, "LOWEST");
         record.set(Tables.RANKINGS.INCLUDED_COUNT, 2);
+        record.set(Tables.RANKINGS.INCLUDE_RESERVES, true);
         record.set(Tables.EVENTS.ID, eventId);
         record.set(Tables.EVENTS.NAME, eventName);
         return record;

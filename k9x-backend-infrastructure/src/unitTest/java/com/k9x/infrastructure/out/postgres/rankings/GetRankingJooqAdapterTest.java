@@ -68,6 +68,7 @@ class GetRankingJooqAdapterTest {
             record.set(Tables.RANKINGS.GROUP_BY, "TEAM");
             record.set(Tables.RANKINGS.INCLUDE_BY, "LOWEST");
             record.set(Tables.RANKINGS.INCLUDED_COUNT, 2);
+            record.set(Tables.RANKINGS.INCLUDE_RESERVES, true);
             record.set(Tables.RANKINGS.CREATOR, "user-1");
             record.set(Tables.RANKINGS.CREATED_AT, 1700000000000L);
             result.add(record);

@@ -31,7 +31,7 @@ class SaveRankingJooqAdapterTest {
 
     private static SaveRankingPersistencePayload payload(RankingIncludeBy includeBy, Integer includedCount) {
         return new SaveRankingPersistencePayload("ranking_comp-1", "Copa", List.of("event-1", "event-2"),
-                RankingGroupBy.TEAM, includeBy, includedCount, "user-1", 1700000000000L);
+                RankingGroupBy.TEAM, includeBy, includedCount, true, "user-1", 1700000000000L);
     }
 
     @Test
@@ -50,6 +50,7 @@ class SaveRankingJooqAdapterTest {
                 .contains("\"group_by\"")
                 .contains("\"include_by\"")
                 .contains("\"included_count\"")
+                .contains("\"include_reserves\"")
                 .contains("\"creator\"")
                 .contains("\"created_at\"");
         assertThat(capturedBindings.get())

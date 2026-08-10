@@ -32,7 +32,9 @@ public class CreateRanking implements SecuredRankingsCreateApiDelegate {
                         body.getEventIds() == null ? List.of() : body.getEventIds(),
                         RankingGroupBy.from(body.getGroupBy()),
                         RankingIncludeBy.from(body.getIncludeBy()),
-                        body.getIncludedCount()),
+                        body.getIncludedCount(),
+                        // Absent means reserves count, which is the column default.
+                        !Boolean.FALSE.equals(body.getIncludeReserves())),
                 userDetails.getEmail(), userDetails.isOrganizer());
         return ResponseEntity.ok().build();
     }

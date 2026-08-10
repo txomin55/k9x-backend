@@ -269,6 +269,7 @@ CREATE TABLE k9x.rankings
     group_by       VARCHAR(50)        NOT NULL,
     include_by     VARCHAR(50)        NOT NULL,
     included_count INTEGER,
+    include_reserves BOOLEAN            NOT NULL DEFAULT TRUE,
     creator        VARCHAR(50)        NOT NULL,
     created_at     BIGINT             NOT NULL,
     CONSTRAINT rankings_pkey PRIMARY KEY (id)
