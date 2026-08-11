@@ -8,5 +8,6 @@ public record FetchStageListDTO(String id, String name, String competitionName, 
                                 String address, Double coordAlt, Double coordLong,
                                 Long dateFrom, Long dateTo,
                                 String organizer, List<FetchStageListEventDTO> events, String status,
-                                List<StageNotificationDTO> notifications) {
+                                List<StageNotificationDTO> notifications,
+                                boolean includesRankings) {
 }

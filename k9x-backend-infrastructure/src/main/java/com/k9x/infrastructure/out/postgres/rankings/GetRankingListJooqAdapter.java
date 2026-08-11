@@ -2,6 +2,7 @@ package com.k9x.infrastructure.out.postgres.rankings;
 
 import com.k9x.application.rankings.port.GetRankingListPersistencePort;
 import com.k9x.application.rankings.use_case.dto.FetchRankingListItemDTO;
+import com.k9x.domain.rankings.RankingIds;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -36,6 +37,9 @@ public class GetRankingListJooqAdapter implements GetRankingListPersistencePort 
                         Tables.RANKINGS.INCLUDE_RESERVES)
                 .from(Tables.RANKINGS)
                 .where(Tables.RANKINGS.CREATOR.eq(creator))
+                // Competition rankings are managed from their competition's tab, so they stay out of the
+                // standalone list.
+                .and(Tables.RANKINGS.ID.notLike(RankingIds.COMPETITION_PREFIX + "%"))
                 .orderBy(Tables.RANKINGS.CREATED_AT.desc())
                 .fetch(record -> new FetchRankingListItemDTO(
                         record.get(Tables.RANKINGS.ID),

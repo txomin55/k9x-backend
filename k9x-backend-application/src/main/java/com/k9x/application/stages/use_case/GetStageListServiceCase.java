@@ -1,6 +1,7 @@
 package com.k9x.application.stages.use_case;
 
 import com.k9x.application.notifications.port.GetStageNotificationsPersistencePort;
+import com.k9x.application.rankings.port.GetRankedEventIdsPersistencePort;
 import com.k9x.application.notifications.use_case.dto.StageNotificationDTO;
 import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
@@ -18,10 +19,14 @@ public class GetStageListServiceCase {
     private final GetStageListPersistencePort getStageListPersistencePort;
     private final GetStageNotificationsPersistencePort getStageNotificationsPersistencePort;
 
+    private final GetRankedEventIdsPersistencePort getRankedEventIdsPersistencePort;
+
     public GetStageListServiceCase(GetStageListPersistencePort getStageListPersistencePort,
-                                   GetStageNotificationsPersistencePort getStageNotificationsPersistencePort) {
+                                   GetStageNotificationsPersistencePort getStageNotificationsPersistencePort,
+                                   GetRankedEventIdsPersistencePort getRankedEventIdsPersistencePort) {
         this.getStageListPersistencePort = getStageListPersistencePort;
         this.getStageNotificationsPersistencePort = getStageNotificationsPersistencePort;
+        this.getRankedEventIdsPersistencePort = getRankedEventIdsPersistencePort;
     }
 
     public List<FetchStageListDTO> getStages(Long from, Long to) {
@@ -38,8 +43,10 @@ public class GetStageListServiceCase {
         // it per stage would be an N+1.
         Map<String, List<StageNotificationDTO>> notificationsByStage = getStageNotificationsPersistencePort
                 .getByStageIds(stages.stream().map(cs -> cs.stage().id()).toList());
+        // Also one query for the whole response, so the flag costs the same no matter how many stages.
+        java.util.Set<String> rankedEventIds = getRankedEventIdsPersistencePort.getRankedEventIds();
         return stages.stream()
-                .map(cs -> toStageDto(cs.competition(), cs.stage(), now, notificationsByStage))
+                .map(cs -> toStageDto(cs.competition(), cs.stage(), now, notificationsByStage, rankedEventIds))
                 .toList();
     }
 
@@ -48,7 +55,8 @@ public class GetStageListServiceCase {
     }
 
     private FetchStageListDTO toStageDto(CompetitionSnapshot competition, StageSnapshot stage, long now,
-                                        Map<String, List<StageNotificationDTO>> notificationsByStage) {
+                                        Map<String, List<StageNotificationDTO>> notificationsByStage,
+                                        java.util.Set<String> rankedEventIds) {
         // The hydrated events carry their scores, so status() resolves the exact lifecycle here: the stage
         // is STARTED once any of its events holds a score, otherwise it falls back to the date-driven state.
         return new FetchStageListDTO(
@@ -66,7 +74,10 @@ public class GetStageListServiceCase {
                                 event.enrollmentDeadline(), event.awards(), event.rank()))
                         .toList(),
                 stage.status(now).name(),
-                notificationsByStage.getOrDefault(stage.id(), List.of()));
+                notificationsByStage.getOrDefault(stage.id(), List.of()),
+                stage.events().stream()
+                        .filter(event -> event.deletedAt() == null)
+                        .anyMatch(event -> rankedEventIds.contains(event.id())));
     }
 
     private record CompetitionStage(CompetitionSnapshot competition, StageSnapshot stage) {

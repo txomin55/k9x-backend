@@ -59,6 +59,9 @@ public class Auth implements Filter {
 
         String path = request.getRequestURI();
         if (!path.startsWith("/secured/")) {
+            // Public paths authenticate optionally: if a token happens to come along it is resolved so the
+            // endpoint can tell who is asking, but a missing or invalid one is never rejected.
+            resolveOptionalUser(request);
             chain.doFilter(req, res);
             return;
         }
@@ -79,13 +82,7 @@ public class Auth implements Filter {
                 return;
             }
 
-            UserInfoDTO userInfo = userInfoCache.getIfPresent(userDetails.getSubject());
-            if (userInfo == null) {
-                userInfo = getUserInfoPort.findById(userDetails.getSubject());
-                if (userInfo != null) {
-                    userInfoCache.put(userDetails.getSubject(), userInfo);
-                }
-            }
+            UserInfoDTO userInfo = findUser(userDetails.getSubject());
 
             if (userInfo == null) {
                 log.warn("Auth 401 [{} {}]: no user found for subject={}",
@@ -101,6 +98,41 @@ public class Auth implements Filter {
             log.warn("Auth 401 [{} {}]: {}", request.getMethod(), path, ex.toString());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
+    }
+
+    /**
+     * Best-effort resolution for public paths: sets the user when a valid token is present and stays silent
+     * otherwise, so an anonymous request is indistinguishable from one with a stale token.
+     */
+    private void resolveOptionalUser(HttpServletRequest request) {
+        String authorization = request.getHeader(AUTHORIZATION_HEADER);
+        if (authorization == null || !authorization.contains(" ")) {
+            return;
+        }
+        try {
+            AuthTokenDTO tokenDetails = authorizationExtractor.getDataFromToken(authorization.split(" ")[1]);
+            if (!isValidInCache(tokenDetails)) {
+                return;
+            }
+            UserInfoDTO userInfo = findUser(tokenDetails.getSubject());
+            if (userInfo != null) {
+                request.setAttribute(USER_DETAILS, userInfo);
+            }
+        } catch (RuntimeException ex) {
+            log.debug("Optional auth skipped [{}]: {}", request.getRequestURI(), ex.toString());
+        }
+    }
+
+    private UserInfoDTO findUser(String subject) {
+        UserInfoDTO cached = userInfoCache.getIfPresent(subject);
+        if (cached != null) {
+            return cached;
+        }
+        UserInfoDTO userInfo = getUserInfoPort.findById(subject);
+        if (userInfo != null) {
+            userInfoCache.put(subject, userInfo);
+        }
+        return userInfo;
     }
 
     private boolean isValidInCache(AuthTokenDTO tokenDetails) {
