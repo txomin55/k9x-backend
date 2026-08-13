@@ -59,7 +59,7 @@ class UpdateUserSubscriptionServiceCaseTest {
 
     private EventSnapshot event(String id) {
         return new EventSnapshot(id, null, null, "Event " + id, "stage-1", "owner@test.com", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
     }
 
     private void eventBelongsToCompetition(long stageDateTo) {

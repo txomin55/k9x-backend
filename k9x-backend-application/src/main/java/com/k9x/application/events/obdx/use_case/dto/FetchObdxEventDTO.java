@@ -4,9 +4,16 @@ import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 
 import java.util.List;
 
+/**
+ * Read model of an OBDX event. Besides the event's own fields it carries the few identity bits of its stage
+ * and competition — start date, competition name, organizing group and address — because the printable
+ * working-booklet proof needs them and they are already hydrated in the competition aggregate. They are not
+ * projected to the REST response of the event detail endpoint.
+ */
 public record FetchObdxEventDTO(String id, String name, String stageId, String stageName, String discipline,
                                 String status, Long enrollmentDeadline, ObdxAvgMethod scoreCalculation,
-                                List<String> awards) {
+                                List<String> awards, String commissioner, Long stageDateFrom,
+                                String competitionName, String organizerName, String address) {
 
     public FetchObdxEventDTO {
         awards = awards == null ? List.of() : awards;

@@ -64,7 +64,7 @@ class SaveCompetitionJooqAdapterTest {
 
     private CompetitionAggregate aggregateWithActiveEvent() {
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", FUTURE_TO, NOW, NOW, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 FUTURE_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
@@ -77,7 +77,7 @@ class SaveCompetitionJooqAdapterTest {
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", null, NOW, NOW, null,
                 ObdxAvgMethod.MID_AVG, List.of(),
                 List.of(new EventExercise("exercise-1", (short) 1, List.of(), List.of("judge-1"))),
-                List.of(), List.of(), List.of(), null, null);
+                List.of(), List.of(), List.of(), null, null, null);
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 PAST_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
@@ -209,21 +209,26 @@ class SaveCompetitionJooqAdapterTest {
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "config-1", ObdxAvgMethod.MID_AVG, 1735689600000L,
                 List.of(new ObdxCompetitorItem("dog-1", (short) 1, null, true, null, false)),
                 List.of(new ObdxExerciseItem("exercise-1", (short) 1, new String[]{"tag1"}, new String[]{"judge-1"})),
-                List.of(new ObdxJudgeItem("judge-1", "collector@example.com")), List.of(), 900, true);
+                List.of(new ObdxJudgeItem("judge-1", "collector@example.com", false)), List.of(), 900, true, null);
         competition.updateObdxEventInfo("evt-1", data, "user", NOW);
 
         new SaveCompetitionJooqAdapter(dsl).save(competition);
 
-        assertThat(capturedSql).hasSize(9);
+        assertThat(capturedSql).hasSize(10);
         assertThat(capturedSql.get(0)).contains("update \"k9x\".\"events\"");
-        assertThat(capturedSql.get(1)).contains("delete from \"obdx\".\"event_scores\"");
-        assertThat(capturedSql.get(2)).contains("delete from \"obdx\".\"event_competitors\"");
-        assertThat(capturedSql.get(3)).contains("insert into \"obdx\".\"event_competitors\"");
-        assertThat(capturedSql.get(4)).contains("delete from \"obdx\".\"event_exercises\"");
-        assertThat(capturedSql.get(5)).contains("insert into \"obdx\".\"event_exercises\"");
-        assertThat(capturedSql.get(6)).contains("delete from \"obdx\".\"event_judges\"");
-        assertThat(capturedSql.get(7)).contains("insert into \"obdx\".\"event_judges\"");
-        assertThat(capturedSql.get(8))
+        // The OBDX settings row is upserted: it does not exist until the event's first update.
+        assertThat(capturedSql.get(1))
+                .contains("insert into \"obdx\".\"event_info\"")
+                .contains("on conflict")
+                .contains("do update");
+        assertThat(capturedSql.get(2)).contains("delete from \"obdx\".\"event_scores\"");
+        assertThat(capturedSql.get(3)).contains("delete from \"obdx\".\"event_competitors\"");
+        assertThat(capturedSql.get(4)).contains("insert into \"obdx\".\"event_competitors\"");
+        assertThat(capturedSql.get(5)).contains("delete from \"obdx\".\"event_exercises\"");
+        assertThat(capturedSql.get(6)).contains("insert into \"obdx\".\"event_exercises\"");
+        assertThat(capturedSql.get(7)).contains("delete from \"obdx\".\"event_judges\"");
+        assertThat(capturedSql.get(8)).contains("insert into \"obdx\".\"event_judges\"");
+        assertThat(capturedSql.get(9))
                 .contains("insert into \"obdx\".\"event_scores\"")
                 .contains("on conflict")
                 .contains("do nothing");
@@ -235,7 +240,7 @@ class SaveCompetitionJooqAdapterTest {
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null, null, null,
                 (short) 1, null, true, false, null, null, null, null);
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", null, NOW, NOW, null,
-                ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of(), List.of(), null, null);
+                ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of(), List.of(), null, null, null);
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 FUTURE_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",

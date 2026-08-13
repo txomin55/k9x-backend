@@ -57,14 +57,16 @@ public class GetEventServiceCase {
         if (discipline != Discipline.OBDX) {
             return new FetchEventDetailDTO(null, List.of(), List.of(), List.of(), null);
         }
-        return buildObdxDetail(event, stage);
+        return buildObdxDetail(event, stage, competition);
     }
 
-    private FetchEventDetailDTO buildObdxDetail(EventSnapshot event, StageSnapshot stage) {
+    private FetchEventDetailDTO buildObdxDetail(EventSnapshot event, StageSnapshot stage,
+                                                CompetitionSnapshot competition) {
         long now = DateUtils.nowUtcMillis();
         FetchObdxEventDTO obdx = new FetchObdxEventDTO(event.id(), event.name(), stage.id(), stage.name(),
                 event.discipline(), event.status(now, stage.dateTo()).name(), event.enrollmentDeadline(),
-                event.scoreCalculation(), event.awards());
+                event.scoreCalculation(), event.awards(), event.commissioner(), stage.dateFrom(),
+                competition.name(), competition.organizerName(), competition.address());
 
         List<FetchObdxEventCompetitorDTO> competitors = event.competitors().stream()
                 .map(c -> new FetchObdxEventCompetitorDTO(c.dogIdentification(), c.dogName(), c.origin(), c.license(), c.breed(),
@@ -75,7 +77,7 @@ public class GetEventServiceCase {
                 .toList();
 
         List<FetchObdxEventJudgeDTO> judges = event.judges().stream()
-                .map(j -> new FetchObdxEventJudgeDTO(j.judgeId(), j.judgeName(), j.collectorEmail()))
+                .map(j -> new FetchObdxEventJudgeDTO(j.judgeId(), j.judgeName(), j.collectorEmail(), j.mainJudge()))
                 .toList();
         Map<String, FetchObdxEventJudgeDTO> judgesById = judges.stream()
                 .collect(Collectors.toMap(FetchObdxEventJudgeDTO::judgeId, j -> j, (a, _) -> a));

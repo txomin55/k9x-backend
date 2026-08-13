@@ -14,6 +14,7 @@ import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Organizers;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Users;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventCompetitors;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventExercises;
+import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventInfo;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventJudges;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventScores;
 import org.jooq.Condition;
@@ -131,18 +132,23 @@ public class CompetitionHydrator {
     private Map<String, List<EventSnapshot>> fetchEvents(Iterable<String> competitionIds) {
         var ev = Tables.EVENTS;
         var st = Tables.STAGES;
+        EventInfo ei = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_INFO;
 
-        List<EventShell> eventShells = dsl.select(ev.ID, ev.CONFIGURATION_ID, ev.DISCIPLINE, ev.NAME,
+        // LEFT JOIN on purpose: the OBDX settings row is written by the event update, so an event that was
+        // just created — or one of another discipline — legitimately has none.
+        List<EventShell> eventShells = dsl.select(ev.ID, ei.CONFIGURATION_ID, ev.DISCIPLINE, ev.NAME,
                         ev.STAGE_ID, ev.CREATOR, ev.ENROLLMENT_DEADLINE, ev.LAST_UPDATE, ev.CREATED_AT,
-                        ev.DELETED_AT, ev.SCORE_CALCULATION, ev.AWARDS, ev.RANK_SCORE, ev.INTERNATIONAL)
+                        ev.DELETED_AT, ei.SCORE_CALCULATION, ev.AWARDS, ev.RANK_SCORE, ev.INTERNATIONAL,
+                        ei.COMMISSIONER)
                 .from(ev)
                 .join(st).on(st.ID.eq(ev.STAGE_ID))
+                .leftJoin(ei).on(ei.EVENT_ID.eq(ev.ID))
                 .where(st.COMPETITION_ID.in(toList(competitionIds)))
                 .orderBy(ev.CREATED_AT.asc())
                 .fetch(r -> {
                     EventShell shell = new EventShell();
                     shell.id = r.get(ev.ID);
-                    shell.configurationId = r.get(ev.CONFIGURATION_ID);
+                    shell.configurationId = r.get(ei.CONFIGURATION_ID);
                     shell.discipline = r.get(ev.DISCIPLINE);
                     shell.name = r.get(ev.NAME);
                     shell.stageId = r.get(ev.STAGE_ID);
@@ -151,10 +157,11 @@ public class CompetitionHydrator {
                     shell.lastUpdate = r.get(ev.LAST_UPDATE);
                     shell.createdAt = r.get(ev.CREATED_AT);
                     shell.deletedAt = r.get(ev.DELETED_AT);
-                    shell.scoreCalculation = r.get(ev.SCORE_CALCULATION);
+                    shell.scoreCalculation = r.get(ei.SCORE_CALCULATION);
                     shell.awards = r.get(ev.AWARDS);
                     shell.rankScore = r.get(ev.RANK_SCORE);
                     shell.international = r.get(ev.INTERNATIONAL);
+                    shell.commissioner = r.get(ei.COMMISSIONER);
                     return shell;
                 });
 
@@ -175,7 +182,8 @@ public class CompetitionHydrator {
                     scores.getOrDefault(s.id, new ArrayList<>()),
                     s.awards == null ? List.of() : Arrays.asList(s.awards),
                     s.rankScore,
-                    s.international);
+                    s.international,
+                    s.commissioner);
             eventsByStage.computeIfAbsent(s.stageId, _ -> new ArrayList<>()).add(event);
         }
         return eventsByStage;
@@ -233,13 +241,14 @@ public class CompetitionHydrator {
         EventJudges ej = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_JUDGES;
         Judges j = Tables.JUDGES;
         Users u = Tables.USERS;
-        dsl.select(ej.EVENT_ID, ej.JUDGE_ID, j.NAME, u.EMAIL)
+        dsl.select(ej.EVENT_ID, ej.JUDGE_ID, j.NAME, u.EMAIL, ej.MAIN_JUDGE)
                 .from(ej)
                 .join(j).on(j.ID.eq(ej.JUDGE_ID).and(j.DELETED_AT.isNull()))
                 .leftJoin(u).on(u.ID.eq(ej.COLLECTOR_ID))
                 .where(ej.EVENT_ID.in(eventIds))
                 .forEach(r -> result.computeIfAbsent(r.get(ej.EVENT_ID), _ -> new ArrayList<>())
-                        .add(new EventJudge(r.get(ej.JUDGE_ID), r.get(j.NAME), r.get(u.EMAIL))));
+                        .add(new EventJudge(r.get(ej.JUDGE_ID), r.get(j.NAME), r.get(u.EMAIL),
+                                Boolean.TRUE.equals(r.get(ej.MAIN_JUDGE)))));
         return result;
     }
 
@@ -274,7 +283,7 @@ public class CompetitionHydrator {
     }
 
     private static final class EventShell {
-        String id, configurationId, discipline, name, stageId, creator, scoreCalculation;
+        String id, configurationId, discipline, name, stageId, creator, scoreCalculation, commissioner;
         Integer rankScore;
         Boolean international;
         Long enrollmentDeadline;

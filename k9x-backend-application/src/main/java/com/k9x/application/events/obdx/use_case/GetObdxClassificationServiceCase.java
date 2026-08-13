@@ -255,7 +255,7 @@ public class GetObdxClassificationServiceCase {
 
         List<FetchObdxEventJudgeDTO> judges = (event.judges() == null ? List.<EventJudge>of() : event.judges())
                 .stream()
-                .map(j -> new FetchObdxEventJudgeDTO(j.judgeId(), j.judgeName(), j.collectorEmail()))
+                .map(j -> new FetchObdxEventJudgeDTO(j.judgeId(), j.judgeName(), j.collectorEmail(), j.mainJudge()))
                 .toList();
 
         return new FetchObdxClassificationDTO(scoresLastUpdate, competitors,

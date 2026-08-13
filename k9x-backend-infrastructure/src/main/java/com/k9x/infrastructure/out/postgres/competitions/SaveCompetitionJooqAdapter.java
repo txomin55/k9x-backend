@@ -151,14 +151,28 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
     private void updateObdxEventInfo(DSLContext ctx, ObdxEventInfoUpdated c) {
         ctx.update(Tables.EVENTS)
                 .set(Tables.EVENTS.NAME, c.name())
-                .set(Tables.EVENTS.CONFIGURATION_ID, c.configurationId())
-                .set(Tables.EVENTS.SCORE_CALCULATION, c.scoreCalculation().name())
                 .set(Tables.EVENTS.ENROLLMENT_DEADLINE, c.enrollmentDeadline())
                 .set(Tables.EVENTS.LAST_UPDATE, c.lastUpdate())
                 .set(Tables.EVENTS.AWARDS, c.awards() == null ? null : c.awards().toArray(String[]::new))
                 .set(Tables.EVENTS.RANK_SCORE, c.rankScore())
                 .set(Tables.EVENTS.INTERNATIONAL, c.international())
                 .where(Tables.EVENTS.ID.eq(c.eventId()))
+                .execute();
+
+        // The OBDX settings row is born with the first update of the event, not with its creation, so this is
+        // an upsert rather than an update.
+        ctx.insertInto(EVENT_INFO)
+                .set(EVENT_INFO.EVENT_ID, c.eventId())
+                .set(EVENT_INFO.CONFIGURATION_ID, c.configurationId())
+                .set(EVENT_INFO.SCORE_CALCULATION, c.scoreCalculation().name())
+                .set(EVENT_INFO.COMMISSIONER, c.commissioner())
+                .set(EVENT_INFO.LAST_UPDATE, c.lastUpdate())
+                .onConflict(EVENT_INFO.EVENT_ID)
+                .doUpdate()
+                .set(EVENT_INFO.CONFIGURATION_ID, c.configurationId())
+                .set(EVENT_INFO.SCORE_CALCULATION, c.scoreCalculation().name())
+                .set(EVENT_INFO.COMMISSIONER, c.commissioner())
+                .set(EVENT_INFO.LAST_UPDATE, c.lastUpdate())
                 .execute();
 
         List<String> newExerciseIds = c.exercises().stream().map(ObdxExerciseItem::exerciseId).toList();
@@ -205,6 +219,7 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                     .set(EVENT_JUDGES.EVENT_ID, c.eventId())
                     .set(EVENT_JUDGES.JUDGE_ID, judge.judgeId())
                     .set(EVENT_JUDGES.COLLECTOR_ID, judge.collectorId())
+                    .set(EVENT_JUDGES.MAIN_JUDGE, judge.mainJudge())
                     .set(EVENT_JUDGES.LAST_UPDATE, c.lastUpdate())
                     .execute();
         }

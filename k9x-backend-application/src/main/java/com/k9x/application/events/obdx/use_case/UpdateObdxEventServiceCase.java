@@ -101,11 +101,12 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
                                 e.judgeIds() == null ? new String[0] : e.judgeIds().toArray(String[]::new)))
                         .toList(),
                 command.judges().stream()
-                        .map(j -> new ObdxJudgeItem(j.judgeId(), j.collectorEmail()))
+                        .map(j -> new ObdxJudgeItem(j.judgeId(), j.collectorEmail(), j.mainJudge()))
                         .toList(),
                 command.awards(),
                 rankScore,
-                international);
+                international,
+                command.commissioner());
     }
 
     private Map<String, Dog> fetchCompetitorDogs(UpdateObdxEventCommand command) {

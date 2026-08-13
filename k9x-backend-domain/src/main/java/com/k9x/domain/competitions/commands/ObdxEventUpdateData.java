@@ -7,5 +7,6 @@ import java.util.List;
 public record ObdxEventUpdateData(String name, String configurationId, ObdxAvgMethod scoreCalculation,
                                   Long enrollmentDeadline, List<ObdxCompetitorItem> competitors,
                                   List<ObdxExerciseItem> exercises, List<ObdxJudgeItem> judges,
-                                  List<String> awards, Integer rankScore, boolean international) {
+                                  List<String> awards, Integer rankScore, boolean international,
+                                  String commissioner) {
 }

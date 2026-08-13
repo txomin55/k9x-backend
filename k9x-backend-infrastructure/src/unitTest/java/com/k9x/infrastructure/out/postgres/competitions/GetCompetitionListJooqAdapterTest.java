@@ -56,7 +56,7 @@ class GetCompetitionListJooqAdapterTest {
 
     private static final Field<?>[] EVENT_FIELDS = {
             Tables.EVENTS.ID,
-            Tables.EVENTS.CONFIGURATION_ID,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_INFO.CONFIGURATION_ID,
             Tables.EVENTS.DISCIPLINE,
             Tables.EVENTS.NAME,
             Tables.EVENTS.STAGE_ID,
@@ -65,10 +65,11 @@ class GetCompetitionListJooqAdapterTest {
             Tables.EVENTS.LAST_UPDATE,
             Tables.EVENTS.CREATED_AT,
             Tables.EVENTS.DELETED_AT,
-            Tables.EVENTS.SCORE_CALCULATION,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_INFO.SCORE_CALCULATION,
             Tables.EVENTS.AWARDS,
             Tables.EVENTS.RANK_SCORE,
-            Tables.EVENTS.INTERNATIONAL
+            Tables.EVENTS.INTERNATIONAL,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_INFO.COMMISSIONER
     };
 
     private static MockResult emptyNoFields() {

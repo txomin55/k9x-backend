@@ -12,6 +12,7 @@ val postgresqlVersion = "42.7.11"
 val flywayDatabasePostgresqlVersion = "12.4.0"
 val poiVersion = "5.4.1"
 val commonsIoVersion = "2.18.0"
+val openPdfVersion = "3.0.5"
 
 dependencies {
     implementation(project(":k9x-backend-application"))
@@ -31,6 +32,9 @@ dependencies {
     // transitively through poi, but the IDE's Gradle import drops it and the app then dies with a
     // NoClassDefFoundError on the first export. Declared explicitly so no toolchain can lose it.
     implementation("commons-io:commons-io:$commonsIoVersion")
+    // OpenPDF renders the printable event proof. Note the coordinate changed meaning in 3.0.0: 3.x lives in
+    // org.openpdf.* while everything under the old com.lowagie.* 2.x package is deprecated.
+    implementation("com.github.librepdf:openpdf:$openPdfVersion")
 
     runtimeOnly("org.postgresql:postgresql:$postgresqlVersion")
     implementation("org.flywaydb:flyway-core")

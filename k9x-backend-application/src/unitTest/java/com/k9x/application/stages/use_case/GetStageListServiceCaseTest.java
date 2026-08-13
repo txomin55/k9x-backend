@@ -58,7 +58,7 @@ class GetStageListServiceCaseTest {
     private static EventSnapshot event(String id, String configId, Long deletedAt, List<EventCompetitor> competitors,
                                        List<EventExercise> exercises, List<EventJudge> judges, List<Score> scores) {
         return new EventSnapshot(id, configId, "OBDX", "Event " + id, "s-1", "creator",
-                null, 0L, 0L, deletedAt, ObdxAvgMethod.AVG, competitors, exercises, judges, scores, List.of(), null, null);
+                null, 0L, 0L, deletedAt, ObdxAvgMethod.AVG, competitors, exercises, judges, scores, List.of(), null, null, null);
     }
 
     private static EventCompetitor competitor(String dogIdentification, boolean notCompeting) {
@@ -71,7 +71,7 @@ class GetStageListServiceCaseTest {
     }
 
     private static EventJudge judge(String id) {
-        return new EventJudge(id, "Judge " + id, "collector@test.com");
+        return new EventJudge(id, "Judge " + id, "collector@test.com", false);
     }
 
     @BeforeEach

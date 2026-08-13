@@ -6,6 +6,7 @@ import com.k9x.domain.competitions.exceptions.CompetitionCannotBeDeletedExceptio
 import com.k9x.domain.competitions.exceptions.CompetitionCannotBeUpdatedException;
 import com.k9x.domain.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.domain.competitions.status.CompetitionStatus;
+import com.k9x.domain.disciplines.obdx.exceptions.ObdxMultipleMainJudgesException;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.exceptions.*;
@@ -319,9 +320,10 @@ public final class CompetitionAggregate {
         assert stage != null;
         assertEventUpdatable(event, stage, now);
         assertEnrollmentDeadlineBeforeStageStart(data.enrollmentDeadline(), stage);
+        assertSingleMainJudge(data.judges());
         changes.add(new ObdxEventInfoUpdated(eventId, data.name(), data.configurationId(), data.scoreCalculation(),
                 data.enrollmentDeadline(), data.competitors(), data.exercises(), data.judges(), now, data.awards(),
-                data.rankScore(), data.international()));
+                data.rankScore(), data.international(), data.commissioner()));
     }
 
     /**
@@ -410,6 +412,16 @@ public final class CompetitionAggregate {
      * must be assigned to that exercise in the event configuration. Otherwise it would be persisted but never
      * surfaced by the classification (which only reads scores/cards for assigned judge+exercise pairs).
      */
+    /**
+     * The working booklet has one "juez principal / árbitro" box, so at most one judge of an event can be the
+     * main one. None is valid: the flag is informative and events created before it have nobody flagged.
+     */
+    private void assertSingleMainJudge(List<ObdxJudgeItem> judges) {
+        if (judges != null && judges.stream().filter(ObdxJudgeItem::mainJudge).count() > 1) {
+            throw new ObdxMultipleMainJudgesException();
+        }
+    }
+
     private void assertJudgeAssignedToExercise(EventSnapshot event, String exerciseId, String judgeId) {
         boolean assigned = event.exercises() != null && event.exercises().stream()
                 .filter(e -> Objects.equals(e.exerciseId(), exerciseId))

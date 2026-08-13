@@ -79,8 +79,8 @@ class GetCompetitionListServiceCaseTest {
         // two judges assigned to the exercise but only one scored -> a score exists yet the competitor
         // is not settled -> STARTED.
         EventExercise exercise = new EventExercise("ex-1", (short) 1, null, List.of("judge-1", "judge-2"));
-        List<EventJudge> startedJudges = List.of(new EventJudge("judge-1", "Judge", null),
-                new EventJudge("judge-2", "Judge 2", null));
+        List<EventJudge> startedJudges = List.of(new EventJudge("judge-1", "Judge", null, false),
+                new EventJudge("judge-2", "Judge 2", null, false));
         EventSnapshot startedEvent = event("event-started", List.of(competitor), List.of(exercise),
                 startedJudges, List.of(new Score("ex-1", "judge-1", "dog-1", new BigDecimal("8"), 0L)));
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1",
@@ -99,7 +99,7 @@ class GetCompetitionListServiceCaseTest {
     private EventSnapshot event(String id, List<EventCompetitor> competitors, List<EventExercise> exercises,
                                 List<EventJudge> judges, List<Score> scores) {
         return new EventSnapshot(id, "cfg-1", "OBDX", id, "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, competitors, exercises, judges, scores, List.of(), null, null);
+                ObdxAvgMethod.MID_AVG, competitors, exercises, judges, scores, List.of(), null, null, null);
     }
 
     @Test

@@ -72,8 +72,9 @@ class EventWorkbookWriterTest {
 
     private FetchEventDetailDTO event() {
         FetchObdxEventDTO obdx = new FetchObdxEventDTO("event-1", "Spring Cup", "stage-1", "Stage A", "OBDX",
-                "STARTED", DEADLINE, ObdxAvgMethod.MID_AVG, List.of());
-        FetchObdxEventJudgeDTO judge = new FetchObdxEventJudgeDTO("judge-1", "Ana", "collector@k9x.com");
+                "STARTED", DEADLINE, ObdxAvgMethod.MID_AVG, List.of(), null, null, "Spring Competition",
+                "ADECAN", "Rota (Cádiz)");
+        FetchObdxEventJudgeDTO judge = new FetchObdxEventJudgeDTO("judge-1", "Ana", "collector@k9x.com", false);
         FetchEventExerciseDTO exercise = new FetchEventExerciseDTO("ex-1", "Heelwork", 1,
                 List.of("tag-a", "tag-b"), List.of(judge));
         FetchObdxEventCompetitorDTO competitor = new FetchObdxEventCompetitorDTO("dog-1", "Rex", "origin-999", "LIC-999", "breed-1",
@@ -289,7 +290,7 @@ class EventWorkbookWriterTest {
      */
     @Test
     void pivots_the_scores_table_with_one_column_per_judge() throws IOException {
-        FetchObdxEventJudgeDTO second = new FetchObdxEventJudgeDTO("judge-2", "Bea", null);
+        FetchObdxEventJudgeDTO second = new FetchObdxEventJudgeDTO("judge-2", "Bea", null, false);
         FetchEventDetailDTO event = event();
         FetchEventDetailDTO twoJudges = new FetchEventDetailDTO(event.obdx(), event.competitors(),
                 event.exercises(), List.of(event.judges().getFirst(), second), event.configuration());

@@ -54,7 +54,8 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                 mapJudges(event.judges()),
                 obdx.enrollmentDeadline(),
                 obdx.scoreCalculation() == null ? null : obdx.scoreCalculation().name(),
-                obdx.awards().stream().map(a -> new IdNameDTO(a, a)).toList()
+                obdx.awards().stream().map(a -> new IdNameDTO(a, a)).toList(),
+                obdx.commissioner()
         );
     }
 
@@ -91,7 +92,7 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
 
     private List<EventJudgeDetailResponseDTO> mapJudges(List<FetchObdxEventJudgeDTO> judges) {
         return judges.stream()
-                .map(j -> new EventJudgeDetailResponseDTO(j.judgeId(), j.judgeName(), j.collectorEmail()))
+                .map(j -> new EventJudgeDetailResponseDTO(j.judgeId(), j.judgeName(), j.collectorEmail(), j.mainJudge()))
                 .toList();
     }
 

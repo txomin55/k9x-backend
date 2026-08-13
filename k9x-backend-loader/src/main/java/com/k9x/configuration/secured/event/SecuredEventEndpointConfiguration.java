@@ -13,6 +13,10 @@ import com.k9x.infrastructure.in.rest.endpoints.secured.events.EnrollEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.GetEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.RemoveEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.export.EventWorkbookWriter;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.proof.EventProof;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.proof.EventProofPdfWriter;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.proof.EventProofRenderer;
+import com.k9x.infrastructure.in.rest.endpoints.secured.events.proof.ObdxEventProofRenderer;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.export.ExportEvent;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventInfo;
 import com.k9x.infrastructure.in.rest.endpoints.secured.events.obdx.UpdateObdxEventNotCompeting;
@@ -21,6 +25,8 @@ import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class SecuredEventEndpointConfiguration {
@@ -54,6 +60,25 @@ public class SecuredEventEndpointConfiguration {
                                    UserInfoDTO userInfoDTO, EventWorkbookWriter eventWorkbookWriter) {
         return new ExportEvent(getEventServiceCase, getEventClassificationServiceCase,
                 getObdxClassificationConfigPort, userInfoDTO, eventWorkbookWriter);
+    }
+
+    @Bean
+    public EventProofPdfWriter eventProofPdfWriter(MessageSource messageSource) {
+        return new EventProofPdfWriter(messageSource);
+    }
+
+    @Bean
+    public ObdxEventProofRenderer obdxEventProofRenderer(
+            GetEventClassificationServiceCase getEventClassificationServiceCase,
+            EventProofPdfWriter eventProofPdfWriter, MessageSource messageSource) {
+        return new ObdxEventProofRenderer(getEventClassificationServiceCase, eventProofPdfWriter, messageSource);
+    }
+
+    /** One renderer per discipline that prints a working booklet; a new discipline only adds a bean here. */
+    @Bean
+    public EventProof eventProof(GetEventServiceCase getEventServiceCase, UserInfoDTO userInfoDTO,
+                                 List<EventProofRenderer> eventProofRenderers) {
+        return new EventProof(getEventServiceCase, userInfoDTO, eventProofRenderers);
     }
 
     @Bean

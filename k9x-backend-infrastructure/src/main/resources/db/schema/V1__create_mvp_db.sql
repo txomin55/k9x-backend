@@ -98,8 +98,6 @@ CREATE TABLE k9x.events
 (
     id                  VARCHAR(255) NOT NULL,
     discipline          VARCHAR(50),
-    configuration_id    VARCHAR(50),
-    score_calculation   VARCHAR(10)  NOT NULL DEFAULT 'AVG',
     name                VARCHAR(255) NOT NULL,
     creator             VARCHAR(50)  NOT NULL,
     stage_id            VARCHAR(255) NOT NULL,
@@ -173,11 +171,26 @@ CREATE TABLE obdx.snap_event_competitors_results
     CONSTRAINT snap_event_competitors_results_dog_fk FOREIGN KEY (dog_identification) REFERENCES k9x.dogs (identification)
 );
 
+-- OBDX-specific settings of an event. Kept out of k9x.events so that table stays discipline-agnostic, in
+-- the same spirit as event_judges/event_exercises/event_competitors. The row is created by the event update,
+-- not by its creation: POST /secured/events has no configuration yet.
+CREATE TABLE obdx.event_info
+(
+    event_id          VARCHAR(255) NOT NULL,
+    configuration_id  VARCHAR(50),
+    score_calculation VARCHAR(10)  NOT NULL DEFAULT 'AVG',
+    commissioner      VARCHAR(255),
+    last_update       BIGINT       NOT NULL,
+    CONSTRAINT obdx_event_info_pkey PRIMARY KEY (event_id),
+    CONSTRAINT obdx_event_info_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id)
+);
+
 CREATE TABLE obdx.event_judges
 (
     event_id     VARCHAR(255) NOT NULL,
     judge_id     VARCHAR(255) NOT NULL,
     collector_id VARCHAR(255),
+    main_judge   BOOLEAN      NOT NULL DEFAULT FALSE,
     last_update  BIGINT       NOT NULL,
     CONSTRAINT obdx_event_judges_pkey PRIMARY KEY (event_id, judge_id),
     CONSTRAINT obdx_event_judges_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),

@@ -34,7 +34,9 @@ public record EventSnapshot(
         List<Score> scores,
         List<String> awards,
         Integer rankScore,
-        Boolean international
+        Boolean international,
+        /** OBDX only: the chief steward / trial manager printed on the working booklet. */
+        String commissioner
 ) {
 
     /**

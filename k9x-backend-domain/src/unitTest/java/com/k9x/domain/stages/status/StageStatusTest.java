@@ -34,27 +34,27 @@ class StageStatusTest {
         return new EventSnapshot("e1", "cfg", "obdx", "Event", "s1", "creator", null, 0L, 0L, null, ObdxAvgMethod.AVG,
                 List.of(new EventCompetitor("d1", "d1", "o", "h", "t", "c", "b", "i", null, null, (short) 0, null, true, false, null, null, null, null)),
                 List.of(new EventExercise("x1", (short) 1, List.of(), List.of("j1")), new EventExercise("x2", (short) 2, List.of(), List.of("j1"))),
-                List.of(new EventJudge("j1", "j1", null)),
-                List.of(new Score("x1", "j1", "d1", new BigDecimal("8.0"), 0L)), List.of(), null, null);
+                List.of(new EventJudge("j1", "j1", null, false)),
+                List.of(new Score("x1", "j1", "d1", new BigDecimal("8.0"), 0L)), List.of(), null, null, null);
     }
 
     private static EventSnapshot openEvent() {
         // no scores -> CREATED, deadline not yet reached -> enrollment open on its own
         return new EventSnapshot("e2", "cfg", "obdx", "Event", "s1", "creator", NEXT_WEEK, 0L, 0L, null,
-                ObdxAvgMethod.AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null);
+                ObdxAvgMethod.AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
     }
 
     private static EventSnapshot noDeadlineEvent() {
         // no scores -> CREATED, no deadline set -> enrollment never open
         return new EventSnapshot("e4", "cfg", "obdx", "Event", "s1", "creator", null, 0L, 0L, null, ObdxAvgMethod.AVG,
-                List.of(), List.of(), List.of(), List.of(), List.of(), null, null);
+                List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
     }
 
     private static EventSnapshot finishedEvent() {
         // single competitor flagged notCompeting -> settled -> FINISHED regardless of dateTo
         return new EventSnapshot("e3", "cfg", "obdx", "Event", "s1", "creator", null, 0L, 0L, null, ObdxAvgMethod.AVG,
                 List.of(new EventCompetitor("d1", "d1", "o", "h", "t", "c", "b", "i", null, null, (short) 0, null, true, true, null, null, null, null)),
-                List.of(), List.of(), List.of(), List.of(), null, null);
+                List.of(), List.of(), List.of(), List.of(), null, null, null);
     }
 
     @Test
