@@ -1,6 +1,7 @@
 package com.k9x.application.events.obdx.use_case.dto;
 
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxEventCategory;
 
 import java.util.List;
 
@@ -12,7 +13,8 @@ import java.util.List;
  */
 public record FetchObdxEventDTO(String id, String name, String stageId, String stageName, String discipline,
                                 String status, Long enrollmentDeadline, ObdxAvgMethod scoreCalculation,
-                                List<String> awards, String commissioner, Long stageDateFrom,
+                                List<String> awards, String commissioner, ObdxEventCategory category,
+                                Long stageDateFrom,
                                 String competitionName, String organizerName, String address) {
 
     public FetchObdxEventDTO {

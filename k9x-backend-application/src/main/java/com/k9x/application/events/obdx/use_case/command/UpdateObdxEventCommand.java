@@ -1,6 +1,7 @@
 package com.k9x.application.events.obdx.use_case.command;
 
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxEventCategory;
 
 import java.util.List;
 
@@ -13,7 +14,8 @@ public record UpdateObdxEventCommand(
         List<ExerciseCommand> exercises,
         List<JudgeCommand> judges,
         List<String> awards,
-        String commissioner
+        String commissioner,
+        ObdxEventCategory category
 ) {
     public record CompetitorCommand(String dogIdentification, Integer order, Integer competitorNumber, boolean bih, String primer, boolean reserve) {
     }

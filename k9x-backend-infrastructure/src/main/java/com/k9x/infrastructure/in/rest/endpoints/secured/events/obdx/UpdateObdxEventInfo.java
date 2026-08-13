@@ -4,6 +4,7 @@ import com.k9x.application.events.obdx.use_case.UpdateObdxEventServiceCase;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxEventCategory;
 import com.k9x.oas.stub.api.SecuredEventsUpdateInfoObdxApiDelegate;
 import com.k9x.oas.stub.model.UpdateEventRequestDTO;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,8 @@ public class UpdateObdxEventInfo implements SecuredEventsUpdateInfoObdxApiDelega
                                         Boolean.TRUE.equals(j.getMainJudge())))
                                 .toList(),
                         body.getAwards() == null ? List.of() : body.getAwards(),
-                        body.getCommissioner()
+                        body.getCommissioner(),
+                        ObdxEventCategory.fromName(body.getCategory())
                 ),
                 userDetails.getEmail(),
                 userDetails.isOrganizer()

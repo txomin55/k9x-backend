@@ -106,7 +106,8 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
                 command.awards(),
                 rankScore,
                 international,
-                command.commissioner());
+                command.commissioner(),
+                command.category());
     }
 
     private Map<String, Dog> fetchCompetitorDogs(UpdateObdxEventCommand command) {

@@ -20,7 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Serves the printable working-booklet proof of one competitor in one event.
+ * Serves the printable working-booklet proof of an event: one strip per competitor, in a single PDF.
  *
  * <p>Deliberately layout-free: the booklet is a per-discipline paper form, so this endpoint only fetches the
  * event — which is where the organizer check lives, inside {@link GetEventServiceCase} — picks the
@@ -43,10 +43,10 @@ public class EventProof implements SecuredEventsEventProofApiDelegate {
     }
 
     @Override
-    public ResponseEntity<Resource> getEventProofSecured(String eventId, String competitorId) {
+    public ResponseEntity<Resource> getEventProofSecured(String eventId) {
         FetchEventDetailDTO event = getEventServiceCase.getEvent(eventId, userDetails.getEmail(),
                 userDetails.isOrganizer());
-        EventProofDocument proof = renderer(event).render(eventId, competitorId, event);
+        EventProofDocument proof = renderer(event).render(eventId, event);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)

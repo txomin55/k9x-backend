@@ -166,12 +166,14 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 .set(EVENT_INFO.CONFIGURATION_ID, c.configurationId())
                 .set(EVENT_INFO.SCORE_CALCULATION, c.scoreCalculation().name())
                 .set(EVENT_INFO.COMMISSIONER, c.commissioner())
+                .set(EVENT_INFO.CATEGORY, c.category() == null ? null : c.category().name())
                 .set(EVENT_INFO.LAST_UPDATE, c.lastUpdate())
                 .onConflict(EVENT_INFO.EVENT_ID)
                 .doUpdate()
                 .set(EVENT_INFO.CONFIGURATION_ID, c.configurationId())
                 .set(EVENT_INFO.SCORE_CALCULATION, c.scoreCalculation().name())
                 .set(EVENT_INFO.COMMISSIONER, c.commissioner())
+                .set(EVENT_INFO.CATEGORY, c.category() == null ? null : c.category().name())
                 .set(EVENT_INFO.LAST_UPDATE, c.lastUpdate())
                 .execute();
 

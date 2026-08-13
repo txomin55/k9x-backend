@@ -59,7 +59,7 @@ class GetCollectionServiceCaseTest {
 
     private EventSnapshot event(Long deletedAt) {
         return new EventSnapshot("event-1", "config-1", "obdx", "Event A", "stage-1", "creator@test.com", null, 0L, 0L, deletedAt,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
     }
 
     private CompetitionSnapshot competition(EventSnapshot event, long dateTo) {

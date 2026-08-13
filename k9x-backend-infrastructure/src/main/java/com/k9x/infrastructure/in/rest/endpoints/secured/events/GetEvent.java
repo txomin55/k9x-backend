@@ -55,7 +55,8 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                 obdx.enrollmentDeadline(),
                 obdx.scoreCalculation() == null ? null : obdx.scoreCalculation().name(),
                 obdx.awards().stream().map(a -> new IdNameDTO(a, a)).toList(),
-                obdx.commissioner()
+                obdx.commissioner(),
+                obdx.category() == null ? null : obdx.category().name()
         );
     }
 

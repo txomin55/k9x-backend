@@ -10,6 +10,7 @@ import com.k9x.domain.shared.UtcDates;
 import com.k9x.domain.disciplines.obdx.LiveExcludedExercise;
 import com.k9x.domain.disciplines.obdx.ObdxCards;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxEventCategory;
 import com.k9x.domain.disciplines.obdx.ObdxRank;
 
 import java.util.List;
@@ -36,7 +37,9 @@ public record EventSnapshot(
         Integer rankScore,
         Boolean international,
         /** OBDX only: the chief steward / trial manager printed on the working booklet. */
-        String commissioner
+        String commissioner,
+        /** OBDX only: the competitive tier of the event; {@code null} when the organizer has not set one. */
+        ObdxEventCategory category
 ) {
 
     /**

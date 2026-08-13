@@ -13,15 +13,17 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * Renders the OBDX working booklet strip.
+ * Renders the OBDX working booklet strips of an event, one per competitor.
  *
- * <p>Everything OBDX-shaped about the proof lives here: where the score comes from, how the class number and
- * the qualification are spelled, and how the file is named. The score is read from the classification use
- * case rather than re-aggregated, so the download inherits its cache and daily snapshot.
+ * <p>Everything OBDX-shaped about the proof lives here: where the scores come from, how the class number and
+ * the qualification are spelled, and how the file is named. Scores are read from the classification use case
+ * rather than re-aggregated, so the download inherits its cache and daily snapshot — one read for the whole
+ * event, not one per competitor.
  */
 public class ObdxEventProofRenderer implements EventProofRenderer {
 
@@ -45,23 +47,34 @@ public class ObdxEventProofRenderer implements EventProofRenderer {
     }
 
     @Override
-    public EventProofDocument render(String eventId, String competitorId, FetchEventDetailDTO event) {
+    public EventProofDocument render(String eventId, FetchEventDetailDTO event) {
         FetchClassificationDTO classification = getEventClassificationServiceCase.getClassification(eventId);
-        FetchClassificationCompetitorDTO competitor = findCompetitor(classification, competitorId);
-        byte[] pdf = eventProofPdfWriter.write(toProofData(event, competitor));
-        return new EventProofDocument(pdf, fileName(event, competitor));
+        List<EventProofData> proofs = competitors(classification).stream()
+                .map(competitor -> toProofData(event, competitor))
+                .toList();
+        return new EventProofDocument(eventProofPdfWriter.write(proofs), fileName(event));
     }
 
-    private FetchClassificationCompetitorDTO findCompetitor(FetchClassificationDTO classification,
-                                                            String competitorId) {
+    /**
+     * Every competitor of the event gets a strip, in dorsal order so the pile of printed strips can be handed
+     * out in the order the handlers are called. Not-competing and disqualified competitors are included: the
+     * booklet records the attempt, not only the good results.
+     *
+     * @throws ObdxCompetitorNotFoundException when the event has nobody enrolled — there is nothing to print.
+     */
+    private List<FetchClassificationCompetitorDTO> competitors(FetchClassificationDTO classification) {
         List<FetchClassificationCompetitorDTO> competitors = classification.obdx() == null
                 || classification.obdx().competitors() == null
                 ? List.of()
                 : classification.obdx().competitors();
+        if (competitors.isEmpty()) {
+            throw new ObdxCompetitorNotFoundException();
+        }
         return competitors.stream()
-                .filter(c -> competitorId.equals(c.dogIdentification()))
-                .findFirst()
-                .orElseThrow(ObdxCompetitorNotFoundException::new);
+                .sorted(Comparator.comparing(FetchClassificationCompetitorDTO::competitorNumber,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(FetchClassificationCompetitorDTO::position))
+                .toList();
     }
 
     private EventProofData toProofData(FetchEventDetailDTO event, FetchClassificationCompetitorDTO competitor) {
@@ -120,16 +133,13 @@ public class ObdxEventProofRenderer implements EventProofRenderer {
     }
 
     /**
-     * Named after the event and the competitor so a folder of downloads stays readable. The endpoint encodes
-     * it as UTF-8, which makes Spring emit the RFC 5987 {@code filename*} form so accents survive; only the
-     * characters no filesystem accepts are replaced.
+     * Named after the event so a folder of downloads stays readable. The endpoint encodes it as UTF-8, which
+     * makes Spring emit the RFC 5987 {@code filename*} form so accents survive; only the characters no
+     * filesystem accepts are replaced.
      */
-    private String fileName(FetchEventDetailDTO event, FetchClassificationCompetitorDTO competitor) {
+    private String fileName(FetchEventDetailDTO event) {
         String eventName = event.obdx() == null ? null : event.obdx().name();
         String base = eventName == null || eventName.isBlank() ? DEFAULT_FILE_NAME : eventName.trim();
-        String competitorName = competitor.dogName() == null || competitor.dogName().isBlank()
-                ? competitor.dogIdentification()
-                : competitor.dogName().trim();
-        return (base + "-" + competitorName).replaceAll("[/\\\\:*?\"<>|\\p{Cntrl}]", "_") + ".pdf";
+        return base.replaceAll("[/\\\\:*?\"<>|\\p{Cntrl}]", "_") + ".pdf";
     }
 }

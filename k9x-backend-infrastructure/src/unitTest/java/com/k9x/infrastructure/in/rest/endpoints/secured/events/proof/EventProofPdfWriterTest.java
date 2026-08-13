@@ -24,9 +24,11 @@ class EventProofPdfWriterTest {
     /** 2026-02-15T10:00:00Z — a UTC morning, so a timezone slip would show up as the 14th or the 16th. */
     private static final long STAGE_DATE_FROM = 1771149600000L;
     private static final float CM = 72f / 2.54f;
-    private static final float EXPECTED_WIDTH = 20.5f * CM;
-    /** The page is one 20.5 x 6 cm block plus the 0.4 cm margin around it, printed at 100 %. */
-    private static final float MIN_EXPECTED_HEIGHT = 6f * CM + 2 * 0.4f * CM;
+    /** Strips are packed onto landscape A4 and cut apart. */
+    private static final float A4_WIDTH = 29.7f * CM;
+    private static final float A4_HEIGHT = 21f * CM;
+    /** 0.5 cm sheet margin, 6 cm blocks and a 0.5 cm cut gap leave room for three strips per sheet. */
+    private static final int STRIPS_PER_SHEET = 3;
 
     private EventProofPdfWriter writer;
 
@@ -64,6 +66,16 @@ class EventProofPdfWriterTest {
                 new EventProofData.Judge("Javier Peña", false)));
     }
 
+    private List<EventProofData> competitors(int count) {
+        List<EventProofData> proofs = new ArrayList<>(count);
+        for (int i = 1; i <= count; i++) {
+            proofs.add(new EventProofData("Spring Cup", STAGE_DATE_FROM, "ADECAN", "Rota (Cádiz)", "3", "233,25",
+                    "VERY GOOD", "Nola Kaschubowski", i, "Handler " + i, "Dog " + i,
+                    List.of(new EventProofData.Judge("Ingrid Tamášiová", true))));
+        }
+        return proofs;
+    }
+
     private static List<EventProofData.Judge> judges(int count) {
         List<EventProofData.Judge> judges = new ArrayList<>(count);
         for (int i = 1; i <= count; i++) {
@@ -73,21 +85,50 @@ class EventProofPdfWriterTest {
     }
 
     @Test
-    void writes_a_single_page_of_the_expected_size() throws IOException {
-        PdfReader reader = new PdfReader(writer.write(proof()));
+    void writes_landscape_a4_sheets() throws IOException {
+        PdfReader reader = new PdfReader(writer.write(List.of(proof())));
         try {
             assertThat(reader.getNumberOfPages()).isEqualTo(1);
-            assertThat(reader.getPageSize(1).getWidth()).isCloseTo(EXPECTED_WIDTH, within());
-            assertThat(reader.getPageSize(1).getHeight()).isCloseTo(MIN_EXPECTED_HEIGHT, within());
+            assertThat(reader.getPageSize(1).getWidth()).isCloseTo(A4_WIDTH, within());
+            assertThat(reader.getPageSize(1).getHeight()).isCloseTo(A4_HEIGHT, within());
         } finally {
             reader.close();
         }
     }
 
-    /** One strip per download: the organizer glues one block per event, spares are not wanted. */
+    /** The whole point of packing: a 20-competitor event must not print 20 sheets. */
     @Test
-    void prints_a_single_block() throws IOException {
-        String text = text(writer.write(proof()));
+    void packs_several_strips_on_each_sheet() throws IOException {
+        byte[] pdf = writer.write(competitors(20));
+
+        PdfReader reader = new PdfReader(pdf);
+        try {
+            assertThat(reader.getNumberOfPages()).isEqualTo(7); // 20 strips, 3 to a sheet
+        } finally {
+            reader.close();
+        }
+        String firstSheet = text(pdf, 1);
+        for (int i = 1; i <= STRIPS_PER_SHEET; i++) {
+            assertThat(firstSheet).contains("[#" + i + "]");
+        }
+        assertThat(firstSheet).doesNotContain("[#" + (STRIPS_PER_SHEET + 1) + "]");
+    }
+
+    /** Every competitor gets a strip, however many sheets that takes. */
+    @Test
+    void prints_a_strip_for_every_competitor() throws IOException {
+        byte[] pdf = writer.write(competitors(9));
+
+        String all = text(pdf, 1) + text(pdf, 2) + text(pdf, 3);
+        for (int i = 1; i <= 9; i++) {
+            assertThat(all).contains("[#" + i + "] Handler " + i + " [Dog " + i + "]");
+        }
+    }
+
+    /** One competitor prints one strip: no duplicated values inside its own block. */
+    @Test
+    void prints_a_single_block_per_competitor() throws IOException {
+        String text = text(writer.write(List.of(proof())));
 
         assertThat(occurrences(text, "15-02-2026")).isEqualTo(1);
         assertThat(occurrences(text, "[#1] Handler [Rex]")).isEqualTo(1);
@@ -95,18 +136,36 @@ class EventProofPdfWriterTest {
     }
 
     /**
-     * The core regression: with many judges the strip grows, and a flow-layout implementation would spill the
-     * overflow onto a second page or drop it. The page must grow instead, keeping every judge on one sheet.
+     * A tall strip (many judges) takes the room it needs, pushing the following ones to the next sheet instead
+     * of being squeezed or clipped.
      */
     @Test
-    void grows_the_page_instead_of_spilling_to_a_second_one() throws IOException {
-        byte[] pdf = writer.write(proof(judges(9)));
+    void moves_a_strip_that_does_not_fit_to_the_next_sheet() throws IOException {
+        List<EventProofData> proofs = List.of(proof(judges(9)), proof(judges(9)), proof(judges(9)));
+
+        byte[] pdf = writer.write(proofs);
+
+        PdfReader reader = new PdfReader(pdf);
+        try {
+            // Only two 6.96 cm strips fit in the 20 cm of usable height, so the third starts a new sheet.
+            assertThat(reader.getNumberOfPages()).isEqualTo(2);
+            assertThat(reader.getPageSize(2).getHeight()).isCloseTo(A4_HEIGHT, within());
+        } finally {
+            reader.close();
+        }
+    }
+
+    /**
+     * The core regression: a strip with many judges must keep every judge, in one piece. A flow-layout
+     * implementation would break the table across sheets and drop signature boxes.
+     */
+    @Test
+    void keeps_a_tall_strip_whole() throws IOException {
+        byte[] pdf = writer.write(List.of(proof(judges(9))));
 
         PdfReader reader = new PdfReader(pdf);
         try {
             assertThat(reader.getNumberOfPages()).isEqualTo(1);
-            assertThat(reader.getPageSize(1).getWidth()).isCloseTo(EXPECTED_WIDTH, within());
-            assertThat(reader.getPageSize(1).getHeight()).isGreaterThan(MIN_EXPECTED_HEIGHT);
         } finally {
             reader.close();
         }
@@ -116,12 +175,13 @@ class EventProofPdfWriterTest {
         }
     }
 
-    /** With four judges or fewer the strip still fits the 6 cm the paper booklet gives it. */
+    /** With four judges or fewer a strip still fits the 6 cm the booklet block gives it, three to a sheet. */
     @Test
-    void keeps_the_page_at_its_paper_size_with_up_to_four_judges() throws IOException {
-        PdfReader reader = new PdfReader(writer.write(proof(judges(4))));
+    void fits_three_strips_of_up_to_four_judges_on_one_sheet() throws IOException {
+        PdfReader reader = new PdfReader(writer.write(List.of(proof(judges(4)), proof(judges(4)),
+                proof(judges(4)))));
         try {
-            assertThat(reader.getPageSize(1).getHeight()).isCloseTo(MIN_EXPECTED_HEIGHT, within());
+            assertThat(reader.getNumberOfPages()).isEqualTo(1);
         } finally {
             reader.close();
         }
@@ -130,7 +190,7 @@ class EventProofPdfWriterTest {
     /** Judge names are not Latin-1. The built-in WinAnsi Helvetica would silently drop these glyphs. */
     @Test
     void keeps_non_latin1_names_intact() throws IOException {
-        String text = text(writer.write(proof()));
+        String text = text(writer.write(List.of(proof())));
 
         assertThat(text).contains("Tamášiová");
         assertThat(text).contains("Peña");
@@ -139,7 +199,7 @@ class EventProofPdfWriterTest {
     /** Guards against someone "simplifying" the font back to a non-embedded, single-byte encoded one. */
     @Test
     void embeds_the_font_as_an_identity_h_subset() throws IOException {
-        PdfReader reader = new PdfReader(writer.write(proof()));
+        PdfReader reader = new PdfReader(writer.write(List.of(proof())));
         try {
             PdfDictionary fonts = reader.getPageN(1)
                     .getAsDict(PdfName.RESOURCES)
@@ -157,8 +217,8 @@ class EventProofPdfWriterTest {
     /** The judge flagged in the database takes the "juez principal" box, whatever order it arrives in. */
     @Test
     void puts_the_flagged_judge_in_the_main_judge_box() throws IOException {
-        String text = text(writer.write(proof(List.of(new EventProofData.Judge("Ana", false),
-                new EventProofData.Judge("Bea", true)))));
+        String text = text(writer.write(List.of(proof(List.of(new EventProofData.Judge("Ana", false),
+                new EventProofData.Judge("Bea", true))))));
 
         assertThat(occurrences(text, "MAIN JUDGE")).isEqualTo(1);
         assertThat(text.indexOf("MAIN JUDGE")).isLessThan(text.indexOf("Bea"));
@@ -171,8 +231,8 @@ class EventProofPdfWriterTest {
      */
     @Test
     void falls_back_to_the_first_judge_when_none_is_flagged() throws IOException {
-        String text = text(writer.write(proof(List.of(new EventProofData.Judge("Ana", false),
-                new EventProofData.Judge("Bea", false)))));
+        String text = text(writer.write(List.of(proof(List.of(new EventProofData.Judge("Ana", false),
+                new EventProofData.Judge("Bea", false))))));
 
         assertThat(occurrences(text, "MAIN JUDGE")).isEqualTo(1);
         assertThat(text.indexOf("MAIN JUDGE")).isLessThan(text.indexOf("Ana"));
@@ -181,7 +241,7 @@ class EventProofPdfWriterTest {
 
     @Test
     void prints_the_commissioner_in_the_steward_cell() throws IOException {
-        String text = text(writer.write(proof()));
+        String text = text(writer.write(List.of(proof())));
 
         assertThat(occurrences(text, "CHIEF STEWARD")).isEqualTo(1);
         assertThat(occurrences(text, "Nola Kaschubowski")).isEqualTo(1);
@@ -193,7 +253,7 @@ class EventProofPdfWriterTest {
         EventProofData withoutCommissioner = new EventProofData("Spring Cup", STAGE_DATE_FROM, "ADECAN",
                 "Rota (Cádiz)", "3", "233,25", "VERY GOOD", null, 1, "Handler", "Rex", List.of());
 
-        String text = text(writer.write(withoutCommissioner));
+        String text = text(writer.write(List.of(withoutCommissioner)));
 
         assertThat(occurrences(text, "CHIEF STEWARD")).isEqualTo(1);
         assertThat(text).doesNotContain("Nola Kaschubowski");
@@ -201,7 +261,7 @@ class EventProofPdfWriterTest {
 
     @Test
     void writes_a_syntactically_valid_pdf() {
-        byte[] pdf = writer.write(proof());
+        byte[] pdf = writer.write(List.of(proof()));
 
         assertThat(new String(pdf, 0, 5, StandardCharsets.ISO_8859_1)).isEqualTo("%PDF-");
         assertThat(new String(pdf, StandardCharsets.ISO_8859_1)).endsWith("%%EOF\n");
@@ -213,13 +273,13 @@ class EventProofPdfWriterTest {
      */
     @Test
     void writes_the_document_when_every_optional_value_is_missing() throws IOException {
-        byte[] pdf = writer.write(new EventProofData(null, null, null, null, null, null, null, null, null, null,
-                null, null));
+        byte[] pdf = writer.write(List.of(new EventProofData(null, null, null, null, null, null, null, null,
+                null, null, null, null)));
 
         PdfReader reader = new PdfReader(pdf);
         try {
             assertThat(reader.getNumberOfPages()).isEqualTo(1);
-            assertThat(reader.getPageSize(1).getHeight()).isCloseTo(MIN_EXPECTED_HEIGHT, within());
+            assertThat(reader.getPageSize(1).getHeight()).isCloseTo(A4_HEIGHT, within());
         } finally {
             reader.close();
         }
@@ -254,9 +314,13 @@ class EventProofPdfWriterTest {
     }
 
     private String text(byte[] pdf) throws IOException {
+        return text(pdf, 1);
+    }
+
+    private String text(byte[] pdf, int page) throws IOException {
         PdfReader reader = new PdfReader(pdf);
         try {
-            return new PdfTextExtractor(reader).getTextFromPage(1);
+            return new PdfTextExtractor(reader).getTextFromPage(page);
         } finally {
             reader.close();
         }

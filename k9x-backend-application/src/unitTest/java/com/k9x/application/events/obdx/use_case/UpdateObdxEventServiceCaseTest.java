@@ -43,7 +43,7 @@ import static org.mockito.Mockito.*;
 class UpdateObdxEventServiceCaseTest {
 
     private static final UpdateObdxEventCommand VALID_COMMAND = new UpdateObdxEventCommand(
-            "Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), null);
+            "Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), null, null);
 
     @Mock
     private GetCompetitionPersistencePort getCompetitionPersistencePort;
@@ -63,7 +63,7 @@ class UpdateObdxEventServiceCaseTest {
 
     private CompetitionSnapshot competition() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
         // dateFrom after the command's enrollment deadline (2025-01-01) so the deadline-before-start invariant holds.
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 4102444800000L, Long.MAX_VALUE,
                 0L, 0L, null, List.of(event));
@@ -81,7 +81,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_configuration_id_is_blank() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "  ", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), null);
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "  ", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), null, null);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(EventConfigurationIdRequiredException.class);
@@ -102,7 +102,7 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_collector_email_does_not_exist() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
-                List.of(), List.of(), List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "missing@k9x.com", false)), List.of(), null);
+                List.of(), List.of(), List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "missing@k9x.com", false)), List.of(), null, null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getUserInfoPersistencePort.findById("missing@k9x.com")).thenReturn(null);
 
@@ -128,7 +128,7 @@ class UpdateObdxEventServiceCaseTest {
                 List.of(), List.of(),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null, false),
                         new UpdateObdxEventCommand.JudgeCommand("judge-1", null, false)),
-                List.of(), null);
+                List.of(), null, null);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxDuplicateJudgeException.class);
@@ -146,7 +146,7 @@ class UpdateObdxEventServiceCaseTest {
                 List.of(), List.of(),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null, true),
                         new UpdateObdxEventCommand.JudgeCommand("judge-2", null, true)),
-                List.of(), null);
+                List.of(), null, null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
@@ -163,7 +163,7 @@ class UpdateObdxEventServiceCaseTest {
                 List.of(), List.of(),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null, true),
                         new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false)),
-                List.of(), null);
+                List.of(), null, null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
@@ -177,7 +177,7 @@ class UpdateObdxEventServiceCaseTest {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
                 List.of(), List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of("judge-1")),
                         new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 2, List.of(), List.of("judge-1"))),
-                List.of(), List.of(), null);
+                List.of(), List.of(), null, null);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxDuplicateExerciseException.class);
@@ -189,7 +189,7 @@ class UpdateObdxEventServiceCaseTest {
     void throws_exception_when_exercise_has_no_judges() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
                 List.of(), List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of())),
-                List.of(), List.of(), null);
+                List.of(), List.of(), null, null);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxExerciseJudgeRequiredException.class);
@@ -202,7 +202,7 @@ class UpdateObdxEventServiceCaseTest {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
                 List.of(),
                 List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of("judge-1"))),
-                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false)), List.of(), null);
+                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false)), List.of(), null, null);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxExerciseJudgeNotFoundException.class);
@@ -216,7 +216,7 @@ class UpdateObdxEventServiceCaseTest {
                 List.of(),
                 List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of("judge-1", "judge-2"))),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null, false),
-                        new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false)), List.of(), null);
+                        new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false)), List.of(), null, null);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxNotEnoughJudgesException.class);
@@ -229,7 +229,7 @@ class UpdateObdxEventServiceCaseTest {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
                 List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, null, false, null, false),
                         new UpdateObdxEventCommand.CompetitorCommand("dog-1", 2, null, false, null, false)),
-                List.of(), List.of(), List.of(), null);
+                List.of(), List.of(), List.of(), null, null);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxDuplicateDogException.class);
@@ -240,7 +240,7 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_bih_true_for_male_dog() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, null, true, null, false)), List.of(), List.of(), List.of(), null);
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, null, true, null, false)), List.of(), List.of(), List.of(), null, null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getDogPersistencePort.getDog("dog-1"))
                 .thenReturn(new Dog("dog-1", "id", null, "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
@@ -258,7 +258,7 @@ class UpdateObdxEventServiceCaseTest {
                 ObdxAvgMethod.AVG,
                 List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, null, false),
                         new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, null, false)),
-                List.of(), List.of(), List.of(), null);
+                List.of(), List.of(), List.of(), null, null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
         when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
@@ -276,7 +276,7 @@ class UpdateObdxEventServiceCaseTest {
                 ObdxAvgMethod.AVG,
                 List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, null, false),
                         new UpdateObdxEventCommand.CompetitorCommand("dog-es-2", 2, null, false, null, false)),
-                List.of(), List.of(), List.of(), null);
+                List.of(), List.of(), List.of(), null, null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
         when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
@@ -296,7 +296,7 @@ class UpdateObdxEventServiceCaseTest {
                 ObdxAvgMethod.AVG,
                 List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, null, false),
                         new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, null, false)),
-                List.of(), List.of(), List.of(), null);
+                List.of(), List.of(), List.of(), null, null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
         when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
@@ -334,7 +334,7 @@ class UpdateObdxEventServiceCaseTest {
 
     private CompetitionSnapshot competitionInCountry(String country) {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 4102444800000L, Long.MAX_VALUE,
                 0L, 0L, null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", country, null, null, null, null,

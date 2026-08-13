@@ -69,7 +69,8 @@ class GetCompetitionListJooqAdapterTest {
             Tables.EVENTS.AWARDS,
             Tables.EVENTS.RANK_SCORE,
             Tables.EVENTS.INTERNATIONAL,
-            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_INFO.COMMISSIONER
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_INFO.COMMISSIONER,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_INFO.CATEGORY
     };
 
     private static MockResult emptyNoFields() {

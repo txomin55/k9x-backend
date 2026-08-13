@@ -2,6 +2,7 @@ package com.k9x.infrastructure.out.postgres.competitions;
 
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxEventCategory;
 import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.domain.events.aggregates.*;
 import com.k9x.domain.events.valueobjects.*;
@@ -139,7 +140,7 @@ public class CompetitionHydrator {
         List<EventShell> eventShells = dsl.select(ev.ID, ei.CONFIGURATION_ID, ev.DISCIPLINE, ev.NAME,
                         ev.STAGE_ID, ev.CREATOR, ev.ENROLLMENT_DEADLINE, ev.LAST_UPDATE, ev.CREATED_AT,
                         ev.DELETED_AT, ei.SCORE_CALCULATION, ev.AWARDS, ev.RANK_SCORE, ev.INTERNATIONAL,
-                        ei.COMMISSIONER)
+                        ei.COMMISSIONER, ei.CATEGORY)
                 .from(ev)
                 .join(st).on(st.ID.eq(ev.STAGE_ID))
                 .leftJoin(ei).on(ei.EVENT_ID.eq(ev.ID))
@@ -162,6 +163,7 @@ public class CompetitionHydrator {
                     shell.rankScore = r.get(ev.RANK_SCORE);
                     shell.international = r.get(ev.INTERNATIONAL);
                     shell.commissioner = r.get(ei.COMMISSIONER);
+                    shell.category = r.get(ei.CATEGORY);
                     return shell;
                 });
 
@@ -183,7 +185,8 @@ public class CompetitionHydrator {
                     s.awards == null ? List.of() : Arrays.asList(s.awards),
                     s.rankScore,
                     s.international,
-                    s.commissioner);
+                    s.commissioner,
+                    ObdxEventCategory.fromName(s.category));
             eventsByStage.computeIfAbsent(s.stageId, _ -> new ArrayList<>()).add(event);
         }
         return eventsByStage;
@@ -283,7 +286,7 @@ public class CompetitionHydrator {
     }
 
     private static final class EventShell {
-        String id, configurationId, discipline, name, stageId, creator, scoreCalculation, commissioner;
+        String id, configurationId, discipline, name, stageId, creator, scoreCalculation, commissioner, category;
         Integer rankScore;
         Boolean international;
         Long enrollmentDeadline;

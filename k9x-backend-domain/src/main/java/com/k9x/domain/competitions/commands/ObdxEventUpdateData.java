@@ -1,6 +1,7 @@
 package com.k9x.domain.competitions.commands;
 
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxEventCategory;
 
 import java.util.List;
 
@@ -8,5 +9,5 @@ public record ObdxEventUpdateData(String name, String configurationId, ObdxAvgMe
                                   Long enrollmentDeadline, List<ObdxCompetitorItem> competitors,
                                   List<ObdxExerciseItem> exercises, List<ObdxJudgeItem> judges,
                                   List<String> awards, Integer rankScore, boolean international,
-                                  String commissioner) {
+                                  String commissioner, ObdxEventCategory category) {
 }

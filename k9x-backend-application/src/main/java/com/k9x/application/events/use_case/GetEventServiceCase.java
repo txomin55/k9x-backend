@@ -65,7 +65,7 @@ public class GetEventServiceCase {
         long now = DateUtils.nowUtcMillis();
         FetchObdxEventDTO obdx = new FetchObdxEventDTO(event.id(), event.name(), stage.id(), stage.name(),
                 event.discipline(), event.status(now, stage.dateTo()).name(), event.enrollmentDeadline(),
-                event.scoreCalculation(), event.awards(), event.commissioner(), stage.dateFrom(),
+                event.scoreCalculation(), event.awards(), event.commissioner(), event.category(), stage.dateFrom(),
                 competition.name(), competition.organizerName(), competition.address());
 
         List<FetchObdxEventCompetitorDTO> competitors = event.competitors().stream()

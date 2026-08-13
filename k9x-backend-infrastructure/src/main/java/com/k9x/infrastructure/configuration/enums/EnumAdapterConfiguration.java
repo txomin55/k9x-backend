@@ -2,11 +2,13 @@ package com.k9x.infrastructure.configuration.enums;
 
 import com.k9x.application.awards.port.GetAwardListPort;
 import com.k9x.application.breeds.port.GetBreedListPort;
+import com.k9x.application.categories.port.GetEventCategoryListPort;
 import com.k9x.application.countries.port.GetCountryListPort;
 import com.k9x.application.rankings.port.GetRankingIncludeByListPort;
 import com.k9x.application.rankings.port.GetRankingGroupByListPort;
 import com.k9x.infrastructure.out.enums.awards.AwardEnumAdapter;
 import com.k9x.infrastructure.out.enums.breeds.BreedEnumAdapter;
+import com.k9x.infrastructure.out.enums.categories.EventCategoryEnumAdapter;
 import com.k9x.infrastructure.out.enums.countries.CountryEnumAdapter;
 import com.k9x.infrastructure.out.enums.rankings.RankingIncludeByEnumAdapter;
 import com.k9x.infrastructure.out.enums.rankings.RankingGroupByEnumAdapter;
@@ -30,6 +32,11 @@ public class EnumAdapterConfiguration {
     @Bean
     public GetAwardListPort getAwardListPort() {
         return new AwardEnumAdapter();
+    }
+
+    @Bean
+    public GetEventCategoryListPort getEventCategoryListPort(MessageSource messageSource) {
+        return new EventCategoryEnumAdapter(messageSource);
     }
 
     @Bean

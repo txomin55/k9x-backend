@@ -72,7 +72,7 @@ class EventWorkbookWriterTest {
 
     private FetchEventDetailDTO event() {
         FetchObdxEventDTO obdx = new FetchObdxEventDTO("event-1", "Spring Cup", "stage-1", "Stage A", "OBDX",
-                "STARTED", DEADLINE, ObdxAvgMethod.MID_AVG, List.of(), null, null, "Spring Competition",
+                "STARTED", DEADLINE, ObdxAvgMethod.MID_AVG, List.of(), null, null, null, "Spring Competition",
                 "ADECAN", "Rota (Cádiz)");
         FetchObdxEventJudgeDTO judge = new FetchObdxEventJudgeDTO("judge-1", "Ana", "collector@k9x.com", false);
         FetchEventExerciseDTO exercise = new FetchEventExerciseDTO("ex-1", "Heelwork", 1,

@@ -29,18 +29,20 @@ import java.util.List;
  * Renders the printable proof a competitor glues into its paper working booklet (cartilla de trabajo).
  *
  * <p>The booklet page holds three pre-printed 20.5 x 6 cm blocks, one per event, filled in by hand. This
- * writer produces exactly one strip reproducing those boxes with the event's data, and the page is that strip
- * plus a thin margin all around: the 20.5 x 6 cm block is printed at 100 %, cut out and glued over the block.
+ * writer produces one strip per competitor of the event, packed onto landscape A4 sheets with a dashed cut
+ * guide between them: a 20-competitor event prints on seven sheets, not twenty, and each strip is cut out and
+ * glued over the booklet's block at 100 %.
  *
  * <p>Two decisions are load-bearing:
  * <ul>
- *     <li>the strip is drawn at absolute coordinates with
+ *     <li>strips are drawn at absolute coordinates with
  *     {@link PdfPTable#writeSelectedRows(int, int, float, float, PdfContentByte)} rather than added to the
- *     document flow. Flow layout would break the table across pages as soon as it grew past the page, and a
- *     booklet proof split over two sheets is useless;</li>
- *     <li>the page grows instead of the content shrinking. An event can have any number of judges; judges are
- *     printed four per row, and every extra row makes the strip taller than 6 cm. Losing a judge's signature
- *     box would invalidate the proof, so overflowing is preferred to clipping.</li>
+ *     document flow. Flow layout would break a strip across two sheets, and half a booklet proof is useless;
+ *     </li>
+ *     <li>a strip never shrinks. An event can have any number of judges; judges are printed four per row, and
+ *     every extra row makes the strip taller than 6 cm — such a strip simply takes more of the sheet, and if
+ *     it does not fit in what is left it starts the next one. Losing a judge's signature box would invalidate
+ *     the proof, so paper is spent instead.</li>
  * </ul>
  */
 public class EventProofPdfWriter {
@@ -51,11 +53,23 @@ public class EventProofPdfWriter {
      */
     private static final float CM = 72f / 2.54f;
 
-    private static final float PAGE_WIDTH = 20.5f * CM;
+    /**
+     * Plain A4 in landscape, so several competitors share a sheet and the 20.5 cm strip still has 4.6 cm of
+     * paper on each side: in portrait it would sit 0.25 cm from the edge, which most printers clip or scale.
+     */
+    private static final float PAGE_WIDTH = 29.7f * CM;
+    private static final float PAGE_HEIGHT = 21f * CM;
     private static final float BLOCK_HEIGHT = 6f * CM;
-    /** Breathing room on all four sides so the borders do not run into the paper edge, and room to cut along. */
-    private static final float MARGIN = 0.4f * CM;
-    private static final float BLOCK_WIDTH = PAGE_WIDTH - 2 * MARGIN;
+    /** Margin around the sheet, and the gap between strips that holds the cut guide. */
+    private static final float MARGIN = 0.5f * CM;
+    private static final float STRIP_GAP = 0.5f * CM;
+    /**
+     * The booklet's block, to the millimetre. The sheet must still be printed at 100 % ("actual size", no
+     * scaling): a driver that shrinks the page to its own margins would shrink these 20.5 cm with it.
+     */
+    private static final float BLOCK_WIDTH = 20.5f * CM;
+    /** Centred on the sheet: the leftover is the same on both sides, and it is also cutting room. */
+    private static final float BLOCK_LEFT = (PAGE_WIDTH - BLOCK_WIDTH) / 2;
 
     /**
      * 24 equal grid columns is the smallest base that expresses both the three-cell row
@@ -94,6 +108,8 @@ public class EventProofPdfWriter {
     private static final float MIN_VALUE_FONT_SIZE = 6.5f;
     private static final float FONT_STEP = 0.5f;
     private static final float OBSERVATIONS_FONT_SIZE = 8f;
+    private static final float CUT_GUIDE_WIDTH = 0.3f;
+    private static final float CUT_GUIDE_DASH = 3f;
 
     private static final DateTimeFormatter PROOF_DATE = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final String OBSERVATIONS_FORMAT = "[#%s] %s [%s]";
@@ -121,7 +137,55 @@ public class EventProofPdfWriter {
         this.messageSource = messageSource;
     }
 
-    public byte[] write(EventProofData proof) {
+    /**
+     * Fills each A4 sheet with as many strips as fit, in the order given, and starts a new sheet when the next
+     * strip would not fit whole.
+     */
+    public byte[] write(List<EventProofData> proofs) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Document document = new Document(new Rectangle(PAGE_WIDTH, PAGE_HEIGHT), 0, 0, 0, 0);
+        try {
+            PdfWriter writer = PdfWriter.getInstance(document, out);
+            document.addTitle(nullToEmpty(proofs.getFirst().eventName()));
+            document.open();
+            PdfContentByte canvas = writer.getDirectContent();
+            float top = PAGE_HEIGHT - MARGIN;
+            for (PdfPTable block : proofs.stream().map(this::buildBlock).toList()) {
+                float height = stripHeight(block);
+                // An empty sheet takes the strip whatever its height: better an overflowing strip than none.
+                if (top - height < MARGIN && top < PAGE_HEIGHT - MARGIN) {
+                    document.newPage();
+                    top = PAGE_HEIGHT - MARGIN;
+                }
+                block.writeSelectedRows(0, -1, BLOCK_LEFT, top, canvas);
+                top -= height;
+                drawCutGuide(canvas, top - STRIP_GAP / 2);
+                top -= STRIP_GAP;
+            }
+        } catch (DocumentException e) {
+            throw new IllegalStateException("Could not render the event proof", e);
+        } finally {
+            document.close();
+        }
+        return out.toByteArray();
+    }
+
+    private float stripHeight(PdfPTable block) {
+        return Math.max(BLOCK_HEIGHT, block.getTotalHeight());
+    }
+
+    /** A dashed line in the gap between two strips, so they are cut apart in the right place. */
+    private void drawCutGuide(PdfContentByte canvas, float y) {
+        canvas.saveState();
+        canvas.setLineWidth(CUT_GUIDE_WIDTH);
+        canvas.setLineDash(CUT_GUIDE_DASH, CUT_GUIDE_DASH, 0f);
+        canvas.moveTo(MARGIN, y);
+        canvas.lineTo(PAGE_WIDTH - MARGIN, y);
+        canvas.stroke();
+        canvas.restoreState();
+    }
+
+    private PdfPTable buildBlock(EventProofData proof) {
         int judgeRows = Math.max(1, ceilDiv(proof.judges().size(), JUDGES_PER_ROW));
         // The slack of a strip with few judges is absorbed by its signature rows, so a one-row strip still
         // fills its 6 cm and only genuinely crowded strips push past it.
@@ -130,21 +194,7 @@ public class EventProofPdfWriter {
         PdfPTable block = buildBlock(proof, judgeRowHeight);
         block.setTotalWidth(BLOCK_WIDTH);
         block.setLockedWidth(true);
-        float pageHeight = Math.max(BLOCK_HEIGHT, block.getTotalHeight()) + 2 * MARGIN;
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Document document = new Document(new Rectangle(PAGE_WIDTH, pageHeight), 0, 0, 0, 0);
-        try {
-            PdfWriter writer = PdfWriter.getInstance(document, out);
-            document.addTitle(nullToEmpty(proof.eventName()));
-            document.open();
-            block.writeSelectedRows(0, -1, MARGIN, pageHeight - MARGIN, writer.getDirectContent());
-        } catch (DocumentException e) {
-            throw new IllegalStateException("Could not render the event proof", e);
-        } finally {
-            document.close();
-        }
-        return out.toByteArray();
+        return block;
     }
 
     private PdfPTable buildBlock(EventProofData proof, float judgeRowHeight) {

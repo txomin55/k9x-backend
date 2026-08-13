@@ -3,7 +3,7 @@ package com.k9x.infrastructure.in.rest.endpoints.secured.events.proof;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 
 /**
- * Produces the working-booklet proof of one competitor for one discipline.
+ * Produces the working-booklet proof of a whole event — one strip per competitor — for one discipline.
  *
  * <p>The booklet is a per-discipline paper form: its boxes, its scoring vocabulary and even its page size
  * belong to the federation that prints it. So the endpoint owns no layout at all — it resolves the renderer
@@ -16,8 +16,7 @@ public interface EventProofRenderer {
     String discipline();
 
     /**
-     * @param competitorId the competitor's dog identification.
-     * @throws com.k9x.domain.exceptions.NotFoundResourceException when the competitor is not in the event.
+     * @throws com.k9x.domain.exceptions.NotFoundResourceException when the event has nothing to print.
      */
-    EventProofDocument render(String eventId, String competitorId, FetchEventDetailDTO event);
+    EventProofDocument render(String eventId, FetchEventDetailDTO event);
 }
