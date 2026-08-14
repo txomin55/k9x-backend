@@ -1,6 +1,7 @@
 package com.k9x.infrastructure.out.postgres.competitions;
 
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.competitions.commands.CompetitionUpdateData;
 import com.k9x.domain.competitions.commands.NewEventData;
@@ -59,7 +60,7 @@ class SaveCompetitionJooqAdapterTest {
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 FUTURE_FROM, FUTURE_TO, NOW, NOW, null, List.of());
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
-                0.0, 0.0, NOW, NOW, null, List.of(stage));
+                0.0, 0.0, CompetitionSource.API, NOW, NOW, null, List.of(stage));
         return CompetitionAggregate.of(competition);
     }
 
@@ -69,7 +70,7 @@ class SaveCompetitionJooqAdapterTest {
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 FUTURE_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
-                0.0, 0.0, NOW, NOW, null, List.of(stage));
+                0.0, 0.0, CompetitionSource.API, NOW, NOW, null, List.of(stage));
         return CompetitionAggregate.of(competition);
     }
 
@@ -82,7 +83,7 @@ class SaveCompetitionJooqAdapterTest {
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 PAST_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
-                0.0, 0.0, NOW, NOW, null, List.of(stage));
+                0.0, 0.0, CompetitionSource.API, NOW, NOW, null, List.of(stage));
         return CompetitionAggregate.of(competition);
     }
 
@@ -246,7 +247,7 @@ class SaveCompetitionJooqAdapterTest {
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 FUTURE_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
-                0.0, 0.0, NOW, NOW, null, List.of(stage));
+                0.0, 0.0, CompetitionSource.API, NOW, NOW, null, List.of(stage));
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition);
         aggregate.updateCompetitorNotCompeting("evt-1", "dog-1", true, "user", NOW);
 

@@ -6,6 +6,7 @@ import com.k9x.application.subscriptions.port.UpdateUserSubscriptionPersistenceP
 import com.k9x.application.subscriptions.port.payload.UpdateUserSubscriptionPersistencePayload;
 import com.k9x.application.subscriptions.use_case.command.UpdateUserSubscriptionCommand;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.exceptions.EventFinishedException;
@@ -54,7 +55,7 @@ class UpdateUserSubscriptionServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "owner@test.com", stageDateTo,
                 stageDateTo, 0L, 0L, null, List.of(event("event-1"), event("event-2")));
         return new CompetitionSnapshot("comp-1", "WC", "owner@test.com", "Org", null, null, null, null, null,
-                0L, 0L, null, List.of(stage));
+                CompetitionSource.API, 0L, 0L, null, List.of(stage));
     }
 
     private EventSnapshot event(String id) {

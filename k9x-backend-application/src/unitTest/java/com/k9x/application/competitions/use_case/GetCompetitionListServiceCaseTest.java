@@ -5,6 +5,7 @@ import com.k9x.application.notifications.port.GetStageNotificationsPersistencePo
 import com.k9x.application.competitions.use_case.dto.FetchCompetitionDTO;
 import com.k9x.application.competitions.use_case.dto.FetchEventDTO;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
@@ -45,7 +46,7 @@ class GetCompetitionListServiceCaseTest {
 
     private CompetitionSnapshot competition(String id, List<StageSnapshot> stages) {
         return new CompetitionSnapshot(id, "World Cup", "user-1", "Org", "ES", "desc", "Calle Mayor 1",
-                null, null, 0L, 0L, null, stages);
+                null, null, CompetitionSource.API, 0L, 0L, null, stages);
     }
 
     @Test

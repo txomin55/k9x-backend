@@ -6,6 +6,7 @@ import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
@@ -48,7 +49,7 @@ class GetStageListServiceCaseTest {
 
     private static CompetitionSnapshot competition(List<StageSnapshot> stages) {
         return new CompetitionSnapshot("comp", "Comp", "creator", "Organizer Name", "ES",
-                "desc", "Calle Mayor 1", 40.4, -3.7, 0L, 0L, null, stages);
+                "desc", "Calle Mayor 1", 40.4, -3.7, CompetitionSource.API, 0L, 0L, null, stages);
     }
 
     private static StageSnapshot stage(String id, long from, long to, List<EventSnapshot> events) {

@@ -77,7 +77,8 @@ public class GetStageListServiceCase {
                 notificationsByStage.getOrDefault(stage.id(), List.of()),
                 stage.events().stream()
                         .filter(event -> event.deletedAt() == null)
-                        .anyMatch(event -> rankedEventIds.contains(event.id())));
+                        .anyMatch(event -> rankedEventIds.contains(event.id())),
+                competition.source());
     }
 
     private record CompetitionStage(CompetitionSnapshot competition, StageSnapshot stage) {

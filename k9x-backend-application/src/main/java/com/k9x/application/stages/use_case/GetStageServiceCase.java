@@ -74,7 +74,8 @@ public class GetStageServiceCase {
                         .toList(),
                 // Announcements live outside the competition aggregate, so they are read through their own port.
                 getStageNotificationsPersistencePort.getByStageIds(java.util.List.of(id))
-                        .getOrDefault(id, java.util.List.of()));
+                        .getOrDefault(id, java.util.List.of()),
+                competition.source());
     }
 
     private Map<String, String> buildConfigNameMap() {

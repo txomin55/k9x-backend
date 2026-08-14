@@ -3,6 +3,7 @@ package com.k9x.application.stages.use_case;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.stages.exceptions.StageNotFoundException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
@@ -41,7 +42,7 @@ class DeleteStageServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", creator,
                 Long.MAX_VALUE, Long.MAX_VALUE, 0L, 0L, null, List.of());
         return new CompetitionSnapshot("comp-1", "World Cup", creator, "Org", "ES", "desc", "addr",
-                null, null, 0L, 0L, null, List.of(stage));
+                null, null, CompetitionSource.API, 0L, 0L, null, List.of(stage));
     }
 
     @Test

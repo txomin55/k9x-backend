@@ -73,6 +73,9 @@ CREATE TABLE k9x.competitions
     coord_alt   DOUBLE PRECISION,
     coord_long  DOUBLE PRECISION,
     creator     VARCHAR(50)  NOT NULL,
+    -- Where the data comes from: API when it was created through the app, EXTRACTION when it was loaded by
+    -- an external ETL. Defaulted so existing rows and app inserts never have to spell it out.
+    source      VARCHAR(20)  NOT NULL DEFAULT 'API',
     last_update BIGINT       NOT NULL,
     created_at  BIGINT       NOT NULL,
     deleted_at  BIGINT,

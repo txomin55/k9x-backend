@@ -17,11 +17,16 @@ public record CompetitionSnapshot(
         String address,
         Double coordAlt,
         Double coordLong,
+        CompetitionSource source,
         long lastUpdate,
         long createdAt,
         Long deletedAt,
         List<StageSnapshot> stages
 ) {
+
+    public CompetitionSnapshot {
+        source = source == null ? CompetitionSource.API : source;
+    }
 
     /**
      * Lifecycle status derived from its (non-deleted) stages: FINISHED when they are all finished,

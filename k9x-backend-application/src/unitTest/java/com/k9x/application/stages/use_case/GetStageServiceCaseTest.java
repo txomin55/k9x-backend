@@ -8,6 +8,7 @@ import com.k9x.application.disciplines.use_case.dto.ConfigurationsDTO;
 import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailDTO;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
@@ -54,7 +55,7 @@ class GetStageServiceCaseTest {
 
     private CompetitionSnapshot competition(StageSnapshot stage) {
         return new CompetitionSnapshot("comp-1", "World Cup", "user-1", "Organizer", "ES", "desc", "Calle Mayor 1",
-                null, null, 0L, 0L, null, List.of(stage));
+                null, null, CompetitionSource.API, 0L, 0L, null, List.of(stage));
     }
 
     @Test

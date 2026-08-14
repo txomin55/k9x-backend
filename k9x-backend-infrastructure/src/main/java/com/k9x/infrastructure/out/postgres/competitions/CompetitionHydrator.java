@@ -1,6 +1,7 @@
 package com.k9x.infrastructure.out.postgres.competitions;
 
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.disciplines.obdx.ObdxEventCategory;
 import com.k9x.domain.dogs.aggregates.Sex;
@@ -72,7 +73,8 @@ public class CompetitionHydrator {
 
         return competitions.values().stream()
                 .map(c -> new CompetitionSnapshot(c.id, c.name, c.creator, c.organizerName, c.country,
-                        c.description, c.address, c.coordAlt, c.coordLong, c.lastUpdate, c.createdAt,
+                        c.description, c.address, c.coordAlt, c.coordLong,
+                        CompetitionSource.fromStored(c.source), c.lastUpdate, c.createdAt,
                         c.deletedAt, stagesByCompetition.getOrDefault(c.id, new ArrayList<>())))
                 .toList();
     }
@@ -84,7 +86,7 @@ public class CompetitionHydrator {
 
         Map<String, CompetitionShell> result = new LinkedHashMap<>();
         dsl.select(co.ID, co.NAME, co.CREATOR, organizerName, co.COUNTRY, co.DESCRIPTION, co.ADDRESS,
-                        co.COORD_ALT, co.COORD_LONG, co.LAST_UPDATE, co.CREATED_AT, co.DELETED_AT)
+                        co.COORD_ALT, co.COORD_LONG, co.SOURCE, co.LAST_UPDATE, co.CREATED_AT, co.DELETED_AT)
                 .from(co)
                 .leftJoin(o).on(o.USER_ID.eq(co.CREATOR))
                 .where(condition)
@@ -100,6 +102,7 @@ public class CompetitionHydrator {
                     shell.address = r.get(co.ADDRESS);
                     shell.coordAlt = r.get(co.COORD_ALT);
                     shell.coordLong = r.get(co.COORD_LONG);
+                    shell.source = r.get(co.SOURCE);
                     shell.lastUpdate = r.get(co.LAST_UPDATE);
                     shell.createdAt = r.get(co.CREATED_AT);
                     shell.deletedAt = r.get(co.DELETED_AT);
@@ -271,7 +274,7 @@ public class CompetitionHydrator {
     }
 
     private static final class CompetitionShell {
-        String id, name, creator, organizerName, country, description, address;
+        String id, name, creator, organizerName, country, description, address, source;
         Double coordAlt, coordLong;
         long lastUpdate, createdAt;
         Long deletedAt;

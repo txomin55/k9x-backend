@@ -9,6 +9,7 @@ import com.k9x.application.notifications.port.PushNotifier;
 import com.k9x.application.notifications.valueobjects.NotificationType;
 import com.k9x.application.notifications.valueobjects.PushNotification;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.dogs.aggregates.Sex;
@@ -60,7 +61,7 @@ class EnrollEventServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE,
                 Long.MAX_VALUE, 0L, 0L, null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                0L, 0L, null, List.of(stage));
+                CompetitionSource.API, 0L, 0L, null, List.of(stage));
     }
 
     @Test
@@ -126,7 +127,7 @@ class EnrollEventServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE,
                 Long.MAX_VALUE, 0L, 0L, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null,
-                null, null, 0L, 0L, null, List.of(stage));
+                null, null, CompetitionSource.API, 0L, 0L, null, List.of(stage));
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition);
 

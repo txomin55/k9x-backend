@@ -3,6 +3,7 @@ package com.k9x.application.events.use_case;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
@@ -44,7 +45,7 @@ class DeleteEventServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                0L, 0L, null, List.of(stage));
+                CompetitionSource.API, 0L, 0L, null, List.of(stage));
     }
 
     @Test

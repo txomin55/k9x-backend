@@ -13,6 +13,7 @@ import com.k9x.application.events.snapshot.use_case.GetEventSnapshotServiceCase;
 import com.k9x.application.events.use_case.dto.EventClassificationContextDTO;
 import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.stages.aggregates.StageSnapshot;
@@ -66,7 +67,7 @@ class GetEventClassificationServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage A", "comp-1", "user-1", 0L, Long.MAX_VALUE, 1000L, 1000L,
                 null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                0L, 0L, null, List.of(stage));
+                CompetitionSource.API, 0L, 0L, null, List.of(stage));
     }
 
     @Test
@@ -132,14 +133,16 @@ class GetEventClassificationServiceCaseTest {
         assertThat(result.configurationName()).isEqualTo("Grade 1");
         assertThat(result.obdx()).isSameAs(obdx);
         verify(eventClassificationCacheManagerPort)
-                .put("evt-1", new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE, "WC"));
+                .put("evt-1", new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE, "WC",
+                        CompetitionSource.API));
     }
 
     @Test
     void uses_cached_context_without_hitting_db_on_cache_hit() throws IOException {
         FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of());
         when(eventClassificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt()))
-                .thenReturn(new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE, "WC"));
+                .thenReturn(new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE, "WC",
+                        CompetitionSource.API));
         when(getObdxClassificationServiceCase.getClassification(ACTIVE_EVENT)).thenReturn(obdx);
         when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of());
 

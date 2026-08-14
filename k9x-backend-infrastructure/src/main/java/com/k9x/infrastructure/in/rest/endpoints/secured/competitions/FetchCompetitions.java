@@ -57,7 +57,8 @@ public class FetchCompetitions implements SecuredCompetitionsFetchAllApiDelegate
                                                                 n.timestamp(), n.eventIds(), n.content()))
                                                         .toList()
                                         ))
-                                        .toList()
+                                        .toList(),
+                                competition.source().name()
                         ))
                         .toList()
         );

@@ -69,7 +69,8 @@ public class GetEventClassificationServiceCase {
         long now = DateUtils.nowUtcMillis();
         return new FetchClassificationDTO(eventId, event.name(), event.status(now, context.stageDateTo()).name(),
                 event.stageId(), context.stageName(), context.competitionName(), event.discipline(),
-                event.configurationId(), configurationName, scoresLastUpdate, obdx, event.rank());
+                event.configurationId(), configurationName, scoresLastUpdate, obdx, event.rank(),
+                context.competitionSource());
     }
 
     private Map<String, String> buildConfigNameMap() {
@@ -99,7 +100,8 @@ public class GetEventClassificationServiceCase {
         StageSnapshot stage = CompetitionNavigator.findStageOfEvent(competition, eventId);
 
         EventClassificationContextDTO context =
-                new EventClassificationContextDTO(event, stage.name(), stage.dateTo(), competition.name());
+                new EventClassificationContextDTO(event, stage.name(), stage.dateTo(), competition.name(),
+                        competition.source());
         eventClassificationCacheManagerPort.put(eventId, context);
         return context;
     }

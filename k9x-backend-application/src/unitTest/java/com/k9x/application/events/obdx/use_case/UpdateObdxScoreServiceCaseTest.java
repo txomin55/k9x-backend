@@ -8,6 +8,7 @@ import com.k9x.application.events.obdx.exceptions.ObdxUserNotCollectorException;
 import com.k9x.application.events.obdx.port.GetObdxEventCollectorPersistencePort;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxScoreCommand;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.valueobjects.EventExercise;
@@ -62,7 +63,7 @@ class UpdateObdxScoreServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                0L, 0L, null, List.of(stage));
+                CompetitionSource.API, 0L, 0L, null, List.of(stage));
     }
 
     private CompetitionSnapshot competitionWithDisqualifiedDog() {
@@ -73,7 +74,7 @@ class UpdateObdxScoreServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                0L, 0L, null, List.of(stage));
+                CompetitionSource.API, 0L, 0L, null, List.of(stage));
     }
 
     private CompetitionSnapshot competitionWithExerciseJudgedByAnother() {
@@ -84,7 +85,7 @@ class UpdateObdxScoreServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                0L, 0L, null, List.of(stage));
+                CompetitionSource.API, 0L, 0L, null, List.of(stage));
     }
 
     @Test

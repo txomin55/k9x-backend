@@ -2,6 +2,7 @@ package com.k9x.infrastructure.out.postgres.competitions;
 
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.competitions.commands.*;
 import com.k9x.domain.competitions.commands.ObdxCompetitorItem;
 import com.k9x.domain.competitions.commands.ObdxExerciseItem;
@@ -259,6 +260,9 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 .set(Tables.COMPETITIONS.ID, c.id())
                 .set(Tables.COMPETITIONS.NAME, c.name())
                 .set(Tables.COMPETITIONS.COUNTRY, "")
+                // Anything created through the app is API by definition; EXTRACTION only ever comes from the ETL,
+                // which writes straight to the database.
+                .set(Tables.COMPETITIONS.SOURCE, CompetitionSource.API.name())
                 .set(Tables.COMPETITIONS.CREATOR, c.creator())
                 .set(Tables.COMPETITIONS.CREATED_AT, c.createdAt())
                 .set(Tables.COMPETITIONS.LAST_UPDATE, c.createdAt())

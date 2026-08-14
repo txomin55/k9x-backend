@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.events.export;
 
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
@@ -73,7 +74,7 @@ class EventWorkbookWriterTest {
     private FetchEventDetailDTO event() {
         FetchObdxEventDTO obdx = new FetchObdxEventDTO("event-1", "Spring Cup", "stage-1", "Stage A", "OBDX",
                 "STARTED", DEADLINE, ObdxAvgMethod.MID_AVG, List.of(), null, null, null, "Spring Competition",
-                "ADECAN", "Rota (Cádiz)");
+                "ADECAN", "Rota (Cádiz)", CompetitionSource.API);
         FetchObdxEventJudgeDTO judge = new FetchObdxEventJudgeDTO("judge-1", "Ana", "collector@k9x.com", false);
         FetchEventExerciseDTO exercise = new FetchEventExerciseDTO("ex-1", "Heelwork", 1,
                 List.of("tag-a", "tag-b"), List.of(judge));
@@ -210,7 +211,7 @@ class EventWorkbookWriterTest {
         FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(0L, List.of(competitor), "MID_AVG", List.of());
 
         return new FetchClassificationDTO("event-1", "Spring Cup", "FINISHED", "stage-1", "Stage A", "Cup",
-                "OBDX", "OBDX.FCI_GRADE_1.V0", "Grade 1", 0L, obdx, "A");
+                "OBDX", "OBDX.FCI_GRADE_1.V0", "Grade 1", 0L, obdx, "A", CompetitionSource.API);
     }
 
     @Test
@@ -308,7 +309,8 @@ class EventWorkbookWriterTest {
                 List.of(exercise), List.of(), "EXC", null);
         FetchClassificationDTO classification = new FetchClassificationDTO("event-1", "Spring Cup", "FINISHED",
                 "stage-1", "Stage A", "Cup", "OBDX", "OBDX.FCI_GRADE_1.V0", "Grade 1", 0L,
-                new FetchObdxClassificationDTO(0L, List.of(competitor), "MID_AVG", List.of()), "A");
+                new FetchObdxClassificationDTO(0L, List.of(competitor), "MID_AVG", List.of()), "A",
+                CompetitionSource.API);
 
         try (XSSFWorkbook workbook = read(writer.write(twoJudges, classification, COEFFICIENTS))) {
             Sheet sheet = workbook.getSheet("7");

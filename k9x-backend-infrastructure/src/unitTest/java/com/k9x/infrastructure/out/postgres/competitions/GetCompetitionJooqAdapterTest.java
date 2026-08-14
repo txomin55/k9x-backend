@@ -37,6 +37,7 @@ class GetCompetitionJooqAdapterTest {
             Tables.COMPETITIONS.ADDRESS,
             Tables.COMPETITIONS.COORD_ALT,
             Tables.COMPETITIONS.COORD_LONG,
+            Tables.COMPETITIONS.SOURCE,
             Tables.COMPETITIONS.LAST_UPDATE,
             Tables.COMPETITIONS.CREATED_AT,
             Tables.COMPETITIONS.DELETED_AT

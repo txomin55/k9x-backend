@@ -41,7 +41,8 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                 dto.scoresLastUpdate(),
                 dto.obdx() == null ? null
                         : new ObdxStageEventClassificationResponseDTO(mapCompetitors(dto.obdx().competitors()),
-                                dto.obdx().scoreCalculation(), mapJudges(dto.obdx().judges()))));
+                                dto.obdx().scoreCalculation(), mapJudges(dto.obdx().judges())),
+                dto.source().name()));
     }
 
     private List<IdNameDTO> mapJudges(List<FetchObdxEventJudgeDTO> judges) {

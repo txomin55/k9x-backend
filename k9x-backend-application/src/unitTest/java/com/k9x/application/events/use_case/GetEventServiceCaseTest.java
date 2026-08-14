@@ -8,6 +8,7 @@ import com.k9x.application.disciplines.use_case.dto.ExerciseDTO;
 import com.k9x.application.disciplines.use_case.dto.FederationInfoDTO;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.domain.events.aggregates.EventSnapshot;
@@ -65,7 +66,7 @@ class GetEventServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", stageCreator, 0L, Long.MAX_VALUE, 0L, 0L,
                 stageDeletedAt, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                0L, 0L, null, List.of(stage));
+                CompetitionSource.API, 0L, 0L, null, List.of(stage));
     }
 
     @Test

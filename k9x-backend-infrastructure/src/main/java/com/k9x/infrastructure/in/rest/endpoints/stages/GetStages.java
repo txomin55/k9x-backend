@@ -56,7 +56,8 @@ public class GetStages implements StagesFetchAllApiDelegate {
                                         .toList(),
                                 stage.status(),
                                 stage.organizer(),
-                                stage.includesRankings()))
+                                stage.includesRankings(),
+                                stage.source().name()))
                         .toList());
     }
 }

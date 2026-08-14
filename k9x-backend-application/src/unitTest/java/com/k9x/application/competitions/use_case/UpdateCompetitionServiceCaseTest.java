@@ -6,6 +6,7 @@ import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.competitions.use_case.command.UpdateCompetitionCommand;
 import com.k9x.application.competitions.use_case.dto.Coordinates;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.competitions.exceptions.CompetitionNotFoundException;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +44,7 @@ class UpdateCompetitionServiceCaseTest {
 
     private CompetitionSnapshot competition(String creator) {
         return new CompetitionSnapshot("comp-1", "World Cup", creator, "Org", "ES", "desc", "addr",
-                null, null, 0L, 0L, null, List.of());
+                null, null, CompetitionSource.API, 0L, 0L, null, List.of());
     }
 
     @Test
