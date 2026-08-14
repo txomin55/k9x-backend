@@ -29,6 +29,8 @@ public enum ErrorEnum {
     EVENT_CANNOT_BE_UPDATED("error.event_cannot_be_updated"),
     DISCIPLINE_CONFIGURATION_MALFORMED("error.discipline_configuration_malformed"),
     EVENT_CONFIGURATION_ID_REQUIRED("error.event_configuration_id_required"),
+    EVENT_CATEGORY_REQUIRED("error.event_category_required"),
+    EVENT_CATEGORY_NOT_ALLOWED("error.event_category_not_allowed"),
     COMPETITOR_NOT_FOUND("error.competitor_not_found"),
     COMPETITOR_ALREADY_NOT_COMPETING("error.competitor_already_not_competing"),
     YELLOW_CARD_ALREADY_REGISTERED("error.yellow_card_already_registered"),

@@ -3,6 +3,8 @@ package com.k9x.application.events.obdx.use_case;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
+import com.k9x.application.events.exceptions.EventCategoryNotAllowedException;
+import com.k9x.application.events.exceptions.EventCategoryRequiredException;
 import com.k9x.application.events.exceptions.EventConfigurationIdRequiredException;
 import com.k9x.application.events.obdx.exceptions.BihNotAllowedForSexException;
 import com.k9x.application.events.obdx.exceptions.ObdxCollectorNotFoundException;
@@ -19,6 +21,7 @@ import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.competitions.commands.ObdxEventInfoUpdated;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxEventCategory;
 import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.domain.events.aggregates.EventSnapshot;
@@ -43,7 +46,7 @@ import static org.mockito.Mockito.*;
 class UpdateObdxEventServiceCaseTest {
 
     private static final UpdateObdxEventCommand VALID_COMMAND = new UpdateObdxEventCommand(
-            "Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), null, null);
+            "Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), null, ObdxEventCategory.CLUB);
 
     @Mock
     private GetCompetitionPersistencePort getCompetitionPersistencePort;
@@ -63,7 +66,7 @@ class UpdateObdxEventServiceCaseTest {
 
     private CompetitionSnapshot competition() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
         // dateFrom after the command's enrollment deadline (2025-01-01) so the deadline-before-start invariant holds.
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 4102444800000L, Long.MAX_VALUE,
                 0L, 0L, null, List.of(event));
@@ -81,7 +84,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_configuration_id_is_blank() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "  ", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), null, null);
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "  ", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), null, ObdxEventCategory.CLUB);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(EventConfigurationIdRequiredException.class);
@@ -102,7 +105,7 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_collector_email_does_not_exist() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
-                List.of(), List.of(), List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "missing@k9x.com", false)), List.of(), null, null);
+                List.of(), List.of(), List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "missing@k9x.com", false)), List.of(), null, ObdxEventCategory.CLUB);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getUserInfoPersistencePort.findById("missing@k9x.com")).thenReturn(null);
 
@@ -128,7 +131,7 @@ class UpdateObdxEventServiceCaseTest {
                 List.of(), List.of(),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null, false),
                         new UpdateObdxEventCommand.JudgeCommand("judge-1", null, false)),
-                List.of(), null, null);
+                List.of(), null, ObdxEventCategory.CLUB);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxDuplicateJudgeException.class);
@@ -146,7 +149,7 @@ class UpdateObdxEventServiceCaseTest {
                 List.of(), List.of(),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null, true),
                         new UpdateObdxEventCommand.JudgeCommand("judge-2", null, true)),
-                List.of(), null, null);
+                List.of(), null, ObdxEventCategory.CLUB);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
@@ -163,7 +166,7 @@ class UpdateObdxEventServiceCaseTest {
                 List.of(), List.of(),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null, true),
                         new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false)),
-                List.of(), null, null);
+                List.of(), null, ObdxEventCategory.CLUB);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
@@ -177,7 +180,7 @@ class UpdateObdxEventServiceCaseTest {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
                 List.of(), List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of("judge-1")),
                         new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 2, List.of(), List.of("judge-1"))),
-                List.of(), List.of(), null, null);
+                List.of(), List.of(), null, ObdxEventCategory.CLUB);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxDuplicateExerciseException.class);
@@ -189,7 +192,7 @@ class UpdateObdxEventServiceCaseTest {
     void throws_exception_when_exercise_has_no_judges() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
                 List.of(), List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of())),
-                List.of(), List.of(), null, null);
+                List.of(), List.of(), null, ObdxEventCategory.CLUB);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxExerciseJudgeRequiredException.class);
@@ -202,7 +205,7 @@ class UpdateObdxEventServiceCaseTest {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
                 List.of(),
                 List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of("judge-1"))),
-                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false)), List.of(), null, null);
+                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false)), List.of(), null, ObdxEventCategory.CLUB);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxExerciseJudgeNotFoundException.class);
@@ -216,7 +219,7 @@ class UpdateObdxEventServiceCaseTest {
                 List.of(),
                 List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of("judge-1", "judge-2"))),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null, false),
-                        new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false)), List.of(), null, null);
+                        new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false)), List.of(), null, ObdxEventCategory.CLUB);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxNotEnoughJudgesException.class);
@@ -229,7 +232,7 @@ class UpdateObdxEventServiceCaseTest {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
                 List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, null, false, null, false),
                         new UpdateObdxEventCommand.CompetitorCommand("dog-1", 2, null, false, null, false)),
-                List.of(), List.of(), List.of(), null, null);
+                List.of(), List.of(), List.of(), null, ObdxEventCategory.CLUB);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(ObdxDuplicateDogException.class);
@@ -240,7 +243,7 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void throws_exception_when_bih_true_for_male_dog() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, null, true, null, false)), List.of(), List.of(), List.of(), null, null);
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, null, true, null, false)), List.of(), List.of(), List.of(), null, ObdxEventCategory.CLUB);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getDogPersistencePort.getDog("dog-1"))
                 .thenReturn(new Dog("dog-1", "id", null, "breed", "Rex", "img", "owner-1", "handler-1", "creator-1", "ES", "team",
@@ -253,12 +256,10 @@ class UpdateObdxEventServiceCaseTest {
     }
 
     @Test
-    void flags_the_event_international_when_a_competitor_is_from_another_country() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L,
-                ObdxAvgMethod.AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, null, false),
-                        new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, null, false)),
-                List.of(), List.of(), List.of(), null, null);
+    void computes_rank_score_within_the_category_sub_band() {
+        // CPC_COBS band [100, 200]; CLUB takes the lower three quarters [100, 175]; two competitors -> tier 1
+        // -> 100 + round(1/3 · 75) = 125.
+        UpdateObdxEventCommand command = obdxCommand("OBDX.CPC_COBS.V0", ObdxEventCategory.CLUB);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
         when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
@@ -266,37 +267,13 @@ class UpdateObdxEventServiceCaseTest {
 
         serviceCase.updateEvent("event-1", command, "user-1", true);
 
-        // A competitor from FR while the event is in ES -> international. (The rank letter is derived on read.)
-        assertThat(recordedChange().international()).isTrue();
+        assertThat(recordedChange().rankScore()).isEqualTo(125);
     }
 
     @Test
-    void flags_the_event_national_when_every_competitor_shares_the_event_country() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L,
-                ObdxAvgMethod.AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, null, false),
-                        new UpdateObdxEventCommand.CompetitorCommand("dog-es-2", 2, null, false, null, false)),
-                List.of(), List.of(), List.of(), null, null);
-        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
-        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
-        when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
-        when(getDogPersistencePort.getDog("dog-es-2")).thenReturn(dogFrom("dog-es-2", "es"));
-
-        serviceCase.updateEvent("event-1", command, "user-1", true);
-
-        // Both from ES (case-insensitive) -> not international.
-        assertThat(recordedChange().international()).isFalse();
-    }
-
-    @Test
-    void computes_rank_score_within_the_configuration_band_and_flags_international() {
-        // CPC_COBS band is [100, 200]; two competitors -> E tier; one from FR while the event is in ES ->
-        // international. score = 100 + round(1/5 * 0.9 * 100) + round(0.1 * 100) = 100 + 18 + 10 = 128.
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "OBDX.CPC_COBS.V0", 1735689600000L,
-                ObdxAvgMethod.AVG,
-                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, null, false),
-                        new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, null, false)),
-                List.of(), List.of(), List.of(), null, null);
+    void an_open_trial_scores_above_a_club_one_of_the_same_grade() {
+        // CPC_COBS OPEN is [176, 200]; two competitors -> tier 1 -> 176 + round(1/3 · 24) = 184.
+        UpdateObdxEventCommand command = obdxCommand("OBDX.CPC_COBS.V0", ObdxEventCategory.OPEN);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
         when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
@@ -304,22 +281,58 @@ class UpdateObdxEventServiceCaseTest {
 
         serviceCase.updateEvent("event-1", command, "user-1", true);
 
-        ObdxEventInfoUpdated change = recordedChange();
-        assertThat(change.rankScore()).isEqualTo(128);
-        assertThat(change.international()).isTrue();
+        assertThat(recordedChange().rankScore()).isEqualTo(184);
+    }
+
+    @Test
+    void a_world_championship_final_scores_1000_whatever_its_size() {
+        UpdateObdxEventCommand command = obdxCommand("OBDX.FCI_GRADE_3.V0", ObdxEventCategory.WC_FINAL);
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
+        when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
+        when(getDogPersistencePort.getDog("dog-fr")).thenReturn(dogFrom("dog-fr", "FR"));
+
+        serviceCase.updateEvent("event-1", command, "user-1", true);
+
+        assertThat(recordedChange().rankScore()).isEqualTo(1000);
+    }
+
+    @Test
+    void rejects_a_championship_category_on_a_grade_that_does_not_host_one() {
+        UpdateObdxEventCommand command = obdxCommand("OBDX.FCI_GRADE_2.V0", ObdxEventCategory.WC_FINAL);
+
+        assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
+                .isInstanceOf(EventCategoryNotAllowedException.class);
+
+        verifyNoInteractions(saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void rejects_an_event_with_no_category() {
+        UpdateObdxEventCommand command = obdxCommand("OBDX.CPC_COBS.V0", null);
+
+        assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
+                .isInstanceOf(EventCategoryRequiredException.class);
+
+        verifyNoInteractions(saveCompetitionPersistencePort);
     }
 
     @Test
     void leaves_rank_score_null_when_the_configuration_has_no_band() {
-        // "config-1" is not a known configuration, so no band -> null score.
+        // "config-1" is not a known configuration, so no band -> null score, and any category is accepted.
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 
         serviceCase.updateEvent("event-1", VALID_COMMAND, "user-1", true);
 
-        ObdxEventInfoUpdated change = recordedChange();
-        assertThat(change.rankScore()).isNull();
-        assertThat(change.international()).isFalse();
+        assertThat(recordedChange().rankScore()).isNull();
+    }
+
+    private UpdateObdxEventCommand obdxCommand(String configurationId, ObdxEventCategory category) {
+        return new UpdateObdxEventCommand("Event 1", configurationId, 1735689600000L, ObdxAvgMethod.AVG,
+                List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-es", 1, null, false, null, false),
+                        new UpdateObdxEventCommand.CompetitorCommand("dog-fr", 2, null, false, null, false)),
+                List.of(), List.of(), List.of(), null, category);
     }
 
     private ObdxEventInfoUpdated recordedChange() {
@@ -334,7 +347,7 @@ class UpdateObdxEventServiceCaseTest {
 
     private CompetitionSnapshot competitionInCountry(String country) {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 4102444800000L, Long.MAX_VALUE,
                 0L, 0L, null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", country, null, null, null, null,

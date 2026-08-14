@@ -28,7 +28,7 @@ class EventSnapshotTest {
         EventCompetitor competitor = new EventCompetitor(DOG, "Rex", null, null, null, null, null, null, null, null,
                 (short) 1, null, null, false, null, null, null, null);
         return new EventSnapshot("evt-1", "cfg-1", "obdx", "Event", "stage-1", "user-1", null,
-                0L, 0L, null, null, List.of(competitor), exercises, List.of(), scores, List.of(), null, null, null, null);
+                0L, 0L, null, null, List.of(competitor), exercises, List.of(), scores, List.of(), null, null, null);
     }
 
     private Score score(String exerciseId) {

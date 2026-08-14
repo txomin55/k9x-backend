@@ -49,7 +49,7 @@ class GetEventServiceCaseTest {
 
     private EventSnapshot event() {
         return new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
     }
 
     private EventSnapshot richEvent() {
@@ -58,7 +58,7 @@ class GetEventServiceCaseTest {
         EventExercise exercise = new EventExercise("ex-1", (short) 1, List.of("tag-a", "tag-b"), List.of("judge-1"));
         EventJudge judge = new EventJudge("judge-1", "Judge", "collector@k9x.com", false);
         return new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(exercise), List.of(judge), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(exercise), List.of(judge), List.of(), List.of(), null, null, null);
     }
 
     private CompetitionSnapshot competition(EventSnapshot event, String stageCreator, Long stageDeletedAt) {
@@ -139,7 +139,7 @@ class GetEventServiceCaseTest {
     @Test
     void exposes_enrollment_deadline_and_domain_status_in_obdx_detail() throws IOException {
         EventSnapshot event = new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1",
-                1700000000000L, 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                1700000000000L, 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1"))
                 .thenReturn(competition(event, "user-1", null));
@@ -157,7 +157,7 @@ class GetEventServiceCaseTest {
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "Handler", "team", "ES", "breed",
                 "id-1", null, null, (short) 1, null, true, true, null, null, null, null);
         EventSnapshot event = new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L,
-                0L, null, ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                0L, null, ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of(), List.of(), null, null, null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1"))
                 .thenReturn(competition(event, "user-1", null));
@@ -174,7 +174,7 @@ class GetEventServiceCaseTest {
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "owner", "Handler", "team", "ES", "breed",
                 "id-1", null, null, (short) 1, null, false, false, null, null, null, null);
         EventSnapshot event = new EventSnapshot("event-1", "cfg-1", "OBDX", "Event 1", "stage-1", "user-1", null, 0L,
-                0L, null, ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                0L, null, ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of(), List.of(), null, null, null);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1"))
                 .thenReturn(competition(event, "user-1", null));

@@ -3,6 +3,8 @@ package com.k9x.application.events.obdx.use_case;
 import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.competitions.port.SaveCompetitionPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
+import com.k9x.application.events.exceptions.EventCategoryNotAllowedException;
+import com.k9x.application.events.exceptions.EventCategoryRequiredException;
 import com.k9x.application.events.exceptions.EventConfigurationIdRequiredException;
 import com.k9x.application.events.obdx.exceptions.ObdxCollectorNotFoundException;
 import com.k9x.application.events.obdx.exceptions.ObdxDuplicateDogException;
@@ -12,6 +14,8 @@ import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeNotFoundExcep
 import com.k9x.application.events.obdx.exceptions.ObdxExerciseJudgeRequiredException;
 import com.k9x.domain.disciplines.obdx.exceptions.ObdxNotEnoughJudgesException;
 import com.k9x.application.events.obdx.use_case.command.UpdateObdxEventCommand;
+import com.k9x.domain.disciplines.obdx.ObdxConfigurationsRankThresholds;
+import com.k9x.domain.disciplines.obdx.ObdxEventCategory;
 import com.k9x.domain.disciplines.obdx.ObdxEventRank;
 import com.k9x.domain.disciplines.obdx.ObdxScoreAveraging;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
@@ -55,6 +59,7 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
     public void updateEvent(String id, UpdateObdxEventCommand command, String userId, boolean organizer) {
         AuthAssertions.assertOrganizer(organizer, userId);
         assertConfigurationId(command.configurationId());
+        assertCategory(command.configurationId(), command.category());
         assertNoDuplicateJudges(command);
         assertNoDuplicateExercises(command);
         assertNoDuplicateDogs(command);
@@ -71,20 +76,13 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
 
         CompetitionSnapshot snapshot = getCompetitionPersistencePort.getCompetition(competitionId);
         CompetitionAggregate competition = CompetitionAggregate.of(snapshot);
-        // One entry per competitor (null when the dog or its country is unknown) so the list size is the
-        // event's competitor count — the international threshold depends on it.
-        List<String> competitorCountries = command.competitors().stream()
-                .map(c -> competitorDogs.get(c.dogIdentification()))
-                .map(dog -> dog == null ? null : dog.getCountry())
-                .toList();
-        boolean international = ObdxEventRank.isInternational(competitorCountries, snapshot.country());
-        Integer rankScore = ObdxEventRank.eventScore(command.configurationId(), command.competitors().size(), international);
-        competition.updateObdxEventInfo(id, toUpdateData(command, rankScore, international),
-                userId, DateUtils.nowUtcMillis());
+        Integer rankScore = ObdxEventRank.eventScore(command.configurationId(), command.competitors().size(),
+                command.category());
+        competition.updateObdxEventInfo(id, toUpdateData(command, rankScore), userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }
 
-    private ObdxEventUpdateData toUpdateData(UpdateObdxEventCommand command, Integer rankScore, boolean international) {
+    private ObdxEventUpdateData toUpdateData(UpdateObdxEventCommand command, Integer rankScore) {
         return new ObdxEventUpdateData(
                 command.name(),
                 command.configurationId(),
@@ -105,7 +103,6 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
                         .toList(),
                 command.awards(),
                 rankScore,
-                international,
                 command.commissioner(),
                 command.category());
     }
@@ -119,6 +116,21 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
     private void assertConfigurationId(String configurationId) {
         if (configurationId == null || configurationId.isBlank()) {
             throw new EventConfigurationIdRequiredException();
+        }
+    }
+
+    /**
+     * The category drives the event's rank score, so it is mandatory and must be one the configuration admits:
+     * only the grade hosting the world championship accepts the {@code WC_*} rounds. Configurations with no
+     * rank band declared score {@code null} and accept any category.
+     */
+    private void assertCategory(String configurationId, ObdxEventCategory category) {
+        if (category == null) {
+            throw new EventCategoryRequiredException();
+        }
+        ObdxConfigurationsRankThresholds band = ObdxConfigurationsRankThresholds.fromConfigurationId(configurationId);
+        if (band != null && !band.allows(category)) {
+            throw new EventCategoryNotAllowedException();
         }
     }
 

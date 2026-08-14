@@ -23,7 +23,7 @@ class EventStatusTest {
     private static EventSnapshot event(Long deletedAt, List<EventCompetitor> competitors,
                                List<EventExercise> exercises, List<EventJudge> judges, List<Score> scores) {
         return new EventSnapshot("e1", "cfg", "obdx", "Event", "s1", "creator", null, 0L, 0L, deletedAt,
-                ObdxAvgMethod.AVG, competitors, exercises, judges, scores, List.of(), null, null, null, null);
+                ObdxAvgMethod.AVG, competitors, exercises, judges, scores, List.of(), null, null, null);
     }
 
     private static EventCompetitor competitor(String dogIdentification, boolean notCompeting) {

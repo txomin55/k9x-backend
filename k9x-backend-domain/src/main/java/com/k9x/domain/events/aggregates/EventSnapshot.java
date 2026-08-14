@@ -35,7 +35,6 @@ public record EventSnapshot(
         List<Score> scores,
         List<String> awards,
         Integer rankScore,
-        Boolean international,
         /** OBDX only: the chief steward / trial manager printed on the working booklet. */
         String commissioner,
         /** OBDX only: the competitive tier of the event; {@code null} when the organizer has not set one. */
@@ -43,12 +42,12 @@ public record EventSnapshot(
 ) {
 
     /**
-     * The OBDX rank label, derived (not stored) from the numeric {@link #rankScore} and the
-     * {@link #international} flag: {@code null} when the event carries no rank score, otherwise e.g.
-     * {@code "B"}, {@code "B+"} or {@code "S"}. See {@link ObdxRank#labelFromScore(int, boolean)}.
+     * The OBDX rank label, derived (not stored) from the numeric {@link #rankScore}: {@code null} when the
+     * event carries no rank score, otherwise e.g. {@code "B"} or {@code "S"}. See
+     * {@link ObdxRank#labelFromScore(int)}.
      */
     public String rank() {
-        return rankScore == null ? null : ObdxRank.labelFromScore(rankScore, Boolean.TRUE.equals(international));
+        return rankScore == null ? null : ObdxRank.labelFromScore(rankScore);
     }
 
     /**

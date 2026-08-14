@@ -433,10 +433,11 @@ crear el evento como si fuera real:
    `applying_timestamp` de todo lo derivado).
 2. `k9x.events`: `discipline`, un `configuration_id` **existente en código** (los `configuration.json` de
    `.../disciplines/obdx/federations/` y las franjas de `ObdxConfigurationsRankThresholds` — no hay tablas de
-   configuración) y **⚠️ `rank_score` + `international` puestos a mano**: esa fórmula corre al guardar el
-   evento por la API, no en el cron. Sin `rank_score`, los competidores no puntúan y el evento no afecta al
-   índice.
-3. `obdx.event_judges`, `obdx.event_exercises` (con los jueces asignados por ejercicio: la clasificación solo
+   configuración) y **⚠️ `rank_score` puesto a mano**: esa fórmula corre al guardar el evento por la API, no
+   en el cron. Sin `rank_score`, los competidores no puntúan y el evento no afecta al índice.
+3. `obdx.event_info` con la **`category`** de la prueba (obligatoria: es lo que fija la sub-banda de la que
+   sale el `rank_score` del punto anterior).
+4. `obdx.event_judges`, `obdx.event_exercises` (con los jueces asignados por ejercicio: la clasificación solo
    lee scores de pares juez+ejercicio listados ahí), `obdx.event_competitors` y `obdx.event_scores`.
 
 A partir de ahí, todo es automático: el cron diario ve la etapa terminada sin marcador y congela el evento

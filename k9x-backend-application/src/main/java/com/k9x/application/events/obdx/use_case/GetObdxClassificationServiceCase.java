@@ -240,7 +240,7 @@ public class GetObdxClassificationServiceCase {
                     event.rankScore(), event.configurationId(),
                     ObdxQualification.minThreshold(qualificationTiers),
                     ObdxQualification.maxThreshold(qualificationTiers),
-                    totalScore, maxPossibleTotal, hasScore);
+                    totalScore, maxPossibleTotal, hasScore, disqualifiedOrNotCompeting);
 
             competitors.add(new FetchClassificationCompetitorDTO(
                     dogIdentification, meta.dogName(), meta.dogBreed(), meta.dogOwner(), meta.dogHandler(), meta.dogTeam(), meta.dogCountry(),

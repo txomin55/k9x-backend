@@ -1,108 +1,98 @@
 # OBDX · Baremos de `rank_score` por configuración
 
-Tabla de referencia: para cada configuración (su franja `[min, max]`), qué `rank_score` y qué letra `rank`
-produce la fórmula según el **nº de competidores** (un *tier* 1–5) y si el evento es **internacional**.
+Tabla de referencia: para cada configuración y **categoría**, qué `rank_score` y qué letra `rank` produce la
+fórmula según el **nº de competidores** (un *tier* 1–3).
 
-Recordatorio de la fórmula (`ObdxConfigurationsRankThresholds.eventScore`, `range = max - min`):
+Recordatorio de la fórmula (`ObdxConfigurationsRankThresholds.eventScore`), con `[subMin, subMax]` la
+sub-banda de la categoría y `range = subMax - subMin`:
 
 ```
-rank_score = min + round(tier/5 · 0.9·range) + (internacional ? round(0.1·range) : 0)
+rank_score = subMin + round(tier/3 · range)
 ```
 
-- **Tier por nº de competidores (1–5):** `<5 → 1`, `5–9 → 2`, `10–19 → 3`, `20–34 → 4`, `≥35 → 5`.
-  Es solo una **capa** para posicionar dentro de la franja; **no** es la letra `rank`.
-- **Internacional:** suficientes competidores de país distinto al de la competición → `+10 %` del range **y**
-  sufijo `+`. El mínimo de extranjeros depende del tier (≈10 % del tramo, redondeado hacia arriba):
-  `tier 1 → 1`, `tier 2 → 2`, `tier 3 → 2`, `tier 4 → 3`, `tier 5 → 4`.
+- **Tier por nº de competidores (1–3):** `<10 → 1`, `10–24 → 2`, `≥25 → 3`. Es solo una **capa** para
+  posicionar dentro de la sub-banda; **no** es la letra `rank`.
+- **Categorías:** `CLUB` toma los 3/4 bajos de la franja y `OPEN` el cuarto alto. **Solo GRADE_3** admite
+  `WC_Q`, `WC_SEMI` y `WC_FINAL`, que son **puntos fijos** (800 / 900 / 1000): no dependen del nº de
+  competidores.
 - **Letra (rango global del score):** `E ≤200`, `D 201–400`, `C 401–600`, `B 601–800`, `A 801–900`,
   `S 901–1000`.
-- **Tope automático 900**; `901–1000` es la letra `S`, **manual** y siempre internacional (`S+`), nunca la
-  produce la fórmula.
+- No hay flag `international` ni sufijo `+`: la letra es siempre una letra sola.
 
 > En cada tabla, cada celda es `rank_score (rank)`.
 
 ---
 
-## OBDX_ENCI_PREDEBUTTANTI — franja `[50, 100]` (range 50)
+## OBDX_ENCI_PREDEBUTTANTI — franja `[50, 100]`
 
-Toda la franja cae en el rango global **E** → letra siempre `E`/`E+`. Es la franja más estrecha (range 50),
-así que el bonus internacional es solo `+5`.
+Sub-bandas: `CLUB [50, 88]`, `OPEN [89, 100]`. Toda la franja cae en el rango global **E**.
 
-| Nº competidores (tier) | Nacional | Internacional |
+| Nº competidores (tier) | CLUB | OPEN |
 |---|---|---|
-| < 5 (1) | 59 (E) | 64 (E+) |
-| 5–9 (2) | 68 (E) | 73 (E+) |
-| 10–19 (3) | 77 (E) | 82 (E+) |
-| 20–34 (4) | 86 (E) | 91 (E+) |
-| ≥ 35 (5) | 95 (E) | 100 (E+) |
+| < 10 (1) | 63 (E) | 93 (E) |
+| 10–24 (2) | 75 (E) | 96 (E) |
+| ≥ 25 (3) | 88 (E) | 100 (E) |
 
 ---
 
-## OBDX_ENCI_DEBUTTANTI · CPC_COBS · OBDX_RSCE_DEBUTANTE — franja `[100, 200]` (range 100)
+## OBDX_ENCI_DEBUTTANTI · CPC_COBS · OBDX_RSCE_DEBUTANTE — franja `[100, 200]`
 
-Toda la franja cae en el rango global **E**, así que la letra es siempre `E`/`E+`; el nº de competidores solo
-mueve el número.
+Sub-bandas: `CLUB [100, 175]`, `OPEN [176, 200]`. Toda la franja cae en el rango global **E**.
 
-| Nº competidores (tier) | Nacional | Internacional |
+| Nº competidores (tier) | CLUB | OPEN |
 |---|---|---|
-| < 5 (1) | 118 (E) | 128 (E+) |
-| 5–9 (2) | 136 (E) | 146 (E+) |
-| 10–19 (3) | 154 (E) | 164 (E+) |
-| 20–34 (4) | 172 (E) | 182 (E+) |
-| ≥ 35 (5) | 190 (E) | 200 (E+) |
+| < 10 (1) | 125 (E) | 184 (E) |
+| 10–24 (2) | 150 (E) | 192 (E) |
+| ≥ 25 (3) | 175 (E) | 200 (E) |
 
 ---
 
-## OBDX_FCI_GRADE_1 · OBDX_RSCE_GRADO_1 — franja `[201, 400]` (range 199)
+## OBDX_FCI_GRADE_1 · OBDX_RSCE_GRADO_1 — franja `[201, 400]`
 
-Toda la franja cae en el rango global **D** → letra siempre `D`/`D+`.
+Sub-bandas: `CLUB [201, 350]`, `OPEN [351, 400]`. Toda la franja cae en el rango global **D**.
 
-| Nº competidores (tier) | Nacional | Internacional |
+| Nº competidores (tier) | CLUB | OPEN |
 |---|---|---|
-| < 5 (1) | 237 (D) | 257 (D+) |
-| 5–9 (2) | 273 (D) | 293 (D+) |
-| 10–19 (3) | 308 (D) | 328 (D+) |
-| 20–34 (4) | 344 (D) | 364 (D+) |
-| ≥ 35 (5) | 380 (D) | 400 (D+) |
+| < 10 (1) | 251 (D) | 367 (D) |
+| 10–24 (2) | 300 (D) | 384 (D) |
+| ≥ 25 (3) | 350 (D) | 400 (D) |
 
 ---
 
-## OBDX_FCI_GRADE_2 — franja `[401, 600]` (range 199)
+## OBDX_FCI_GRADE_2 — franja `[401, 600]`
 
-Toda la franja cae en el rango global **C** → letra siempre `C`/`C+`.
+Sub-bandas: `CLUB [401, 550]`, `OPEN [551, 600]`. Toda la franja cae en el rango global **C**.
 
-| Nº competidores (tier) | Nacional | Internacional |
+| Nº competidores (tier) | CLUB | OPEN |
 |---|---|---|
-| < 5 (1) | 437 (C) | 457 (C+) |
-| 5–9 (2) | 473 (C) | 493 (C+) |
-| 10–19 (3) | 508 (C) | 528 (C+) |
-| 20–34 (4) | 544 (C) | 564 (C+) |
-| ≥ 35 (5) | 580 (C) | 600 (C+) |
+| < 10 (1) | 451 (C) | 567 (C) |
+| 10–24 (2) | 500 (C) | 584 (C) |
+| ≥ 25 (3) | 550 (C) | 600 (C) |
 
 ---
 
-## OBDX_FCI_GRADE_3 — franja `[601, 900]` (range 299)
+## OBDX_FCI_GRADE_3 — franja `[601, 1000]`
 
-Es la única franja que **cruza de B a A** (frontera en 800): con pocos competidores da `B`, y a partir del
-tier 4 sube a `A`. El máximo automático es **900** (`A+`); **nunca llega a `S`** (901–1000, manual).
+La única configuración que admite las categorías de mundial, y la única que cruza de **B** a **A** y a **S**.
+Las tres rondas de mundial son puntos fijos: da igual cuánta gente se presente a una final, vale 1000.
 
-| Nº competidores (tier) | Nacional | Internacional |
-|---|---|---|
-| < 5 (1) | 655 (B) | 685 (B+) |
-| 5–9 (2) | 709 (B) | 739 (B+) |
-| 10–19 (3) | 762 (B) | 792 (B+) |
-| 20–34 (4) | 816 (A) | 846 (A+) |
-| ≥ 35 (5) | 870 (A) | 900 (A+) |
+| Nº competidores (tier) | CLUB | OPEN | WC_Q | WC_SEMI | WC_FINAL |
+|---|---|---|---|---|---|
+| < 10 (1) | 634 (B) | 717 (B) | 800 (B) | 900 (A) | 1000 (S) |
+| 10–24 (2) | 667 (B) | 734 (B) | 800 (B) | 900 (A) | 1000 (S) |
+| ≥ 25 (3) | 700 (B) | 750 (B) | 800 (B) | 900 (A) | 1000 (S) |
+
+Sub-bandas: `CLUB [601, 700]`, `OPEN [701, 750]`, `WC_Q = 800`, `WC_SEMI = 900`, `WC_FINAL = 1000`. Los tramos
+751–799, 801–899 y 901–999 quedan vacíos a propósito.
 
 ---
 
 ## Resumen de letra por configuración
 
-| Configuración | Franja | Letra(s) posibles |
-|---|---|---|
-| OBDX_ENCI_PREDEBUTTANTI | 50–100 | E / E+ |
-| OBDX_ENCI_DEBUTTANTI, CPC_COBS, OBDX_RSCE_DEBUTANTE | 100–200 | E / E+ |
-| OBDX_FCI_GRADE_1, OBDX_RSCE_GRADO_1 | 201–400 | D / D+ |
-| OBDX_FCI_GRADE_2 | 401–600 | C / C+ |
-| OBDX_FCI_GRADE_3 | 601–900 | B / B+ / A / A+ |
-| — (manual, seed) | 901–1000 | S / S+ |
+| Configuración | Franja | Categorías | Letra(s) posibles |
+|---|---|---|---|
+| OBDX_ENCI_PREDEBUTTANTI | 50–100 | CLUB, OPEN | E |
+| OBDX_ENCI_DEBUTTANTI, CPC_COBS, OBDX_RSCE_DEBUTANTE | 100–200 | CLUB, OPEN | E |
+| OBDX_FCI_GRADE_1, OBDX_RSCE_GRADO_1 | 201–400 | CLUB, OPEN | D |
+| OBDX_FCI_GRADE_2 | 401–600 | CLUB, OPEN | C |
+| OBDX_FCI_GRADE_3 | 601–1000 | las cinco | B / A / S |

@@ -139,7 +139,7 @@ public class CompetitionHydrator {
         // just created — or one of another discipline — legitimately has none.
         List<EventShell> eventShells = dsl.select(ev.ID, ei.CONFIGURATION_ID, ev.DISCIPLINE, ev.NAME,
                         ev.STAGE_ID, ev.CREATOR, ev.ENROLLMENT_DEADLINE, ev.LAST_UPDATE, ev.CREATED_AT,
-                        ev.DELETED_AT, ei.SCORE_CALCULATION, ev.AWARDS, ev.RANK_SCORE, ev.INTERNATIONAL,
+                        ev.DELETED_AT, ei.SCORE_CALCULATION, ev.AWARDS, ev.RANK_SCORE,
                         ei.COMMISSIONER, ei.CATEGORY)
                 .from(ev)
                 .join(st).on(st.ID.eq(ev.STAGE_ID))
@@ -161,7 +161,6 @@ public class CompetitionHydrator {
                     shell.scoreCalculation = r.get(ei.SCORE_CALCULATION);
                     shell.awards = r.get(ev.AWARDS);
                     shell.rankScore = r.get(ev.RANK_SCORE);
-                    shell.international = r.get(ev.INTERNATIONAL);
                     shell.commissioner = r.get(ei.COMMISSIONER);
                     shell.category = r.get(ei.CATEGORY);
                     return shell;
@@ -184,7 +183,6 @@ public class CompetitionHydrator {
                     scores.getOrDefault(s.id, new ArrayList<>()),
                     s.awards == null ? List.of() : Arrays.asList(s.awards),
                     s.rankScore,
-                    s.international,
                     s.commissioner,
                     ObdxEventCategory.fromName(s.category));
             eventsByStage.computeIfAbsent(s.stageId, _ -> new ArrayList<>()).add(event);
@@ -288,7 +286,6 @@ public class CompetitionHydrator {
     private static final class EventShell {
         String id, configurationId, discipline, name, stageId, creator, scoreCalculation, commissioner, category;
         Integer rankScore;
-        Boolean international;
         Long enrollmentDeadline;
         long lastUpdate, createdAt;
         Long deletedAt;

@@ -7,13 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ObdxRankTest {
 
     @Test
-    void format_appends_plus_only_when_international() {
-        assertEquals("B", ObdxRank.B.format(false));
-        assertEquals("B+", ObdxRank.B.format(true));
-        assertEquals("S+", ObdxRank.S.format(true));   // S is always international
-    }
-
-    @Test
     void from_score_reads_the_letter_from_the_global_bands() {
         assertEquals(ObdxRank.E, ObdxRank.fromScore(0));
         assertEquals(ObdxRank.E, ObdxRank.fromScore(200));
@@ -30,17 +23,17 @@ class ObdxRankTest {
     }
 
     @Test
-    void label_from_score_combines_the_global_letter_with_the_international_suffix() {
-        assertEquals("E", ObdxRank.labelFromScore(136, false));     // COBS, national
-        assertEquals("D", ObdxRank.labelFromScore(237, false));     // FCI grade 1, national
-        assertEquals("C", ObdxRank.labelFromScore(437, false));     // FCI grade 2, national
-        assertEquals("B+", ObdxRank.labelFromScore(699, true));     // FCI grade 3, international
-        assertEquals("A+", ObdxRank.labelFromScore(900, true));     // top of the automatic scale, international
+    void label_from_score_is_the_bare_letter() {
+        assertEquals("E", ObdxRank.labelFromScore(125));     // COBS club trial
+        assertEquals("D", ObdxRank.labelFromScore(251));     // FCI grade 1 club trial
+        assertEquals("C", ObdxRank.labelFromScore(451));     // FCI grade 2 club trial
+        assertEquals("B", ObdxRank.labelFromScore(700));     // FCI grade 3 club trial, tier 3
+        assertEquals("A", ObdxRank.labelFromScore(900));     // world championship semi-final
     }
 
     @Test
-    void label_from_score_reports_S_in_the_manual_range() {
-        assertEquals("S", ObdxRank.labelFromScore(901, false));
-        assertEquals("S+", ObdxRank.labelFromScore(1000, true));    // S seeds are always international
+    void label_from_score_reports_S_for_a_world_championship_final() {
+        assertEquals("S", ObdxRank.labelFromScore(901));
+        assertEquals("S", ObdxRank.labelFromScore(1000));
     }
 }

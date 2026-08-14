@@ -116,7 +116,7 @@ class CompetitionAggregateTest {
     void delete_throws_when_competition_is_started() {
         EventSnapshot started = new EventSnapshot("evt-1", "cfg-1", "obdx", "Open", "stage-1", OWNER,
                 null, 0L, 0L, null, null, List.of(), List.of(), List.of(),
-                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null, null);
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null);
         StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, FUTURE, 0L, 0L, null,
                 List.of(started));
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, startedStage));
@@ -149,7 +149,7 @@ class CompetitionAggregateTest {
     void delete_allows_started_smoke_competition_owned_by_support_account() {
         EventSnapshot started = new EventSnapshot("evt-1", "cfg-1", "obdx", "Open", "stage-1", SMOKE_CREATOR,
                 null, 0L, 0L, null, null, List.of(), List.of(), List.of(),
-                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null, null);
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null);
         StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", SMOKE_CREATOR, FUTURE, FUTURE,
                 0L, 0L, null, List.of(started));
         CompetitionSnapshot smoke = new CompetitionSnapshot("comp-1", "--SMOKE-- Competition 1 (0803-120000)",
@@ -166,7 +166,7 @@ class CompetitionAggregateTest {
     void delete_throws_when_smoke_prefixed_competition_is_not_owned_by_support_account() {
         EventSnapshot started = new EventSnapshot("evt-1", "cfg-1", "obdx", "Open", "stage-1", OWNER,
                 null, 0L, 0L, null, null, List.of(), List.of(), List.of(),
-                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null, null);
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null);
         StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, FUTURE,
                 0L, 0L, null, List.of(started));
         CompetitionSnapshot prefixedOnly = new CompetitionSnapshot("comp-1", "--SMOKE-- Competition 1 (0803-120000)",
@@ -180,7 +180,7 @@ class CompetitionAggregateTest {
     void delete_throws_when_support_account_competition_has_no_smoke_prefix() {
         EventSnapshot started = new EventSnapshot("evt-1", "cfg-1", "obdx", "Open", "stage-1", SMOKE_CREATOR,
                 null, 0L, 0L, null, null, List.of(), List.of(), List.of(),
-                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null, null);
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null);
         StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", SMOKE_CREATOR, FUTURE, FUTURE,
                 0L, 0L, null, List.of(started));
         CompetitionSnapshot unprefixed = new CompetitionSnapshot("comp-1", "World Cup",
@@ -194,7 +194,7 @@ class CompetitionAggregateTest {
     void delete_throws_when_a_stage_has_a_non_created_event() {
         EventSnapshot started = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
-                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null, null);
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(started, FUTURE)));
         assertThrows(CompetitionCannotBeDeletedException.class, () -> aggregate.delete(OWNER, NOW));
     }
@@ -347,7 +347,7 @@ class CompetitionAggregateTest {
     void deleteStage_throws_when_stage_is_started() {
         EventSnapshot started = new EventSnapshot("evt-1", "cfg-1", "obdx", "Open", "stage-1", OWNER,
                 null, 0L, 0L, null, null, List.of(), List.of(), List.of(),
-                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null, null);
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null);
         StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, FUTURE, 0L, 0L, null,
                 List.of(started));
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, startedStage));
@@ -366,7 +366,7 @@ class CompetitionAggregateTest {
         EventCompetitor settled = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null, null, null,
                 (short) 1, null, false, true, null, null, null, null);
         EventSnapshot finished = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(settled), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(settled), List.of(), List.of(), List.of(), List.of(), null, null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(finished, FUTURE)));
         assertThrows(StageCannotBeDeletedException.class, () -> aggregate.deleteStage("stage-1", OWNER, NOW));
     }
@@ -402,12 +402,12 @@ class CompetitionAggregateTest {
 
     private EventSnapshot event(Long deletedAt) {
         return new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, deletedAt,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
     }
 
     private EventSnapshot eventWithEnrollmentDeadline(Long enrollmentDeadline) {
         return new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, enrollmentDeadline, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
     }
 
     private StageSnapshot stageWith(EventSnapshot event, long dateTo) {
@@ -459,7 +459,7 @@ class CompetitionAggregateTest {
         // A score on one of the stage's events -> stage STARTED, so it no longer accepts new events.
         EventSnapshot started = new EventSnapshot("evt-1", "cfg-1", "obdx", "Open", "stage-1", OWNER,
                 null, 0L, 0L, null, null, List.of(), List.of(), List.of(),
-                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null, null);
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null);
         StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, FUTURE, 0L, 0L, null,
                 List.of(started));
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, startedStage));
@@ -526,7 +526,7 @@ class CompetitionAggregateTest {
         EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i", null, null,
                 (short) 3, null, true, false, null, null, null, null);
         EventSnapshot eventWithCompetitors = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, FUTURE,
-                0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of(), List.of(), null, null, null);
         CompetitionAggregate aggregate =
                 CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(eventWithCompetitors)));
 
@@ -541,7 +541,7 @@ class CompetitionAggregateTest {
         EventCompetitor existing = new EventCompetitor("dog-1", "dog-1", "o", "h", "t", "c", "b", "i", null, null,
                 (short) 1, null, true, false, null, null, null, null);
         EventSnapshot eventWithCompetitors = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, FUTURE,
-                0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(existing), List.of(), List.of(), List.of(), List.of(), null, null, null);
         CompetitionAggregate aggregate =
                 CompetitionAggregate.of(competition(OWNER, null, openEnrollmentStage(eventWithCompetitors)));
 
@@ -552,10 +552,10 @@ class CompetitionAggregateTest {
     @Test
     void updateObdxEventInfo_throws_when_user_is_not_event_creator() {
         EventSnapshot otherEvent = new EventSnapshot("evt-1", null, null, "Event", "stage-1", "other", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(otherEvent, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("E", "cfg", ObdxAvgMethod.MID_AVG, null,
-                List.of(), List.of(), List.of(), List.of(), null, false, null, null);
+                List.of(), List.of(), List.of(), List.of(), null, null, null);
         assertThrows(UnauthorizedResourceException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
@@ -566,10 +566,10 @@ class CompetitionAggregateTest {
         // itself has not reached its start day yet.
         EventSnapshot started = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(),
-                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null, null);
+                List.of(new Score("ex-1", "judge-1", "dog-1", BigDecimal.TEN, 0L)), List.of(), null, null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(started, FUTURE, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,
-                List.of(), List.of(), List.of(), List.of(), null, false, null, null);
+                List.of(), List.of(), List.of(), List.of(), null, null, null);
         assertThrows(EventCannotBeUpdatedException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
@@ -579,7 +579,7 @@ class CompetitionAggregateTest {
         // Stage dateTo already in the past -> event is FINISHED, so its config is locked.
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), PAST, PAST)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, null,
-                List.of(), List.of(), List.of(), List.of(), null, false, null, null);
+                List.of(), List.of(), List.of(), List.of(), null, null, null);
         assertThrows(EventCannotBeUpdatedException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
@@ -591,7 +591,7 @@ class CompetitionAggregateTest {
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, null,
                 List.of(), List.of(),
                 List.of(new ObdxJudgeItem("judge-1", null, true), new ObdxJudgeItem("judge-2", null, true)),
-                List.of(), null, false, null, null);
+                List.of(), null, null, null);
         assertThrows(ObdxMultipleMainJudgesException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
@@ -603,7 +603,7 @@ class CompetitionAggregateTest {
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, null,
                 List.of(), List.of(),
                 List.of(new ObdxJudgeItem("judge-1", null, true), new ObdxJudgeItem("judge-2", null, false)),
-                List.of(), null, false, null, null);
+                List.of(), null, null, null);
 
         aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW);
 
@@ -617,7 +617,7 @@ class CompetitionAggregateTest {
         long afterStart = Instant.parse("2030-01-02T00:00:00Z").toEpochMilli();
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, afterStart,
-                List.of(), List.of(), List.of(), List.of(), null, false, null, null);
+                List.of(), List.of(), List.of(), List.of(), null, null, null);
         assertThrows(EnrollmentDeadlineAfterStageStartException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
@@ -628,7 +628,7 @@ class CompetitionAggregateTest {
         long sameDayAsDateFrom = Instant.parse("2030-01-01T23:00:00Z").toEpochMilli();
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, sameDayAsDateFrom,
-                List.of(), List.of(), List.of(), List.of(), null, false, null, null);
+                List.of(), List.of(), List.of(), List.of(), null, null, null);
         assertThrows(EnrollmentDeadlineAfterStageStartException.class,
                 () -> aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW));
     }
@@ -638,7 +638,7 @@ class CompetitionAggregateTest {
         // dateFrom in the future -> stage not started, event config still editable.
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event(null), FUTURE, FUTURE)));
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "cfg-1", ObdxAvgMethod.MID_AVG, 100L,
-                List.of(), List.of(), List.of(), List.of(), 700, true, null, null);
+                List.of(), List.of(), List.of(), List.of(), 700, null, null);
 
         aggregate.updateObdxEventInfo("evt-1", data, OWNER, NOW);
 
@@ -647,7 +647,6 @@ class CompetitionAggregateTest {
         assertEquals("cfg-1", change.configurationId());
         assertEquals(NOW, change.lastUpdate());
         assertEquals(700, change.rankScore().intValue());
-        assertTrue(change.international());
     }
 
     @Test
@@ -693,7 +692,7 @@ class CompetitionAggregateTest {
         EventSnapshot disqualified = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), scoreExercises(), List.of(),
                 List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L),
-                        new Score("ex-2", "judge-1", "dog-1", null, 0L, 2000L)), List.of(), null, null, null, null);
+                        new Score("ex-2", "judge-1", "dog-1", null, 0L, 2000L)), List.of(), null, null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(disqualified, FUTURE)));
         ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-3", "dog-1", BigDecimal.TEN);
 
@@ -705,7 +704,7 @@ class CompetitionAggregateTest {
         EventCompetitor notCompeting = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed",
                 null, null, null, (short) 1, null, true, true, null, null, null, null);
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(notCompeting), scoreExercises(), List.of(), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(notCompeting), scoreExercises(), List.of(), List.of(), List.of(), null, null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event, FUTURE)));
         ScoreUpdateData data = new ScoreUpdateData("judge-1", "ex-1", "dog-1", BigDecimal.TEN);
 
@@ -739,7 +738,7 @@ class CompetitionAggregateTest {
     void registerYellowCard_throws_when_already_registered_for_judge_exercise_and_dog() {
         EventSnapshot carded = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), cardExercises(), List.of(),
-                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L)), List.of(), null, null, null, null);
+                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L)), List.of(), null, null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(carded, FUTURE)));
         YellowCardData data = new YellowCardData("judge-1", "ex-1", "dog-1");
 
@@ -751,7 +750,7 @@ class CompetitionAggregateTest {
     void registerYellowCard_also_registers_red_card_when_it_is_the_second_yellow_card() {
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), cardExercises(), List.of(),
-                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L)), List.of(), null, null, null, null);
+                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L)), List.of(), null, null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event, FUTURE)));
         YellowCardData data = new YellowCardData("judge-2", "ex-2", "dog-1");
 
@@ -771,7 +770,7 @@ class CompetitionAggregateTest {
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), cardExercises(), List.of(),
                 List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, 1000L, null),
-                        new Score("ex-1", "judge-1", "dog-1", null, 0L, null, 500L)), List.of(), null, null, null, null);
+                        new Score("ex-1", "judge-1", "dog-1", null, 0L, null, 500L)), List.of(), null, null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(event, FUTURE)));
         YellowCardData data = new YellowCardData("judge-2", "ex-2", "dog-1");
 
@@ -807,7 +806,7 @@ class CompetitionAggregateTest {
     void registerRedCard_throws_when_already_registered() {
         EventSnapshot carded = new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(), cardExercises(), List.of(),
-                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, null, 1000L)), List.of(), null, null, null, null);
+                List.of(new Score("ex-1", "judge-1", "dog-1", null, 0L, null, 1000L)), List.of(), null, null, null);
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition(OWNER, null, stageWith(carded, FUTURE)));
         RedCardData data = new RedCardData("judge-1", "ex-1", "dog-1");
 
@@ -821,7 +820,7 @@ class CompetitionAggregateTest {
      */
     private EventSnapshot cardEvent() {
         return new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), cardExercises(), List.of(), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), cardExercises(), List.of(), List.of(), List.of(), null, null, null);
     }
 
     private static List<EventExercise> cardExercises() {
@@ -836,7 +835,7 @@ class CompetitionAggregateTest {
      */
     private EventSnapshot scoreEvent() {
         return new EventSnapshot("evt-1", null, null, "Event", "stage-1", OWNER, null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), scoreExercises(), List.of(), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), scoreExercises(), List.of(), List.of(), List.of(), null, null, null);
     }
 
     private static List<EventExercise> scoreExercises() {
@@ -850,7 +849,7 @@ class CompetitionAggregateTest {
 
     private EventSnapshot notifiableEvent(String id, String creator, Long deletedAt) {
         return new EventSnapshot(id, null, null, "Event " + id, "stage-1", creator, null, 0L, 0L, deletedAt,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
     }
 
     private CompetitionAggregate withStageEvents(Long stageDeletedAt, EventSnapshot... events) {

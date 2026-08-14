@@ -9,6 +9,6 @@ public record ObdxEventInfoUpdated(String eventId, String name, String configura
                                    ObdxAvgMethod scoreCalculation, Long enrollmentDeadline,
                                    List<ObdxCompetitorItem> competitors, List<ObdxExerciseItem> exercises,
                                    List<ObdxJudgeItem> judges, long lastUpdate,
-                                   List<String> awards, Integer rankScore, boolean international,
+                                   List<String> awards, Integer rankScore,
                                    String commissioner, ObdxEventCategory category) implements CompetitionChange {
 }

@@ -107,7 +107,6 @@ CREATE TABLE k9x.events
     deleted_at          BIGINT,
     awards              VARCHAR(50)[],
     rank_score          INTEGER,
-    international       BOOLEAN,
     CONSTRAINT k9x_events_pkey PRIMARY KEY (id),
     CONSTRAINT k9x_events_fk FOREIGN KEY (stage_id) REFERENCES k9x.stages (id)
 );
@@ -180,7 +179,7 @@ CREATE TABLE obdx.event_info
     configuration_id  VARCHAR(50),
     score_calculation VARCHAR(10)  NOT NULL DEFAULT 'AVG',
     commissioner      VARCHAR(255),
-    category          VARCHAR(20),
+    category          VARCHAR(20)  NOT NULL DEFAULT 'CLUB',
     last_update       BIGINT       NOT NULL,
     CONSTRAINT obdx_event_info_pkey PRIMARY KEY (event_id),
     CONSTRAINT obdx_event_info_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id)

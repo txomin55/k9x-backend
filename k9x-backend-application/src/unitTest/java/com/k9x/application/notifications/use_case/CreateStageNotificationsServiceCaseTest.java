@@ -73,7 +73,7 @@ class CreateStageNotificationsServiceCaseTest {
 
     private EventSnapshot event(String id, String stageId, String creator, Long deletedAt) {
         return new EventSnapshot(id, null, null, "Event " + id, stageId, creator, Long.MAX_VALUE, 0L, 0L,
-                deletedAt, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                deletedAt, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
     }
 
     /** Stage 1 owns event-1 and event-2, both created by user-1. Stage 2 owns event-3. */
@@ -105,7 +105,7 @@ class CreateStageNotificationsServiceCaseTest {
                 null, null, null, null, null, null, null, true, null, null, null, null);
         EventSnapshot finishedEvent = new EventSnapshot("event-1", null, null, "Event event-1", "stage-1",
                 "user-1", Long.MAX_VALUE, 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(notCompeting),
-                List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+                List.of(), List.of(), List.of(), List.of(), null, null, null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE,
                 Long.MAX_VALUE, 0L, 0L, null,
                 List.of(finishedEvent, event("event-2", "stage-1", "user-1", null)));

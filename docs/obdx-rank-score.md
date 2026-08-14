@@ -3,17 +3,21 @@
 ## Qué es
 
 Cada prueba (evento) OBDX obtiene una **puntuación de ranking numérica de 0 a 1000**, guardada en
-`k9x.events.rank_score`. Es el **dato primario**. Junto a él se persiste solo un booleano `k9x.events.international`.
-La letra `rank` (`E`, `E+`, … `A`, `A+`, `S`, `S+`) **no se guarda**: se **computa en lectura** a partir de
-`rank_score` + `international` (ver [`EventSnapshot.rank()`](../k9x-backend-domain/src/main/java/com/k9x/domain/events/aggregates/EventSnapshot.java)).
+`k9x.events.rank_score`. Es el **dato primario**, y lo único que se persiste. La letra `rank` (`E`, `D`, `C`,
+`B`, `A`, `S`) **no se guarda**: se **computa en lectura** a partir de `rank_score`
+(ver [`EventSnapshot.rank()`](../k9x-backend-domain/src/main/java/com/k9x/domain/events/aggregates/EventSnapshot.java)).
 
-La puntuación refleja lo "fuerte" que es la prueba y depende de tres factores:
+La puntuación refleja lo "fuerte" que es la prueba y depende de dos factores:
 
 1. **La configuración** (`configuration_id`): cada configuración ocupa una **franja** `[min, max]` dentro del
-   0–1000. Cuanto más alta la categoría, más alta la franja.
-2. **El número de competidores**: coloca la prueba dentro de la franja (más competidores → más arriba).
-3. **Si es internacional**: hay **suficientes** competidores cuyo perro es de un país distinto al de la
-   competición (cuántos depende del tier, ver [Umbral de internacional](#umbral-de-internacional)).
+   0–1000. Cuanto más alto el grado, más alta la franja.
+2. **La categoría** (`obdx.event_info.category`): subdivide esa franja. Un concurso de club y una final del
+   mundial del mismo grado no optan a la misma puntuación.
+3. Dentro de la sub-banda de la categoría, **el número de competidores** (un *tier* 1–3) posiciona la prueba.
+
+> El viejo flag `international` (calculado a partir del país de los perros) **ya no existe**: ni en el código,
+> ni en base de datos, ni en la letra — el sufijo `+` ha desaparecido. Lo que distinguía de verdad a dos
+> pruebas del mismo grado era su nivel competitivo, y eso es justo lo que declara la categoría.
 
 ## Franjas por configuración
 
@@ -25,68 +29,71 @@ que resuelve la franja a partir del `configuration_id` **ignorando el sufijo de 
 
 | Configuración | Franja |
 |---|---|
-| `OBDX_RSCE_DEBUTANTE`, `CPC_COBS` | 100 – 200 |
+| `OBDX_ENCI_PREDEBUTTANTI` | 50 – 100 |
+| `OBDX_ENCI_DEBUTTANTI`, `OBDX_RSCE_DEBUTANTE`, `CPC_COBS` | 100 – 200 |
 | `OBDX_FCI_GRADE_1`, `OBDX_RSCE_GRADO_1` | 201 – 400 |
 | `OBDX_FCI_GRADE_2` | 401 – 600 |
-| `OBDX_FCI_GRADE_3` | 601 – 900 |
+| `OBDX_FCI_GRADE_3` | 601 – **1000** |
+
+## Categorías y sub-bandas
+
+`ObdxEventCategory` tiene cinco valores: `CLUB`, `OPEN`, `WC_Q`, `WC_SEMI`, `WC_FINAL`. **Solo GRADE_3 admite
+las tres de mundial**; el resto de configuraciones se limita a `CLUB` y `OPEN`. La regla vive en
+`ObdxConfigurationsRankThresholds.allows(category)` y es la fuente única: la usan tanto la validación de
+escritura como el catálogo de categorías.
+
+En los grados sin mundial, **`CLUB` se queda con los 3/4 bajos de la franja y `OPEN` con el cuarto alto**
+(corte en `min + round(0.75 · range)`):
+
+```
+PREDEBUTTANTI  [50, 100]     CLUB [ 50,  88]   OPEN [ 89, 100]
+DEBUTTANTI /
+RSCE_DEBUTANTE /
+CPC_COBS       [100, 200]    CLUB [100, 175]   OPEN [176, 200]
+GRADE_1 /
+RSCE_GRADO_1   [201, 400]    CLUB [201, 350]   OPEN [351, 400]
+GRADE_2        [401, 600]    CLUB [401, 550]   OPEN [551, 600]
+GRADE_3        [601, 1000]   CLUB [601, 700]   OPEN [701, 750]
+                             WC_Q = 800   WC_SEMI = 900   WC_FINAL = 1000
+```
+
+Las tres categorías de mundial son **puntos fijos**, no bandas: una final vale 1000 tenga los competidores que
+tenga. Los huecos entre ellas (751–799, 801–899, 901–999) son intencionados: nada salvo una ronda de mundial
+puntúa ahí.
 
 ## Fórmula (`ObdxConfigurationsRankThresholds.eventScore`)
 
-Con `range = max - min` de la franja de la configuración:
-
-- El **`+` internacional** vale un **10 % del range** (fijo).
-- El **90 % restante** se reparte por un **tier (capa) 1–5 según el nº de competidores** (esto **no** es la
-  letra `rank`, es solo una capa para posicionar dentro de la franja): el tier aporta `tier / 5 · 90% · range`.
+Con `[subMin, subMax]` la sub-banda de la categoría y `range = subMax - subMin`:
 
 ```
-rank_score = min
-           + redondear( tier/5 · 0.9 · range )
-           + ( internacional ? redondear(0.1 · range) : 0 )
+rank_score = subMin + round( tier/3 · range )
 ```
 
-Los umbrales de tier por nº de competidores:
-`<5 → 1`, `[5,10) → 2`, `[10,20) → 3`, `[20,35) → 4`, `≥35 → 5`.
+Los umbrales de tier por nº de competidores: `<10 → 1`, `[10,25) → 2`, `≥25 → 3`.
 
-## Umbral de internacional
-
-Un evento **no** es internacional por tener un único visitante extranjero: hace falta un mínimo de
-competidores extranjeros que crece con el tier (≈10 % del tramo de competidores, redondeado hacia arriba).
-Se define en [`ObdxEventRank.requiredForeignCompetitors`](../k9x-backend-domain/src/main/java/com/k9x/domain/disciplines/obdx/ObdxEventRank.java):
-
-| Nº competidores (tier) | Extranjeros necesarios |
-|---|---|
-| < 5 (1) | 1 |
-| 5–9 (2) | 2 |
-| 10–19 (3) | 2 |
-| 20–34 (4) | 3 |
-| ≥ 35 (5) | 4 |
-
-Un competidor cuenta como **extranjero** cuando su perro tiene país y ese país difiere (sin distinguir
-mayúsculas) del país de la competición; los perros sin país no cuentan como extranjeros, pero **sí** cuentan
-para el nº total de competidores que fija el tier.
+El tier **nunca cae en el suelo de la sub-banda**, y eso es deliberado: ese suelo es también el punto contra
+el que se mide la puntuación de cada competidor (ver [`obdx-competitor-event-score.md`](obdx-competitor-event-score.md)),
+así que una prueba que aterrizara exactamente en él dejaría a todos sus competidores aprobados empatados. Con
+las categorías de mundial `range` es 0, de modo que el tier no las mueve.
 
 ### Ejemplo
 
-`CPC_COBS` (franja `[100, 200]`, `range = 100`), **3 competidores** (→ tier 1) con **1 internacional**
-(suficiente en tier 1):
+`CPC_COBS` (franja `[100, 200]`), categoría `CLUB` (sub-banda `[100, 175]`, `range = 75`), **3 competidores**
+(→ tier 1):
 
 ```
-100 + round(1/5 · 0.9 · 100)  + round(0.1 · 100)
-100 +        18               +        10          = 128   → etiqueta "E+"
+100 + round(1/3 · 75) = 100 + 25 = 125   → etiqueta "E"
 ```
 
-## El tope 900 y `S`
+## La `S` ya no es manual
 
-La fórmula automática **nunca supera 900** (`ObdxRank.MAX_AUTOMATIC_SCORE`). El tramo **901–1000 queda
-reservado** para el rango **`S`**, que **solo se asigna manualmente** (seed, p. ej. una final de campeonato
-del mundo) y es **siempre internacional** (por eso se etiqueta `S+`). Por eso todas las franjas de
-configuración terminan en ≤ 900 y **GRADE_3 nunca llega a S** (su franja `[601, 900]` topa en A).
+El tramo **901–1000** lo alcanza la fórmula automática por una única vía: una `WC_FINAL` de GRADE_3, que vale
+1000 fijo. Ya no hay tope automático (`MAX_AUTOMATIC_SCORE` desapareció) ni seed manual para la `S`.
 
 ## La letra se deriva del score (rangos globales)
 
 `rank` no se calcula por su cuenta: la **letra** se lee de la posición del `rank_score` en la escala global
-0–1000 (`ObdxRank.fromScore`), y el **`+`** marca que el evento es internacional
-(`ObdxRank.labelFromScore(score, internacional)`):
+0–1000 (`ObdxRank.fromScore`), y `ObdxRank.labelFromScore(score)` devuelve la letra a secas:
 
 | rank_score | letra |
 |---|---|
@@ -95,18 +102,22 @@ configuración terminan en ≤ 900 y **GRADE_3 nunca llega a S** (su franja `[60
 | 401 – 600 | C |
 | 601 – 800 | B |
 | 801 – 900 | A |
-| 901 – 1000 | S (manual, siempre internacional → `S+`) |
+| 901 – 1000 | S |
 
-Como cada franja de configuración cae dentro de uno de estos rangos, **la letra refleja la categoría** de la
-prueba (COBS → E, GRADE_1 → D, GRADE_2 → C, GRADE_3 → B/A) y el score la posiciona dentro. En GRADE_3
-(`[601, 900]`) el nº de competidores puede empujar de **B** a **A**.
+Como cada franja de configuración cae dentro de uno de estos rangos, **la letra refleja el grado** de la
+prueba (COBS → E, GRADE_1 → D, GRADE_2 → C, GRADE_3 → B/A/S) y la categoría la posiciona dentro. En GRADE_3 la
+categoría puede empujar de **B** (club, open, clasificatoria) a **A** (semifinal) o **S** (final).
 
 ## Qué se persiste y qué se computa
 
-Al **actualizar la prueba** (`UpdateObdxEventServiceCase.updateEvent`) se computan y persisten en `k9x.events`
-solo dos cosas: `rank_score` (INTEGER) e `international` (BOOLEAN). Si la configuración no tiene franja,
-`rank_score` es `null` (y `rank()` devuelve `null`). La **letra `rank` no se guarda**: se deriva en cada
-lectura con `EventSnapshot.rank()`, así que no hay valor duplicado que mantener sincronizado.
+Al **actualizar la prueba** (`UpdateObdxEventServiceCase.updateEvent`) se computa y persiste en `k9x.events`
+una sola cosa: `rank_score` (INTEGER). Si la configuración no tiene franja, `rank_score` es `null` (y `rank()`
+devuelve `null`). La **letra `rank` no se guarda**: se deriva en cada lectura con `EventSnapshot.rank()`, así
+que no hay valor duplicado que mantener sincronizado.
+
+La `category` es **obligatoria** (`obdx.event_info.category NOT NULL`): sin ella no se puede situar la prueba,
+así que el caso de uso rechaza la actualización (`EventCategoryRequiredException`). Y si la categoría no es una
+de las que admite la configuración, también (`EventCategoryNotAllowedException`).
 
 El **snapshot del cron guarda solo la parte pesada `obdx`** (totales, posiciones, scores por ejercicio); los
 metadatos del evento y la letra se **reconstruyen en lectura** a partir del detalle del evento (los joins que
@@ -116,28 +127,32 @@ ya hace `GetEventClassificationServiceCase`). Objetivo: cachear solo el cálculo
 
 | Pieza | Fichero |
 |---|---|
-| Letra global + tope + derivación (`fromScore`/`labelFromScore`/`rangeFloor`) | `k9x-backend-domain/.../disciplines/obdx/ObdxRank.java` |
-| Franjas por config + fórmula del score (`eventScore`, tier por nº competidores) | `k9x-backend-domain/.../disciplines/obdx/ObdxConfigurationsRankThresholds.java` |
+| Letra global + derivación (`fromScore`/`labelFromScore`) | `k9x-backend-domain/.../disciplines/obdx/ObdxRank.java` |
+| Franjas, sub-bandas por categoría y fórmula del score | `k9x-backend-domain/.../disciplines/obdx/ObdxConfigurationsRankThresholds.java` |
+| Categorías | `k9x-backend-domain/.../disciplines/obdx/ObdxEventCategory.java` |
 | Letra derivada del evento | `k9x-backend-domain/.../events/aggregates/EventSnapshot.java` (`rank()`) |
-| Cálculo al actualizar la prueba | `k9x-backend-application/.../events/obdx/use_case/UpdateObdxEventServiceCase.java` |
+| Cálculo y validación al actualizar la prueba | `k9x-backend-application/.../events/obdx/use_case/UpdateObdxEventServiceCase.java` |
 | Ensamblado en lectura (snapshot obdx + metadatos) | `k9x-backend-application/.../events/use_case/GetEventClassificationServiceCase.java` |
 | Persistencia (escritura/lectura) | `SaveCompetitionJooqAdapter.java` / `CompetitionHydrator.java` |
-| Columnas | `V1__create_mvp_db.sql` (`events.rank_score`, `events.international`) |
+| Columnas | `V1__create_mvp_db.sql` (`events.rank_score`, `obdx.event_info.category`) |
 
 ## rank_score por competidor
 
-Además del `rank_score` del evento, cada competidor tiene su propio `rank_score` en
-`obdx.event_competitors.rank_score` (`NUMERIC(6,2)`). **Premia el mérito** (subir por los calificativos), no
-solo ir a un evento con mucho campo. Resumen:
+Además del `rank_score` del evento, cada competidor tiene su propio `rank_score`, persistido en
+`obdx.snap_event_competitors_results.rank_score` (`NUMERIC(6,2)`). **Premia el mérito** (subir por los
+calificativos), no solo ir a un evento con mucho campo. Resumen:
 
-- No llega a la 1ª qualificación → **suelo del rango anterior** (`configBandMin − 1`).
-- Llegar a la 1ª qualificación desbloquea un **10 % fijo** de `(eventScore − configBandMin)`.
+- **Descalificado** (tarjeta roja, dos amarillas o no compite) → **NULL**: el evento no entra en el historial
+  del perro.
+- No llega a la 1ª qualificación → **suelo del grado menos uno** (`gradeFloor − 1`, p.ej. 600 en GRADE_3),
+  independientemente de la categoría.
+- Llegar a la 1ª qualificación desbloquea un **10 % fijo** de `(eventScore − gradeFloor)`.
 - El **90 % restante** tiene la **rodilla en el calificativo más alto** de la config (p.ej. EXC): de la 1ª al
   top qualificativo se gana el **85 %** de esa ventana; del top al máximo, el 15 % (pulido). Un 100 % cae justo
   en `eventScore`.
-- Sin puntuación (no compiten / sin scores) → **NULL**.
+- Sin puntuación (sin scores) → **NULL**.
 
-La fórmula completa, con ejemplo y tabla, está en **[`obdx-competitor-event-score.md`](obdx-competitor-event-score.md)**
+La fórmula completa, con ejemplos y tablas, está en **[`obdx-competitor-event-score.md`](obdx-competitor-event-score.md)**
 (dominio: `ObdxCompetitorEventScore`).
 
 Se calcula en `GetObdxClassificationServiceCase` (junto a la posición) y se **persiste en el cron diario de
@@ -145,8 +160,9 @@ snapshot** (`GenerateEventSnapshotsServiceCase`): posición + `rank_score` del c
 escriben **atómicamente** en una sola transacción (`SaveObdxSnapshotJooqAdapter`, `dsl.transaction`). Un fallo
 deja la prueba sin snapshot y se reintenta al día siguiente (escrituras idempotentes).
 
-## Cómo cambiar las franjas
+## Cómo cambiar las franjas o las sub-bandas
 
-Editar los valores en `ObdxConfigurationsRankThresholds`. No hay que tocar JSON ni base de datos (más allá de
-recalcular las pruebas afectadas volviéndolas a guardar). Mantener siempre `max ≤ 900` (901–1000 es zona `S`
-manual).
+Editar los valores en `ObdxConfigurationsRankThresholds`: las franjas están en los constructores del enum, el
+corte CLUB/OPEN en `CLUB_SHARE`, y el layout de GRADE_3 (incluidos los tres puntos de mundial) en sus
+constantes. No hay que tocar JSON ni base de datos, más allá de recalcular las pruebas afectadas volviéndolas
+a guardar.

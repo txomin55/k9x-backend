@@ -323,7 +323,7 @@ public final class CompetitionAggregate {
         assertSingleMainJudge(data.judges());
         changes.add(new ObdxEventInfoUpdated(eventId, data.name(), data.configurationId(), data.scoreCalculation(),
                 data.enrollmentDeadline(), data.competitors(), data.exercises(), data.judges(), now, data.awards(),
-                data.rankScore(), data.international(), data.commissioner(), data.category()));
+                data.rankScore(), data.commissioner(), data.category()));
     }
 
     /**

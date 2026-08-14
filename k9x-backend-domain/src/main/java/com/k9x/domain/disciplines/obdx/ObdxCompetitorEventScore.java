@@ -10,10 +10,14 @@ import java.math.RoundingMode;
  * tiers.
  *
  * <p>Let {@code configBandMin} be the configuration's rank band floor (e.g. FCI grade 3 → 601), {@code eventScore}
- * the event's rank score and {@code span = eventScore - configBandMin}:
+ * the event's rank score and {@code span = eventScore - configBandMin}. Note the floor is the <em>grade's</em>
+ * floor, not the floor of the event category's sub-band: every competitor of a given grade is measured from the
+ * same point, so failing a world championship final drops to the same place as failing a club trial.
  * <ul>
+ *   <li>A disqualified competitor (or one that did not compete) earns nothing at all: {@code null}, so the
+ *       event never enters the dog's ranking history.</li>
  *   <li>A competitor that does not even reach the first (lowest) qualification did not earn its place in this
- *       category, so it drops to the top of the range below: {@code configBandMin - 1}.</li>
+ *       grade, so it drops to the top of the range below: {@code configBandMin - 1}.</li>
  *   <li>Reaching the first qualification unlocks a flat 10% of the span.</li>
  *   <li>The remaining 90% window has a <em>knee at the highest qualification</em> the configuration defines
  *       (e.g. EXC): climbing from the first qualification up to that top qualification earns
@@ -34,10 +38,11 @@ public final class ObdxCompetitorEventScore {
     }
 
     /**
-     * The competitor's ranking score for an event, or {@code null} when it cannot be computed: the event has no
-     * rank score, the competitor has no score, there is no attainable maximum, or the configuration defines no
-     * rank band. When computable it delegates to {@link #of(int, int, BigDecimal, BigDecimal, BigDecimal, BigDecimal)}
-     * with the configuration's band floor and qualification knees.
+     * The competitor's ranking score for an event, or {@code null} when it cannot or must not be computed: the
+     * competitor is disqualified or not competing, the event has no rank score, the competitor has no score,
+     * there is no attainable maximum, or the configuration defines no rank band. When computable it delegates
+     * to {@link #of(int, int, BigDecimal, BigDecimal, BigDecimal, BigDecimal)} with the configuration's band
+     * floor and qualification knees.
      *
      * @param eventScore    the event's own rank score, or {@code null} when the event has none.
      * @param configurationId the event's configuration id (resolves the rank band).
@@ -46,10 +51,13 @@ public final class ObdxCompetitorEventScore {
      * @param total         the competitor's achieved weighted total score.
      * @param max           the maximum attainable weighted total score for the event.
      * @param hasScore      whether the competitor has any recorded score.
+     * @param disqualified  whether the competitor is disqualified or not competing — such a competitor scores
+     *                      nothing even when its exercises were partly marked.
      */
     public static BigDecimal ofEvent(Integer eventScore, String configurationId, BigDecimal firstQualMin,
-                                     BigDecimal topQualMin, BigDecimal total, BigDecimal max, boolean hasScore) {
-        if (eventScore == null || !hasScore || max == null || max.compareTo(BigDecimal.ZERO) == 0) {
+                                     BigDecimal topQualMin, BigDecimal total, BigDecimal max, boolean hasScore,
+                                     boolean disqualified) {
+        if (disqualified || eventScore == null || !hasScore || max == null || max.compareTo(BigDecimal.ZERO) == 0) {
             return null;
         }
         ObdxConfigurationsRankThresholds band = ObdxConfigurationsRankThresholds.fromConfigurationId(configurationId);
@@ -74,7 +82,7 @@ public final class ObdxCompetitorEventScore {
                                 BigDecimal total, BigDecimal max) {
         BigDecimal firstQual = firstQualMin == null ? BigDecimal.ZERO : firstQualMin;
         if (total.compareTo(firstQual) < 0) {
-            return BigDecimal.valueOf(configBandMin - 1L);
+            return BigDecimal.valueOf(configBandMin - 1L).setScale(2, RoundingMode.HALF_UP);
         }
 
         BigDecimal span = BigDecimal.valueOf((long) eventScore - configBandMin);
