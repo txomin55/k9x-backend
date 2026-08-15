@@ -11,7 +11,9 @@ spring:
       - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
 
 server:
-  port: ${SERVER_PORT:4000}
+  # Render injects PORT into every web service and scans that port first, so honouring it makes
+  # the platform detect the service as soon as it binds.
+  port: ${PORT:4000}
 
 # Secrets have no fallback on purpose: a missing variable must fail startup instead of silently
 # booting with a value committed to the repo. Local profiles load them from a git-ignored .env
