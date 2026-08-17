@@ -85,12 +85,12 @@ class ObdxConfigurationsRankThresholdsTest {
     }
 
     @Test
-    void grade_3_splits_into_club_open_and_three_fixed_championship_points() {
+    void grade_3_splits_into_club_open_a_qualifier_band_and_two_fixed_championship_points() {
         assertEquals(new ObdxConfigurationsRankThresholds.Band(601, 700),
                 ObdxConfigurationsRankThresholds.FCI_GRADE_3.subBand(CLUB));
         assertEquals(new ObdxConfigurationsRankThresholds.Band(701, 750),
                 ObdxConfigurationsRankThresholds.FCI_GRADE_3.subBand(OPEN));
-        assertEquals(new ObdxConfigurationsRankThresholds.Band(800, 800),
+        assertEquals(new ObdxConfigurationsRankThresholds.Band(775, 850),
                 ObdxConfigurationsRankThresholds.FCI_GRADE_3.subBand(WC_Q));
         assertEquals(new ObdxConfigurationsRankThresholds.Band(900, 900),
                 ObdxConfigurationsRankThresholds.FCI_GRADE_3.subBand(WC_SEMI));
@@ -114,11 +114,11 @@ class ObdxConfigurationsRankThresholdsTest {
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_2, OPEN, 567, 584, 600);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_3, CLUB, 634, 667, 700);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_3, OPEN, 717, 734, 750);
+        assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_3, WC_Q, 800, 825, 850);
     }
 
     @Test
-    void championship_rounds_are_worth_the_same_however_many_competitors_turn_up() {
-        assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_3, WC_Q, 800, 800, 800);
+    void the_semi_final_and_the_final_are_worth_the_same_however_many_competitors_turn_up() {
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_3, WC_SEMI, 900, 900, 900);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_3, WC_FINAL, 1000, 1000, 1000);
     }
@@ -127,6 +127,11 @@ class ObdxConfigurationsRankThresholdsTest {
     void the_letter_follows_the_grade_and_the_final_reaches_S() {
         assertEquals(ObdxRank.B, ObdxRank.fromScore(
                 ObdxConfigurationsRankThresholds.FCI_GRADE_3.eventScore(TIER_1, CLUB)));
+        // The qualifier straddles the B/A border: 800 is still B, a crowded one (825+) already reaches A.
+        assertEquals(ObdxRank.B, ObdxRank.fromScore(
+                ObdxConfigurationsRankThresholds.FCI_GRADE_3.eventScore(TIER_1, WC_Q)));
+        assertEquals(ObdxRank.A, ObdxRank.fromScore(
+                ObdxConfigurationsRankThresholds.FCI_GRADE_3.eventScore(TIER_3, WC_Q)));
         assertEquals(ObdxRank.A, ObdxRank.fromScore(
                 ObdxConfigurationsRankThresholds.FCI_GRADE_3.eventScore(TIER_1, WC_SEMI)));
         assertEquals(ObdxRank.S, ObdxRank.fromScore(

@@ -15,8 +15,9 @@ import java.util.regex.Pattern;
  * The category subdivides the configuration's band, so the score a trial can reach depends on its competitive
  * tier. Grades that hold no world championship split their band between {@code CLUB} (the lower
  * {@link #CLUB_SHARE 75%}) and {@code OPEN} (the top quarter). FCI grade 3 additionally hosts the three world
- * championship rounds, which are <em>fixed points</em>: a final is worth {@link #WC_FINAL_SCORE 1000} however
- * many competitors turn up.
+ * championship rounds: the qualifier keeps a real sub-band ({@code [775, 850]}, reached as 800 / 825 / 850),
+ * so the competitor count still moves it, while the semi-final and the final are <em>fixed points</em> — a final is worth
+ * {@link #WC_FINAL_SCORE 1000} however many competitors turn up.
  */
 public enum ObdxConfigurationsRankThresholds {
     ENCI_PRE_DEBUTTANTI("OBDX.ENCI_PREDEBUTTANTI", 50, 100, false),
@@ -28,7 +29,7 @@ public enum ObdxConfigurationsRankThresholds {
     FCI_GRADE_2("OBDX.FCI_GRADE_2", 401, 600, false),
     FCI_GRADE_3("OBDX.FCI_GRADE_3", 601, 1000, true);
 
-    /** A closed score range. World championship rounds use a degenerate band where {@code min == max}. */
+    /** A closed score range. The championship semi-final and final use a degenerate band where {@code min == max}. */
     public record Band(int min, int max) {
     }
 
@@ -42,11 +43,14 @@ public enum ObdxConfigurationsRankThresholds {
     /** Share of a non-championship band that belongs to {@code CLUB}; {@code OPEN} takes the rest. */
     private static final double CLUB_SHARE = 0.75;
 
-    // The FCI grade 3 layout: CLUB [601, 700], OPEN [701, 750], and the three championship rounds as fixed
-    // points. The gaps between them are intentional — nothing but a championship round scores there.
+    // The FCI grade 3 layout: CLUB [601, 700], OPEN [701, 750], the qualifier band [775, 850] and the two
+    // final championship rounds as fixed points. The gaps between them are intentional — nothing but a
+    // championship round scores there. The qualifier floor sits at 775 so that its three tiers land on
+    // 800 / 825 / 850: the floor itself is never reachable (see eventScore).
     private static final int GRADE_3_CLUB_MAX = 700;
     private static final int GRADE_3_OPEN_MAX = 750;
-    private static final int WC_QUALIFIER_SCORE = 800;
+    private static final int WC_QUALIFIER_MIN = 775;
+    private static final int WC_QUALIFIER_MAX = 850;
     private static final int WC_SEMI_FINAL_SCORE = 900;
     private static final int WC_FINAL_SCORE = 1000;
 
@@ -127,7 +131,7 @@ public enum ObdxConfigurationsRankThresholds {
             return switch (category) {
                 case CLUB -> new Band(min, GRADE_3_CLUB_MAX);
                 case OPEN -> new Band(GRADE_3_CLUB_MAX + 1, GRADE_3_OPEN_MAX);
-                case WC_Q -> new Band(WC_QUALIFIER_SCORE, WC_QUALIFIER_SCORE);
+                case WC_Q -> new Band(WC_QUALIFIER_MIN, WC_QUALIFIER_MAX);
                 case WC_SEMI -> new Band(WC_SEMI_FINAL_SCORE, WC_SEMI_FINAL_SCORE);
                 case WC_FINAL -> new Band(WC_FINAL_SCORE, WC_FINAL_SCORE);
             };
@@ -143,8 +147,8 @@ public enum ObdxConfigurationsRankThresholds {
      *
      * <p>The tier deliberately never lands on the sub-band floor: that floor is also the floor a competitor's
      * own score is measured against ({@link ObdxCompetitorEventScore}), so an event sitting exactly on it would
-     * leave every qualified competitor tied. World championship rounds have a zero-width sub-band, so the tier
-     * does not move them at all.
+     * leave every qualified competitor tied. The world championship semi-final and final have a zero-width
+     * sub-band, so the tier does not move them at all.
      */
     public int eventScore(int competitorCount, ObdxEventCategory category) {
         Band band = subBand(category);

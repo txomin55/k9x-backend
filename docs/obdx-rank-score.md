@@ -54,12 +54,13 @@ GRADE_1 /
 RSCE_GRADO_1   [201, 400]    CLUB [201, 350]   OPEN [351, 400]
 GRADE_2        [401, 600]    CLUB [401, 550]   OPEN [551, 600]
 GRADE_3        [601, 1000]   CLUB [601, 700]   OPEN [701, 750]
-                             WC_Q = 800   WC_SEMI = 900   WC_FINAL = 1000
+                             WC_Q [775, 850]   WC_SEMI = 900   WC_FINAL = 1000
 ```
 
-Las tres categorías de mundial son **puntos fijos**, no bandas: una final vale 1000 tenga los competidores que
-tenga. Los huecos entre ellas (751–799, 801–899, 901–999) son intencionados: nada salvo una ronda de mundial
-puntúa ahí.
+`WC_Q` sí es una banda: sus tres tiers valen **800 / 825 / 850** (el suelo 775 no es alcanzable, como en el
+resto de sub-bandas). `WC_SEMI` y `WC_FINAL` son **puntos fijos**: una final vale 1000 tenga los competidores
+que tenga. Los huecos (751–774, 851–899, 901–999) son intencionados: nada salvo una ronda de mundial puntúa
+ahí.
 
 ## Fórmula (`ObdxConfigurationsRankThresholds.eventScore`)
 
@@ -74,7 +75,7 @@ Los umbrales de tier por nº de competidores: `<10 → 1`, `[10,25) → 2`, `≥
 El tier **nunca cae en el suelo de la sub-banda**, y eso es deliberado: ese suelo es también el punto contra
 el que se mide la puntuación de cada competidor (ver [`obdx-competitor-event-score.md`](obdx-competitor-event-score.md)),
 así que una prueba que aterrizara exactamente en él dejaría a todos sus competidores aprobados empatados. Con
-las categorías de mundial `range` es 0, de modo que el tier no las mueve.
+`WC_SEMI` y `WC_FINAL` `range` es 0, de modo que el tier no las mueve.
 
 ### Ejemplo
 
