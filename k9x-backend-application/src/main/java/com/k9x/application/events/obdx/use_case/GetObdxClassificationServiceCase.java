@@ -7,6 +7,7 @@ import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.disciplines.obdx.ObdxCacobAwards;
 import com.k9x.domain.disciplines.obdx.ObdxCompetitorEventScore;
+import com.k9x.domain.disciplines.obdx.ObdxFinalScoreExercise;
 import com.k9x.domain.disciplines.obdx.ObdxQualification;
 import com.k9x.domain.disciplines.obdx.ObdxRanking;
 import com.k9x.domain.disciplines.obdx.ObdxScoreAveraging;
@@ -68,6 +69,11 @@ public class GetObdxClassificationServiceCase {
 
         List<FetchClassificationRawRowDTO> rows = new ArrayList<>();
         for (EventCompetitor c : competitors) {
+            // The static final score is the competitor's whole total, so it supersedes any per-exercise score it
+            // might also hold: emit no exercise rows for such a competitor at all.
+            if (event.finalScore(c.dogIdentification()) != null) {
+                continue;
+            }
             for (EventExercise ex : sortedExercises) {
                 List<String> assignedJudgeIds = ex.judges() == null ? List.of() : ex.judges();
                 for (String judgeId : assignedJudgeIds) {
@@ -136,6 +142,24 @@ public class GetObdxClassificationServiceCase {
 
         List<ObdxQualification.Tier> qualificationTiers = qualificationTiers(config);
         Long scoresLastUpdate = null;
+
+        // Competitors carrying a static final score produce no raw rows, so seed their entries here: an empty
+        // exercise map (nothing to break down) plus the metadata the projection reads off the first raw row.
+        Map<String, BigDecimal> finalScoreByDog = new LinkedHashMap<>();
+        for (EventCompetitor competitor : (event.competitors() == null ? List.<EventCompetitor>of() : event.competitors())) {
+            Score staticScore = event.finalScore(competitor.dogIdentification());
+            if (staticScore == null) {
+                continue;
+            }
+            finalScoreByDog.put(competitor.dogIdentification(), staticScore.score());
+            scoresLastUpdate = scoresLastUpdate == null
+                    ? staticScore.lastUpdate() : Math.max(scoresLastUpdate, staticScore.lastUpdate());
+            judgeScoresByDogExercise.put(competitor.dogIdentification(), new LinkedHashMap<>());
+            dogMeta.put(competitor.dogIdentification(), new FetchClassificationRawRowDTO(
+                    competitor.dogIdentification(), competitor.dogName(), competitor.breed(), competitor.owner(),
+                    competitor.handler(), competitor.team(), competitor.country(),
+                    null, (short) 0, null, null, null, null, null, null, null));
+        }
 
         for (FetchClassificationRawRowDTO row : rawRows) {
             dogMeta.putIfAbsent(row.dogIdentification(), row);
@@ -218,10 +242,14 @@ public class GetObdxClassificationServiceCase {
                         judgeEntries, exerciseYellowCards, exerciseRedCard));
             }
 
-            BigDecimal totalScore = computedTotal;
+            // A static final score replaces the computed total outright, and it is measured against the maximum of
+            // every exercise the configuration defines: the event carries no exercise rows of its own to sum.
+            BigDecimal finalScore = finalScoreByDog.get(dogIdentification);
+            BigDecimal totalScore = finalScore != null ? finalScore : computedTotal;
 
             BigDecimal maxPossibleTotal = ObdxScoreRating.maxPossibleTotal(
-                    config.maxAllowedScore(), config.coefByExerciseId(), exercisePositions.keySet());
+                    config.maxAllowedScore(), config.coefByExerciseId(),
+                    finalScore != null ? config.coefByExerciseId().keySet() : exercisePositions.keySet());
             BigDecimal competitorScoreRating = ObdxScoreRating.percentageOfMax(totalScore, maxPossibleTotal);
 
             ClassificationCompetitorStatus status;
@@ -234,7 +262,7 @@ public class GetObdxClassificationServiceCase {
             }
 
             boolean disqualifiedOrNotCompeting = event.isDisqualified(dogIdentification) || event.isNotCompeting(dogIdentification);
-            boolean hasScore = anyExerciseScored;
+            boolean hasScore = anyExerciseScored || finalScore != null;
             String qualification = ObdxQualification.resolve(qualificationTiers, totalScore, disqualifiedOrNotCompeting, hasScore);
             BigDecimal rankScore = ObdxCompetitorEventScore.ofEvent(
                     event.rankScore(), event.configurationId(),

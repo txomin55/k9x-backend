@@ -11,6 +11,7 @@ import com.k9x.domain.disciplines.obdx.LiveExcludedExercise;
 import com.k9x.domain.disciplines.obdx.ObdxCards;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.disciplines.obdx.ObdxEventCategory;
+import com.k9x.domain.disciplines.obdx.ObdxFinalScoreExercise;
 import com.k9x.domain.disciplines.obdx.ObdxRank;
 
 import java.util.List;
@@ -78,6 +79,22 @@ public record EventSnapshot(
      */
     public boolean enrollmentOpened(long now) {
         return enrollmentDeadline != null && !UtcDates.isAfterUtcDay(now, enrollmentDeadline);
+    }
+
+    /**
+     * The competitor's static final score, when the event carries one for it: imported events have no
+     * per-exercise granularity and publish a single {@link ObdxFinalScoreExercise} row holding the whole
+     * event total. {@code null} when the competitor has no such row, i.e. its total must be computed from
+     * the per-exercise scores as usual.
+     */
+    public Score finalScore(String dogIdentification) {
+        if (scores == null) {
+            return null;
+        }
+        return scores.stream()
+                .filter(s -> s.score() != null && ObdxFinalScoreExercise.isFinalScore(s.exerciseId())
+                        && dogIdentification.equals(s.dogIdentification()))
+                .findFirst().orElse(null);
     }
 
     public boolean hasAnyScore() {
@@ -188,6 +205,11 @@ public record EventSnapshot(
      */
     private boolean isSettled(EventCompetitor competitor, boolean includeExcludedExercises) {
         if (competitor.notCompeting() || isDisqualified(competitor.dogIdentification())) {
+            return true;
+        }
+        // A static final score is the competitor's whole event total, so there is nothing left to score: such a
+        // competitor is settled even though an imported event has no exercise rows at all.
+        if (finalScore(competitor.dogIdentification()) != null) {
             return true;
         }
         if (exercises == null || exercises.isEmpty()) {

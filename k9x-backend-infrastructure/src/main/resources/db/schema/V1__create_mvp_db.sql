@@ -213,13 +213,17 @@ CREATE TABLE obdx.event_exercises
     CONSTRAINT obdx_event_exercises_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id)
 );
 
+-- A score row is normally one judge's mark for one exercise (0-10, hence a single decimal). The exception is
+-- the grade-agnostic final-score exercise (OBDX.FINAL_SCORE) used by imported events, which holds the
+-- competitor's whole event total in this very column -- up to 320 in FCI grade 3 -- so the column is wide
+-- enough for a total, not just a mark.
 CREATE TABLE obdx.event_scores
 (
     event_id           VARCHAR(255) NOT NULL,
     exercise_id        VARCHAR(255) NOT NULL,
     judge_id           VARCHAR(255) NOT NULL,
     dog_identification VARCHAR(255) NOT NULL,
-    score              NUMERIC(3, 1),
+    score              NUMERIC(6, 2),
     created_at         BIGINT       NOT NULL,
     last_update        BIGINT       NOT NULL,
     yellow_card        BIGINT,

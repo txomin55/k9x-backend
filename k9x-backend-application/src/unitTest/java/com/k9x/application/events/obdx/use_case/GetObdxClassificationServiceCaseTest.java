@@ -11,6 +11,7 @@ import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerP
 import com.k9x.domain.disciplines.valueobjects.ClassificationCacheEvictStrategy;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
+import com.k9x.domain.disciplines.obdx.ObdxFinalScoreExercise;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.events.valueobjects.EventExercise;
@@ -842,5 +843,94 @@ class GetObdxClassificationServiceCaseTest {
         FetchObdxClassificationDTO result = serviceCase.getClassification(event);
 
         assertThat(result.competitors().getFirst().awards()).isEmpty();
+    }
+
+    @Test
+    void uses_the_static_final_score_as_the_total_when_event_has_no_exercises() {
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null));
+        List<Score> scores = List.of(new Score(ObdxFinalScoreExercise.EXERCISE_ID,
+                ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, "dog-1", new BigDecimal("63.50"), 2000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V0", "obdx", "Imported Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, List.of(), List.of(), scores, List.of(), null, null, null);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX.RSCE_GRADO_1.V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        FetchClassificationCompetitorDTO competitor = result.competitors().getFirst();
+        assertThat(competitor.dogIdentification()).isEqualTo("dog-1");
+        assertThat(competitor.dogName()).isEqualTo("Rex");
+        assertThat(competitor.totalScore()).isEqualByComparingTo("63.50");
+        // the max comes from every exercise of the configuration (10 * (3 + 4) = 70), not from the event's own rows
+        assertThat(competitor.scoreRating()).isEqualByComparingTo("90.71");
+        assertThat(competitor.exercises()).isEmpty();
+        assertThat(competitor.position()).isEqualTo(1);
+        assertThat(competitor.status()).isEqualTo("SETTLED");
+        assertThat(result.scoresLastUpdate()).isEqualTo(2000L);
+    }
+
+    @Test
+    void static_final_score_supersedes_the_per_exercise_scores_of_the_same_competitor() {
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1")));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null, false));
+        List<Score> scores = List.of(
+                new Score("ex-1", "j-1", "dog-1", new BigDecimal("9"), 1000L),
+                new Score(ObdxFinalScoreExercise.EXERCISE_ID, ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, "dog-1",
+                        new BigDecimal("70.00"), 2000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V0", "obdx", "Imported Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of(), null, null, null);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX.RSCE_GRADO_1.V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        FetchClassificationCompetitorDTO competitor = result.competitors().getFirst();
+        assertThat(competitor.totalScore()).isEqualByComparingTo("70.00");
+        assertThat(competitor.scoreRating()).isEqualByComparingTo("100.00");
+        assertThat(competitor.exercises()).isEmpty();
+    }
+
+    @Test
+    void resolves_the_qualification_from_the_static_final_score() {
+        ObdxClassificationConfigDTO configWithQualifications = new ObdxClassificationConfigDTO(
+                ClassificationCacheEvictStrategy.OBDX,
+                new BigDecimal("10"),
+                Map.of("ex-1", new BigDecimal("3"), "ex-2", new BigDecimal("4")),
+                List.of(), List.of(),
+                List.of(new ObdxClassificationConfigDTO.QualificationThreshold("EXC", new BigDecimal("56")),
+                        new ObdxClassificationConfigDTO.QualificationThreshold("MB", new BigDecimal("49"))));
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null),
+                new EventCompetitor("dog-2", "Luna", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "origin", null, null, (short) 2, null, false, false, null, null, null, null));
+        List<Score> scores = List.of(
+                new Score(ObdxFinalScoreExercise.EXERCISE_ID, ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, "dog-1",
+                        new BigDecimal("50.00"), 2000L),
+                new Score(ObdxFinalScoreExercise.EXERCISE_ID, ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, "dog-2",
+                        new BigDecimal("58.00"), 2000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V0", "obdx", "Imported Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, List.of(), List.of(), scores, List.of(), null, null, null);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX.RSCE_GRADO_1.V0")).thenReturn(configWithQualifications);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        assertThat(result.competitors())
+                .extracting(FetchClassificationCompetitorDTO::dogIdentification,
+                        FetchClassificationCompetitorDTO::position,
+                        FetchClassificationCompetitorDTO::qualification)
+                .containsExactly(tuple("dog-2", 1, "EXC"), tuple("dog-1", 2, "MB"));
     }
 }

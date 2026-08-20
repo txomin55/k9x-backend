@@ -1,5 +1,6 @@
 package com.k9x.domain.events.aggregates;
 
+import com.k9x.domain.disciplines.obdx.ObdxFinalScoreExercise;
 import com.k9x.domain.events.status.EventStatus;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.events.valueobjects.EventExercise;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EventSnapshotTest {
@@ -122,5 +124,31 @@ class EventSnapshotTest {
                 score(INDIVIDUAL_1), score(INDIVIDUAL_2), score(GROUP_STAY), score(GENERAL_IMPRESSION));
 
         assertEquals(EventStatus.FINISHED, event(exercises, scores).status(0L, FUTURE));
+    }
+    // ---- static final score (imported events) --------------------------------------------------
+
+    @Test
+    void competitor_settled_and_started_on_a_static_final_score_without_any_exercise() {
+        EventSnapshot event = event(List.of(), List.of(finalScore(new BigDecimal("285.50"))));
+
+        assertTrue(event.isCompetitorStarted(DOG));
+        assertTrue(event.isCompetitorSettled(DOG));
+        assertEquals(EventStatus.FINISHED, event.status(0L, FUTURE));
+    }
+
+    @Test
+    void exposes_the_static_final_score_of_the_competitor() {
+        EventSnapshot event = event(List.of(), List.of(finalScore(new BigDecimal("285.50"))));
+
+        assertEquals(new BigDecimal("285.50"), event.finalScore(DOG).score());
+    }
+
+    @Test
+    void no_static_final_score_when_the_competitor_only_holds_per_exercise_scores() {
+        assertNull(event(List.of(exercise(INDIVIDUAL_1)), List.of(score(INDIVIDUAL_1))).finalScore(DOG));
+    }
+
+    private Score finalScore(BigDecimal total) {
+        return new Score(ObdxFinalScoreExercise.EXERCISE_ID, ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, DOG, total, 0L);
     }
 }

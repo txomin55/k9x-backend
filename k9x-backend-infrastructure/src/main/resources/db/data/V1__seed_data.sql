@@ -14,3 +14,10 @@ VALUES ('k9x.support@gmail.com', 'Nos');
 -- user_subscriptions ----------------------------------------------------
 INSERT INTO k9x.user_subscriptions (user_id, event_ids)
 VALUES ('k9x.support@gmail.com', ARRAY[]::VARCHAR(255)[]);
+
+-- judges ----------------------------------------------------------------
+-- Synthetic judge that owns the score rows of imported events: an import carries a final total, not the
+-- per-judge marks that produced it, but obdx.event_scores.judge_id is part of the primary key and points at
+-- k9x.judges. It is never shown: the classification ignores the judge of a OBDX.FINAL_SCORE row.
+INSERT INTO k9x.judges (id, name, creator, last_update, created_at, country)
+VALUES ('UNKNOWN', 'Unknown', 'k9x.support@gmail.com', 0, 0, '');
