@@ -83,7 +83,7 @@ class GetObdxClassificationServiceCaseTest {
         for (Row r : rows) {
             if (dogIdentifications.add(r.dogIdentification())) {
                 competitors.add(new EventCompetitor(r.dogIdentification(), r.dogName(), "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null, null));
             }
             if (judgeIds.add(r.judgeId())) {
                 judges.add(new EventJudge(r.judgeId(), "Judge " + r.judgeId(), null, false));
@@ -133,7 +133,7 @@ class GetObdxClassificationServiceCaseTest {
     void throws_exception_when_mid_avg_and_event_has_fewer_than_4_judges() {
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1", "j-2")));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null, false), new EventJudge("j-2", "Judge j-2", null, false));
         List<Score> scores = List.of(
@@ -181,7 +181,7 @@ class GetObdxClassificationServiceCaseTest {
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
                 List.of(new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "id-1", null, null, (short) 1, null, false, false, null, null, null, null)),
+                        "breed", "id-1", null, null, (short) 1, null, false, false, null, null, null, null, null)),
                 List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1", "j-2"))),
                 List.of(new EventJudge("j-1", "Judge j-1", null, false), new EventJudge("j-2", "Judge j-2", null, false)),
                 List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("2"), 1000L),
@@ -201,7 +201,7 @@ class GetObdxClassificationServiceCaseTest {
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
                 List.of(new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "id-1", null, null, (short) 1, null, false, false, null, null, null, null)),
+                        "breed", "id-1", null, null, (short) 1, null, false, false, null, null, null, null, null)),
                 List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1", "j-2", "j-3", "j-4"))),
                 List.of(new EventJudge("j-1", "Judge j-1", null, false), new EventJudge("j-2", "Judge j-2", null, false),
                         new EventJudge("j-3", "Judge j-3", null, false), new EventJudge("j-4", "Judge j-4", null, false)),
@@ -223,7 +223,7 @@ class GetObdxClassificationServiceCaseTest {
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V0", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
                 List.of(new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "id-1", null, null, (short) 1, null, false, false, null, null, null, null)),
+                        "breed", "id-1", null, null, (short) 1, null, false, false, null, null, null, null, null)),
                 List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1", "j-2", "j-3", "j-4"))),
                 List.of(new EventJudge("j-1", "Judge j-1", null, false), new EventJudge("j-2", "Judge j-2", null, false),
                         new EventJudge("j-3", "Judge j-3", null, false), new EventJudge("j-4", "Judge j-4", null, false)),
@@ -253,7 +253,7 @@ class GetObdxClassificationServiceCaseTest {
         // The average for ex-1 must be over the assigned judges' scores only (8, 6) -> 7.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1", "j-2")));
         List<EventJudge> judges = List.of(
                 new EventJudge("j-1", "Judge j-1", null, false),
@@ -284,7 +284,7 @@ class GetObdxClassificationServiceCaseTest {
     void exposes_stamped_yellow_cards_per_exercise_with_judge_and_timestamp() {
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1", "j-2")));
         List<EventJudge> judges = List.of(
                 new EventJudge("j-1", "Judge j-1", null, false),
@@ -314,7 +314,7 @@ class GetObdxClassificationServiceCaseTest {
     void exposes_the_stamped_red_card_of_an_exercise_with_judge_and_timestamp() {
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1")));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null, false));
         List<Score> scores = List.of(
@@ -357,11 +357,11 @@ class GetObdxClassificationServiceCaseTest {
         // despite the higher score. dog-3: not competing, ranked last regardless of score.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "id-1", null, null, (short) 1, null, false, false, null, null, null, null),
+                        "breed", "id-1", null, null, (short) 1, null, false, false, null, null, null, null, null),
                 new EventCompetitor("dog-2", "Max", "owner@test.com", "Handler", "Team B", "ES",
-                        "breed", "id-2", null, null, (short) 2, null, false, false, null, null, null, null),
+                        "breed", "id-2", null, null, (short) 2, null, false, false, null, null, null, null, null),
                 new EventCompetitor("dog-3", "Fido", "owner@test.com", "Handler", "Team C", "ES",
-                        "breed", "id-3", null, null, (short) 3, null, false, true, null, null, null, null));
+                        "breed", "id-3", null, null, (short) 3, null, false, true, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1")));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null, false));
         List<Score> scores = List.of(
@@ -388,9 +388,9 @@ class GetObdxClassificationServiceCaseTest {
         // dynamic ranking position.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "id-1", null, null, (short) 5, null, false, false, null, null, null, null),
+                        "breed", "id-1", null, null, (short) 5, null, false, false, null, null, null, null, null),
                 new EventCompetitor("dog-2", "Max", "owner@test.com", "Handler", "Team B", "ES",
-                        "breed", "id-2", null, null, (short) 3, null, false, false, null, null, null, null));
+                        "breed", "id-2", null, null, (short) 3, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1")));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null, false));
         List<Score> scores = List.of(
@@ -435,7 +435,7 @@ class GetObdxClassificationServiceCaseTest {
         // one exercise, two judges, but only j-1 has scored -> required (1*2) not met -> LIVE.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1", "j-2")));
         List<EventJudge> judges = List.of(
                 new EventJudge("j-1", "Judge j-1", null, false),
@@ -462,7 +462,7 @@ class GetObdxClassificationServiceCaseTest {
         // while each exercise still exposes its maximum: exerciseScore ex-1 -> 10*coef(3)=30, ex-2 -> 10*coef(4)=40.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Luna", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(
                 new EventExercise("ex-1", (short) 1, null, List.of("j-1")),
                 new EventExercise("ex-2", (short) 2, null, List.of("j-1")));
@@ -499,7 +499,7 @@ class GetObdxClassificationServiceCaseTest {
         // The competitor has started, so it is LIVE (not settled: ex-2 still missing).
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(
                 new EventExercise("ex-1", (short) 1, null, List.of("j-1")),
                 new EventExercise("ex-2", (short) 2, null, List.of("j-1")));
@@ -591,7 +591,7 @@ class GetObdxClassificationServiceCaseTest {
         // qualification yet.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1")));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null, false));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V0", "obdx", "Open Grade 1",
@@ -611,7 +611,7 @@ class GetObdxClassificationServiceCaseTest {
         // total 27 would reach EXC, but the red card disqualifies the competitor.
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1")));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null, false));
         List<Score> scores = List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("9"), 1000L, null, 5000L));
@@ -631,7 +631,7 @@ class GetObdxClassificationServiceCaseTest {
     void qualification_is_disq_when_competitor_has_two_yellow_cards() {
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1", "j-2")));
         List<EventJudge> judges = List.of(
                 new EventJudge("j-1", "Judge j-1", null, false),
@@ -655,7 +655,7 @@ class GetObdxClassificationServiceCaseTest {
     void qualification_is_disq_when_competitor_is_not_competing() {
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 0, null, false, true, null, null, null, null));
+                        "breed", "origin", null, null, (short) 0, null, false, true, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1")));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null, false));
         List<Score> scores = List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("9"), 1000L));
@@ -675,7 +675,7 @@ class GetObdxClassificationServiceCaseTest {
 
     private EventCompetitor competitorWithFciFlag(String dogIdentification, String dogName, short startOrder, Boolean fciConfirmed) {
         return new EventCompetitor(dogIdentification, dogName, "owner@test.com", "Handler", "Team A", "ES",
-                "breed", "id-" + dogIdentification, null, null, startOrder, null, false, false, null, null, null, fciConfirmed);
+                "breed", "id-" + dogIdentification, null, null, startOrder, null, false, false, null, null, null, fciConfirmed, null);
     }
 
     @Test
@@ -849,7 +849,7 @@ class GetObdxClassificationServiceCaseTest {
     void uses_the_static_final_score_as_the_total_when_event_has_no_exercises() {
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null, null));
         List<Score> scores = List.of(new Score(ObdxFinalScoreExercise.EXERCISE_ID,
                 ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, "dog-1", new BigDecimal("63.50"), 2000L));
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V0", "obdx", "Imported Grade 1",
@@ -877,7 +877,7 @@ class GetObdxClassificationServiceCaseTest {
     void static_final_score_supersedes_the_per_exercise_scores_of_the_same_competitor() {
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null, null));
         List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-1")));
         List<EventJudge> judges = List.of(new EventJudge("j-1", "Judge j-1", null, false));
         List<Score> scores = List.of(
@@ -910,9 +910,9 @@ class GetObdxClassificationServiceCaseTest {
                         new ObdxClassificationConfigDTO.QualificationThreshold("MB", new BigDecimal("49"))));
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null),
+                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null, null),
                 new EventCompetitor("dog-2", "Luna", "owner@test.com", "Handler", "Team A", "ES",
-                        "breed", "origin", null, null, (short) 2, null, false, false, null, null, null, null));
+                        "breed", "origin", null, null, (short) 2, null, false, false, null, null, null, null, null));
         List<Score> scores = List.of(
                 new Score(ObdxFinalScoreExercise.EXERCISE_ID, ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, "dog-1",
                         new BigDecimal("50.00"), 2000L),

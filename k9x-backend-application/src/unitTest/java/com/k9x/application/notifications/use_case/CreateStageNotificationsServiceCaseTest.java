@@ -103,7 +103,7 @@ class CreateStageNotificationsServiceCaseTest {
      */
     private CompetitionSnapshot competitionWithFinishedEvent() {
         EventCompetitor notCompeting = new EventCompetitor("dog-1", "Rex", "owner-1", "handler-1", null, null,
-                null, null, null, null, null, null, null, true, null, null, null, null);
+                null, null, null, null, null, null, null, true, null, null, null, null, null);
         EventSnapshot finishedEvent = new EventSnapshot("event-1", null, null, "Event event-1", "stage-1",
                 "user-1", Long.MAX_VALUE, 0L, 0L, null, ObdxAvgMethod.MID_AVG, List.of(notCompeting),
                 List.of(), List.of(), List.of(), List.of(), null, null, null);

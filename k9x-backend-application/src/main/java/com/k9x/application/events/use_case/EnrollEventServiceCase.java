@@ -13,6 +13,7 @@ import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.competitions.aggregates.CompetitionAggregate;
 import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.valueobjects.CompetitorDogSnapshot;
 
 import java.util.Map;
 
@@ -42,7 +43,8 @@ public class EnrollEventServiceCase implements TransactionalUseCase {
         BihGuards.assertBihAllowedForSex(command.bih(), dog);
         CompetitionAggregate competition =
                 CompetitionAggregate.of(getCompetitionPersistencePort.getCompetition(competitionId));
-        competition.enrollDog(eventId, command.dogIdentification(), command.bih(), command.primer(), userId, DateUtils.nowUtcMillis());
+        competition.enrollDog(eventId, command.dogIdentification(), command.bih(), command.primer(),
+                CompetitorDogSnapshot.of(dog), userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
         notifyCreator(competition, eventId, userId);
     }

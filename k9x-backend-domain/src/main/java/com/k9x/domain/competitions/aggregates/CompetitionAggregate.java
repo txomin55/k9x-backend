@@ -11,6 +11,7 @@ import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.exceptions.*;
 import com.k9x.domain.events.status.EventStatus;
+import com.k9x.domain.events.valueobjects.CompetitorDogSnapshot;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import com.k9x.domain.shared.UtcDates;
@@ -277,7 +278,8 @@ public final class CompetitionAggregate {
         changes.add(new EventDeleted(eventId, now));
     }
 
-    public void enrollDog(String eventId, String dogIdentification, boolean bih, String primer, String userId, long now) {
+    public void enrollDog(String eventId, String dogIdentification, boolean bih, String primer,
+                          CompetitorDogSnapshot dogSnapshot, String userId, long now) {
         EventSnapshot event = requireActiveEvent(eventId);
         StageSnapshot stage = findStageOfEvent(eventId);
         assert stage != null;
@@ -291,7 +293,8 @@ public final class CompetitionAggregate {
         if (isDogEnrolled(event, dogIdentification)) {
             throw new DogAlreadyEnrolledException();
         }
-        changes.add(new DogEnrolled(eventId, dogIdentification, bih, primer, nextStartNumber(event), now));
+        // The dog is joining now (it was not enrolled above), so the snapshot is simply its current state.
+        changes.add(new DogEnrolled(eventId, dogIdentification, bih, primer, nextStartNumber(event), dogSnapshot, now));
     }
 
     /**
@@ -322,8 +325,30 @@ public final class CompetitionAggregate {
         assertEnrollmentDeadlineBeforeStageStart(data.enrollmentDeadline(), stage);
         assertSingleMainJudge(data.judges());
         changes.add(new ObdxEventInfoUpdated(eventId, data.name(), data.configurationId(), data.scoreCalculation(),
-                data.enrollmentDeadline(), data.competitors(), data.exercises(), data.judges(), now, data.awards(),
+                data.enrollmentDeadline(), withInclusionSnapshots(event, data.competitors()), data.exercises(), data.judges(), now, data.awards(),
                 data.rankScore(), data.commissioner(), data.category()));
+    }
+
+    /**
+     * The event update rewrites the whole competitor list, so the snapshot each competitor was included with
+     * has to survive it: only dogs joining the event now take the snapshot the use case read from the dog.
+     */
+    private List<ObdxCompetitorItem> withInclusionSnapshots(EventSnapshot event, List<ObdxCompetitorItem> competitors) {
+        return competitors.stream()
+                .map(c -> c.withDogSnapshot(CompetitorDogSnapshot.atInclusion(
+                        includedSnapshotOf(event, c.dogIdentification()), c.dogSnapshot())))
+                .toList();
+    }
+
+    private CompetitorDogSnapshot includedSnapshotOf(EventSnapshot event, String dogIdentification) {
+        if (event.competitors() == null) {
+            return null;
+        }
+        return event.competitors().stream()
+                .filter(c -> c.dogIdentification().equals(dogIdentification))
+                .map(EventCompetitor::dogSnapshot)
+                .findFirst()
+                .orElse(null);
     }
 
     /**

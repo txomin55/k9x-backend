@@ -201,7 +201,7 @@ public class CompetitionHydrator {
         EventCompetitors ec = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
         Dogs d = Tables.DOGS;
         dsl.select(ec.EVENT_ID, ec.DOG_IDENTIFICATION, ec.START_NUMBER, ec.COMPETITOR_NUMBER, ec.VERIFIED, ec.NOT_COMPETING, ec.BIH, ec.PRIMER,
-                        ec.RESERVE,
+                        ec.RESERVE, ec.HANDLER, ec.COUNTRY, ec.TEAM,
                         d.NAME, d.OWNER, d.HANDLER, d.TEAM, d.COUNTRY, d.BREED, d.ORIGIN, d.LICENSE, d.SEX,
                         d.THREE_FCI_GENERATIONS_CONFIRMED)
                 .from(ec)
@@ -215,7 +215,8 @@ public class CompetitionHydrator {
                                 r.get(ec.START_NUMBER), r.get(ec.COMPETITOR_NUMBER), r.get(ec.VERIFIED),
                                 Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)), r.get(ec.BIH), r.get(ec.PRIMER),
                                 r.get(ec.RESERVE),
-                                r.get(d.THREE_FCI_GENERATIONS_CONFIRMED))));
+                                r.get(d.THREE_FCI_GENERATIONS_CONFIRMED),
+                                new CompetitorDogSnapshot(r.get(ec.HANDLER), r.get(ec.COUNTRY), r.get(ec.TEAM)))));
         return result;
     }
 

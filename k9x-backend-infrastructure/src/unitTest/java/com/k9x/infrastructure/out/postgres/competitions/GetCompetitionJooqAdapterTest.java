@@ -2,6 +2,7 @@ package com.k9x.infrastructure.out.postgres.competitions;
 
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.dogs.aggregates.Sex;
+import com.k9x.domain.events.valueobjects.CompetitorDogSnapshot;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -85,6 +86,9 @@ class GetCompetitionJooqAdapterTest {
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.BIH,
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.PRIMER,
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.RESERVE,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.HANDLER,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.COUNTRY,
+            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.TEAM,
             Tables.DOGS.NAME,
             Tables.DOGS.OWNER,
             Tables.DOGS.HANDLER,
@@ -220,6 +224,10 @@ class GetCompetitionJooqAdapterTest {
                         "event-1");
                 competitor.set(com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.DOG_IDENTIFICATION,
                         "dog-1");
+                competitor.set(com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.HANDLER,
+                        "Handler at inclusion");
+                competitor.set(com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.COUNTRY, "FR");
+                competitor.set(com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.TEAM, "Team at inclusion");
                 competitor.set(Tables.DOGS.NAME, "Rex");
                 competitor.set(Tables.DOGS.SEX, "MALE");
                 competitors.add(competitor);
@@ -262,6 +270,9 @@ class GetCompetitionJooqAdapterTest {
         assertThat(competitors).hasSize(1);
         assertThat(competitors.getFirst().dogIdentification()).isEqualTo("dog-1");
         assertThat(competitors.getFirst().sex()).isEqualTo(Sex.MALE);
+        // The competitor row's own handler/country/team, not the dog's current ones.
+        assertThat(competitors.getFirst().dogSnapshot())
+                .isEqualTo(new CompetitorDogSnapshot("Handler at inclusion", "FR", "Team at inclusion"));
     }
 
     @Test

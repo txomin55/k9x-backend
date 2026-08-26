@@ -14,6 +14,7 @@ import com.k9x.domain.competitions.commands.ScoreUpdateData;
 import com.k9x.domain.competitions.commands.StageUpdateData;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
 import com.k9x.domain.disciplines.obdx.ObdxEventCategory;
+import com.k9x.domain.events.valueobjects.CompetitorDogSnapshot;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.events.valueobjects.EventExercise;
@@ -197,11 +198,13 @@ class SaveCompetitionJooqAdapterTest {
     void emits_insert_for_dog_enrolled() {
         givenCapturingDsl();
         CompetitionAggregate competition = aggregateWithActiveEvent();
-        competition.enrollDog("evt-1", "dog-1", false, null, "user-1", NOW);
+        competition.enrollDog("evt-1", "dog-1", false, null, new CompetitorDogSnapshot("handler", "ES", "team"), "user-1", NOW);
 
         new SaveCompetitionJooqAdapter(dsl).save(competition);
 
-        assertThat(capturedSql).anyMatch(sql -> sql.contains("insert into \"obdx\".\"event_competitors\""));
+        assertThat(capturedSql).anyMatch(sql -> sql.contains("insert into \"obdx\".\"event_competitors\"")
+                // The dog's handler/country/team are frozen onto the competitor row on enrollment.
+                && sql.contains("\"handler\"") && sql.contains("\"country\"") && sql.contains("\"team\""));
     }
 
     @Test
@@ -209,7 +212,7 @@ class SaveCompetitionJooqAdapterTest {
         givenCapturingDsl();
         CompetitionAggregate competition = aggregateWithActiveEvent();
         ObdxEventUpdateData data = new ObdxEventUpdateData("Event", "config-1", ObdxAvgMethod.MID_AVG, 1735689600000L,
-                List.of(new ObdxCompetitorItem("dog-1", (short) 1, null, true, null, false)),
+                List.of(new ObdxCompetitorItem("dog-1", (short) 1, null, true, null, false, null)),
                 List.of(new ObdxExerciseItem("exercise-1", (short) 1, new String[]{"tag1"}, new String[]{"judge-1"})),
                 List.of(new ObdxJudgeItem("judge-1", "collector@example.com", false)), List.of(), 900, null,
                 ObdxEventCategory.WC_SEMI);
@@ -226,7 +229,8 @@ class SaveCompetitionJooqAdapterTest {
                 .contains("do update");
         assertThat(capturedSql.get(2)).contains("delete from \"obdx\".\"event_scores\"");
         assertThat(capturedSql.get(3)).contains("delete from \"obdx\".\"event_competitors\"");
-        assertThat(capturedSql.get(4)).contains("insert into \"obdx\".\"event_competitors\"");
+        assertThat(capturedSql.get(4)).contains("insert into \"obdx\".\"event_competitors\"")
+                .contains("\"handler\"").contains("\"country\"").contains("\"team\"");
         assertThat(capturedSql.get(5)).contains("delete from \"obdx\".\"event_exercises\"");
         assertThat(capturedSql.get(6)).contains("insert into \"obdx\".\"event_exercises\"");
         assertThat(capturedSql.get(7)).contains("delete from \"obdx\".\"event_judges\"");
@@ -241,7 +245,7 @@ class SaveCompetitionJooqAdapterTest {
     void emits_update_for_competitor_not_competing() {
         givenCapturingDsl();
         EventCompetitor competitor = new EventCompetitor("dog-1", "Rex", "Owner", "Handler", "Team", "ES", "Breed", null, null, null,
-                (short) 1, null, true, false, null, null, null, null);
+                (short) 1, null, true, false, null, null, null, null, null);
         EventSnapshot event = new EventSnapshot("evt-1", null, null, "Event", "stage-123", "user", null, NOW, NOW, null,
                 ObdxAvgMethod.MID_AVG, List.of(competitor), List.of(), List.of(), List.of(), List.of(), null, null, null);
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",

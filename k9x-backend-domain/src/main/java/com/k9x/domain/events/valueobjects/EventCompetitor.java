@@ -20,6 +20,8 @@ public record EventCompetitor(
         Boolean bih,
         String primer,
         Boolean reserve,
-        Boolean threeFciGenerationsConfirmed
+        Boolean threeFciGenerationsConfirmed,
+        // handler/country/team frozen when the dog was included in the event; see CompetitorDogSnapshot.
+        CompetitorDogSnapshot dogSnapshot
 ) {
 }

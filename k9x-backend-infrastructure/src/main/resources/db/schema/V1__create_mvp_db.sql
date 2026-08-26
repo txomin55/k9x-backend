@@ -154,6 +154,12 @@ CREATE TABLE obdx.event_competitors
     bih                BOOLEAN,
     primer             VARCHAR(255),
     reserve            BOOLEAN      NOT NULL DEFAULT FALSE,
+    -- Snapshot of the dog's handler/country/team at the moment the dog was included in the event (by
+    -- enrollment or by the event update). Kept here so an already-run event keeps showing who competed and
+    -- for whom, even after the dog record changes. NULL on rows created before the snapshot existed.
+    handler            VARCHAR(255),
+    country            VARCHAR(50),
+    team               VARCHAR(50),
     CONSTRAINT obdx_event_competitors_pkey PRIMARY KEY (event_id, dog_identification),
     CONSTRAINT obdx_event_competitors_event_fk FOREIGN KEY (event_id) REFERENCES k9x.events (id),
     CONSTRAINT obdx_event_competitors_dogs_fk FOREIGN KEY (dog_identification) REFERENCES k9x.dogs (identification)

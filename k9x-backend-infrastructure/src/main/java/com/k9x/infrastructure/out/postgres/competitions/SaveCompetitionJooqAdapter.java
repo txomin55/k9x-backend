@@ -85,6 +85,9 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                 .set(EVENT_COMPETITORS.BIH, c.bih())
                 .set(EVENT_COMPETITORS.PRIMER, c.primer())
                 .set(EVENT_COMPETITORS.START_NUMBER, c.startNumber())
+                .set(EVENT_COMPETITORS.HANDLER, c.dogSnapshot().handler())
+                .set(EVENT_COMPETITORS.COUNTRY, c.dogSnapshot().country())
+                .set(EVENT_COMPETITORS.TEAM, c.dogSnapshot().team())
                 .set(EVENT_COMPETITORS.LAST_UPDATE, c.lastUpdate())
                 .execute();
     }
@@ -199,6 +202,9 @@ public class SaveCompetitionJooqAdapter implements SaveCompetitionPersistencePor
                     .set(EVENT_COMPETITORS.BIH, competitor.bih())
                     .set(EVENT_COMPETITORS.PRIMER, competitor.primer())
                     .set(EVENT_COMPETITORS.RESERVE, competitor.reserve())
+                    .set(EVENT_COMPETITORS.HANDLER, competitor.dogSnapshot().handler())
+                    .set(EVENT_COMPETITORS.COUNTRY, competitor.dogSnapshot().country())
+                    .set(EVENT_COMPETITORS.TEAM, competitor.dogSnapshot().team())
                     .set(EVENT_COMPETITORS.LAST_UPDATE, c.lastUpdate())
                     .execute();
         }

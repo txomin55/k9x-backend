@@ -29,6 +29,7 @@ import com.k9x.domain.competitions.commands.ObdxJudgeItem;
 import com.k9x.application.utils.auth.AuthAssertions;
 import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.events.exceptions.EventNotFoundException;
+import com.k9x.domain.events.valueobjects.CompetitorDogSnapshot;
 import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.domain.shared.UtcDates;
 
@@ -78,11 +79,11 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
         CompetitionAggregate competition = CompetitionAggregate.of(snapshot);
         Integer rankScore = ObdxEventRank.eventScore(command.configurationId(), command.competitors().size(),
                 command.category());
-        competition.updateObdxEventInfo(id, toUpdateData(command, rankScore), userId, DateUtils.nowUtcMillis());
+        competition.updateObdxEventInfo(id, toUpdateData(command, rankScore, competitorDogs), userId, DateUtils.nowUtcMillis());
         saveCompetitionPersistencePort.save(competition);
     }
 
-    private ObdxEventUpdateData toUpdateData(UpdateObdxEventCommand command, Integer rankScore) {
+    private ObdxEventUpdateData toUpdateData(UpdateObdxEventCommand command, Integer rankScore, Map<String, Dog> competitorDogs) {
         return new ObdxEventUpdateData(
                 command.name(),
                 command.configurationId(),
@@ -91,7 +92,8 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
                 command.competitors().stream()
                         .map(c -> new ObdxCompetitorItem(c.dogIdentification(), c.order().shortValue(),
                                 c.competitorNumber() == null ? null : c.competitorNumber().shortValue(),
-                                c.bih(), c.primer(), c.reserve()))
+                                c.bih(), c.primer(), c.reserve(),
+                                CompetitorDogSnapshot.of(competitorDogs.get(c.dogIdentification()))))
                         .toList(),
                 command.exercises().stream()
                         .map(e -> new ObdxExerciseItem(e.exerciseId(), e.order().shortValue(),
