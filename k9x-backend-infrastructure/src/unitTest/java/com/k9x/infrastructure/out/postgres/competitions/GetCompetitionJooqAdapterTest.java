@@ -230,6 +230,9 @@ class GetCompetitionJooqAdapterTest {
                 competitor.set(com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.TEAM, "Team at inclusion");
                 competitor.set(Tables.DOGS.NAME, "Rex");
                 competitor.set(Tables.DOGS.SEX, "MALE");
+                competitor.set(Tables.DOGS.HANDLER, "Current handler");
+                competitor.set(Tables.DOGS.COUNTRY, "ES");
+                competitor.set(Tables.DOGS.TEAM, "Current team");
                 competitors.add(competitor);
                 return new MockResult[]{new MockResult(competitors.size(), competitors)};
             }
@@ -273,6 +276,11 @@ class GetCompetitionJooqAdapterTest {
         // The competitor row's own handler/country/team, not the dog's current ones.
         assertThat(competitors.getFirst().dogSnapshot())
                 .isEqualTo(new CompetitorDogSnapshot("Handler at inclusion", "FR", "Team at inclusion"));
+        // And the read model exposes the snapshot, so every consumer (detail, classification, rankings, exports)
+        // sees the historical values rather than dogs.*
+        assertThat(competitors.getFirst().handler()).isEqualTo("Handler at inclusion");
+        assertThat(competitors.getFirst().country()).isEqualTo("FR");
+        assertThat(competitors.getFirst().team()).isEqualTo("Team at inclusion");
     }
 
     @Test

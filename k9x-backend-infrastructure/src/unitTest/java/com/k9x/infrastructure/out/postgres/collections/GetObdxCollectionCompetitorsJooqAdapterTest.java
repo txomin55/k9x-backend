@@ -26,7 +26,8 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
 
     private static final Field<?>[] SELECT_FIELDS = {
             EC.DOG_IDENTIFICATION, EC.START_NUMBER, EC.COMPETITOR_NUMBER, EC.VERIFIED, EC.NOT_COMPETING, EC.BIH, EC.PRIMER, EC.RESERVE,
-            D.NAME, D.ORIGIN, D.BREED, D.OWNER, D.HANDLER, D.TEAM, D.COUNTRY
+            D.NAME, D.ORIGIN, D.BREED, D.OWNER, D.HANDLER, D.TEAM, D.COUNTRY,
+            EC.HANDLER, EC.TEAM, EC.COUNTRY
     };
 
     private static final Field<?>[] JOIN_FIELDS = Stream.of(
@@ -57,7 +58,7 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
     }
 
     @Test
-    void maps_record_to_dto() {
+    void maps_record_to_dto_falling_back_to_dogs_when_snapshot_is_missing() {
         MockDataProvider provider = _ -> {
             DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);
             Result<Record> result = mockDsl.newResult(SELECT_FIELDS);
@@ -99,6 +100,31 @@ class GetObdxCollectionCompetitorsJooqAdapterTest {
         assertThat(comp.bih()).isTrue();
         assertThat(comp.reserve()).isTrue();
         assertThat(comp.status()).isNull();
+    }
+
+    @Test
+    void prefers_event_competitors_snapshot_over_current_dog_values() {
+        MockDataProvider provider = _ -> {
+            DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);
+            Result<Record> result = mockDsl.newResult(SELECT_FIELDS);
+            Record record = mockDsl.newRecord(SELECT_FIELDS);
+            record.set(EC.DOG_IDENTIFICATION, "dog-1");
+            record.set(D.HANDLER, "Current Handler");
+            record.set(D.TEAM, "Current Team");
+            record.set(D.COUNTRY, "FR");
+            record.set(EC.HANDLER, "Snapshot Handler");
+            record.set(EC.TEAM, "Snapshot Team");
+            record.set(EC.COUNTRY, "ES");
+            result.add(record);
+            return new MockResult[]{new MockResult(1, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        FetchCollectionCompetitorDTO comp = new GetObdxCollectionCompetitorsJooqAdapter(dsl).getCompetitors("event-1").getFirst();
+
+        assertThat(comp.handler()).isEqualTo("Snapshot Handler");
+        assertThat(comp.team()).isEqualTo("Snapshot Team");
+        assertThat(comp.country()).isEqualTo("ES");
     }
 
     @Test

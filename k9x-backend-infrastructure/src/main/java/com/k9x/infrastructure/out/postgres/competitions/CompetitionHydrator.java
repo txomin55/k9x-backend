@@ -210,14 +210,22 @@ public class CompetitionHydrator {
                 .orderBy(ec.START_NUMBER.asc().nullsLast(), ec.DOG_IDENTIFICATION.asc())
                 .forEach(r -> result.computeIfAbsent(r.get(ec.EVENT_ID), _ -> new ArrayList<>())
                         .add(new EventCompetitor(
-                                r.get(ec.DOG_IDENTIFICATION), r.get(d.NAME), r.get(d.OWNER), r.get(d.HANDLER), r.get(d.TEAM),
-                                r.get(d.COUNTRY), r.get(d.BREED), r.get(d.ORIGIN), r.get(d.LICENSE), toSex(r.get(d.SEX)),
+                                // Handler/team/country come from the event_competitors snapshot (frozen at inclusion);
+                                // dogs.* is only the fallback for competitors included before snapshots existed.
+                                r.get(ec.DOG_IDENTIFICATION), r.get(d.NAME), r.get(d.OWNER),
+                                firstNonBlank(r.get(ec.HANDLER), r.get(d.HANDLER)),
+                                firstNonBlank(r.get(ec.TEAM), r.get(d.TEAM)),
+                                firstNonBlank(r.get(ec.COUNTRY), r.get(d.COUNTRY)), r.get(d.BREED), r.get(d.ORIGIN), r.get(d.LICENSE), toSex(r.get(d.SEX)),
                                 r.get(ec.START_NUMBER), r.get(ec.COMPETITOR_NUMBER), r.get(ec.VERIFIED),
                                 Boolean.TRUE.equals(r.get(ec.NOT_COMPETING)), r.get(ec.BIH), r.get(ec.PRIMER),
                                 r.get(ec.RESERVE),
                                 r.get(d.THREE_FCI_GENERATIONS_CONFIRMED),
                                 new CompetitorDogSnapshot(r.get(ec.HANDLER), r.get(ec.COUNTRY), r.get(ec.TEAM)))));
         return result;
+    }
+
+    private static String firstNonBlank(String snapshot, String current) {
+        return snapshot == null || snapshot.isBlank() ? current : snapshot;
     }
 
     private Map<String, List<EventExercise>> fetchExercises(List<String> eventIds) {
