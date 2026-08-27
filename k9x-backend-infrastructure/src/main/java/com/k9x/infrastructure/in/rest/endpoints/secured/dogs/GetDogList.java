@@ -1,10 +1,12 @@
 package com.k9x.infrastructure.in.rest.endpoints.secured.dogs;
 
 import com.k9x.application.dogs.use_case.GetDogListServiceCase;
-import com.k9x.application.dogs.use_case.dto.DogDTO;
+import com.k9x.application.dogs.use_case.command.GetDogListCommand;
+import com.k9x.application.dogs.use_case.dto.DogListDTO;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
 import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import com.k9x.oas.stub.api.SecuredDogsFetchAllApiDelegate;
+import com.k9x.oas.stub.model.DogListResponseDTO;
 import com.k9x.oas.stub.model.DogSummaryResponseDTO;
 import org.springframework.http.ResponseEntity;
 
@@ -24,13 +26,13 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
     }
 
     @Override
-    public ResponseEntity<List<DogSummaryResponseDTO>> getDogsSecured(Boolean owned, Boolean created) {
-        List<DogDTO> dogs = getDogListService.getDogs(
+    public ResponseEntity<DogListResponseDTO> getDogsSecured(Boolean owned, Boolean created, String name,
+                                                             Integer page, Integer size) {
+        DogListDTO dogs = getDogListService.getDogs(
                 userDetails.getEmail(),
                 userDetails.isOrganizer(),
-                owned != null && owned,
-                created != null && created);
-        List<DogSummaryResponseDTO> mapped = dogs.stream()
+                new GetDogListCommand(owned != null && owned, created != null && created, name, page, size));
+        List<DogSummaryResponseDTO> mapped = dogs.items().stream()
                 .map(dog ->
                         new DogSummaryResponseDTO(
                                 dog.identification(),
@@ -50,6 +52,6 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
                         )
                 )
                 .toList();
-        return ResponseEntity.ok(mapped);
+        return ResponseEntity.ok(new DogListResponseDTO(mapped, dogs.page(), dogs.size(), dogs.total(), dogs.totalPages()));
     }
 }

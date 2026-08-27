@@ -1,10 +1,13 @@
 package com.k9x.infrastructure.out.postgres.dogs;
 
+import com.k9x.application.dogs.port.payload.DogListFilter;
+import com.k9x.application.dogs.port.payload.DogListPage;
 import com.k9x.domain.dogs.aggregates.Dog;
 import com.k9x.domain.dogs.aggregates.Sex;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -13,6 +16,7 @@ import org.jooq.tools.jdbc.MockDataProvider;
 import org.jooq.tools.jdbc.MockResult;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,7 +37,7 @@ class GetDogListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetDogListJooqAdapter(dsl).getDogs("owner-123", null);
+        new GetDogListJooqAdapter(dsl).getDogs(filter("owner-123", null));
 
         assertThat(capturedSql.get())
                 .contains("""
@@ -62,7 +66,7 @@ class GetDogListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetDogListJooqAdapter(dsl).getDogs(null, "creator-123");
+        new GetDogListJooqAdapter(dsl).getDogs(filter(null, "creator-123"));
 
         assertThat(capturedSql.get())
                 .contains("from \"k9x\".\"dogs\"")
@@ -84,7 +88,7 @@ class GetDogListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetDogListJooqAdapter(dsl).getDogs("user-123", "user-123");
+        new GetDogListJooqAdapter(dsl).getDogs(filter("user-123", "user-123"));
 
         assertThat(capturedSql.get())
                 .contains("from \"k9x\".\"dogs\"")
@@ -107,7 +111,7 @@ class GetDogListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetDogListJooqAdapter(dsl).getDogs(null, null);
+        new GetDogListJooqAdapter(dsl).getDogs(filter(null, null));
 
         assertThat(capturedSql.get())
                 .contains("from \"k9x\".\"dogs\"")
@@ -143,10 +147,11 @@ class GetDogListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<Dog> dogs = new GetDogListJooqAdapter(dsl).getDogs("owner-123", null);
+        DogListPage page = new GetDogListJooqAdapter(dsl).getDogs(filter("owner-123", null));
 
-        assertThat(dogs).hasSize(1);
-        Dog dog = dogs.getFirst();
+        assertThat(page.dogs()).hasSize(1);
+        assertThat(page.total()).isEqualTo(1);
+        Dog dog = page.dogs().getFirst();
         assertThat(dog.identification()).isEqualTo("id-1");
         assertThat(dog.origin()).isEqualTo("ident-1");
         assertThat(dog.breed()).isEqualTo("Labrador");
@@ -162,5 +167,94 @@ class GetDogListJooqAdapterTest {
         assertThat(dog.lastUpdate()).isEqualTo(1000L);
         assertThat(dog.createdAt()).isEqualTo(2000L);
         assertThat(dog.deletedAt()).isNull();
+    }
+
+    // ---- name filter & pagination -----------------------------------------------------------------
+
+    @Test
+    void generates_case_insensitive_name_search() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+        AtomicReference<Object[]> capturedBindings = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            capturedBindings.set(ctx.bindings());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.DOGS.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetDogListJooqAdapter(dsl).getDogs(new DogListFilter("owner-123", null, "re", null, null));
+
+        assertThat(capturedSql.get()).contains("lower(\"k9x\".\"dogs\".\"name\") like");
+        assertThat(capturedBindings.get()).contains("re");
+    }
+
+    @Test
+    void orders_by_name_so_pages_are_stable() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.DOGS.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetDogListJooqAdapter(dsl).getDogs(filter(null, null));
+
+        assertThat(capturedSql.get())
+                .contains("order by \"k9x\".\"dogs\".\"name\" asc, \"k9x\".\"dogs\".\"identification\" asc");
+    }
+
+    @Test
+    void generates_limit_and_offset_and_counts_the_total_when_paginated() {
+        List<String> capturedSql = new ArrayList<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.add(ctx.sql());
+            if (ctx.sql().contains("count(*)")) {
+                Result<Record1<Integer>> count = DSL.using(SQLDialect.POSTGRES).newResult(DSL.count());
+                Record1<Integer> record = DSL.using(SQLDialect.POSTGRES).newRecord(DSL.count());
+                record.value1(137);
+                count.add(record);
+                return new MockResult[]{new MockResult(1, count)};
+            }
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.DOGS.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        DogListPage page = new GetDogListJooqAdapter(dsl).getDogs(new DogListFilter(null, null, null, 40, 20));
+
+        assertThat(capturedSql).anyMatch(sql -> sql.contains("count(*)"));
+        assertThat(capturedSql).anyMatch(sql -> sql.contains("offset ?") && sql.contains("fetch next ? rows only"));
+        // The total is the whole match count, not the size of the returned page.
+        assertThat(page.total()).isEqualTo(137);
+        assertThat(page.dogs()).isEmpty();
+    }
+
+    /**
+     * Without a size the whole list is fetched, so the count query would be a pointless second round trip.
+     */
+    @Test
+    void does_not_count_when_not_paginated() {
+        List<String> capturedSql = new ArrayList<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.add(ctx.sql());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.DOGS.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetDogListJooqAdapter(dsl).getDogs(filter(null, null));
+
+        assertThat(capturedSql).hasSize(1);
+        assertThat(capturedSql.getFirst()).doesNotContain("count(*)").doesNotContain("offset");
+    }
+
+    private DogListFilter filter(String owner, String creator) {
+        return new DogListFilter(owner, creator, null, null, null);
     }
 }

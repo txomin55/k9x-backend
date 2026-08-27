@@ -2,8 +2,11 @@ package com.k9x.application.dogs.use_case;
 
 import com.k9x.application.dogs.exceptions.OwnerNonProvidedWhenOrganizerException;
 import com.k9x.application.dogs.port.GetDogListPersistencePort;
+import com.k9x.application.dogs.port.payload.DogListFilter;
+import com.k9x.application.dogs.port.payload.DogListPage;
+import com.k9x.application.dogs.use_case.command.GetDogListCommand;
 import com.k9x.application.dogs.use_case.dto.DogDTO;
-import com.k9x.domain.dogs.aggregates.Dog;
+import com.k9x.application.dogs.use_case.dto.DogListDTO;
 
 import java.util.List;
 
@@ -15,23 +18,24 @@ public class GetDogListServiceCase {
         this.getDogListPersistencePort = getDogListPersistencePort;
     }
 
-    public List<DogDTO> getDogs(String userId, boolean organizer, boolean owned, boolean created) {
+    public DogListDTO getDogs(String userId, boolean organizer, GetDogListCommand command) {
 
         assertOwnerWhenNoOrganizer(userId, organizer);
 
-        boolean filterByOwner = owned;
-        boolean filterByCreator = created;
+        boolean filterByOwner = command.owned();
+        boolean filterByCreator = command.created();
         // A non-organizer may only ever list their own dogs (owned or created).
-        if (!organizer && !owned && !created) {
+        if (!organizer && !command.owned() && !command.created()) {
             filterByOwner = true;
             filterByCreator = true;
         }
 
         String ownerFilter = filterByOwner ? userId : null;
         String creatorFilter = filterByCreator ? userId : null;
-        List<Dog> dogs = getDogListPersistencePort.getDogs(ownerFilter, creatorFilter);
+        DogListFilter filter = DogListFilter.from(ownerFilter, creatorFilter, command);
+        DogListPage page = getDogListPersistencePort.getDogs(filter);
 
-        return dogs.stream()
+        List<DogDTO> items = page.dogs().stream()
                 .map(dog -> new DogDTO(
                                 dog.getIdentification(),
                                 dog.getName(),
@@ -50,6 +54,8 @@ public class GetDogListServiceCase {
                         )
                 )
                 .toList();
+
+        return DogListDTO.of(items, filter, page.total());
     }
 
     private void assertOwnerWhenNoOrganizer(String owner, boolean organizer) {
