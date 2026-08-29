@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface GetCompetitionListPersistencePort {
 
-    /** Hydrates every competition root aggregate owned by the given creator. */
-    List<CompetitionSnapshot> getCompetitions(String creator);
+    /** Hydrates the competition root aggregates owned by the creator, of that country when one is given. */
+    List<CompetitionSnapshot> getCompetitions(String creator, String country);
 }

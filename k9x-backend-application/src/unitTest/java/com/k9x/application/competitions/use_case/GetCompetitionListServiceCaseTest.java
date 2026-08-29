@@ -51,24 +51,42 @@ class GetCompetitionListServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_organizer() {
-        assertThatThrownBy(() -> serviceCase.getCompetitions("user-1", false))
+        assertThatThrownBy(() -> serviceCase.getCompetitions("user-1", false, null))
                 .isInstanceOf(UnauthorizedResourceException.class);
 
         verifyNoInteractions(getCompetitionListPersistencePort);
     }
 
     @Test
+    void asks_the_persistence_side_for_the_country_when_one_is_given() {
+        when(getCompetitionListPersistencePort.getCompetitions("user-1", "ES")).thenReturn(List.of());
+
+        serviceCase.getCompetitions("user-1", true, "ES");
+
+        verify(getCompetitionListPersistencePort).getCompetitions("user-1", "ES");
+    }
+
+    @Test
+    void ignores_a_blank_country() {
+        when(getCompetitionListPersistencePort.getCompetitions("user-1", null)).thenReturn(List.of());
+
+        serviceCase.getCompetitions("user-1", true, "   ");
+
+        verify(getCompetitionListPersistencePort).getCompetitions("user-1", null);
+    }
+
+    @Test
     void maps_empty_competition_as_created() {
-        when(getCompetitionListPersistencePort.getCompetitions("user-1"))
+        when(getCompetitionListPersistencePort.getCompetitions("user-1", null))
                 .thenReturn(List.of(competition("comp-1", List.of())));
 
-        List<FetchCompetitionDTO> result = serviceCase.getCompetitions("user-1", true);
+        List<FetchCompetitionDTO> result = serviceCase.getCompetitions("user-1", true, null);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().id()).isEqualTo("comp-1");
         assertThat(result.getFirst().status()).isEqualTo("CREATED");
         assertThat(result.getFirst().stages()).isEmpty();
-        verify(getCompetitionListPersistencePort).getCompetitions("user-1");
+        verify(getCompetitionListPersistencePort).getCompetitions("user-1", null);
     }
 
     @Test
@@ -86,10 +104,10 @@ class GetCompetitionListServiceCaseTest {
                 startedJudges, List.of(new Score("ex-1", "judge-1", "dog-1", new BigDecimal("8"), 0L)));
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1",
                 0L, Long.MAX_VALUE, 0L, 0L, null, List.of(createdEvent, startedEvent));
-        when(getCompetitionListPersistencePort.getCompetitions("user-1"))
+        when(getCompetitionListPersistencePort.getCompetitions("user-1", null))
                 .thenReturn(List.of(competition("comp-1", List.of(stage))));
 
-        List<FetchEventDTO> events = serviceCase.getCompetitions("user-1", true)
+        List<FetchEventDTO> events = serviceCase.getCompetitions("user-1", true, null)
                 .getFirst().stages().getFirst().events();
 
         assertThat(events).hasSize(2);
@@ -114,10 +132,10 @@ class GetCompetitionListServiceCaseTest {
         CompetitionSnapshot recentPast = competition("recent-past", List.of(stage(now - 2 * day)));
         CompetitionSnapshot olderPast = competition("older-past", List.of(stage(now - 30 * day)));
         CompetitionSnapshot noStages = competition("no-stages", List.of());
-        when(getCompetitionListPersistencePort.getCompetitions("user-1"))
+        when(getCompetitionListPersistencePort.getCompetitions("user-1", null))
                 .thenReturn(List.of(olderPast, noStages, upcomingLater, recentPast, upcomingSoon));
 
-        List<FetchCompetitionDTO> result = serviceCase.getCompetitions("user-1", true);
+        List<FetchCompetitionDTO> result = serviceCase.getCompetitions("user-1", true, null);
 
         assertThat(result).extracting(FetchCompetitionDTO::id)
                 .containsExactly("upcoming-soon", "upcoming-later", "recent-past", "older-past", "no-stages");
@@ -133,10 +151,10 @@ class GetCompetitionListServiceCaseTest {
         // dateTo = 0L (1970) is strictly before today's UTC day -> FINISHED stage -> FINISHED competition.
         StageSnapshot finishedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1",
                 0L, 0L, 0L, 0L, null, List.of());
-        when(getCompetitionListPersistencePort.getCompetitions("user-1"))
+        when(getCompetitionListPersistencePort.getCompetitions("user-1", null))
                 .thenReturn(List.of(competition("comp-1", List.of(finishedStage))));
 
-        List<FetchCompetitionDTO> result = serviceCase.getCompetitions("user-1", true);
+        List<FetchCompetitionDTO> result = serviceCase.getCompetitions("user-1", true, null);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().status()).isEqualTo("FINISHED");

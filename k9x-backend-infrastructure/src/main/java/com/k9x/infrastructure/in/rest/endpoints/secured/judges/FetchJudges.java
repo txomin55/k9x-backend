@@ -19,9 +19,10 @@ public class FetchJudges implements SecuredJudgesFetchAllApiDelegate {
     }
 
     @Override
-    public ResponseEntity<List<JudgeResponseDTO>> fetchJudgesSecured(Boolean created) {
+    public ResponseEntity<List<JudgeResponseDTO>> fetchJudgesSecured(Boolean created, String country) {
         return ResponseEntity.ok(
-                getJudgeListServiceCase.getJudges(userDetails.getEmail(), userDetails.isOrganizer(), created != null && created).stream()
+                getJudgeListServiceCase.getJudges(userDetails.getEmail(), userDetails.isOrganizer(),
+                                created != null && created, country).stream()
                         .map(judge -> new JudgeResponseDTO(judge.name(), judge.id(), judge.country()))
                         .toList()
         );

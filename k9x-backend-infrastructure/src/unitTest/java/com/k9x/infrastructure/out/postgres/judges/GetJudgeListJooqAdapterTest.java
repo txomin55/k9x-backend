@@ -32,7 +32,7 @@ class GetJudgeListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetJudgeListJooqAdapter(dsl).getJudges("creator-123");
+        new GetJudgeListJooqAdapter(dsl).getJudges("creator-123", null);
 
         assertThat(capturedSql.get())
                 .contains("""
@@ -43,6 +43,25 @@ class GetJudgeListJooqAdapterTest {
                 .contains("from \"k9x\".\"judges\"")
                 .contains("where (\"k9x\".\"judges\".\"creator\" = ? and \"k9x\".\"judges\".\"deleted_at\" is null)");
         assertThat(capturedBindings.get()).containsExactly("creator-123");
+    }
+
+    @Test
+    void generates_sql_filtered_by_country_when_one_is_given() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+        AtomicReference<Object[]> capturedBindings = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            capturedBindings.set(ctx.bindings());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.JUDGES.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetJudgeListJooqAdapter(dsl).getJudges(null, "ES");
+
+        assertThat(capturedSql.get()).contains("\"k9x\".\"judges\".\"country\" = ?");
+        assertThat(capturedBindings.get()).containsExactly("ES");
     }
 
     @Test
@@ -58,7 +77,7 @@ class GetJudgeListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetJudgeListJooqAdapter(dsl).getJudges(null);
+        new GetJudgeListJooqAdapter(dsl).getJudges(null, null);
 
         assertThat(capturedSql.get())
                 .contains("from \"k9x\".\"judges\"")
@@ -85,7 +104,7 @@ class GetJudgeListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<Judge> judges = new GetJudgeListJooqAdapter(dsl).getJudges("creator-123");
+        List<Judge> judges = new GetJudgeListJooqAdapter(dsl).getJudges("creator-123", null);
 
         assertThat(judges).hasSize(1);
         Judge judge = judges.getFirst();

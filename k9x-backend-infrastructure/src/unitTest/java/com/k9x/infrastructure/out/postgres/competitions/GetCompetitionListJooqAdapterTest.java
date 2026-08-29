@@ -14,6 +14,7 @@ import org.jooq.tools.jdbc.MockExecuteContext;
 import org.jooq.tools.jdbc.MockResult;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,6 +98,26 @@ class GetCompetitionListJooqAdapterTest {
     }
 
     @Test
+    void asks_the_database_for_the_country_when_one_is_given() {
+        List<String> capturedSql = new ArrayList<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.add(ctx.sql());
+            DSLContext mock = DSL.using(SQLDialect.POSTGRES);
+            return new MockResult[]{routeHydrator(ctx,
+                    mock.newResult(COMPETITION_FIELDS),
+                    mock.newResult(STAGE_FIELDS),
+                    mock.newResult(EVENT_FIELDS))};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetCompetitionListJooqAdapter(dsl).getCompetitions("creator-1", "ES");
+
+        assertThat(capturedSql)
+                .anyMatch(sql -> sql.contains("\"k9x\".\"competitions\".\"country\" = ?"));
+    }
+
+    @Test
     void returns_empty_list_when_creator_has_no_competitions() {
         MockDataProvider provider = ctx -> {
             DSLContext mock = DSL.using(SQLDialect.POSTGRES);
@@ -107,7 +128,7 @@ class GetCompetitionListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<CompetitionSnapshot> competitions = new GetCompetitionListJooqAdapter(dsl).getCompetitions("creator-1");
+        List<CompetitionSnapshot> competitions = new GetCompetitionListJooqAdapter(dsl).getCompetitions("creator-1", null);
 
         assertThat(competitions).isEmpty();
     }
@@ -152,7 +173,7 @@ class GetCompetitionListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<CompetitionSnapshot> competitions = new GetCompetitionListJooqAdapter(dsl).getCompetitions("creator-1");
+        List<CompetitionSnapshot> competitions = new GetCompetitionListJooqAdapter(dsl).getCompetitions("creator-1", null);
 
         assertThat(competitions).hasSize(1);
         CompetitionSnapshot competition = competitions.getFirst();

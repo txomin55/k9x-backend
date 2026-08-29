@@ -32,34 +32,52 @@ class GetJudgeListServiceCaseTest {
 
     @Test
     void throws_exception_when_user_is_not_organizer() {
-        assertThatThrownBy(() -> serviceCase.getJudges("user-1", false, false))
+        assertThatThrownBy(() -> serviceCase.getJudges("user-1", false, false, null))
                 .isInstanceOf(UnauthorizedResourceException.class);
     }
 
     @Test
+    void filters_by_country_when_one_is_given() {
+        when(getJudgeListPersistencePort.getJudges(null, "ES")).thenReturn(List.of());
+
+        serviceCase.getJudges("user-1", true, false, "ES");
+
+        verify(getJudgeListPersistencePort).getJudges(null, "ES");
+    }
+
+    @Test
+    void ignores_a_blank_country() {
+        when(getJudgeListPersistencePort.getJudges(null, null)).thenReturn(List.of());
+
+        serviceCase.getJudges("user-1", true, false, "  ");
+
+        verify(getJudgeListPersistencePort).getJudges(null, null);
+    }
+
+    @Test
     void fetches_only_created_judges_by_user_id_when_created_is_true() {
-        when(getJudgeListPersistencePort.getJudges("user-1")).thenReturn(List.of());
+        when(getJudgeListPersistencePort.getJudges("user-1", null)).thenReturn(List.of());
 
-        serviceCase.getJudges("user-1", true, true);
+        serviceCase.getJudges("user-1", true, true, null);
 
-        verify(getJudgeListPersistencePort).getJudges("user-1");
+        verify(getJudgeListPersistencePort).getJudges("user-1", null);
     }
 
     @Test
     void fetches_all_judges_when_created_is_false() {
-        when(getJudgeListPersistencePort.getJudges(null)).thenReturn(List.of());
+        when(getJudgeListPersistencePort.getJudges(null, null)).thenReturn(List.of());
 
-        serviceCase.getJudges("user-1", true, false);
+        serviceCase.getJudges("user-1", true, false, null);
 
-        verify(getJudgeListPersistencePort).getJudges(null);
+        verify(getJudgeListPersistencePort).getJudges(null, null);
     }
 
     @Test
     void maps_judge_fields_to_dto_correctly() {
         Judge judge = new Judge("id-1", "Rex", "user-1", "ES", 0L, 0L, null);
-        when(getJudgeListPersistencePort.getJudges(null)).thenReturn(List.of(judge));
+        when(getJudgeListPersistencePort.getJudges(null, null)).thenReturn(List.of(judge));
 
-        List<JudgeDTO> result = serviceCase.getJudges("user-1", true, false);
+        List<JudgeDTO> result = serviceCase.getJudges("user-1", true, false, null);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().id()).isEqualTo("id-1");

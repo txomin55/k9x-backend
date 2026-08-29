@@ -17,12 +17,15 @@ public class GetJudgeListJooqAdapter implements GetJudgeListPersistencePort {
     }
 
     @Override
-    public List<Judge> getJudges(String creator) {
+    public List<Judge> getJudges(String creator, String country) {
         return dsl.select()
                 .from(Tables.JUDGES)
                 .where(creator == null
                         ? DSL.noCondition()
                         : Tables.JUDGES.CREATOR.eq(creator))
+                .and(country == null
+                        ? DSL.noCondition()
+                        : Tables.JUDGES.COUNTRY.eq(country))
                 .and(Tables.JUDGES.DELETED_AT.isNull())
                 .fetch(r -> new Judge(
                         r.get(Tables.JUDGES.ID),

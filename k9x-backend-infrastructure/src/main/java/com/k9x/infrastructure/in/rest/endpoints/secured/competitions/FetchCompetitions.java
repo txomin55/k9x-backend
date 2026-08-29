@@ -27,9 +27,10 @@ public class FetchCompetitions implements SecuredCompetitionsFetchAllApiDelegate
     }
 
     @Override
-    public ResponseEntity<List<CompetitionResponseDTO>> fetchCompetitionsSecured() {
+    public ResponseEntity<List<CompetitionResponseDTO>> fetchCompetitionsSecured(String country) {
         return ResponseEntity.ok(
-                getCompetitionListServiceCase.getCompetitions(userDetails.getEmail(), userDetails.isOrganizer()).stream()
+                getCompetitionListServiceCase
+                        .getCompetitions(userDetails.getEmail(), userDetails.isOrganizer(), country).stream()
                         .map(competition -> new CompetitionResponseDTO(
                                 competition.id(),
                                 competition.name(),

@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface GetJudgeListPersistencePort {
 
-    List<Judge> getJudges(String creator);
+    /** Both filters are optional: a {@code null} leaves that side of the list unfiltered. */
+    List<Judge> getJudges(String creator, String country);
 }

@@ -69,7 +69,7 @@ class GetDogListServiceCaseTest {
     void filters_dogs_to_owned_when_owned_requested() {
         givenDogs();
 
-        serviceCase.getDogs("user-1", true, new GetDogListCommand(true, false, null, null, null));
+        serviceCase.getDogs("user-1", true, new GetDogListCommand(true, false, null, null, null, null));
 
         assertThat(capturedFilter().owner()).isEqualTo("user-1");
         assertThat(capturedFilter().creator()).isNull();
@@ -79,7 +79,7 @@ class GetDogListServiceCaseTest {
     void filters_dogs_to_created_when_created_requested() {
         givenDogs();
 
-        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, true, null, null, null));
+        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, true, null, null, null, null));
 
         assertThat(capturedFilter().owner()).isNull();
         assertThat(capturedFilter().creator()).isEqualTo("user-1");
@@ -89,7 +89,7 @@ class GetDogListServiceCaseTest {
     void merges_owned_and_created_when_both_requested() {
         givenDogs();
 
-        serviceCase.getDogs("user-1", true, new GetDogListCommand(true, true, null, null, null));
+        serviceCase.getDogs("user-1", true, new GetDogListCommand(true, true, null, null, null, null));
 
         assertThat(capturedFilter().owner()).isEqualTo("user-1");
         assertThat(capturedFilter().creator()).isEqualTo("user-1");
@@ -111,7 +111,7 @@ class GetDogListServiceCaseTest {
     void passes_the_name_search_to_the_persistence_filter() {
         givenDogs();
 
-        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, " Rex ", null, null));
+        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, " Rex ", null, null, null));
 
         assertThat(capturedFilter().nameContains()).isEqualTo("Rex");
     }
@@ -120,9 +120,27 @@ class GetDogListServiceCaseTest {
     void ignores_a_blank_name_search() {
         givenDogs();
 
-        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, "   ", null, null));
+        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, "   ", null, null, null));
 
         assertThat(capturedFilter().nameContains()).isNull();
+    }
+
+    @Test
+    void passes_the_country_to_the_persistence_filter() {
+        givenDogs();
+
+        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, null, "ES", null, null));
+
+        assertThat(capturedFilter().country()).isEqualTo("ES");
+    }
+
+    @Test
+    void ignores_a_blank_country() {
+        givenDogs();
+
+        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, null, "  ", null, null));
+
+        assertThat(capturedFilter().country()).isNull();
     }
 
     // ---- pagination -------------------------------------------------------------------------------
@@ -148,7 +166,7 @@ class GetDogListServiceCaseTest {
     void translates_page_and_size_into_offset_and_limit() {
         givenDogs();
 
-        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, null, 3, 20));
+        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, null, null, 3, 20));
 
         assertThat(capturedFilter().offset()).isEqualTo(60);
         assertThat(capturedFilter().limit()).isEqualTo(20);
@@ -158,7 +176,7 @@ class GetDogListServiceCaseTest {
     void defaults_to_the_first_page_when_only_size_is_requested() {
         givenDogs();
 
-        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, null, null, 20));
+        serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, null, null, null, 20));
 
         assertThat(capturedFilter().offset()).isZero();
         assertThat(capturedFilter().limit()).isEqualTo(20);
@@ -169,7 +187,7 @@ class GetDogListServiceCaseTest {
         when(getDogListPersistencePort.getDogs(any()))
                 .thenReturn(new DogListPage(List.of(dog("id-1", "user-1", "creator-1")), 137));
 
-        DogListDTO result = serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, null, 2, 20));
+        DogListDTO result = serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, null, null, 2, 20));
 
         assertThat(result.items()).hasSize(1);
         assertThat(result.page()).isEqualTo(2);
@@ -183,7 +201,7 @@ class GetDogListServiceCaseTest {
     void reports_no_pages_when_nothing_matches() {
         when(getDogListPersistencePort.getDogs(any())).thenReturn(new DogListPage(List.of(), 0));
 
-        DogListDTO result = serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, "nope", 0, 20));
+        DogListDTO result = serviceCase.getDogs("user-1", true, new GetDogListCommand(false, false, "nope", null, 0, 20));
 
         assertThat(result.items()).isEmpty();
         assertThat(result.total()).isZero();
@@ -211,7 +229,7 @@ class GetDogListServiceCaseTest {
         Dog othersCreatedDog = new Dog("id-2", "ident-2", null, "breed", "Max", "img2.png", null, "handler-1", "creator-2", "FR", "team-2", null, null, null, 0L, 0L, null);
         givenDogs(createdDog, othersCreatedDog);
 
-        List<DogDTO> result = serviceCase.getDogs("user-1", true, new GetDogListCommand(false, true, null, null, null)).items();
+        List<DogDTO> result = serviceCase.getDogs("user-1", true, new GetDogListCommand(false, true, null, null, null, null)).items();
 
         assertThat(result.get(0).owned()).isTrue();
         assertThat(result.get(1).owned()).isFalse();
@@ -222,7 +240,7 @@ class GetDogListServiceCaseTest {
         Dog dog = new Dog("id-1", "ident-1", null, "breed", "Rex", "img.png", "user-2", "handler-1", "user-1", "ES", "team-1", null, null, null, 0L, 0L, null);
         givenDogs(dog);
 
-        List<DogDTO> result = serviceCase.getDogs("user-1", true, new GetDogListCommand(false, true, null, null, null)).items();
+        List<DogDTO> result = serviceCase.getDogs("user-1", true, new GetDogListCommand(false, true, null, null, null, null)).items();
 
         assertThat(result.getFirst().owned()).isFalse();
     }

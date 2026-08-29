@@ -27,7 +27,8 @@ public class GetDogListJooqAdapter implements GetDogListPersistencePort {
                 .from(Tables.DOGS)
                 .where(ownership(filter))
                 .and(Tables.DOGS.DELETED_AT.isNull())
-                .and(nameSearch(filter));
+                .and(nameSearch(filter))
+                .and(country(filter));
 
         if (!filter.paginated()) {
             List<Dog> dogs = query.orderBy(Tables.DOGS.NAME.asc(), Tables.DOGS.IDENTIFICATION.asc()).fetch(GetDogListJooqAdapter::toDog);
@@ -40,6 +41,7 @@ public class GetDogListJooqAdapter implements GetDogListPersistencePort {
                 .where(ownership(filter))
                 .and(Tables.DOGS.DELETED_AT.isNull())
                 .and(nameSearch(filter))
+                .and(country(filter))
                 .fetchOne(0, int.class);
         List<Dog> dogs = query.orderBy(Tables.DOGS.NAME.asc(), Tables.DOGS.IDENTIFICATION.asc())
                 .limit(filter.limit())
@@ -57,6 +59,13 @@ public class GetDogListJooqAdapter implements GetDogListPersistencePort {
             ownership = ownership.or(Tables.DOGS.CREATOR.eq(filter.creator()));
         }
         return ownership;
+    }
+
+    private Condition country(DogListFilter filter) {
+        if (filter.country() == null) {
+            return DSL.noCondition();
+        }
+        return Tables.DOGS.COUNTRY.eq(filter.country());
     }
 
     private Condition nameSearch(DogListFilter filter) {

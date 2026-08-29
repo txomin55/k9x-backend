@@ -26,11 +26,12 @@ public class GetCompetitionListServiceCase {
         this.getStageNotificationsPersistencePort = getStageNotificationsPersistencePort;
     }
 
-    public List<FetchCompetitionDTO> getCompetitions(String userId, boolean organizer) {
+    public List<FetchCompetitionDTO> getCompetitions(String userId, boolean organizer, String country) {
         AuthAssertions.assertOrganizer(organizer, userId);
 
         long now = DateUtils.nowUtcMillis();
-        List<CompetitionSnapshot> competitions = getCompetitionListPersistencePort.getCompetitions(userId);
+        List<CompetitionSnapshot> competitions = getCompetitionListPersistencePort.getCompetitions(
+                userId, country == null || country.isBlank() ? null : country);
         // One query for every stage in the response: announcements are read outside the aggregate, and doing
         // it per stage would be an N+1.
         Map<String, List<StageNotificationDTO>> notificationsByStage =
