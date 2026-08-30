@@ -1,6 +1,5 @@
 package com.k9x.application.events.snapshot.use_case;
 
-import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
@@ -50,7 +49,7 @@ class GenerateEventSnapshotsServiceCaseTest {
 
     private FetchClassificationDTO classification(String eventId, FetchObdxClassificationDTO obdx) {
         return new FetchClassificationDTO(eventId, "Event", "FINISHED", "stage-1", "Stage A", "WC",
-                "obdx", "cfg", "Cfg", null, obdx, "A+", CompetitionSource.API);
+                "obdx", "cfg", "Cfg", null, obdx, "A+", null);
     }
 
     private FetchClassificationCompetitorDTO competitor(String dogIdentification, int position, BigDecimal totalScore,

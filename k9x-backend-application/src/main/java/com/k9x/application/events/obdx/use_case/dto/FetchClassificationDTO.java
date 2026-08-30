@@ -1,6 +1,6 @@
 package com.k9x.application.events.obdx.use_case.dto;
 
-import com.k9x.domain.competitions.aggregates.CompetitionSource;
+import com.k9x.domain.competitions.aggregates.CompetitionExtraction;
 
 public record FetchClassificationDTO(
         String eventId, String eventName, String eventStatus,
@@ -11,5 +11,5 @@ public record FetchClassificationDTO(
         Long scoresLastUpdate,
         FetchObdxClassificationDTO obdx,
         String rank,
-        CompetitionSource source) {
+        CompetitionExtraction extraction) {
 }

@@ -42,7 +42,7 @@ class CompetitionAggregateTest {
 
     private CompetitionSnapshot competition(String creator, Long deletedAt, StageSnapshot stage) {
         return new CompetitionSnapshot("comp-1", "World Cup", creator, "Org", "ES", "desc", "addr",
-                null, null, CompetitionSource.API, 0L, 0L, deletedAt, List.of(stage));
+                null, null, CompetitionSource.API, null, 0L, 0L, deletedAt, List.of(stage));
     }
 
     // ---- of -------------------------------------------------------------------------------------
@@ -157,7 +157,7 @@ class CompetitionAggregateTest {
         StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", SMOKE_CREATOR, FUTURE, FUTURE,
                 0L, 0L, null, List.of(started));
         CompetitionSnapshot smoke = new CompetitionSnapshot("comp-1", "--SMOKE-- Competition 1 (0803-120000)",
-                SMOKE_CREATOR, "Org", "ES", "desc", "addr", null, null, CompetitionSource.API, 0L, 0L, null, List.of(startedStage));
+                SMOKE_CREATOR, "Org", "ES", "desc", "addr", null, null, CompetitionSource.API, null, 0L, 0L, null, List.of(startedStage));
         CompetitionAggregate aggregate = CompetitionAggregate.of(smoke);
 
         aggregate.delete(SMOKE_CREATOR, NOW);
@@ -174,7 +174,7 @@ class CompetitionAggregateTest {
         StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", OWNER, FUTURE, FUTURE,
                 0L, 0L, null, List.of(started));
         CompetitionSnapshot prefixedOnly = new CompetitionSnapshot("comp-1", "--SMOKE-- Competition 1 (0803-120000)",
-                OWNER, "Org", "ES", "desc", "addr", null, null, CompetitionSource.API, 0L, 0L, null, List.of(startedStage));
+                OWNER, "Org", "ES", "desc", "addr", null, null, CompetitionSource.API, null, 0L, 0L, null, List.of(startedStage));
         CompetitionAggregate aggregate = CompetitionAggregate.of(prefixedOnly);
 
         assertThrows(CompetitionCannotBeDeletedException.class, () -> aggregate.delete(OWNER, NOW));
@@ -188,7 +188,7 @@ class CompetitionAggregateTest {
         StageSnapshot startedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", SMOKE_CREATOR, FUTURE, FUTURE,
                 0L, 0L, null, List.of(started));
         CompetitionSnapshot unprefixed = new CompetitionSnapshot("comp-1", "World Cup",
-                SMOKE_CREATOR, "Org", "ES", "desc", "addr", null, null, CompetitionSource.API, 0L, 0L, null, List.of(startedStage));
+                SMOKE_CREATOR, "Org", "ES", "desc", "addr", null, null, CompetitionSource.API, null, 0L, 0L, null, List.of(startedStage));
         CompetitionAggregate aggregate = CompetitionAggregate.of(unprefixed);
 
         assertThrows(CompetitionCannotBeDeletedException.class, () -> aggregate.delete(SMOKE_CREATOR, NOW));

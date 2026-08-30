@@ -55,7 +55,7 @@ class GetStageServiceCaseTest {
 
     private CompetitionSnapshot competition(StageSnapshot stage) {
         return new CompetitionSnapshot("comp-1", "World Cup", "user-1", "Organizer", "ES", "desc", "Calle Mayor 1",
-                null, null, CompetitionSource.API, 0L, 0L, null, List.of(stage));
+                null, null, CompetitionSource.API, null, 0L, 0L, null, List.of(stage));
     }
 
     @Test

@@ -59,7 +59,7 @@ public class FetchCompetitions implements SecuredCompetitionsFetchAllApiDelegate
                                                         .toList()
                                         ))
                                         .toList(),
-                                competition.source().name()
+                                referenceNames.extraction(competition.extraction())
                         ))
                         .toList()
         );

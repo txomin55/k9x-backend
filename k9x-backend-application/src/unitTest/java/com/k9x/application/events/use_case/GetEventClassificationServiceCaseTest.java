@@ -67,7 +67,7 @@ class GetEventClassificationServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage A", "comp-1", "user-1", 0L, Long.MAX_VALUE, 1000L, 1000L,
                 null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                CompetitionSource.API, 0L, 0L, null, List.of(stage));
+                CompetitionSource.API, null, 0L, 0L, null, List.of(stage));
     }
 
     @Test
@@ -134,7 +134,7 @@ class GetEventClassificationServiceCaseTest {
         assertThat(result.obdx()).isSameAs(obdx);
         verify(eventClassificationCacheManagerPort)
                 .put("evt-1", new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE, "WC",
-                        CompetitionSource.API));
+                        null));
     }
 
     @Test
@@ -142,7 +142,7 @@ class GetEventClassificationServiceCaseTest {
         FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(5000L, List.of(), "AVG", List.of());
         when(eventClassificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt()))
                 .thenReturn(new EventClassificationContextDTO(ACTIVE_EVENT, "Stage A", Long.MAX_VALUE, "WC",
-                        CompetitionSource.API));
+                        null));
         when(getObdxClassificationServiceCase.getClassification(ACTIVE_EVENT)).thenReturn(obdx);
         when(getObdxFederationsConfigurationsPort.getConfigurations()).thenReturn(List.of());
 

@@ -46,7 +46,7 @@ class GetCompetitionListServiceCaseTest {
 
     private CompetitionSnapshot competition(String id, List<StageSnapshot> stages) {
         return new CompetitionSnapshot(id, "World Cup", "user-1", "Org", "ES", "desc", "Calle Mayor 1",
-                null, null, CompetitionSource.API, 0L, 0L, null, stages);
+                null, null, CompetitionSource.API, null, 0L, 0L, null, stages);
     }
 
     @Test

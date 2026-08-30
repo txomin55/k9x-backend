@@ -1,12 +1,12 @@
 package com.k9x.application.stages.use_case.dto;
 
 import com.k9x.application.notifications.use_case.dto.StageNotificationDTO;
-import com.k9x.domain.competitions.aggregates.CompetitionSource;
+import com.k9x.domain.competitions.aggregates.CompetitionExtraction;
 
 import java.util.List;
 
 /**
- * The stage read models carry the competition's {@code source} the same way they carry its address: a stage has
+ * The stage read models carry the competition's {@code extraction} provenance the same way they carry its address: a stage has
  * no origin of its own, it inherits the one of the competition it belongs to.
  */
 public record FetchStageListDTO(String id, String name, String competitionName, String country,
@@ -14,5 +14,5 @@ public record FetchStageListDTO(String id, String name, String competitionName, 
                                 Long dateFrom, Long dateTo,
                                 String organizer, List<FetchStageListEventDTO> events, String status,
                                 List<StageNotificationDTO> notifications,
-                                boolean includesRankings, CompetitionSource source) {
+                                boolean includesRankings, CompetitionExtraction extraction) {
 }

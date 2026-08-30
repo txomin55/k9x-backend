@@ -1,6 +1,5 @@
 package com.k9x.application.rankings.use_case;
 
-import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationCompetitorDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxClassificationDTO;
@@ -58,7 +57,7 @@ class GetRankingClassificationServiceCaseTest {
         return new FetchClassificationDTO(eventId, "Event " + eventId, "FINISHED", "stage-1", "Stage 1",
                 "Copa", "OBDX", "OBDX_FCI_GRADE_1", "Grade 1", 0L,
                 new FetchObdxClassificationDTO(0L, List.of(competitor), "AVG", List.of()), "A",
-                CompetitionSource.API);
+                null);
     }
 
     @Test

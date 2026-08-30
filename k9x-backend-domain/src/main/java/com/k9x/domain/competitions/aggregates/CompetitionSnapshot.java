@@ -18,6 +18,7 @@ public record CompetitionSnapshot(
         Double coordAlt,
         Double coordLong,
         CompetitionSource source,
+        CompetitionExtraction extractionMetadata,
         long lastUpdate,
         long createdAt,
         Long deletedAt,
@@ -26,6 +27,18 @@ public record CompetitionSnapshot(
 
     public CompetitionSnapshot {
         source = source == null ? CompetitionSource.API : source;
+    }
+
+    /**
+     * Provenance to surface to the reader, {@code null} for competitions created through the app. An EXTRACTION
+     * competition with no metadata row still yields {@link CompetitionExtraction#UNKNOWN}: the warning does not
+     * depend on anybody having written down where the data came from.
+     */
+    public CompetitionExtraction extraction() {
+        if (source != CompetitionSource.EXTRACTION) {
+            return null;
+        }
+        return extractionMetadata == null ? CompetitionExtraction.UNKNOWN : extractionMetadata;
     }
 
     /**

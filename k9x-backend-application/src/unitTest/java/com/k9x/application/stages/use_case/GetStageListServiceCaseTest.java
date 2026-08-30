@@ -49,7 +49,7 @@ class GetStageListServiceCaseTest {
 
     private static CompetitionSnapshot competition(List<StageSnapshot> stages) {
         return new CompetitionSnapshot("comp", "Comp", "creator", "Organizer Name", "ES",
-                "desc", "Calle Mayor 1", 40.4, -3.7, CompetitionSource.API, 0L, 0L, null, stages);
+                "desc", "Calle Mayor 1", 40.4, -3.7, CompetitionSource.API, null, 0L, 0L, null, stages);
     }
 
     private static StageSnapshot stage(String id, long from, long to, List<EventSnapshot> events) {

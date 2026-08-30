@@ -1,5 +1,6 @@
 package com.k9x.infrastructure.out.postgres.competitions;
 
+import com.k9x.domain.competitions.aggregates.CompetitionExtraction;
 import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
 import com.k9x.domain.competitions.aggregates.CompetitionSource;
 import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
@@ -61,6 +62,7 @@ public class CompetitionHydrator {
             return List.of();
         }
 
+        Map<String, CompetitionExtraction> extractions = fetchExtractions(competitions.keySet());
         Map<String, List<StageSnapshot>> stagesByCompetition = new LinkedHashMap<>();
         Map<String, List<EventSnapshot>> eventsByStage = fetchEvents(competitions.keySet());
 
@@ -74,7 +76,7 @@ public class CompetitionHydrator {
         return competitions.values().stream()
                 .map(c -> new CompetitionSnapshot(c.id, c.name, c.creator, c.organizerName, c.country,
                         c.description, c.address, c.coordAlt, c.coordLong,
-                        CompetitionSource.fromStored(c.source), c.lastUpdate, c.createdAt,
+                        CompetitionSource.fromStored(c.source), extractions.get(c.id), c.lastUpdate, c.createdAt,
                         c.deletedAt, stagesByCompetition.getOrDefault(c.id, new ArrayList<>())))
                 .toList();
     }
@@ -108,6 +110,23 @@ public class CompetitionHydrator {
                     shell.deletedAt = r.get(co.DELETED_AT);
                     result.put(shell.id, shell);
                 });
+        return result;
+    }
+
+    /**
+     * A competition can be extracted more than once — a re-collection from a better source — so only the most
+     * recent extraction is kept: it is the one that describes the data currently loaded.
+     */
+    private Map<String, CompetitionExtraction> fetchExtractions(Iterable<String> competitionIds) {
+        var em = Tables.EXTRACTION_METADATA;
+        Map<String, CompetitionExtraction> result = new LinkedHashMap<>();
+        dsl.select(em.COMPETITION_ID, em.EXTRACTION_ID, em.SOURCE, em.EXTRACTION_TIMESTAMP, em.TYPE)
+                .from(em)
+                .where(em.COMPETITION_ID.in(toList(competitionIds)))
+                .orderBy(em.EXTRACTION_TIMESTAMP.asc())
+                .forEach(r -> result.put(r.get(em.COMPETITION_ID), new CompetitionExtraction(
+                        r.get(em.EXTRACTION_ID), r.get(em.SOURCE), r.get(em.EXTRACTION_TIMESTAMP),
+                        r.get(em.TYPE))));
         return result;
     }
 

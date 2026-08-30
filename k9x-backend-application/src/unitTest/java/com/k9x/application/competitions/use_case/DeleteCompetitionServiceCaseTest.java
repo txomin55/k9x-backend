@@ -38,7 +38,7 @@ class DeleteCompetitionServiceCaseTest {
 
     private CompetitionSnapshot competition(String creator) {
         return new CompetitionSnapshot("comp-1", "World Cup", creator, "Org", "ES", "desc", "addr",
-                null, null, CompetitionSource.API, 0L, 0L, null, List.of());
+                null, null, CompetitionSource.API, null, 0L, 0L, null, List.of());
     }
 
     @Test

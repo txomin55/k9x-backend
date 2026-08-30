@@ -72,7 +72,7 @@ class UpdateObdxEventServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 4102444800000L, Long.MAX_VALUE,
                 0L, 0L, null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                CompetitionSource.API, 0L, 0L, null, List.of(stage));
+                CompetitionSource.API, null, 0L, 0L, null, List.of(stage));
     }
 
     @Test
@@ -352,7 +352,7 @@ class UpdateObdxEventServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 4102444800000L, Long.MAX_VALUE,
                 0L, 0L, null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", country, null, null, null, null,
-                CompetitionSource.API, 0L, 0L, null, List.of(stage));
+                CompetitionSource.API, null, 0L, 0L, null, List.of(stage));
     }
 
     private Dog dogFrom(String id, String country) {

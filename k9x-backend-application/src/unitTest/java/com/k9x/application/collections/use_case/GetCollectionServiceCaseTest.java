@@ -66,7 +66,7 @@ class GetCollectionServiceCaseTest {
     private CompetitionSnapshot competition(EventSnapshot event, long dateTo) {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage A", "comp-1", "user-1", 0L, dateTo, 0L, 0L, null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                CompetitionSource.API, 0L, 0L, null, List.of(stage));
+                CompetitionSource.API, null, 0L, 0L, null, List.of(stage));
     }
 
     private void givenActiveEventAndStage() {

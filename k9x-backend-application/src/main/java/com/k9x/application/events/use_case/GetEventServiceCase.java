@@ -66,7 +66,7 @@ public class GetEventServiceCase {
         FetchObdxEventDTO obdx = new FetchObdxEventDTO(event.id(), event.name(), stage.id(), stage.name(),
                 event.discipline(), event.status(now, stage.dateTo()).name(), event.enrollmentDeadline(),
                 event.scoreCalculation(), event.awards(), event.commissioner(), event.category(), stage.dateFrom(),
-                competition.name(), competition.organizerName(), competition.address(), competition.source());
+                competition.name(), competition.organizerName(), competition.address(), competition.extraction());
 
         List<FetchObdxEventCompetitorDTO> competitors = event.competitors().stream()
                 .map(c -> new FetchObdxEventCompetitorDTO(c.dogIdentification(), c.dogName(), c.origin(), c.license(), c.breed(),

@@ -51,7 +51,7 @@ public class GetStage implements StagesFetchOneApiDelegate {
                 stage.address(),
                 stage.organizer(),
                 stage.status(),
-                stage.source().name()));
+                referenceNames.extraction(stage.extraction())));
     }
 
     private List<StageEventDetailCompetitorResponseDTO> mapCompetitors(List<FetchStageDetailCompetitorDTO> competitors) {

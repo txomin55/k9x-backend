@@ -76,6 +76,14 @@ class GetCompetitionJooqAdapterTest {
 
     private static final Field<?>[] COMPETITION_ID_FIELDS = {Tables.STAGES.COMPETITION_ID};
 
+    private static final Field<?>[] EXTRACTION_FIELDS = {
+            Tables.EXTRACTION_METADATA.COMPETITION_ID,
+            Tables.EXTRACTION_METADATA.EXTRACTION_ID,
+            Tables.EXTRACTION_METADATA.SOURCE,
+            Tables.EXTRACTION_METADATA.EXTRACTION_TIMESTAMP,
+            Tables.EXTRACTION_METADATA.TYPE
+    };
+
     private static final Field<?>[] COMPETITOR_FIELDS = {
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.EVENT_ID,
             com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS.DOG_IDENTIFICATION,
@@ -134,6 +142,53 @@ class GetCompetitionJooqAdapterTest {
             return new MockResult(competitions.size(), competitions);
         }
         return emptyNoFields();
+    }
+
+    @Test
+    void hydrates_the_last_extraction_of_an_extracted_competition() {
+        MockDataProvider provider = ctx -> {
+            DSLContext mock = DSL.using(SQLDialect.POSTGRES);
+
+            if (ctx.sql().toLowerCase().contains("extraction_metadata")) {
+                Result<Record> extractions = mock.newResult(EXTRACTION_FIELDS);
+                extractions.add(extraction(mock, "cpc-2020-9-extraction", "https://cpc/2020/9", 100L));
+                // Ordered by extraction_timestamp: a re-collection from a better source wins over the first one.
+                extractions.add(extraction(mock, "cpc-2020-9-extraction-2", "https://cpc/better", 200L));
+                return new MockResult[]{new MockResult(extractions.size(), extractions)};
+            }
+
+            Result<Record> competitions = mock.newResult(COMPETITION_FIELDS);
+            Record comp = mock.newRecord(COMPETITION_FIELDS);
+            comp.set(Tables.COMPETITIONS.ID, "comp-1");
+            comp.set(Tables.COMPETITIONS.NAME, "World Cup");
+            comp.set(Tables.COMPETITIONS.CREATOR, "creator-1");
+            comp.set(Tables.COMPETITIONS.SOURCE, "EXTRACTION");
+            comp.set(Tables.COMPETITIONS.LAST_UPDATE, 10L);
+            comp.set(Tables.COMPETITIONS.CREATED_AT, 20L);
+            competitions.add(comp);
+
+            return new MockResult[]{routeHydrator(ctx, competitions,
+                    mock.newResult(STAGE_FIELDS), mock.newResult(EVENT_FIELDS))};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        CompetitionSnapshot competition = new GetCompetitionJooqAdapter(dsl).getCompetition("comp-1");
+
+        assertThat(competition).isNotNull();
+        assertThat(competition.extraction().extractionId()).isEqualTo("cpc-2020-9-extraction-2");
+        assertThat(competition.extraction().url()).isEqualTo("https://cpc/better");
+        assertThat(competition.extraction().extractionTimestamp()).isEqualTo(200L);
+        assertThat(competition.extraction().type()).isEqualTo("FEDERATION_PAGE,cpc");
+    }
+
+    private static Record extraction(DSLContext mock, String extractionId, String url, long timestamp) {
+        Record record = mock.newRecord(EXTRACTION_FIELDS);
+        record.set(Tables.EXTRACTION_METADATA.COMPETITION_ID, "comp-1");
+        record.set(Tables.EXTRACTION_METADATA.EXTRACTION_ID, extractionId);
+        record.set(Tables.EXTRACTION_METADATA.SOURCE, url);
+        record.set(Tables.EXTRACTION_METADATA.EXTRACTION_TIMESTAMP, timestamp);
+        record.set(Tables.EXTRACTION_METADATA.TYPE, "FEDERATION_PAGE,cpc");
+        return record;
     }
 
     @Test

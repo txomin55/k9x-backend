@@ -43,7 +43,7 @@ class UpdateStageServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", creator,
                 Long.MAX_VALUE, Long.MAX_VALUE, 0L, 0L, null, List.of());
         return new CompetitionSnapshot("comp-1", "World Cup", creator, "Org", "ES", "desc", "addr",
-                null, null, CompetitionSource.API, 0L, 0L, null, List.of(stage));
+                null, null, CompetitionSource.API, null, 0L, 0L, null, List.of(stage));
     }
 
     @Test

@@ -18,7 +18,7 @@ class CompetitionStatusTest {
     private static final long NEXT_WEEK = Instant.parse("2024-06-22T08:00:00Z").toEpochMilli();
 
     private static CompetitionSnapshot competition(Long deletedAt, List<StageSnapshot> stages) {
-        return new CompetitionSnapshot("c1", "WC", "creator", "Org", "ES", "desc", "addr", null, null, CompetitionSource.API, 0L, 0L, deletedAt, stages);
+        return new CompetitionSnapshot("c1", "WC", "creator", "Org", "ES", "desc", "addr", null, null, CompetitionSource.API, null, 0L, 0L, deletedAt, stages);
     }
 
     private static StageSnapshot stage(long dateFrom, long dateTo, Long deletedAt) {

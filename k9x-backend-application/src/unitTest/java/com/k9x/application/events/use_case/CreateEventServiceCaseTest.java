@@ -41,7 +41,7 @@ class CreateEventServiceCaseTest {
         // dateFrom/dateTo in the far future and no events -> stage is CREATED, so it still accepts new events.
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", Long.MAX_VALUE, Long.MAX_VALUE, 0L, 0L, null, List.of());
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                CompetitionSource.API, 0L, 0L, null, List.of(stage));
+                CompetitionSource.API, null, 0L, 0L, null, List.of(stage));
     }
 
     @Test

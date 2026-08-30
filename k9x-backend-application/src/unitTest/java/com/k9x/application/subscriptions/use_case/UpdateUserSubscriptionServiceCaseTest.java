@@ -55,7 +55,7 @@ class UpdateUserSubscriptionServiceCaseTest {
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "owner@test.com", stageDateTo,
                 stageDateTo, 0L, 0L, null, List.of(event("event-1"), event("event-2")));
         return new CompetitionSnapshot("comp-1", "WC", "owner@test.com", "Org", null, null, null, null, null,
-                CompetitionSource.API, 0L, 0L, null, List.of(stage));
+                CompetitionSource.API, null, 0L, 0L, null, List.of(stage));
     }
 
     private EventSnapshot event(String id) {

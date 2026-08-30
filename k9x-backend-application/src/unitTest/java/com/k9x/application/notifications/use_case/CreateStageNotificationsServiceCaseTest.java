@@ -85,7 +85,7 @@ class CreateStageNotificationsServiceCaseTest {
         StageSnapshot stageTwo = new StageSnapshot("stage-2", "Stage 2", "comp-1", "user-1", Long.MAX_VALUE,
                 Long.MAX_VALUE, 0L, 0L, null, List.of(event("event-3", "stage-2", "user-1", null)));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                CompetitionSource.API, 0L, 0L, null, List.of(stageOne, stageTwo));
+                CompetitionSource.API, null, 0L, 0L, null, List.of(stageOne, stageTwo));
     }
 
     /** Stage 1 as a stage whose last day is long past, so its events are FINISHED. */
@@ -93,7 +93,7 @@ class CreateStageNotificationsServiceCaseTest {
         StageSnapshot finishedStage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, 0L, 0L, 0L,
                 null, List.of(event("event-1", "stage-1", "user-1", null)));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                CompetitionSource.API, 0L, 0L, null, List.of(finishedStage));
+                CompetitionSource.API, null, 0L, 0L, null, List.of(finishedStage));
     }
 
     /**
@@ -111,7 +111,7 @@ class CreateStageNotificationsServiceCaseTest {
                 Long.MAX_VALUE, 0L, 0L, null,
                 List.of(finishedEvent, event("event-2", "stage-1", "user-1", null)));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                CompetitionSource.API, 0L, 0L, null, List.of(stage));
+                CompetitionSource.API, null, 0L, 0L, null, List.of(stage));
     }
 
     private void stageOneExists() {
@@ -199,7 +199,7 @@ class CreateStageNotificationsServiceCaseTest {
         when(getCompetitionPersistencePort.competitionIdByStage("stage-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(
                 new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                        CompetitionSource.API, 0L, 0L, null, List.of(stage)));
+                        CompetitionSource.API, null, 0L, 0L, null, List.of(stage)));
 
         assertThatThrownBy(() -> serviceCase.createStageNotifications(
                 "stage-1", announcement("event-1"), "user-1", true))
@@ -238,7 +238,7 @@ class CreateStageNotificationsServiceCaseTest {
         when(getCompetitionPersistencePort.competitionIdByStage("stage-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(
                 new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", null, null, null, null, null,
-                        CompetitionSource.API, 0L, 0L, null, List.of(stage)));
+                        CompetitionSource.API, null, 0L, 0L, null, List.of(stage)));
 
         assertThatThrownBy(() -> serviceCase.createStageNotifications(
                 "stage-1", announcement("event-1"), "user-1", true))

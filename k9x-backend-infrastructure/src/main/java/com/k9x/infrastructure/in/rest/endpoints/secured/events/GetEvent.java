@@ -57,7 +57,7 @@ public class GetEvent implements SecuredEventsFetchOneApiDelegate {
                 obdx.awards().stream().map(a -> new IdNameDTO(a, a)).toList(),
                 obdx.commissioner(),
                 obdx.category() == null ? null : obdx.category().name(),
-                obdx.source().name()
+                referenceNames.extraction(obdx.extraction())
         );
     }
 

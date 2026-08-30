@@ -88,7 +88,7 @@ public class GetCompetitionListServiceCase {
                 competition.country(),
                 competition.address(),
                 competition.status(now).name(),
-                competition.source(),
+                competition.extraction(),
                 toStageDtos(competition, now, notificationsByStage));
     }
 

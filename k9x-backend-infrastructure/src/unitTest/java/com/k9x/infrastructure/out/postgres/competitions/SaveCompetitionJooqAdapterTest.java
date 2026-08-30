@@ -61,7 +61,7 @@ class SaveCompetitionJooqAdapterTest {
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 FUTURE_FROM, FUTURE_TO, NOW, NOW, null, List.of());
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
-                0.0, 0.0, CompetitionSource.API, NOW, NOW, null, List.of(stage));
+                0.0, 0.0, CompetitionSource.API, null, NOW, NOW, null, List.of(stage));
         return CompetitionAggregate.of(competition);
     }
 
@@ -71,7 +71,7 @@ class SaveCompetitionJooqAdapterTest {
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 FUTURE_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
-                0.0, 0.0, CompetitionSource.API, NOW, NOW, null, List.of(stage));
+                0.0, 0.0, CompetitionSource.API, null, NOW, NOW, null, List.of(stage));
         return CompetitionAggregate.of(competition);
     }
 
@@ -84,7 +84,7 @@ class SaveCompetitionJooqAdapterTest {
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 PAST_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
-                0.0, 0.0, CompetitionSource.API, NOW, NOW, null, List.of(stage));
+                0.0, 0.0, CompetitionSource.API, null, NOW, NOW, null, List.of(stage));
         return CompetitionAggregate.of(competition);
     }
 
@@ -251,7 +251,7 @@ class SaveCompetitionJooqAdapterTest {
         StageSnapshot stage = new StageSnapshot("stage-123", "Stage", "comp-1", "user",
                 FUTURE_FROM, FUTURE_TO, NOW, NOW, null, List.of(event));
         CompetitionSnapshot competition = new CompetitionSnapshot("comp-1", "Comp", "user", "Org", "ES", "desc", "addr",
-                0.0, 0.0, CompetitionSource.API, NOW, NOW, null, List.of(stage));
+                0.0, 0.0, CompetitionSource.API, null, NOW, NOW, null, List.of(stage));
         CompetitionAggregate aggregate = CompetitionAggregate.of(competition);
         aggregate.updateCompetitorNotCompeting("evt-1", "dog-1", true, "user", NOW);
 
