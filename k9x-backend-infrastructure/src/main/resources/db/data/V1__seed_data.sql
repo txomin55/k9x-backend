@@ -9,7 +9,7 @@ VALUES ('k9x.support@gmail.com', 'k9x.support@gmail.com',
 
 -- organizers ------------------------------------------------------------
 INSERT INTO k9x.organizers (user_id, name)
-VALUES ('k9x.support@gmail.com', 'Nos');
+VALUES ('k9x.support@gmail.com', 'K9X Support');
 
 -- user_subscriptions ----------------------------------------------------
 INSERT INTO k9x.user_subscriptions (user_id, event_ids)
