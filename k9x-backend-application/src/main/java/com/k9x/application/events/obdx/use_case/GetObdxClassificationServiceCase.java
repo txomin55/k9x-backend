@@ -25,6 +25,14 @@ import java.util.stream.Collectors;
 
 public class GetObdxClassificationServiceCase {
 
+    /**
+     * Stand-in for the seeded UNKNOWN judge when an exercise assigns its scores to it. It is never part of the
+     * event's panel, so it is resolved here rather than read from {@code obdx.event_judges}; see
+     * {@link #resolveAssignedJudge}.
+     */
+    private static final EventJudge UNKNOWN_JUDGE = new EventJudge(
+            ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, null, false);
+
     private final GetObdxClassificationConfigPort getObdxClassificationConfigPort;
     private final ClassificationCacheManagerPort classificationCacheManagerPort;
 
@@ -77,7 +85,7 @@ public class GetObdxClassificationServiceCase {
             for (EventExercise ex : sortedExercises) {
                 List<String> assignedJudgeIds = ex.judges() == null ? List.of() : ex.judges();
                 for (String judgeId : assignedJudgeIds) {
-                    EventJudge jd = judgesById.get(judgeId);
+                    EventJudge jd = resolveAssignedJudge(judgesById, judgeId);
                     if (jd == null) {
                         continue;
                     }
@@ -99,6 +107,32 @@ public class GetObdxClassificationServiceCase {
             }
         }
         return rows;
+    }
+
+    /**
+     * The judge an exercise assignment resolves to, or {@code null} when the assignment names nobody the event
+     * knows and the row has to be dropped.
+     *
+     * <p>Normally the assignment is one of the event's own judges. {@link ObdxFinalScoreExercise#UNKNOWN_JUDGE_ID}
+     * is the exception, and it is resolved here instead of being looked up in the panel: it is not a person, so it
+     * has no business in {@code obdx.event_judges} — that table is the trial's jury, and an event that lists
+     * UNKNOWN there would show it as a judge of the trial.
+     *
+     * <p>The case is an extraction that knows <em>what</em> each exercise scored but not <em>who</em> gave the
+     * mark: the source publishes one mark per exercise and never breaks it down by judge. Those scores are
+     * attributed to UNKNOWN — {@code obdx.event_scores.judge_id} is {@code NOT NULL} and part of the primary key,
+     * so there is nowhere else to put them — while the event keeps declaring its real panel. Without this the two
+     * id sets never intersected and <em>every</em> competitor of such an event vanished from the classification,
+     * silently and with a 200: the scores are only ever reached through this assignment, so the lookup below never
+     * ran. The averaging denominator stays right on its own, because it counts the exercise's assigned judges —
+     * one — and not the panel.
+     */
+    private EventJudge resolveAssignedJudge(Map<String, EventJudge> judgesById, String judgeId) {
+        EventJudge judge = judgesById.get(judgeId);
+        if (judge != null) {
+            return judge;
+        }
+        return ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID.equals(judgeId) ? UNKNOWN_JUDGE : null;
     }
 
     private FetchObdxClassificationDTO aggregateProjection(EventSnapshot event,

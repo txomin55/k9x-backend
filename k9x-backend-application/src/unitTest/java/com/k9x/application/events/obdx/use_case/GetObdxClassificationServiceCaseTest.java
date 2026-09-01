@@ -933,4 +933,59 @@ class GetObdxClassificationServiceCaseTest {
                         FetchClassificationCompetitorDTO::qualification)
                 .containsExactly(tuple("dog-2", 1, "EXC"), tuple("dog-1", 2, "MB"));
     }
+
+    @Test
+    void scores_exercises_assigned_to_the_unknown_judge_while_the_event_declares_its_real_panel() {
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null, null));
+        // The source publishes one mark per exercise without saying which judge gave it, so the scores go to
+        // UNKNOWN; the panel is still the real jury of the trial, and UNKNOWN is not one of them.
+        List<EventExercise> exercises = List.of(
+                new EventExercise("ex-1", (short) 1, null, List.of(ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID)));
+        List<EventJudge> judges = List.of(
+                new EventJudge("j-1", "Lone Thyrsgaard", null, true),
+                new EventJudge("j-2", "Rune Bjerkelund", null, false));
+        List<Score> scores = List.of(
+                new Score("ex-1", ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, "dog-1", new BigDecimal("8.50"), 2000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V0", "obdx", "Extracted Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of(), null, null, null);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX.RSCE_GRADO_1.V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        FetchClassificationCompetitorDTO competitor = result.competitors().getFirst();
+        assertThat(competitor.dogIdentification()).isEqualTo("dog-1");
+        // ex-1 has coefficient 3, and the average is over the ONE judge the exercise assigns, not over the panel
+        assertThat(competitor.totalScore()).isEqualByComparingTo("25.50");
+        FetchClassificationExerciseScoreDTO exercise = competitor.exercises().getFirst();
+        assertThat(exercise.exerciseId()).isEqualTo("ex-1");
+        assertThat(exercise.judgeScores())
+                .extracting(FetchClassificationJudgeScoreDTO::judgeId, FetchClassificationJudgeScoreDTO::score)
+                .containsExactly(tuple(ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, new BigDecimal("8.50")));
+    }
+
+    @Test
+    void drops_an_exercise_assigned_to_a_judge_the_event_does_not_declare() {
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null, null));
+        List<EventExercise> exercises = List.of(new EventExercise("ex-1", (short) 1, null, List.of("j-missing")));
+        List<EventJudge> judges = List.of(new EventJudge("j-1", "Lone Thyrsgaard", null, true));
+        List<Score> scores = List.of(new Score("ex-1", "j-missing", "dog-1", new BigDecimal("8.50"), 2000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V0", "obdx", "Extracted Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of(), null, null, null);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX.RSCE_GRADO_1.V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        // only UNKNOWN gets the exception; any other id the event does not declare still drops the row
+        assertThat(result.competitors()).isEmpty();
+    }
 }
