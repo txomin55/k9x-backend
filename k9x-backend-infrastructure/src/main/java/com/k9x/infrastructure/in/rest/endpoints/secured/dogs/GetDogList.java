@@ -27,11 +27,13 @@ public class GetDogList implements SecuredDogsFetchAllApiDelegate {
 
     @Override
     public ResponseEntity<DogListResponseDTO> getDogsSecured(Boolean owned, Boolean created, String name,
-                                                             Integer page, Integer size, String country) {
+                                                             Integer page, Integer size, String country,
+                                                             String identification) {
         DogListDTO dogs = getDogListService.getDogs(
                 userDetails.getEmail(),
                 userDetails.isOrganizer(),
-                new GetDogListCommand(owned != null && owned, created != null && created, name, country, page, size));
+                new GetDogListCommand(owned != null && owned, created != null && created, name, country, page, size,
+                        identification));
         List<DogSummaryResponseDTO> mapped = dogs.items().stream()
                 .map(dog ->
                         new DogSummaryResponseDTO(

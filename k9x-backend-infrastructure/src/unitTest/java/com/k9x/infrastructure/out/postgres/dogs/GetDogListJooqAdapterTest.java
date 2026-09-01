@@ -184,10 +184,51 @@ class GetDogListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetDogListJooqAdapter(dsl).getDogs(new DogListFilter("owner-123", null, "re", null, null, null));
+        new GetDogListJooqAdapter(dsl).getDogs(new DogListFilter("owner-123", null, "re", null, null, null, null));
 
         assertThat(capturedSql.get()).contains("lower(\"k9x\".\"dogs\".\"name\") like");
         assertThat(capturedBindings.get()).contains("re");
+    }
+
+    @Test
+    void generates_case_insensitive_identification_search() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+        AtomicReference<Object[]> capturedBindings = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            capturedBindings.set(ctx.bindings());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.DOGS.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetDogListJooqAdapter(dsl).getDogs(new DogListFilter("owner-123", null, null, null, null, null, "9810"));
+
+        assertThat(capturedSql.get()).contains("lower(\"k9x\".\"dogs\".\"identification\") like");
+        assertThat(capturedBindings.get()).contains("9810");
+    }
+
+    /**
+     * The two searches are the ends of one search box, so the dog matching either of them is listed.
+     */
+    @Test
+    void matches_name_or_identification_when_both_searches_are_given() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.DOGS.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetDogListJooqAdapter(dsl).getDogs(new DogListFilter("owner-123", null, "re", null, null, null, "re"));
+
+        assertThat(capturedSql.get())
+                .contains("lower(\"k9x\".\"dogs\".\"name\") like")
+                .contains("lower(\"k9x\".\"dogs\".\"identification\") like")
+                .contains(" or ");
     }
 
     @Test
@@ -225,7 +266,7 @@ class GetDogListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        DogListPage page = new GetDogListJooqAdapter(dsl).getDogs(new DogListFilter(null, null, null, null, 40, 20));
+        DogListPage page = new GetDogListJooqAdapter(dsl).getDogs(new DogListFilter(null, null, null, null, 40, 20, null));
 
         assertThat(capturedSql).anyMatch(sql -> sql.contains("count(*)"));
         assertThat(capturedSql).anyMatch(sql -> sql.contains("offset ?") && sql.contains("fetch next ? rows only"));
@@ -267,13 +308,13 @@ class GetDogListJooqAdapterTest {
         };
 
         DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        new GetDogListJooqAdapter(dsl).getDogs(new DogListFilter(null, null, null, "ES", null, null));
+        new GetDogListJooqAdapter(dsl).getDogs(new DogListFilter(null, null, null, "ES", null, null, null));
 
         assertThat(capturedSql.get()).contains("\"k9x\".\"dogs\".\"country\" = ?");
         assertThat(capturedBindings.get()).containsExactly("ES");
     }
 
     private DogListFilter filter(String owner, String creator) {
-        return new DogListFilter(owner, creator, null, null, null, null);
+        return new DogListFilter(owner, creator, null, null, null, null, null);
     }
 }

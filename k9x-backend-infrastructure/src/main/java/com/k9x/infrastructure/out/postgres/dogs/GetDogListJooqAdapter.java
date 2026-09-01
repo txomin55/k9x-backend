@@ -27,7 +27,7 @@ public class GetDogListJooqAdapter implements GetDogListPersistencePort {
                 .from(Tables.DOGS)
                 .where(ownership(filter))
                 .and(Tables.DOGS.DELETED_AT.isNull())
-                .and(nameSearch(filter))
+                .and(textSearch(filter))
                 .and(country(filter));
 
         if (!filter.paginated()) {
@@ -40,7 +40,7 @@ public class GetDogListJooqAdapter implements GetDogListPersistencePort {
                 .from(Tables.DOGS)
                 .where(ownership(filter))
                 .and(Tables.DOGS.DELETED_AT.isNull())
-                .and(nameSearch(filter))
+                .and(textSearch(filter))
                 .and(country(filter))
                 .fetchOne(0, int.class);
         List<Dog> dogs = query.orderBy(Tables.DOGS.NAME.asc(), Tables.DOGS.IDENTIFICATION.asc())
@@ -68,11 +68,19 @@ public class GetDogListJooqAdapter implements GetDogListPersistencePort {
         return Tables.DOGS.COUNTRY.eq(filter.country());
     }
 
-    private Condition nameSearch(DogListFilter filter) {
-        if (filter.nameContains() == null) {
-            return DSL.noCondition();
+    /**
+     * The name and the identification searches are the two ends of a single search box, so a dog is
+     * listed when either of the two matches, not only when both do.
+     */
+    private Condition textSearch(DogListFilter filter) {
+        Condition search = DSL.noCondition();
+        if (filter.nameContains() != null) {
+            search = search.or(Tables.DOGS.NAME.containsIgnoreCase(filter.nameContains()));
         }
-        return Tables.DOGS.NAME.containsIgnoreCase(filter.nameContains());
+        if (filter.identificationContains() != null) {
+            search = search.or(Tables.DOGS.IDENTIFICATION.containsIgnoreCase(filter.identificationContains()));
+        }
+        return search;
     }
 
     private static Dog toDog(org.jooq.Record r) {
