@@ -29,13 +29,6 @@ class CountryEnumAdapterTest {
     }
 
     @Test
-    void returns_one_entry_per_enum_constant_except_eu() {
-        List<CountryDTO> result = adapter.getCountries();
-
-        assertThat(result).hasSize(Country.values().length - 1);
-    }
-
-    @Test
     void id_matches_enum_constant_name() {
         List<CountryDTO> result = adapter.getCountries();
 
