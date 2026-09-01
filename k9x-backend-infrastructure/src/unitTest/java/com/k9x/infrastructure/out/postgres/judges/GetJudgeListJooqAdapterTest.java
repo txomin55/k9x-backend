@@ -87,6 +87,23 @@ class GetJudgeListJooqAdapterTest {
     }
 
     @Test
+    void generates_sql_ordered_alphabetically_by_name() {
+        AtomicReference<String> capturedSql = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedSql.set(ctx.sql());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.JUDGES.fields());
+            return new MockResult[]{new MockResult(0, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new GetJudgeListJooqAdapter(dsl).getJudges(null, null);
+
+        assertThat(capturedSql.get())
+                .contains("order by \"k9x\".\"judges\".\"name\" asc, \"k9x\".\"judges\".\"id\" asc");
+    }
+
+    @Test
     void maps_records_to_judge_domain() {
         MockDataProvider provider = _ -> {
             DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);

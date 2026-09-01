@@ -10,7 +10,6 @@ public enum Country {
     DK,
     EE,
     ES,
-    EU,
     FI,
     FR,
     HU,

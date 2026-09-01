@@ -4,6 +4,9 @@ import com.k9x.application.breeds.use_case.dto.BreedDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+
+import java.text.Collator;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +41,14 @@ class BreedEnumAdapterTest {
 
         assertThat(result).extracting(BreedDTO::id)
                 .containsExactlyInAnyOrderElementsOf(Arrays.stream(Breed.values()).map(Enum::name).toList());
+    }
+
+    @Test
+    void returns_breeds_sorted_by_translated_name() {
+        List<BreedDTO> result = adapter.getBreeds();
+
+        assertThat(result).extracting(BreedDTO::name)
+                .isSortedAccordingTo(Collator.getInstance(LocaleContextHolder.getLocale()));
     }
 
     @Test

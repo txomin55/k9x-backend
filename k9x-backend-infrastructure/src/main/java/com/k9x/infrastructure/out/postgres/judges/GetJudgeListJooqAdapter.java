@@ -27,6 +27,7 @@ public class GetJudgeListJooqAdapter implements GetJudgeListPersistencePort {
                         ? DSL.noCondition()
                         : Tables.JUDGES.COUNTRY.eq(country))
                 .and(Tables.JUDGES.DELETED_AT.isNull())
+                .orderBy(Tables.JUDGES.NAME.asc(), Tables.JUDGES.ID.asc())
                 .fetch(r -> new Judge(
                         r.get(Tables.JUDGES.ID),
                         r.get(Tables.JUDGES.NAME),
