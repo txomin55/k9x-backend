@@ -969,6 +969,40 @@ class GetObdxClassificationServiceCaseTest {
     }
 
     @Test
+    void scores_the_numbered_anonymous_slots_when_the_source_gives_several_marks_without_names() {
+        List<EventCompetitor> competitors = List.of(
+                new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
+                        "breed", "origin", null, null, (short) 1, null, false, false, null, null, null, null, null));
+        // Four marks per exercise and no names to put them under: four anonymous slots.
+        List<EventExercise> exercises = List.of(
+                new EventExercise("ex-1", (short) 1, null,
+                        List.of("UNKNOWN_1", "UNKNOWN_2", "UNKNOWN_3", "UNKNOWN_4")));
+        List<EventJudge> judges = List.of(
+                new EventJudge("j-1", "Lone Thyrsgaard", null, true),
+                new EventJudge("j-2", "Rune Bjerkelund", null, false));
+        List<Score> scores = List.of(
+                new Score("ex-1", "UNKNOWN_1", "dog-1", new BigDecimal("8.00"), 2000L),
+                new Score("ex-1", "UNKNOWN_2", "dog-1", new BigDecimal("9.00"), 2000L),
+                new Score("ex-1", "UNKNOWN_3", "dog-1", new BigDecimal("8.50"), 2000L),
+                new Score("ex-1", "UNKNOWN_4", "dog-1", new BigDecimal("8.50"), 2000L));
+        EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V0", "obdx", "Extracted Grade 1",
+                "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.AVG,
+                competitors, exercises, judges, scores, List.of(), null, null, null);
+
+        when(getObdxClassificationConfigPort.getConfig("OBDX.RSCE_GRADO_1.V0")).thenReturn(CONFIG);
+        when(classificationCacheManagerPort.getIfPresentAndValid(eq("evt-1"), anyInt())).thenReturn(null);
+
+        FetchObdxClassificationDTO result = serviceCase.getClassification(event);
+
+        FetchClassificationCompetitorDTO competitor = result.competitors().getFirst();
+        // media de las cuatro = 8.50, por el coeficiente 3 de ex-1
+        assertThat(competitor.totalScore()).isEqualByComparingTo("25.50");
+        assertThat(competitor.exercises().getFirst().judgeScores())
+                .extracting(FetchClassificationJudgeScoreDTO::judgeId)
+                .containsExactly("UNKNOWN_1", "UNKNOWN_2", "UNKNOWN_3", "UNKNOWN_4");
+    }
+
+    @Test
     void drops_an_exercise_assigned_to_a_judge_the_event_does_not_declare() {
         List<EventCompetitor> competitors = List.of(
                 new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",

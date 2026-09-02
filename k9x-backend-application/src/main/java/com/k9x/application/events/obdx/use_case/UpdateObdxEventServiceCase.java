@@ -171,17 +171,21 @@ public class UpdateObdxEventServiceCase implements TransactionalUseCase {
     }
 
     /**
-     * MID_AVG discards the single highest and lowest score per exercise, so every exercise needs enough
-     * assigned judges for that to be meaningful (see {@link ObdxScoreAveraging#hasEnoughJudges}) — otherwise it
-     * degenerates into (near-)AVG.
+     * MID_AVG discards the single highest and lowest score, so the event needs enough judges for that to be
+     * meaningful (see {@link ObdxScoreAveraging#hasEnoughJudges}) — otherwise it degenerates into (near-)AVG.
+     *
+     * <p>The check is on the <strong>panel of the event</strong>, not on each exercise. It used to be per
+     * exercise, and that rejected the shape the world championship semifinals actually have: four judges split
+     * across two rings, the two group exercises scored by all four and each individual exercise by the two of
+     * its ring. Demanding four per exercise left only two ways out, and both were wrong — call the event AVG,
+     * losing the trim where four judges did score, or list in {@code event_exercises.judges} judges who never
+     * scored there, which also breaks the «is this competitor finished» check.
      */
     private void assertEnoughJudgesForMidAvg(UpdateObdxEventCommand command) {
-        command.exercises().forEach(e -> {
-            if (e.judgeIds() != null
-                    && !ObdxScoreAveraging.hasEnoughJudges(command.scoreCalculation(), e.judgeIds().size())) {
-                throw new ObdxNotEnoughJudgesException();
-            }
-        });
+        int panelSize = command.judges() == null ? 0 : command.judges().size();
+        if (!ObdxScoreAveraging.hasEnoughJudges(command.scoreCalculation(), panelSize)) {
+            throw new ObdxNotEnoughJudgesException();
+        }
     }
 
     private void assertNoDuplicateDogs(UpdateObdxEventCommand command) {

@@ -59,6 +59,34 @@ class ReferenceNameResolverTest {
     }
 
     @Test
+    void translates_results_published_by_someone_other_than_the_federation() {
+        // The 2024 world championship is Latvian but its results hang off obedience.ch, a Swiss club:
+        // calling that a federation page would say the LKF published them.
+        LocaleContextHolder.setLocale(Locale.of("es"));
+
+        ExtractionResponseDTO dto = resolver().extraction(
+                new CompetitionExtraction("lkf-2024-wc-extraction", "https://www.obedience.ch/wm-2026/wm-2024/",
+                        1L, "EXTERNAL_RESOURCES,obedience.ch"));
+
+        assertThat(dto.getHint()).isEqualTo("Resultados tomados de obedience.ch, una fuente ajena a la federación");
+    }
+
+    @Test
+    void names_every_federation_that_can_appear_as_a_parameter() {
+        // The parameter falls back to the raw token when nobody translated it, so a federation missing
+        // from the bundle turns up as a bare `dkk` in the middle of a Spanish sentence.
+        LocaleContextHolder.setLocale(Locale.of("es"));
+
+        for (String federation : new String[]{"cpc", "enci", "rsce", "dkk", "lkf", "nkn", "skk"}) {
+            ExtractionResponseDTO dto = resolver().extraction(
+                    new CompetitionExtraction("id", null, 1L, "FEDERATION_PAGE," + federation));
+            assertThat(dto.getHint())
+                    .as("federación %s", federation)
+                    .isNotEqualTo("Resultados publicados en la página de la federación " + federation);
+        }
+    }
+
+    @Test
     void leaves_no_dangling_space_when_the_type_carries_no_parameters() {
         LocaleContextHolder.setLocale(Locale.of("es"));
 

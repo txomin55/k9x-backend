@@ -16,7 +16,15 @@ import java.util.Set;
  * <p>{@link ObdxAvgMethod#AVG} is a plain mean. {@link ObdxAvgMethod#MID_AVG} discards the single highest and
  * single lowest score before averaging, so it needs at least {@link #MIN_JUDGES_FOR_MID_AVG} judges to be
  * meaningful — otherwise it degenerates into (near-)AVG. That threshold is the one OBDX rule that governs both
- * the write-time validation (every exercise must have enough judges assigned) and the read-time computation.
+ * the write-time validation and the read-time computation.
+ *
+ * <p><strong>The threshold is on the event's panel, not on each exercise.</strong> A trial with four judges may
+ * still split them across rings and have an exercise scored by only two of them — the world championship
+ * semifinals do exactly that: the two group exercises are scored by all four, and each individual exercise by
+ * the two judges of its ring. That is a four-judge event and its method is MID_AVG; asking every single
+ * exercise for four assigned judges would either reject it or force {@code event_exercises.judges} to claim
+ * judges that never scored there. The trim takes care of itself further down: it only applies where there
+ * really are four scores, so the group exercises get trimmed and the individual ones fall back to the mean.
  */
 public final class ObdxScoreAveraging {
 
@@ -28,25 +36,30 @@ public final class ObdxScoreAveraging {
     private ObdxScoreAveraging() {
     }
 
-    /** Whether {@code judgeCount} judges suffice for {@code method}; only MID_AVG imposes a minimum. */
-    public static boolean hasEnoughJudges(ObdxAvgMethod method, int judgeCount) {
-        return method != ObdxAvgMethod.MID_AVG || judgeCount >= MIN_JUDGES_FOR_MID_AVG;
+    /**
+     * Whether a panel of {@code panelSize} judges suffices for {@code method}; only MID_AVG imposes a minimum.
+     *
+     * @param panelSize judges of the <em>event</em> ({@code obdx.event_judges}), not of one exercise.
+     */
+    public static boolean hasEnoughJudges(ObdxAvgMethod method, int panelSize) {
+        return method != ObdxAvgMethod.MID_AVG || panelSize >= MIN_JUDGES_FOR_MID_AVG;
     }
 
     /**
      * Collapses the given scores into a single value. Under MID_AVG the single highest and lowest are trimmed
      * once there are at least {@value #MIN_JUDGES_FOR_MID_AVG} scores; an empty list yields {@link BigDecimal#ZERO}.
      *
-     * @param judgeCount number of judges assigned to the exercise (not merely how many have scored); MID_AVG
-     *                   with fewer than {@value #MIN_JUDGES_FOR_MID_AVG} assigned judges throws.
-     * @throws ObdxNotEnoughJudgesException when MID_AVG is used with too few assigned judges.
+     * @param panelSize judges of the <em>event</em>, not of this exercise: an exercise scored by the two judges
+     *                  of its ring is normal in a four-judge trial, and it still trims wherever four judges did
+     *                  score. MID_AVG on a panel of fewer than {@value #MIN_JUDGES_FOR_MID_AVG} throws.
+     * @throws ObdxNotEnoughJudgesException when MID_AVG is used on too small a panel.
      */
-    public static BigDecimal average(List<BigDecimal> scores, ObdxAvgMethod method, int judgeCount) {
+    public static BigDecimal average(List<BigDecimal> scores, ObdxAvgMethod method, int panelSize) {
         if (scores.isEmpty()) {
             return BigDecimal.ZERO;
         }
         if (method == ObdxAvgMethod.MID_AVG) {
-            if (judgeCount < MIN_JUDGES_FOR_MID_AVG) {
+            if (panelSize < MIN_JUDGES_FOR_MID_AVG) {
                 throw new ObdxNotEnoughJudgesException();
             }
             if (scores.size() >= MIN_JUDGES_FOR_MID_AVG) {

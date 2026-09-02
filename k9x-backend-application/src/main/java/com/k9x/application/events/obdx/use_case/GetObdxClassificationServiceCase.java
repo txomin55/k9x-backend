@@ -25,14 +25,6 @@ import java.util.stream.Collectors;
 
 public class GetObdxClassificationServiceCase {
 
-    /**
-     * Stand-in for the seeded UNKNOWN judge when an exercise assigns its scores to it. It is never part of the
-     * event's panel, so it is resolved here rather than read from {@code obdx.event_judges}; see
-     * {@link #resolveAssignedJudge}.
-     */
-    private static final EventJudge UNKNOWN_JUDGE = new EventJudge(
-            ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID, null, false);
-
     private final GetObdxClassificationConfigPort getObdxClassificationConfigPort;
     private final ClassificationCacheManagerPort classificationCacheManagerPort;
 
@@ -113,35 +105,38 @@ public class GetObdxClassificationServiceCase {
      * The judge an exercise assignment resolves to, or {@code null} when the assignment names nobody the event
      * knows and the row has to be dropped.
      *
-     * <p>Normally the assignment is one of the event's own judges. {@link ObdxFinalScoreExercise#UNKNOWN_JUDGE_ID}
-     * is the exception, and it is resolved here instead of being looked up in the panel: it is not a person, so it
-     * has no business in {@code obdx.event_judges} — that table is the trial's jury, and an event that lists
-     * UNKNOWN there would show it as a judge of the trial.
+     * <p>Normally the assignment is one of the event's own judges. The <strong>anonymous</strong> judges —
+     * {@code UNKNOWN} and the numbered {@code UNKNOWN_1}, {@code UNKNOWN_2}…, see
+     * {@link ObdxFinalScoreExercise#isUnknownJudge} — are the exception, and they are resolved here instead of
+     * being looked up in the panel: none of them is a person, so none has any business in
+     * {@code obdx.event_judges}. That table is the jury of the trial, and an event listing UNKNOWN there would
+     * render it as one of its judges.
      *
      * <p>The case is an extraction that knows <em>what</em> each exercise scored but not <em>who</em> gave the
-     * mark: the source publishes one mark per exercise and never breaks it down by judge. Those scores are
-     * attributed to UNKNOWN — {@code obdx.event_scores.judge_id} is {@code NOT NULL} and part of the primary key,
-     * so there is nowhere else to put them — while the event keeps declaring its real panel. Without this the two
-     * id sets never intersected and <em>every</em> competitor of such an event vanished from the classification,
-     * silently and with a 200: the scores are only ever reached through this assignment, so the lookup below never
-     * ran. The averaging denominator stays right on its own, because it counts the exercise's assigned judges —
-     * one — and not the panel.
+     * mark. Those scores go to the anonymous slots — {@code obdx.event_scores.judge_id} is {@code NOT NULL} and
+     * part of the primary key, so there is nowhere else to put them — while the event keeps declaring its real
+     * panel. Without this the two id sets never intersected and <em>every</em> competitor of such an event
+     * vanished from the classification, silently and with a 200: the scores are only ever reached through this
+     * assignment, so the lookup below never ran. The averaging denominator stays right on its own, because it
+     * counts the exercise's assigned judges — as many as there are marks — and not the panel.
      */
     private EventJudge resolveAssignedJudge(Map<String, EventJudge> judgesById, String judgeId) {
         EventJudge judge = judgesById.get(judgeId);
         if (judge != null) {
             return judge;
         }
-        return ObdxFinalScoreExercise.UNKNOWN_JUDGE_ID.equals(judgeId) ? UNKNOWN_JUDGE : null;
+        return ObdxFinalScoreExercise.isUnknownJudge(judgeId)
+                ? new EventJudge(judgeId, judgeId, null, false)
+                : null;
     }
 
     private FetchObdxClassificationDTO aggregateProjection(EventSnapshot event,
                                                            ObdxClassificationConfigDTO config,
                                                            List<FetchClassificationRawRowDTO> rawRows) {
-        Map<String, Integer> judgeCountByExercise = (event.exercises() == null ? List.<EventExercise>of() : event.exercises())
-                .stream()
-                .collect(Collectors.toMap(EventExercise::exerciseId,
-                        e -> e.judges() == null ? 0 : e.judges().size(), (a, _) -> a));
+        // The panel of the EVENT, which is what MID_AVG's minimum is about. Not the judges assigned to each
+        // exercise: a four-judge trial that splits them across rings has exercises scored by two of them, and
+        // that is still a four-judge trial. The trim itself keys off how many actually scored.
+        int panelSize = event.judges() == null ? 0 : event.judges().size();
         // dogIdentification → exerciseId → list of (judgeId, judgeName, score)
         Map<String, Map<String, List<FetchClassificationJudgeScoreDTO>>> judgeScoresByDogExercise = new LinkedHashMap<>();
         // dogIdentification → exerciseId → list of yellow cards stamped for that exercise (one per stamped slot, across judges)
@@ -255,8 +250,7 @@ public class GetObdxClassificationServiceCase {
                 BigDecimal maxExerciseScore = ObdxScoreRating.maxExerciseScore(config.maxAllowedScore(), coef);
                 BigDecimal weightedScore = scores.isEmpty() ? null
                         : ObdxScoreRating.weightedScore(
-                        ObdxScoreAveraging.average(scores, event.scoreCalculation(),
-                                judgeCountByExercise.getOrDefault(exerciseId, 0)),
+                        ObdxScoreAveraging.average(scores, event.scoreCalculation(), panelSize),
                         coef);
                 if (weightedScore != null && !exerciseYellowCards.isEmpty()) {
                     weightedScore = ObdxScoreRating.applyYellowCardPenalty(weightedScore);

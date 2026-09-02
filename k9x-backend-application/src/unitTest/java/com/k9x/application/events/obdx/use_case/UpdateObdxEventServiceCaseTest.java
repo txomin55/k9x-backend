@@ -46,8 +46,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UpdateObdxEventServiceCaseTest {
 
+    // AVG and not MID_AVG: this command declares no judges, and MID_AVG needs a panel of four to be able to
+    // discard a high and a low. It used to say MID_AVG and pass only because the check looked at each exercise
+    // and there are none here.
     private static final UpdateObdxEventCommand VALID_COMMAND = new UpdateObdxEventCommand(
-            "Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), null, ObdxEventCategory.CLUB);
+            "Event 1", "config-1", 1735689600000L, ObdxAvgMethod.AVG, List.of(), List.of(), List.of(), List.of(), null, ObdxEventCategory.CLUB);
 
     @Mock
     private GetCompetitionPersistencePort getCompetitionPersistencePort;
@@ -105,7 +108,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_collector_email_does_not_exist() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.AVG,
                 List.of(), List.of(), List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", "missing@k9x.com", false)), List.of(), null, ObdxEventCategory.CLUB);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getUserInfoPersistencePort.findById("missing@k9x.com")).thenReturn(null);
@@ -146,7 +149,7 @@ class UpdateObdxEventServiceCaseTest {
      */
     @Test
     void throws_exception_when_more_than_one_judge_is_the_main_judge() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.AVG,
                 List.of(), List.of(),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null, true),
                         new UpdateObdxEventCommand.JudgeCommand("judge-2", null, true)),
@@ -163,7 +166,7 @@ class UpdateObdxEventServiceCaseTest {
     /** The flag is informative and optional: one main judge saves, and so does none. */
     @Test
     void saves_aggregate_when_a_single_judge_is_the_main_judge() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.AVG,
                 List.of(), List.of(),
                 List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null, true),
                         new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false)),
@@ -215,7 +218,7 @@ class UpdateObdxEventServiceCaseTest {
     }
 
     @Test
-    void throws_exception_when_mid_avg_and_an_exercise_has_fewer_than_4_judges() {
+    void throws_exception_when_mid_avg_and_the_panel_has_fewer_than_4_judges() {
         UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
                 List.of(),
                 List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of("judge-1", "judge-2"))),
@@ -226,6 +229,27 @@ class UpdateObdxEventServiceCaseTest {
                 .isInstanceOf(ObdxNotEnoughJudgesException.class);
 
         verifyNoInteractions(getCompetitionPersistencePort, saveCompetitionPersistencePort);
+    }
+
+    @Test
+    void accepts_mid_avg_when_the_panel_has_4_judges_even_if_an_exercise_is_scored_by_2() {
+        // The shape of a world championship semifinal: four judges split across two rings, so each individual
+        // exercise is scored by the two of its ring. That is still a four-judge trial and still MID_AVG — the
+        // trim just applies where four judges did score, which is the group exercises.
+        when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
+        when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
+                List.of(),
+                List.of(new UpdateObdxEventCommand.ExerciseCommand("exercise-1", 1, List.of(), List.of("judge-1", "judge-2"))),
+                List.of(new UpdateObdxEventCommand.JudgeCommand("judge-1", null, false),
+                        new UpdateObdxEventCommand.JudgeCommand("judge-2", null, false),
+                        new UpdateObdxEventCommand.JudgeCommand("judge-3", null, false),
+                        new UpdateObdxEventCommand.JudgeCommand("judge-4", null, false)),
+                List.of(), null, ObdxEventCategory.CLUB);
+
+        serviceCase.updateEvent("event-1", command, "user-1", true);
+
+        verify(saveCompetitionPersistencePort).save(any());
     }
 
     @Test
@@ -243,7 +267,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void throws_exception_when_bih_true_for_male_dog() {
-        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.MID_AVG,
+        UpdateObdxEventCommand command = new UpdateObdxEventCommand("Event 1", "config-1", 1735689600000L, ObdxAvgMethod.AVG,
                 List.of(new UpdateObdxEventCommand.CompetitorCommand("dog-1", 1, null, true, null, false)), List.of(), List.of(), List.of(), null, ObdxEventCategory.CLUB);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getDogPersistencePort.getDog("dog-1"))
@@ -348,7 +372,7 @@ class UpdateObdxEventServiceCaseTest {
 
     private CompetitionSnapshot competitionInCountry(String country) {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
-                ObdxAvgMethod.MID_AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
+                ObdxAvgMethod.AVG, List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 4102444800000L, Long.MAX_VALUE,
                 0L, 0L, null, List.of(event));
         return new CompetitionSnapshot("comp-1", "WC", "user-1", "Org", country, null, null, null, null,
