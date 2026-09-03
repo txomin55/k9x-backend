@@ -1,0 +1,74 @@
+{
+  "id": "OBDX.SPKL_ALO.V0",
+  "description": "SPKL ALO (alokasluokka, Finnish beginner class) version 03/09/2026",
+  "break_tie": [
+    "OBDX.SPKL_ALO.2_V0",
+    "OBDX.SPKL_ALO.4_V0",
+    "OBDX.SPKL_ALO.8_V0"
+  ],
+  "break_tie_tie": [
+    "OBDX.SPKL_ALO.8_V0"
+  ],
+  "allowed_values": [
+    0,
+    5,
+    5.5,
+    6,
+    6.5,
+    7,
+    7.5,
+    8,
+    8.5,
+    9,
+    9.5,
+    10
+  ],
+  "qualifications": [
+    {
+      "id": "EXC",
+      "min_score": 160
+    },
+    {
+      "id": "MB",
+      "min_score": 140
+    },
+    {
+      "id": "B",
+      "min_score": 120
+    }
+  ],
+  "exercises": [
+    {
+      "id": "OBDX.SPKL_ALO.1_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.SPKL_ALO.2_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.SPKL_ALO.3_V0",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.SPKL_ALO.4_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.SPKL_ALO.5_V0",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.SPKL_ALO.6_V0",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.SPKL_ALO.7_V0",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.SPKL_ALO.8_V0",
+      "coef": 2
+    }
+  ]
+}

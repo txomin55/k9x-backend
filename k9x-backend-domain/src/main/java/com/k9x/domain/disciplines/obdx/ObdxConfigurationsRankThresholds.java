@@ -23,6 +23,7 @@ public enum ObdxConfigurationsRankThresholds {
     ENCI_PRE_DEBUTTANTI("OBDX.ENCI_PREDEBUTTANTI", 50, 100, false),
     ENCI_DEBUTTANTI("OBDX.ENCI_DEBUTTANTI", 100, 200, false),
     RSCE_DEBUTANTE("OBDX.RSCE_DEBUTANTE", 100, 200, false),
+    SPKL_ALO("OBDX.SPKL_ALO", 100, 200, false),
     CPC_COBS("OBDX.CPC_COBS", 100, 200, false),
     FCI_GRADE_1("OBDX.FCI_GRADE_1", 201, 400, false),
     RSCE_GRADO_1("OBDX.RSCE_GRADO_1", 201, 400, false),

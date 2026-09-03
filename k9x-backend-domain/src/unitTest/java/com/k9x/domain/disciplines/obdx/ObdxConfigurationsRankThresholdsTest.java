@@ -107,6 +107,9 @@ class ObdxConfigurationsRankThresholdsTest {
         assertBaremo(ObdxConfigurationsRankThresholds.RSCE_DEBUTANTE, CLUB, 125, 150, 175);
         assertBaremo(ObdxConfigurationsRankThresholds.CPC_COBS, CLUB, 125, 150, 175);
         assertBaremo(ObdxConfigurationsRankThresholds.CPC_COBS, OPEN, 184, 192, 200);
+        // The Finnish beginner class scores exactly like COBS: same band, same event points.
+        assertBaremo(ObdxConfigurationsRankThresholds.SPKL_ALO, CLUB, 125, 150, 175);
+        assertBaremo(ObdxConfigurationsRankThresholds.SPKL_ALO, OPEN, 184, 192, 200);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_1, CLUB, 251, 300, 350);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_1, OPEN, 367, 384, 400);
         assertBaremo(ObdxConfigurationsRankThresholds.RSCE_GRADO_1, CLUB, 251, 300, 350);

@@ -33,11 +33,13 @@ public enum LiveExcludedExercise {
     FCI_GRADE_3_2("OBDX.FCI_GRADE_3.2"),
     FCI_GRADE_2_1("OBDX.FCI_GRADE_2.1"),
     FCI_GRADE_1_1("OBDX.FCI_GRADE_1.1"),
+    SPKL_ALO_1("OBDX.SPKL_ALO.1"),
     // General impression
     CPC_COBS_8("OBDX.CPC_COBS.8"),
     RSCE_DEBUTANTE_9("OBDX.RSCE_DEBUTANTE.9"),
     FCI_GRADE_1_9("OBDX.FCI_GRADE_1.9"),
-    FCI_GRADE_2_10("OBDX.FCI_GRADE_2.10");
+    FCI_GRADE_2_10("OBDX.FCI_GRADE_2.10"),
+    SPKL_ALO_8("OBDX.SPKL_ALO.8");
 
     /**
      * Trailing version token of an exercise id, e.g. the {@code _V0} in {@code OBDX.FCI_GRADE_2.1_V0}.

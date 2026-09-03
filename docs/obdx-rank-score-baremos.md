@@ -36,7 +36,7 @@ Sub-bandas: `CLUB [50, 88]`, `OPEN [89, 100]`. Toda la franja cae en el rango gl
 
 ---
 
-## OBDX_ENCI_DEBUTTANTI · CPC_COBS · OBDX_RSCE_DEBUTANTE — franja `[100, 200]`
+## OBDX_ENCI_DEBUTTANTI · CPC_COBS · OBDX_RSCE_DEBUTANTE · OBDX_SPKL_ALO — franja `[100, 200]`
 
 Sub-bandas: `CLUB [100, 175]`, `OPEN [176, 200]`. Toda la franja cae en el rango global **E**.
 
@@ -96,7 +96,7 @@ la única categoría que cruza la frontera B/A: con menos de 10 competidores se 
 | Configuración | Franja | Categorías | Letra(s) posibles |
 |---|---|---|---|
 | OBDX_ENCI_PREDEBUTTANTI | 50–100 | CLUB, OPEN | E |
-| OBDX_ENCI_DEBUTTANTI, CPC_COBS, OBDX_RSCE_DEBUTANTE | 100–200 | CLUB, OPEN | E |
+| OBDX_ENCI_DEBUTTANTI, CPC_COBS, OBDX_RSCE_DEBUTANTE, OBDX_SPKL_ALO | 100–200 | CLUB, OPEN | E |
 | OBDX_FCI_GRADE_1, OBDX_RSCE_GRADO_1 | 201–400 | CLUB, OPEN | D |
 | OBDX_FCI_GRADE_2 | 401–600 | CLUB, OPEN | C |
 | OBDX_FCI_GRADE_3 | 601–1000 | las cinco | B / A / S |

@@ -23,6 +23,7 @@ class ObdxConfigurationGradeTest {
         assertNull(ObdxConfigurationGrade.resolve("OBDX.RSCE_DEBUTANTE.V0"));
         assertNull(ObdxConfigurationGrade.resolve("OBDX.ENCI_PRE_DEBUTANTI.V0"));
         assertNull(ObdxConfigurationGrade.resolve("OBDX.CPC_COBS.V0"));
+        assertNull(ObdxConfigurationGrade.resolve("OBDX.SPKL_ALO.V0"));
     }
 
     /** The version suffix is digits too; reading it as the grade would print "0" for every class. */
