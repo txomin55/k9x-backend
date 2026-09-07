@@ -26,7 +26,7 @@ class GetDogRankEventResultsJooqAdapterTest {
     private DSLContext dslReturning(Object[]... rows) {
         MockDataProvider provider = ctx -> {
             sqls.add(ctx.sql());
-            Field<?>[] fields = {SNAP_DOG_RANK.DOG_IDENTIFICATION, SNAP_DOG_RANK.DISCIPLINE, SNAP_DOG_RANK.EVENT_ID,
+            Field<?>[] fields = {SNAP_DOG_RANK.DOG_IDENTIFICATION, SNAP_DOG_RANK.EVENT_ID,
                     SNAP_DOG_RANK.RANK, SNAP_DOG_RANK.TIMESTAMP};
             Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(fields);
             for (Object[] row : rows) {
@@ -40,18 +40,17 @@ class GetDogRankEventResultsJooqAdapterTest {
     }
 
     @Test
-    void fetches_the_raw_per_event_rank_scores_across_disciplines() {
-        DSLContext dsl = dslReturning(new Object[]{"dog-1", "OBDX", "evt-1", new BigDecimal("773.14"), 1700000000000L});
+    void fetches_the_raw_per_event_rank_scores() {
+        DSLContext dsl = dslReturning(new Object[]{"dog-1", "evt-1", new BigDecimal("773.14"), 1700000000000L});
 
         List<FetchDogRankEventResultDTO> results =
                 new GetDogRankEventResultsJooqAdapter(dsl).getEventResults();
 
         assertThat(results).containsExactly(
-                new FetchDogRankEventResultDTO("dog-1", "OBDX", "evt-1", new BigDecimal("773.14"), 1700000000000L));
+                new FetchDogRankEventResultDTO("dog-1", "evt-1", new BigDecimal("773.14"), 1700000000000L));
         assertThat(sqls).hasSize(1);
         assertThat(sqls.get(0))
                 .contains("\"k9x\".\"snap_dog_rank\"")
-                .contains("\"discipline\"")
                 .contains("order by");
     }
 }

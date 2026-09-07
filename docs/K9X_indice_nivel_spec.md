@@ -115,10 +115,11 @@ seleccionados = las N mayores de  [contribuciones  ∪  N copias del relleno]
 nivel         = Σ(seleccionados) / N                               ← denominador SIEMPRE N
 ```
 
-Tres cosas importantes:
+Cuatro cosas importantes:
 
 - **No hay ventana dura.** Se miran todos los resultados de la vida del perro; la curva de peso es la ventana, pero blanda. Un 950 de hace 4 años contribuye `0.04 × 950 ≈ 38`, así que no le gana la plaza a ningún resultado reciente. Ventaja frente a una ventana de corte seco (p. ej. "últimos 36 meses"): no hay acantilados el día que un resultado sale de la ventana.
 - **La selección es por contribución, no por puntuación bruta.** Si se seleccionara por puntuación, un competidor con tres resultados iguales acabaría eligiendo los más viejos (los de menor peso) y su índice bajaría con el tiempo sin motivo.
+- **No hay agrupación por disciplina.** «Todos los resultados del competidor» es literal: un perro tiene **un único índice**, y cada resultado suyo entra en el mismo cálculo sea de la disciplina que sea. Todas comparten la escala 0-1000 (§4.1.1), así que un 750 en obediencia y un 750 en otra disciplina valen lo mismo y compiten por las mismas N plazas. La frescura también se mide sobre el resultado más reciente del perro **en cualquier disciplina**: quien compite en varias no arrastra una línea temporal degradándose por cada una.
 - **El denominador es N, no la suma de pesos.** De aquí salen las propiedades 1 y 2 de §1: añadir un resultado solo puede aumentar el numerador (o dejarlo igual) → el índice **nunca baja al competir**; y un resultado suelto vale `1/N` del nivel → un pico no te define.
 
 #### 4.1.1 El relleno de las plazas vacías (`C`)
@@ -404,9 +405,9 @@ inserts idempotentes):
 | Tabla | Qué guarda | Quién la escribe |
 |---|---|---|
 | `obdx.snap_event_competitors_results` | La foto del evento: position, total_score, rank_score por competidor | Cron diario de snapshot |
-| `k9x.snap_dog_rank` | El historial crudo del perro: su rank_score por evento y disciplina (el insumo del índice) | Cron diario, misma transacción |
+| `k9x.snap_dog_rank` | El historial crudo del perro: su rank_score por evento, con la disciplina como dato del resultado —no como criterio de agrupación— (el insumo del índice) | Cron diario, misma transacción |
 | `obdx.snap_event_classification` | El JSON de la clasificación + el marcador de "evento ya congelado" | Cron diario, misma transacción |
-| `k9x.snap_dog_index_history` | La línea temporal del índice por (perro, disciplina): registros `EVENT` y `TIME_DEGRADATION` con metadata JSON | Cron quincenal |
+| `k9x.snap_dog_index_history` | La línea temporal del índice del perro (una sola, sin separar por disciplina): registros `EVENT` y `TIME_DEGRADATION` con metadata JSON | Cron quincenal |
 
 Toda tabla snap lleva **dos timestamps** con contrato fijo:
 

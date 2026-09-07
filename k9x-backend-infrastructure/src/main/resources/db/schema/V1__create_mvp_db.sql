@@ -158,12 +158,11 @@ CREATE TABLE k9x.snap_dog_rank
 CREATE TABLE k9x.snap_dog_index_history
 (
     dog_identification VARCHAR(255) NOT NULL,
-    discipline         VARCHAR(50)  NOT NULL,
     rank               INTEGER      NOT NULL,
     timestamp          BIGINT       NOT NULL,
     applying_timestamp BIGINT       NOT NULL,
     metadata           TEXT         NOT NULL,
-    CONSTRAINT snap_dog_index_history_pkey PRIMARY KEY (dog_identification, discipline, applying_timestamp),
+    CONSTRAINT snap_dog_index_history_pkey PRIMARY KEY (dog_identification, applying_timestamp),
     CONSTRAINT snap_dog_index_history_dog_fk FOREIGN KEY (dog_identification) REFERENCES k9x.dogs (identification),
     CONSTRAINT k9x_snap_dog_index_history_rank_check
         CHECK (rank BETWEEN 0 AND 1000)

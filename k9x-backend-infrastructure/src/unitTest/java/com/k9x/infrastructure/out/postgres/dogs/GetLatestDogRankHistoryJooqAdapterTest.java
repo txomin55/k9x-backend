@@ -25,7 +25,7 @@ class GetLatestDogRankHistoryJooqAdapterTest {
     private DSLContext dslReturning(Object[]... rows) {
         MockDataProvider provider = ctx -> {
             sqls.add(ctx.sql());
-            Field<?>[] fields = {SNAP_DOG_INDEX_HISTORY.DOG_IDENTIFICATION, SNAP_DOG_INDEX_HISTORY.DISCIPLINE, SNAP_DOG_INDEX_HISTORY.RANK,
+            Field<?>[] fields = {SNAP_DOG_INDEX_HISTORY.DOG_IDENTIFICATION, SNAP_DOG_INDEX_HISTORY.RANK,
                     SNAP_DOG_INDEX_HISTORY.APPLYING_TIMESTAMP};
             Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(fields);
             for (Object[] row : rows) {
@@ -40,11 +40,11 @@ class GetLatestDogRankHistoryJooqAdapterTest {
 
     @Test
     void fetches_the_latest_history_record_per_dog() {
-        DSLContext dsl = dslReturning(new Object[]{"dog-1", "OBDX", 760, 1700000000000L});
+        DSLContext dsl = dslReturning(new Object[]{"dog-1", 760, 1700000000000L});
 
         List<FetchLatestDogRankHistoryDTO> latest = new GetLatestDogRankHistoryJooqAdapter(dsl).getLatestHistory();
 
-        assertThat(latest).containsExactly(new FetchLatestDogRankHistoryDTO("dog-1", "OBDX", 760, 1700000000000L));
+        assertThat(latest).containsExactly(new FetchLatestDogRankHistoryDTO("dog-1", 760, 1700000000000L));
         assertThat(sqls).hasSize(1);
         assertThat(sqls.get(0))
                 .contains("distinct on")

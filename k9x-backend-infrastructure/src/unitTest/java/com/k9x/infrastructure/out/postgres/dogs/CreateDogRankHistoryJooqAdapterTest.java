@@ -45,8 +45,8 @@ class CreateDogRankHistoryJooqAdapterTest {
         DSLContext dsl = capturingDsl(sqls);
 
         new CreateDogRankHistoryJooqAdapter(dsl, new ObjectMapper()).create(List.of(
-                DogRankHistoryPayload.fromEvent("dog-1", "OBDX", 800, 1700000000000L, "evt-1"),
-                DogRankHistoryPayload.fromTimeDegradation("dog-2", "OBDX", 799, 1700000000000L, 10)));
+                DogRankHistoryPayload.fromEvent("dog-1", 800, 1700000000000L, "evt-1"),
+                DogRankHistoryPayload.fromTimeDegradation("dog-2", 799, 1700000000000L, 10)));
 
         assertThat(sqls).hasSize(2);
         assertThat(sqls.get(0))
@@ -69,9 +69,9 @@ class CreateDogRankHistoryJooqAdapterTest {
 
     @Test
     void event_and_degradation_payloads_carry_their_type() {
-        assertThat(DogRankHistoryPayload.fromEvent("d", "OBDX", 1, 1L, "e").metadata())
+        assertThat(DogRankHistoryPayload.fromEvent("d", 1, 1L, "e").metadata())
                 .isEqualTo(Map.of("type", "EVENT", "eventId", "e"));
-        assertThat(DogRankHistoryPayload.fromTimeDegradation("d", "OBDX", 1, 1L, 12).metadata())
+        assertThat(DogRankHistoryPayload.fromTimeDegradation("d", 1, 1L, 12).metadata())
                 .isEqualTo(Map.of("type", "TIME_DEGRADATION", "month", "12"));
     }
 }

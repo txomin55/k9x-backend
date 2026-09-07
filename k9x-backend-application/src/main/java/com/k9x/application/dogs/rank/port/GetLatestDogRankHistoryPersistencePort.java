@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface GetLatestDogRankHistoryPersistencePort {
 
-    /** The most recent {@code k9x.snap_dog_index_history} record per dog and discipline. */
+    /** The most recent {@code k9x.snap_dog_index_history} record per dog. */
     List<FetchLatestDogRankHistoryDTO> getLatestHistory();
 }
