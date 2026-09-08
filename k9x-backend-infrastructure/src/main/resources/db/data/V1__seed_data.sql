@@ -16,8 +16,8 @@ INSERT INTO k9x.user_subscriptions (user_id, event_ids)
 VALUES ('k9x.support@gmail.com', ARRAY[]::VARCHAR(255)[]);
 
 -- judges ----------------------------------------------------------------
--- Synthetic judge that owns the score rows of imported events: an import carries a final total, not the
--- per-judge marks that produced it, but obdx.event_scores.judge_id is part of the primary key and points at
--- k9x.judges. It is never shown: the classification ignores the judge of a OBDX.FINAL_SCORE row.
-INSERT INTO k9x.judges (id, name, creator, last_update, created_at, country)
-VALUES ('UNKNOWN', 'Unknown', 'k9x.support@gmail.com', 0, 0, '');
+-- No synthetic judge is seeded. The anonymous judge slots that own the score rows of an event whose
+-- source does not name its judges are ALWAYS numbered -- UNKNOWN_1, UNKNOWN_2... -- and each import
+-- creates the ones it needs, so the seed does not have to guess how many there are. The unnumbered
+-- 'UNKNOWN' used to be seeded here and coexisted with the numbered ones, which meant the same event
+-- could show one slot too many.
