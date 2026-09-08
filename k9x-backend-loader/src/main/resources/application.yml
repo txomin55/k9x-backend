@@ -1,6 +1,16 @@
 spring:
   application:
     name: k9x-backend
+  threads:
+    # Tomcat sirve cada request en un virtual thread, y @Async/@Scheduled pasan a los
+    # SimpleAsyncTask{Executor,Scheduler} virtuales. Todo el I/O del backend es bloqueante y
+    # virtual-thread-friendly: java.net.http.HttpClient (Nominatim, Google), sockets del driver
+    # pgjdbc y web-push. En Java 25 `synchronized` ya no fija el carrier thread (JEP 491), asi que
+    # los bloques sincronizados de pgjdbc tampoco bloquean la plataforma.
+    # Ojo: el paralelismo real de las operaciones con base de datos lo sigue limitando el pool de
+    # Hikari (maximum-pool-size), no el numero de threads.
+    virtual:
+      enabled: true
   banner:
     location: classpath:banner.txt
   profiles:

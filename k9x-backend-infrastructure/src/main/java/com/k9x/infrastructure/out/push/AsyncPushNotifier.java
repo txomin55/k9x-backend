@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 
 /**
  * Delivers push notifications off the caller's thread: both entry points return immediately and the
- * fetch/send/prune work runs on a small daemon pool. This lets a transactional service case fire a
+ * fetch/send/prune work runs on a virtual thread. This lets a transactional service case fire a
  * notification without holding its database connection open for the HTTP round-trip or delaying its
  * response, and guarantees a delivery failure can never roll back the originating transaction.
  *
@@ -52,11 +52,11 @@ public class AsyncPushNotifier implements PushNotifier {
         this.deletePushSubscriptionPersistencePort = deletePushSubscriptionPersistencePort;
         this.sendPushNotificationPort = sendPushNotificationPort;
         this.saveNotificationPersistencePort = saveNotificationPersistencePort;
-        this.executor = Executors.newFixedThreadPool(2, runnable -> {
-            Thread thread = new Thread(runnable, "push-notifier");
-            thread.setDaemon(true);
-            return thread;
-        });
+        // Un virtual thread por entrega, igual que el resto de la aplicacion
+        // (spring.threads.virtual.enabled). La fabrica solo aporta el nombre, util en logs y en el
+        // agente de New Relic; los virtual threads ya son daemon, asi que no frenan el apagado.
+        this.executor = Executors.newThreadPerTaskExecutor(
+                Thread.ofVirtual().name("push-notifier-", 0).factory());
     }
 
     @Override
