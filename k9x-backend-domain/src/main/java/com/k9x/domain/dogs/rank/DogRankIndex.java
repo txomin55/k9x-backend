@@ -40,6 +40,13 @@ import java.util.stream.Stream;
  */
 public final class DogRankIndex {
 
+    /**
+     * What a dog with no index yet reads as. The cron only appends history for dogs that have competed, so a
+     * freshly registered dog has no index at all — a distinct answer from a low one, and the public directory
+     * has to say so rather than showing a 0 that would read as the worst possible competitor.
+     */
+    public static final String NOT_GENERATED = "NO_K9X_INDEX_GENERATED";
+
     /** Level slots and, at the same time, the fixed denominator of the level (§4.1). */
     public static final int SLOTS = 3;
 
