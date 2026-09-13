@@ -30,7 +30,7 @@ que resuelve la franja a partir del `configuration_id` **ignorando el sufijo de 
 | Configuración | Franja |
 |---|---|
 | `OBDX_ENCI_PREDEBUTTANTI` | 50 – 100 |
-| `OBDX_ENCI_DEBUTTANTI`, `OBDX_RSCE_DEBUTANTE`, `CPC_COBS`, `OBDX_SPKL_ALO` | 100 – 200 |
+| `OBDX_ENCI_DEBUTTANTI`, `OBDX_RSCE_DEBUTANTE`, `CPC_COBS`, `OBDX_SPKL_ALO`, `OBDX_SCC_BREVET` | 100 – 200 |
 | `OBDX_FCI_GRADE_1`, `OBDX_RSCE_GRADO_1` | 201 – 400 |
 | `OBDX_FCI_GRADE_2` | 401 – 600 |
 | `OBDX_FCI_GRADE_3` | 601 – **1000** |
@@ -50,7 +50,8 @@ PREDEBUTTANTI  [50, 100]     CLUB [ 50,  88]   OPEN [ 89, 100]
 DEBUTTANTI /
 RSCE_DEBUTANTE /
 SPKL_ALO /
-CPC_COBS       [100, 200]    CLUB [100, 175]   OPEN [176, 200]
+CPC_COBS /
+SCC_BREVET     [100, 200]    CLUB [100, 175]   OPEN [176, 200]
 GRADE_1 /
 RSCE_GRADO_1   [201, 400]    CLUB [201, 350]   OPEN [351, 400]
 GRADE_2        [401, 600]    CLUB [401, 550]   OPEN [551, 600]

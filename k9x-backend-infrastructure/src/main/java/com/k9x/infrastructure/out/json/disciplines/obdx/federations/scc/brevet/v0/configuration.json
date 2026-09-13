@@ -1,0 +1,86 @@
+{
+  "id": "OBDX.SCC_BREVET.V0",
+  "description": "SCC Brevet National d'Obeissance, reglement applicable 01/01/2024",
+  "break_tie": [
+    "OBDX.SCC_BREVET.4_V0",
+    "OBDX.SCC_BREVET.7_V0",
+    "OBDX.SCC_BREVET.11_V0"
+  ],
+  "break_tie_tie": [
+    "OBDX.SCC_BREVET.11_V0"
+  ],
+  "allowed_values": [
+    0,
+    5,
+    5.5,
+    6,
+    6.5,
+    7,
+    7.5,
+    8,
+    8.5,
+    9,
+    9.5,
+    10
+  ],
+  "qualifications": [
+    {
+      "id": "EXC",
+      "min_score": 256
+    },
+    {
+      "id": "MB",
+      "min_score": 224
+    },
+    {
+      "id": "B",
+      "min_score": 192
+    }
+  ],
+  "exercises": [
+    {
+      "id": "OBDX.SCC_BREVET.1_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.SCC_BREVET.2_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.SCC_BREVET.3_V0",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.SCC_BREVET.4_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.SCC_BREVET.5_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.SCC_BREVET.6_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.SCC_BREVET.7_V0",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.SCC_BREVET.8_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.SCC_BREVET.9_V0",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.SCC_BREVET.10_V0",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.SCC_BREVET.11_V0",
+      "coef": 2
+    }
+  ]
+}
