@@ -18,6 +18,20 @@ class ObdxConfigurationGradeTest {
         assertEquals("1", ObdxConfigurationGrade.resolve("OBDX.RSCE_GRADO_1.V0"));
     }
 
+    /** NKK numbers its classes too, spelled KLASSE in Norwegian. */
+    @Test
+    void resolves_the_grade_of_a_norwegian_spelled_configuration() {
+        assertEquals("1", ObdxConfigurationGrade.resolve("OBDX.NKN_KLASSE_1.V0"));
+        assertEquals("3", ObdxConfigurationGrade.resolve("OBDX.NKN_KLASSE_3.V0"));
+    }
+
+    /** SKK numbers its classes too, spelled KLASS in Swedish, with no trailing E. */
+    @Test
+    void resolves_the_grade_of_a_swedish_spelled_configuration() {
+        assertEquals("1", ObdxConfigurationGrade.resolve("OBDX.SKK_KLASS_1.V0"));
+        assertEquals("2", ObdxConfigurationGrade.resolve("OBDX.SKK_KLASS_2.V0"));
+    }
+
     @Test
     void has_no_grade_for_configurations_without_a_number() {
         assertNull(ObdxConfigurationGrade.resolve("OBDX.RSCE_DEBUTANTE.V0"));

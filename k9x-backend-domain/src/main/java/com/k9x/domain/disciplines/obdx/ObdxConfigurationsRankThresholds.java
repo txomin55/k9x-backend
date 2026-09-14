@@ -26,9 +26,15 @@ public enum ObdxConfigurationsRankThresholds {
     SPKL_ALO("OBDX.SPKL_ALO", 100, 200, false),
     CPC_COBS("OBDX.CPC_COBS", 100, 200, false),
     SCC_BREVET("OBDX.SCC_BREVET", 100, 200, false),
+    SKK_STARTKLASS("OBDX.SKK_STARTKLASS", 100, 200, false),
     FCI_GRADE_1("OBDX.FCI_GRADE_1", 201, 400, false),
     RSCE_GRADO_1("OBDX.RSCE_GRADO_1", 201, 400, false),
+    NKN_KLASSE_1("OBDX.NKN_KLASSE_1", 201, 400, false),
+    SKK_KLASS_1("OBDX.SKK_KLASS_1", 201, 400, false),
     FCI_GRADE_2("OBDX.FCI_GRADE_2", 401, 600, false),
+    NKN_KLASSE_2("OBDX.NKN_KLASSE_2", 401, 600, false),
+    SKK_KLASS_2("OBDX.SKK_KLASS_2", 401, 600, false),
+    NKN_KLASSE_3("OBDX.NKN_KLASSE_3", 601, 750, false),
     FCI_GRADE_3("OBDX.FCI_GRADE_3", 601, 1000, true);
 
     /** A closed score range. The championship semi-final and final use a degenerate band where {@code min == max}. */

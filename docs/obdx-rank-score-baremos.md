@@ -36,7 +36,7 @@ Sub-bandas: `CLUB [50, 88]`, `OPEN [89, 100]`. Toda la franja cae en el rango gl
 
 ---
 
-## OBDX_ENCI_DEBUTTANTI · CPC_COBS · OBDX_RSCE_DEBUTANTE · OBDX_SPKL_ALO · OBDX_SCC_BREVET — franja `[100, 200]`
+## OBDX_ENCI_DEBUTTANTI · CPC_COBS · OBDX_RSCE_DEBUTANTE · OBDX_SPKL_ALO · OBDX_SCC_BREVET · OBDX_SKK_STARTKLASS — franja `[100, 200]`
 
 Sub-bandas: `CLUB [100, 175]`, `OPEN [176, 200]`. Toda la franja cae en el rango global **E**.
 
@@ -48,7 +48,7 @@ Sub-bandas: `CLUB [100, 175]`, `OPEN [176, 200]`. Toda la franja cae en el rango
 
 ---
 
-## OBDX_FCI_GRADE_1 · OBDX_RSCE_GRADO_1 — franja `[201, 400]`
+## OBDX_FCI_GRADE_1 · OBDX_RSCE_GRADO_1 · OBDX_NKN_KLASSE_1 · OBDX_SKK_KLASS_1 — franja `[201, 400]`
 
 Sub-bandas: `CLUB [201, 350]`, `OPEN [351, 400]`. Toda la franja cae en el rango global **D**.
 
@@ -60,7 +60,7 @@ Sub-bandas: `CLUB [201, 350]`, `OPEN [351, 400]`. Toda la franja cae en el rango
 
 ---
 
-## OBDX_FCI_GRADE_2 — franja `[401, 600]`
+## OBDX_FCI_GRADE_2 · OBDX_NKN_KLASSE_2 · OBDX_SKK_KLASS_2 — franja `[401, 600]`
 
 Sub-bandas: `CLUB [401, 550]`, `OPEN [551, 600]`. Toda la franja cae en el rango global **C**.
 
@@ -69,6 +69,25 @@ Sub-bandas: `CLUB [401, 550]`, `OPEN [551, 600]`. Toda la franja cae en el rango
 | < 10 (1) | 451 (C) | 567 (C) |
 | 10–24 (2) | 500 (C) | 584 (C) |
 | ≥ 25 (3) | 550 (C) | 600 (C) |
+
+---
+
+## OBDX_NKN_KLASSE_3 — franja `[601, 750]`
+
+La clase alta **nacional** de la NKK. Es del nivel del grado 3 —mismos ejercicios de dificultad, prueba de
+olfato y dirigido incluidos—, así que arranca donde arranca el grado 3; pero el mundial no se corre en ella
+sino en la clase FCI, de modo que su franja acaba en 750 y **no alcanza los tramos de campeonato**. Toda la
+franja cae en el rango global **B**.
+
+| Nº competidores (tier) | CLUB | OPEN |
+|---|---|---|
+| < 10 (1) | 638 (B) | 726 (B) |
+| 10–24 (2) | 676 (B) | 738 (B) |
+| ≥ 25 (3) | 713 (B) | 750 (B) |
+
+Sub-bandas: `CLUB [601, 713]`, `OPEN [714, 750]`. Son exactamente los mismos números que el grado 3 alcanza
+con esas dos categorías, que es lo que se quería: una klasse 3 noruega y una Classe 3 de club valen lo mismo,
+y lo que las separa es lo que solo el grado 3 tiene detrás.
 
 ---
 
@@ -96,7 +115,8 @@ la única categoría que cruza la frontera B/A: con menos de 10 competidores se 
 | Configuración | Franja | Categorías | Letra(s) posibles |
 |---|---|---|---|
 | OBDX_ENCI_PREDEBUTTANTI | 50–100 | CLUB, OPEN | E |
-| OBDX_ENCI_DEBUTTANTI, CPC_COBS, OBDX_RSCE_DEBUTANTE, OBDX_SPKL_ALO, OBDX_SCC_BREVET | 100–200 | CLUB, OPEN | E |
-| OBDX_FCI_GRADE_1, OBDX_RSCE_GRADO_1 | 201–400 | CLUB, OPEN | D |
-| OBDX_FCI_GRADE_2 | 401–600 | CLUB, OPEN | C |
+| OBDX_ENCI_DEBUTTANTI, CPC_COBS, OBDX_RSCE_DEBUTANTE, OBDX_SPKL_ALO, OBDX_SCC_BREVET, OBDX_SKK_STARTKLASS | 100–200 | CLUB, OPEN | E |
+| OBDX_FCI_GRADE_1, OBDX_RSCE_GRADO_1, OBDX_NKN_KLASSE_1, OBDX_SKK_KLASS_1 | 201–400 | CLUB, OPEN | D |
+| OBDX_FCI_GRADE_2, OBDX_NKN_KLASSE_2, OBDX_SKK_KLASS_2 | 401–600 | CLUB, OPEN | C |
+| OBDX_NKN_KLASSE_3 | 601–750 | CLUB, OPEN | B |
 | OBDX_FCI_GRADE_3 | 601–1000 | las cinco | B / A / S |
