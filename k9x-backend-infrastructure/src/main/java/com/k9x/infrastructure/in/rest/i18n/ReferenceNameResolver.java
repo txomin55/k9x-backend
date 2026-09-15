@@ -77,14 +77,14 @@ public class ReferenceNameResolver {
         // were taken from would publish exactly what the restriction is about, and so would the federation
         // hidden in the real type's parameters. The stored row keeps saying 'FEDERATION_PAGE,nkn'.
         if (extraction.restricted()) {
-            return new ExtractionResponseDTO(extraction.extractionId(), null, translate(RESTRICTED_HINT, null, null))
-                    .restricted(true);
+            return new ExtractionResponseDTO(extraction.extractionId(), null,
+                    translate(RESTRICTED_HINT, null, null), true);
         }
         return new ExtractionResponseDTO(
                 extraction.extractionId(),
                 new ExtractionSourceResponseDTO(extraction.url(), extraction.extractionTimestamp()),
-                extractionHint(extraction))
-                .restricted(false);
+                extractionHint(extraction),
+                false);
     }
 
     private String extractionHint(CompetitionExtraction extraction) {
