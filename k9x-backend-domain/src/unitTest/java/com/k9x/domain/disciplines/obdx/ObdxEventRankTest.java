@@ -25,9 +25,9 @@ class ObdxEventRankTest {
 
     @Test
     void event_score_places_the_event_in_its_category_sub_band() {
-        assertEquals(125, ObdxEventRank.eventScore("OBDX.CPC_COBS.V2022", 3, ObdxEventCategory.CLUB));
-        assertEquals(184, ObdxEventRank.eventScore("OBDX.CPC_COBS.V2022", 3, ObdxEventCategory.OPEN));
-        assertEquals(125, ObdxEventRank.eventScore("OBDX.SPKL_ALO.V2022", 3, ObdxEventCategory.CLUB));
+        assertEquals(125, ObdxEventRank.eventScore("OBDX.CPC_COBS.V2016", 3, ObdxEventCategory.CLUB));
+        assertEquals(184, ObdxEventRank.eventScore("OBDX.CPC_COBS.V2016", 3, ObdxEventCategory.OPEN));
+        assertEquals(125, ObdxEventRank.eventScore("OBDX.SPKL_ALO.V2016", 3, ObdxEventCategory.CLUB));
         assertEquals(1000, ObdxEventRank.eventScore("OBDX.FCI_GRADE_3.V2022", 3, ObdxEventCategory.WC_FINAL));
     }
 

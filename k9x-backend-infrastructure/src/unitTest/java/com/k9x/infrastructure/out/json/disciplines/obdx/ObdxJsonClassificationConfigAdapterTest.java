@@ -33,7 +33,7 @@ class ObdxJsonClassificationConfigAdapterTest {
 
     @Test
     void loads_qualification_scale_for_cobs() {
-        ObdxClassificationConfigDTO config = adapter.getConfig("OBDX.CPC_COBS.V2022");
+        ObdxClassificationConfigDTO config = adapter.getConfig("OBDX.CPC_COBS.V2016");
 
         assertThat(config.qualifications())
                 .extracting(ObdxClassificationConfigDTO.QualificationThreshold::id)

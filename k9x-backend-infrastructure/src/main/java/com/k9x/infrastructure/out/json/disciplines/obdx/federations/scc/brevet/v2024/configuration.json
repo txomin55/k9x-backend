@@ -1,13 +1,13 @@
 {
-  "id": "OBDX.SCC_BREVET.V2022",
+  "id": "OBDX.SCC_BREVET.V2024",
   "description": "SCC Brevet National d'Obeissance, reglement applicable 01/01/2024",
   "break_tie": [
-    "OBDX.SCC_BREVET.4_V2022",
-    "OBDX.SCC_BREVET.7_V2022",
-    "OBDX.SCC_BREVET.11_V2022"
+    "OBDX.SCC_BREVET.4_V2024",
+    "OBDX.SCC_BREVET.7_V2024",
+    "OBDX.SCC_BREVET.11_V2024"
   ],
   "break_tie_tie": [
-    "OBDX.SCC_BREVET.11_V2022"
+    "OBDX.SCC_BREVET.11_V2024"
   ],
   "allowed_values": [
     0,
@@ -39,47 +39,47 @@
   ],
   "exercises": [
     {
-      "id": "OBDX.SCC_BREVET.1_V2022",
+      "id": "OBDX.SCC_BREVET.1_V2024",
       "coef": 3
     },
     {
-      "id": "OBDX.SCC_BREVET.2_V2022",
+      "id": "OBDX.SCC_BREVET.2_V2024",
       "coef": 3
     },
     {
-      "id": "OBDX.SCC_BREVET.3_V2022",
+      "id": "OBDX.SCC_BREVET.3_V2024",
       "coef": 2
     },
     {
-      "id": "OBDX.SCC_BREVET.4_V2022",
+      "id": "OBDX.SCC_BREVET.4_V2024",
       "coef": 4
     },
     {
-      "id": "OBDX.SCC_BREVET.5_V2022",
+      "id": "OBDX.SCC_BREVET.5_V2024",
       "coef": 3
     },
     {
-      "id": "OBDX.SCC_BREVET.6_V2022",
+      "id": "OBDX.SCC_BREVET.6_V2024",
       "coef": 3
     },
     {
-      "id": "OBDX.SCC_BREVET.7_V2022",
+      "id": "OBDX.SCC_BREVET.7_V2024",
       "coef": 4
     },
     {
-      "id": "OBDX.SCC_BREVET.8_V2022",
+      "id": "OBDX.SCC_BREVET.8_V2024",
       "coef": 3
     },
     {
-      "id": "OBDX.SCC_BREVET.9_V2022",
+      "id": "OBDX.SCC_BREVET.9_V2024",
       "coef": 3
     },
     {
-      "id": "OBDX.SCC_BREVET.10_V2022",
+      "id": "OBDX.SCC_BREVET.10_V2024",
       "coef": 2
     },
     {
-      "id": "OBDX.SCC_BREVET.11_V2022",
+      "id": "OBDX.SCC_BREVET.11_V2024",
       "coef": 2
     }
   ]

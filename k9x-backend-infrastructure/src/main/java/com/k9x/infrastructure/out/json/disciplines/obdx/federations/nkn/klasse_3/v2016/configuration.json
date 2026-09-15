@@ -1,13 +1,13 @@
 {
-  "id": "OBDX.NKN_KLASSE_3.V2022",
+  "id": "OBDX.NKN_KLASSE_3.V2016",
   "description": "NKK Lydighet klasse 3, regler gjeldende 2024",
   "break_tie": [
-    "OBDX.NKN_KLASSE_3.2_V2022",
-    "OBDX.NKN_KLASSE_3.8_V2022",
-    "OBDX.NKN_KLASSE_3.10_V2022"
+    "OBDX.NKN_KLASSE_3.2_V2016",
+    "OBDX.NKN_KLASSE_3.8_V2016",
+    "OBDX.NKN_KLASSE_3.10_V2016"
   ],
   "break_tie_tie": [
-    "OBDX.NKN_KLASSE_3.10_V2022"
+    "OBDX.NKN_KLASSE_3.10_V2016"
   ],
   "allowed_values": [
     0,
@@ -39,43 +39,43 @@
   ],
   "exercises": [
     {
-      "id": "OBDX.NKN_KLASSE_3.1_V2022",
+      "id": "OBDX.NKN_KLASSE_3.1_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.NKN_KLASSE_3.2_V2022",
+      "id": "OBDX.NKN_KLASSE_3.2_V2016",
       "coef": 4
     },
     {
-      "id": "OBDX.NKN_KLASSE_3.3_V2022",
+      "id": "OBDX.NKN_KLASSE_3.3_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.NKN_KLASSE_3.4_V2022",
+      "id": "OBDX.NKN_KLASSE_3.4_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.NKN_KLASSE_3.5_V2022",
+      "id": "OBDX.NKN_KLASSE_3.5_V2016",
       "coef": 4
     },
     {
-      "id": "OBDX.NKN_KLASSE_3.6_V2022",
+      "id": "OBDX.NKN_KLASSE_3.6_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.NKN_KLASSE_3.7_V2022",
+      "id": "OBDX.NKN_KLASSE_3.7_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.NKN_KLASSE_3.8_V2022",
+      "id": "OBDX.NKN_KLASSE_3.8_V2016",
       "coef": 4
     },
     {
-      "id": "OBDX.NKN_KLASSE_3.9_V2022",
+      "id": "OBDX.NKN_KLASSE_3.9_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.NKN_KLASSE_3.10_V2022",
+      "id": "OBDX.NKN_KLASSE_3.10_V2016",
       "coef": 2
     }
   ]

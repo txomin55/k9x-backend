@@ -1,14 +1,14 @@
 {
-  "id": "OBDX.RSCE_GRADO_1.V2022",
+  "id": "OBDX.RSCE_GRADO_1.V2026",
   "description": "RSCE grade 1 version 20/05/2026",
   "break_tie": [
-    "OBDX.RSCE_GRADO_1.2_V2022",
-    "OBDX.RSCE_GRADO_1.4_V2022",
-    "OBDX.RSCE_GRADO_1.5_V2022",
-    "OBDX.RSCE_GRADO_1.9_V2022"
+    "OBDX.RSCE_GRADO_1.2_V2026",
+    "OBDX.RSCE_GRADO_1.4_V2026",
+    "OBDX.RSCE_GRADO_1.5_V2026",
+    "OBDX.RSCE_GRADO_1.9_V2026"
   ],
   "break_tie_tie": [
-    "OBDX.RSCE_GRADO_1.9_V2022"
+    "OBDX.RSCE_GRADO_1.9_V2026"
   ],
   "allowed_values": [
     0,
@@ -40,43 +40,43 @@
   ],
   "exercises": [
     {
-      "id": "OBDX.RSCE_GRADO_1.1_V2022",
+      "id": "OBDX.RSCE_GRADO_1.1_V2026",
       "coef": 3
     },
     {
-      "id": "OBDX.RSCE_GRADO_1.2_V2022",
+      "id": "OBDX.RSCE_GRADO_1.2_V2026",
       "coef": 4
     },
     {
-      "id": "OBDX.RSCE_GRADO_1.3_V2022",
+      "id": "OBDX.RSCE_GRADO_1.3_V2026",
       "coef": 3
     },
     {
-      "id": "OBDX.RSCE_GRADO_1.4_V2022",
+      "id": "OBDX.RSCE_GRADO_1.4_V2026",
       "coef": 3
     },
     {
-      "id": "OBDX.RSCE_GRADO_1.5_V2022",
+      "id": "OBDX.RSCE_GRADO_1.5_V2026",
       "coef": 4
     },
     {
-      "id": "OBDX.RSCE_GRADO_1.6_V2022",
+      "id": "OBDX.RSCE_GRADO_1.6_V2026",
       "coef": 4
     },
     {
-      "id": "OBDX.RSCE_GRADO_1.7_V2022",
+      "id": "OBDX.RSCE_GRADO_1.7_V2026",
       "coef": 3
     },
     {
-      "id": "OBDX.RSCE_GRADO_1.8_V2022",
+      "id": "OBDX.RSCE_GRADO_1.8_V2026",
       "coef": 3
     },
     {
-      "id": "OBDX.RSCE_GRADO_1.9_V2022",
+      "id": "OBDX.RSCE_GRADO_1.9_V2026",
       "coef": 3
     },
     {
-      "id": "OBDX.RSCE_GRADO_1.10_V2022",
+      "id": "OBDX.RSCE_GRADO_1.10_V2026",
       "coef": 2
     }
   ]

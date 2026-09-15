@@ -284,7 +284,7 @@ class UpdateObdxEventServiceCaseTest {
     void computes_rank_score_within_the_category_sub_band() {
         // CPC_COBS band [100, 200]; CLUB takes the lower three quarters [100, 175]; two competitors -> tier 1
         // -> 100 + round(1/3 · 75) = 125.
-        UpdateObdxEventCommand command = obdxCommand("OBDX.CPC_COBS.V2022", ObdxEventCategory.CLUB);
+        UpdateObdxEventCommand command = obdxCommand("OBDX.CPC_COBS.V2016", ObdxEventCategory.CLUB);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
         when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
@@ -298,7 +298,7 @@ class UpdateObdxEventServiceCaseTest {
     @Test
     void an_open_trial_scores_above_a_club_one_of_the_same_grade() {
         // CPC_COBS OPEN is [176, 200]; two competitors -> tier 1 -> 176 + round(1/3 · 24) = 184.
-        UpdateObdxEventCommand command = obdxCommand("OBDX.CPC_COBS.V2022", ObdxEventCategory.OPEN);
+        UpdateObdxEventCommand command = obdxCommand("OBDX.CPC_COBS.V2016", ObdxEventCategory.OPEN);
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionInCountry("ES"));
         when(getDogPersistencePort.getDog("dog-es")).thenReturn(dogFrom("dog-es", "ES"));
@@ -334,7 +334,7 @@ class UpdateObdxEventServiceCaseTest {
 
     @Test
     void rejects_an_event_with_no_category() {
-        UpdateObdxEventCommand command = obdxCommand("OBDX.CPC_COBS.V2022", null);
+        UpdateObdxEventCommand command = obdxCommand("OBDX.CPC_COBS.V2016", null);
 
         assertThatThrownBy(() -> serviceCase.updateEvent("event-1", command, "user-1", true))
                 .isInstanceOf(EventCategoryRequiredException.class);

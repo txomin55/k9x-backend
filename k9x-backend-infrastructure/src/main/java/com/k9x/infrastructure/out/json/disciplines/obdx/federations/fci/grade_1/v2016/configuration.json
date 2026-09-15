@@ -1,0 +1,87 @@
+{
+  "id": "OBDX.FCI_GRADE_1.V2016",
+  "description": "FCI grade 1 rules of 2016, in force until 31/12/2021",
+  "break_tie": [
+    "OBDX.FCI_GRADE_1.2_V2016",
+    "OBDX.FCI_GRADE_1.4_V2016",
+    "OBDX.FCI_GRADE_1.6_V2016",
+    "OBDX.FCI_GRADE_1.11_V2016"
+  ],
+  "break_tie_tie": [
+    "OBDX.FCI_GRADE_1.11_V2016"
+  ],
+  "allowed_values": [
+    0,
+    5,
+    5.5,
+    6,
+    6.5,
+    7,
+    7.5,
+    8,
+    8.5,
+    9,
+    9.5,
+    10
+  ],
+  "qualifications": [
+    {
+      "id": "EXC",
+      "min_score": 256
+    },
+    {
+      "id": "MB",
+      "min_score": 224
+    },
+    {
+      "id": "B",
+      "min_score": 192
+    }
+  ],
+  "exercises": [
+    {
+      "id": "OBDX.FCI_GRADE_1.1_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_1.2_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_1.3_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_1.4_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_1.5_V2016",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.FCI_GRADE_1.6_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_1.7_V2016",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.FCI_GRADE_1.8_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_1.9_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_1.10_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_1.11_V2016",
+      "coef": 2
+    }
+  ]
+}

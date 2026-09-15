@@ -1,13 +1,13 @@
 {
-  "id": "OBDX.CPC_COBS.V2022",
+  "id": "OBDX.CPC_COBS.V2016",
   "description": "CPC COBS version 20/05/2026",
   "break_tie": [
-    "OBDX.CPC_COBS.6_V2022",
-    "OBDX.CPC_COBS.3_V2022",
-    "OBDX.CPC_COBS.8_V2022"
+    "OBDX.CPC_COBS.6_V2016",
+    "OBDX.CPC_COBS.3_V2016",
+    "OBDX.CPC_COBS.8_V2016"
   ],
   "break_tie_tie": [
-    "OBDX.CPC_COBS.8_V2022"
+    "OBDX.CPC_COBS.8_V2016"
   ],
   "allowed_values": [
     0,
@@ -48,35 +48,35 @@
   ],
   "exercises": [
     {
-      "id": "OBDX.CPC_COBS.1_V2022",
+      "id": "OBDX.CPC_COBS.1_V2016",
       "coef": 1
     },
     {
-      "id": "OBDX.CPC_COBS.2_V2022",
+      "id": "OBDX.CPC_COBS.2_V2016",
       "coef": 4
     },
     {
-      "id": "OBDX.CPC_COBS.3_V2022",
+      "id": "OBDX.CPC_COBS.3_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.CPC_COBS.4_V2022",
+      "id": "OBDX.CPC_COBS.4_V2016",
       "coef": 4
     },
     {
-      "id": "OBDX.CPC_COBS.5_V2022",
+      "id": "OBDX.CPC_COBS.5_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.CPC_COBS.6_V2022",
+      "id": "OBDX.CPC_COBS.6_V2016",
       "coef": 2
     },
     {
-      "id": "OBDX.CPC_COBS.7_V2022",
+      "id": "OBDX.CPC_COBS.7_V2016",
       "coef": 2
     },
     {
-      "id": "OBDX.CPC_COBS.8_V2022",
+      "id": "OBDX.CPC_COBS.8_V2016",
       "coef": 1
     }
   ]

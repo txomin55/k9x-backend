@@ -1,16 +1,16 @@
 {
-  "id": "OBDX.SKK_KLASS_1.V2022",
+  "id": "OBDX.SKK_KLASS_1.V2016",
   "description": "SKK/SBK Lydnadsklass 1, nationella regler (not FCI), 2023-2026",
   "break_tie": [
-    "OBDX.SKK_KLASS_1.1_V2022",
-    "OBDX.SKK_KLASS_1.2_V2022",
-    "OBDX.SKK_KLASS_1.4_V2022",
-    "OBDX.SKK_KLASS_1.5_V2022",
-    "OBDX.SKK_KLASS_1.6_V2022",
-    "OBDX.SKK_KLASS_1.9_V2022"
+    "OBDX.SKK_KLASS_1.1_V2016",
+    "OBDX.SKK_KLASS_1.2_V2016",
+    "OBDX.SKK_KLASS_1.4_V2016",
+    "OBDX.SKK_KLASS_1.5_V2016",
+    "OBDX.SKK_KLASS_1.6_V2016",
+    "OBDX.SKK_KLASS_1.9_V2016"
   ],
   "break_tie_tie": [
-    "OBDX.SKK_KLASS_1.9_V2022"
+    "OBDX.SKK_KLASS_1.9_V2016"
   ],
   "allowed_values": [
     0,
@@ -42,39 +42,39 @@
   ],
   "exercises": [
     {
-      "id": "OBDX.SKK_KLASS_1.1_V2022",
+      "id": "OBDX.SKK_KLASS_1.1_V2016",
       "coef": 4
     },
     {
-      "id": "OBDX.SKK_KLASS_1.2_V2022",
+      "id": "OBDX.SKK_KLASS_1.2_V2016",
       "coef": 4
     },
     {
-      "id": "OBDX.SKK_KLASS_1.3_V2022",
+      "id": "OBDX.SKK_KLASS_1.3_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.SKK_KLASS_1.4_V2022",
+      "id": "OBDX.SKK_KLASS_1.4_V2016",
       "coef": 4
     },
     {
-      "id": "OBDX.SKK_KLASS_1.5_V2022",
+      "id": "OBDX.SKK_KLASS_1.5_V2016",
       "coef": 4
     },
     {
-      "id": "OBDX.SKK_KLASS_1.6_V2022",
+      "id": "OBDX.SKK_KLASS_1.6_V2016",
       "coef": 4
     },
     {
-      "id": "OBDX.SKK_KLASS_1.7_V2022",
+      "id": "OBDX.SKK_KLASS_1.7_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.SKK_KLASS_1.8_V2022",
+      "id": "OBDX.SKK_KLASS_1.8_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.SKK_KLASS_1.9_V2022",
+      "id": "OBDX.SKK_KLASS_1.9_V2016",
       "coef": 3
     }
   ]

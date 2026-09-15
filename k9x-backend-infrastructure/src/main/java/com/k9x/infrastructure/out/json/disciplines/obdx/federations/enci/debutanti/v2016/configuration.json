@@ -1,13 +1,13 @@
 {
-  "id": "OBDX.ENCI_DEBUTTANTI.V2022",
+  "id": "OBDX.ENCI_DEBUTTANTI.V2016",
   "description": "ENCI debuttanti version 23/07/2026",
   "break_tie": [
-    "OBDX.ENCI_DEBUTTANTI.3_V2022",
-    "OBDX.ENCI_DEBUTTANTI.4_V2022",
-    "OBDX.ENCI_DEBUTTANTI.10_V2022"
+    "OBDX.ENCI_DEBUTTANTI.3_V2016",
+    "OBDX.ENCI_DEBUTTANTI.4_V2016",
+    "OBDX.ENCI_DEBUTTANTI.10_V2016"
   ],
   "break_tie_tie": [
-    "OBDX.ENCI_DEBUTTANTI.10_V2022"
+    "OBDX.ENCI_DEBUTTANTI.10_V2016"
   ],
   "allowed_values": [
     0,
@@ -39,43 +39,43 @@
   ],
   "exercises": [
     {
-      "id": "OBDX.ENCI_DEBUTTANTI.1_V2022",
+      "id": "OBDX.ENCI_DEBUTTANTI.1_V2016",
       "coef": 1
     },
     {
-      "id": "OBDX.ENCI_DEBUTTANTI.2_V2022",
+      "id": "OBDX.ENCI_DEBUTTANTI.2_V2016",
       "coef": 1
     },
     {
-      "id": "OBDX.ENCI_DEBUTTANTI.3_V2022",
+      "id": "OBDX.ENCI_DEBUTTANTI.3_V2016",
       "coef": 2
     },
     {
-      "id": "OBDX.ENCI_DEBUTTANTI.4_V2022",
+      "id": "OBDX.ENCI_DEBUTTANTI.4_V2016",
       "coef": 2
     },
     {
-      "id": "OBDX.ENCI_DEBUTTANTI.5_V2022",
+      "id": "OBDX.ENCI_DEBUTTANTI.5_V2016",
       "coef": 2
     },
     {
-      "id": "OBDX.ENCI_DEBUTTANTI.6_V2022",
+      "id": "OBDX.ENCI_DEBUTTANTI.6_V2016",
       "coef": 2
     },
     {
-      "id": "OBDX.ENCI_DEBUTTANTI.7_V2022",
+      "id": "OBDX.ENCI_DEBUTTANTI.7_V2016",
       "coef": 1
     },
     {
-      "id": "OBDX.ENCI_DEBUTTANTI.8_V2022",
+      "id": "OBDX.ENCI_DEBUTTANTI.8_V2016",
       "coef": 2
     },
     {
-      "id": "OBDX.ENCI_DEBUTTANTI.9_V2022",
+      "id": "OBDX.ENCI_DEBUTTANTI.9_V2016",
       "coef": 1
     },
     {
-      "id": "OBDX.ENCI_DEBUTTANTI.10_V2022",
+      "id": "OBDX.ENCI_DEBUTTANTI.10_V2016",
       "coef": 1
     }
   ]

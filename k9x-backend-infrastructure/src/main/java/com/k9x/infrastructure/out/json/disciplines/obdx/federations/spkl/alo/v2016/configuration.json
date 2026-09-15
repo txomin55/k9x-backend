@@ -1,13 +1,13 @@
 {
-  "id": "OBDX.SPKL_ALO.V2022",
+  "id": "OBDX.SPKL_ALO.V2016",
   "description": "SPKL ALO (alokasluokka, Finnish beginner class) version 03/09/2026",
   "break_tie": [
-    "OBDX.SPKL_ALO.2_V2022",
-    "OBDX.SPKL_ALO.4_V2022",
-    "OBDX.SPKL_ALO.8_V2022"
+    "OBDX.SPKL_ALO.2_V2016",
+    "OBDX.SPKL_ALO.4_V2016",
+    "OBDX.SPKL_ALO.8_V2016"
   ],
   "break_tie_tie": [
-    "OBDX.SPKL_ALO.8_V2022"
+    "OBDX.SPKL_ALO.8_V2016"
   ],
   "allowed_values": [
     0,
@@ -39,35 +39,35 @@
   ],
   "exercises": [
     {
-      "id": "OBDX.SPKL_ALO.1_V2022",
+      "id": "OBDX.SPKL_ALO.1_V2016",
       "coef": 4
     },
     {
-      "id": "OBDX.SPKL_ALO.2_V2022",
+      "id": "OBDX.SPKL_ALO.2_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.SPKL_ALO.3_V2022",
+      "id": "OBDX.SPKL_ALO.3_V2016",
       "coef": 2
     },
     {
-      "id": "OBDX.SPKL_ALO.4_V2022",
+      "id": "OBDX.SPKL_ALO.4_V2016",
       "coef": 3
     },
     {
-      "id": "OBDX.SPKL_ALO.5_V2022",
+      "id": "OBDX.SPKL_ALO.5_V2016",
       "coef": 2
     },
     {
-      "id": "OBDX.SPKL_ALO.6_V2022",
+      "id": "OBDX.SPKL_ALO.6_V2016",
       "coef": 2
     },
     {
-      "id": "OBDX.SPKL_ALO.7_V2022",
+      "id": "OBDX.SPKL_ALO.7_V2016",
       "coef": 2
     },
     {
-      "id": "OBDX.SPKL_ALO.8_V2022",
+      "id": "OBDX.SPKL_ALO.8_V2016",
       "coef": 2
     }
   ]
