@@ -15,12 +15,20 @@ public class ObdxFederationsConfigurationsCache {
     private static final String PATTERN = "classpath:com/k9x/infrastructure/out/json/disciplines/obdx/federations/**/configuration.json";
     private static final String FEDERATIONS_PREFIX = "federations/";
 
-    public record Entry(String federationKey, FederationConfigurationFileDTO configuration) {}
+    /**
+     * Una configuración por fichero: {@code federations/<federación>/<clase>/v<año>/configuration.json}.
+     * El año es el del reglamento publicado, y es lo que ordena una versión frente a la siguiente.
+     */
+    public record Entry(String federationKey, String classKey, int version, FederationConfigurationFileDTO configuration) {}
 
     private final List<Entry> entries;
 
     public ObdxFederationsConfigurationsCache(ObjectMapper objectMapper) {
         this.entries = load(objectMapper);
+    }
+
+    ObdxFederationsConfigurationsCache(List<Entry> entries) {
+        this.entries = List.copyOf(entries);
     }
 
     public List<Entry> getAll() {
@@ -31,22 +39,36 @@ public class ObdxFederationsConfigurationsCache {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         try {
             return Arrays.stream(resolver.getResources(PATTERN))
-                    .sorted(Comparator.comparing(r -> r.getFilename() != null ? r.getFilename() : ""))
-                    .map(resource -> new Entry(extractFederationKey(resource), parseJson(resource, objectMapper)))
+                    .map(resource -> toEntry(resource, objectMapper))
+                    .sorted(Comparator.comparing(Entry::federationKey)
+                            .thenComparing(Entry::classKey)
+                            .thenComparingInt(Entry::version))
                     .toList();
         } catch (IOException e) {
             throw new RuntimeException("Failed to load OBDX federation configurations", e);
         }
     }
 
-    private static String extractFederationKey(Resource resource) {
+    private static Entry toEntry(Resource resource, ObjectMapper objectMapper) {
+        String[] path = federationPathSegments(resource);
+        return new Entry(path[0], path[1], parseVersion(path[2]), parseJson(resource, objectMapper));
+    }
+
+    private static String[] federationPathSegments(Resource resource) {
         try {
             String path = resource.getURL().getPath();
             int idx = path.indexOf(FEDERATIONS_PREFIX);
-            String afterFederations = path.substring(idx + FEDERATIONS_PREFIX.length());
-            return afterFederations.substring(0, afterFederations.indexOf('/'));
+            return path.substring(idx + FEDERATIONS_PREFIX.length()).split("/");
         } catch (IOException e) {
             throw new RuntimeException("Failed to extract federation key from resource path", e);
+        }
+    }
+
+    private static int parseVersion(String directory) {
+        try {
+            return Integer.parseInt(directory.startsWith("v") ? directory.substring(1) : directory);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Unexpected OBDX configuration version directory: " + directory, e);
         }
     }
 
