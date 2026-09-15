@@ -19,6 +19,12 @@ import java.util.Locale;
  */
 public class ReferenceNameResolver {
 
+    /**
+     * The kind a restricted extraction reports instead of its real type: the sentence says the results cannot be
+     * republished, and says nothing about where they came from.
+     */
+    private static final String RESTRICTED_HINT = "extraction.type.restricted.hint";
+
     private final MessageSource messageSource;
 
     public ReferenceNameResolver(MessageSource messageSource) {
@@ -59,15 +65,26 @@ public class ReferenceNameResolver {
      * reader can act on: {@code FEDERATION_PAGE,cpc} becomes the hint for {@code extraction.type.federation_page}
      * with {@code cpc} — itself translated — as its parameter. An unknown type falls back to the raw value rather
      * than hiding the warning.
+     *
+     * <p>A restricted extraction never gets that far: it reports the {@code restricted} kind, no source and the
+     * flag, because both the page and the federation are part of what must not be republished.
      */
     public ExtractionResponseDTO extraction(CompetitionExtraction extraction) {
         if (extraction == null) {
             return null;
         }
+        // A restricted extraction answers with its own kind and no source at all: naming the page the results
+        // were taken from would publish exactly what the restriction is about, and so would the federation
+        // hidden in the real type's parameters. The stored row keeps saying 'FEDERATION_PAGE,nkn'.
+        if (extraction.restricted()) {
+            return new ExtractionResponseDTO(extraction.extractionId(), null, translate(RESTRICTED_HINT, null, null))
+                    .restricted(true);
+        }
         return new ExtractionResponseDTO(
                 extraction.extractionId(),
                 new ExtractionSourceResponseDTO(extraction.url(), extraction.extractionTimestamp()),
-                extractionHint(extraction));
+                extractionHint(extraction))
+                .restricted(false);
     }
 
     private String extractionHint(CompetitionExtraction extraction) {

@@ -2,6 +2,7 @@ package com.k9x.infrastructure.in.rest.endpoints.rankings;
 
 import com.k9x.application.rankings.use_case.GetRankingClassificationServiceCase;
 import com.k9x.application.rankings.use_case.dto.FetchRankingClassificationDTO;
+import com.k9x.application.rankings.use_case.dto.FetchRankingClassificationEventDTO;
 import com.k9x.application.rankings.use_case.dto.FetchRankingClassificationGroupDTO;
 import com.k9x.domain.rankings.RankingGroupBy;
 import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
@@ -12,6 +13,9 @@ import com.k9x.oas.stub.model.RankingClassificationGroupResponseDTO;
 import com.k9x.oas.stub.model.RankingClassificationMemberResponseDTO;
 import com.k9x.oas.stub.model.RankingClassificationResponseDTO;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Public ranking results. Carries no {@code UserInfoDTO}: the path is outside {@code /secured/}, so the auth
@@ -39,18 +43,25 @@ public class FetchRankingClassification implements RankingsFetchOneApiDelegate {
 
     private RankingClassificationResponseDTO toResponse(FetchRankingClassificationDTO ranking) {
         boolean groupedByCountry = RankingGroupBy.COUNTRY.name().equals(ranking.groupBy());
+        // Cells of a restricted event travel empty. The group total is NOT recomputed from what is left: it is
+        // the real one, and 'counts' still says whether the hidden score was added to it.
+        Set<String> restrictedEvents = ranking.events().stream()
+                .filter(FetchRankingClassificationEventDTO::restricted)
+                .map(FetchRankingClassificationEventDTO::id)
+                .collect(Collectors.toSet());
         return new RankingClassificationResponseDTO(
                 ranking.events().stream()
                         .map(event -> new RankingClassificationEventResponseDTO(
                                 event.id(), event.name(), event.stageId()))
                         .toList(),
                 ranking.groups().stream()
-                        .map(group -> toGroup(group, groupedByCountry))
+                        .map(group -> toGroup(group, groupedByCountry, restrictedEvents))
                         .toList());
     }
 
     private RankingClassificationGroupResponseDTO toGroup(FetchRankingClassificationGroupDTO group,
-                                                          boolean groupedByCountry) {
+                                                          boolean groupedByCountry,
+                                                          Set<String> restrictedEvents) {
         // Grouping by country yields ISO codes, which are translated here just like everywhere else at the
         // REST boundary. Individual and team criteria are already display names.
         String name = groupedByCountry ? referenceNames.countryName(group.id()) : group.name();
@@ -66,7 +77,9 @@ public class FetchRankingClassification implements RankingsFetchOneApiDelegate {
                                 member.name(),
                                 member.cells().stream()
                                         .map(cell -> new RankingClassificationCellResponseDTO(
-                                                cell.eventId(), cell.score(), cell.counts()))
+                                                cell.eventId(),
+                                                restrictedEvents.contains(cell.eventId()) ? null : cell.score(),
+                                                cell.counts()))
                                         .toList()))
                         .toList());
     }

@@ -5,6 +5,7 @@ import com.k9x.application.events.obdx.use_case.dto.FetchClassificationDTO;
 import com.k9x.application.events.obdx.use_case.dto.FetchObdxEventJudgeDTO;
 import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
 import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
+import com.k9x.infrastructure.in.rest.restricted.WithheldScores;
 import com.k9x.oas.stub.api.EventsFetchClassificationApiDelegate;
 import com.k9x.oas.stub.model.*;
 import org.springframework.context.MessageSource;
@@ -28,7 +29,10 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
 
     @Override
     public ResponseEntity<StageEventClassificationResponseDTO> fetchEventClassification(String eventId) {
-        FetchClassificationDTO dto = getClassificationServiceCase.getClassification(eventId);
+        // The scores are aggregated, snapshotted and ranked exactly the same for a restricted competition: what
+        // changes is what leaves through here, which is why the classification is emptied at this boundary and
+        // not inside the use case.
+        FetchClassificationDTO dto = WithheldScores.apply(getClassificationServiceCase.getClassification(eventId));
 
         return ResponseEntity.ok(new StageEventClassificationResponseDTO(
                 referenceNames.discipline(dto.disciplineId()),
@@ -40,7 +44,8 @@ public class GetEventClassification implements EventsFetchClassificationApiDeleg
                 dto.competitionName(),
                 dto.scoresLastUpdate(),
                 dto.obdx() == null ? null
-                        : new ObdxStageEventClassificationResponseDTO(mapCompetitors(dto.obdx().competitors()),
+                        : new ObdxStageEventClassificationResponseDTO(
+                                mapCompetitors(dto.obdx().competitors()),
                                 dto.obdx().scoreCalculation(), mapJudges(dto.obdx().judges())),
                 referenceNames.extraction(dto.extraction())));
     }

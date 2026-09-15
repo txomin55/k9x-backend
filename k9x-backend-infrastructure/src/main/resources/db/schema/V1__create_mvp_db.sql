@@ -100,6 +100,10 @@ CREATE TABLE k9x.extraction_metadata
     -- 'PRIVATE_CONVERSATIONS,ORGANIZER'. The ETL is what joins them and it refuses parameters
     -- containing a comma, so the first token is always the type.
     type                 VARCHAR(255) NOT NULL,
+    -- Whether the source forbids republishing these results: DogWeb, the Norwegian federation database,
+    -- is the first one that says so. Everything is stored, snapshotted and ranked as usual; it is the API
+    -- that withholds the scores. Set by the ETL from event_metadata.json.
+    restricted           BOOLEAN      NOT NULL DEFAULT FALSE,
     created_at           BIGINT       NOT NULL,
     CONSTRAINT extraction_metadata_pkey PRIMARY KEY (extraction_id),
     CONSTRAINT extraction_metadata_competition_fk

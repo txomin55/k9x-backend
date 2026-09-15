@@ -120,13 +120,14 @@ public class CompetitionHydrator {
     private Map<String, CompetitionExtraction> fetchExtractions(Iterable<String> competitionIds) {
         var em = Tables.EXTRACTION_METADATA;
         Map<String, CompetitionExtraction> result = new LinkedHashMap<>();
-        dsl.select(em.COMPETITION_ID, em.EXTRACTION_ID, em.SOURCE, em.EXTRACTION_TIMESTAMP, em.TYPE)
+        dsl.select(em.COMPETITION_ID, em.EXTRACTION_ID, em.SOURCE, em.EXTRACTION_TIMESTAMP, em.TYPE,
+                        em.RESTRICTED)
                 .from(em)
                 .where(em.COMPETITION_ID.in(toList(competitionIds)))
                 .orderBy(em.EXTRACTION_TIMESTAMP.asc())
                 .forEach(r -> result.put(r.get(em.COMPETITION_ID), new CompetitionExtraction(
                         r.get(em.EXTRACTION_ID), r.get(em.SOURCE), r.get(em.EXTRACTION_TIMESTAMP),
-                        r.get(em.TYPE))));
+                        r.get(em.TYPE), Boolean.TRUE.equals(r.get(em.RESTRICTED)))));
         return result;
     }
 

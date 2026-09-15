@@ -10,14 +10,19 @@ import java.util.List;
  * {@code FEDERATION_PAGE,cpc} or {@code PRIVATE_CONVERSATIONS,ORGANIZER}: the ETL refuses parameters containing
  * a comma, so the first token is always the type and the rest are its parameters. It is kept raw here because
  * turning it into a sentence is a presentation concern.
+ *
+ * <p>{@code restricted} says the source forbids republishing these results. It changes nothing here: the scores
+ * are stored, snapshotted and ranked exactly like any others, and it is the REST boundary that withholds them —
+ * a restricted competition answers with null scores and without saying where the evidence came from.
  */
-public record CompetitionExtraction(String extractionId, String url, Long extractionTimestamp, String type) {
+public record CompetitionExtraction(String extractionId, String url, Long extractionTimestamp, String type,
+                                    boolean restricted) {
 
     /**
      * A competition whose {@code source} says EXTRACTION but has no metadata row yet: the reader still has to be
      * told the results were not collected by k9x, even when nobody wrote down where they came from.
      */
-    public static final CompetitionExtraction UNKNOWN = new CompetitionExtraction(null, null, null, null);
+    public static final CompetitionExtraction UNKNOWN = new CompetitionExtraction(null, null, null, null, false);
 
     /** First token of {@code type}, or {@code null} when there is no type at all. */
     public String typeToken() {

@@ -6,6 +6,7 @@ import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
 import com.k9x.application.events.use_case.GetEventServiceCase;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 import com.k9x.application.users.use_case.dto.UserInfoDTO;
+import com.k9x.infrastructure.in.rest.restricted.WithheldScores;
 import com.k9x.oas.stub.api.SecuredEventsExportApiDelegate;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -47,9 +48,10 @@ public class ExportEvent implements SecuredEventsExportApiDelegate {
                 userDetails.isOrganizer());
 
         // Reuses the classification use case rather than re-aggregating here, so the export inherits its cache
-        // and daily snapshot instead of paying the full CPU-heavy aggregation on every download.
+        // and daily snapshot instead of paying the full CPU-heavy aggregation on every download. A restricted
+        // extraction downloads with its score columns empty: a spreadsheet is republishing like any other.
         FetchClassificationDTO classification = Boolean.TRUE.equals(includeClassification)
-                ? getEventClassificationServiceCase.getClassification(eventId)
+                ? WithheldScores.apply(getEventClassificationServiceCase.getClassification(eventId))
                 : null;
 
         // The exercise coefficients live in the discipline configuration, not in the classification, and the

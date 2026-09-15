@@ -87,7 +87,8 @@ public class GetRankingClassificationServiceCase {
             Map<String, FetchClassificationDTO> classificationsByEvent) {
         return classificationsByEvent.values().stream()
                 .map(classification -> new FetchRankingClassificationEventDTO(
-                        classification.eventId(), classification.eventName(), classification.stageId()))
+                        classification.eventId(), classification.eventName(), classification.stageId(),
+                        classification.extraction() != null && classification.extraction().restricted()))
                 .toList();
     }
 

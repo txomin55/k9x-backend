@@ -81,7 +81,8 @@ class GetCompetitionJooqAdapterTest {
             Tables.EXTRACTION_METADATA.EXTRACTION_ID,
             Tables.EXTRACTION_METADATA.SOURCE,
             Tables.EXTRACTION_METADATA.EXTRACTION_TIMESTAMP,
-            Tables.EXTRACTION_METADATA.TYPE
+            Tables.EXTRACTION_METADATA.TYPE,
+            Tables.EXTRACTION_METADATA.RESTRICTED
     };
 
     private static final Field<?>[] COMPETITOR_FIELDS = {
@@ -151,9 +152,9 @@ class GetCompetitionJooqAdapterTest {
 
             if (ctx.sql().toLowerCase().contains("extraction_metadata")) {
                 Result<Record> extractions = mock.newResult(EXTRACTION_FIELDS);
-                extractions.add(extraction(mock, "cpc-2020-9-extraction", "https://cpc/2020/9", 100L));
+                extractions.add(extraction(mock, "cpc-2020-9-extraction", "https://cpc/2020/9", 100L, false));
                 // Ordered by extraction_timestamp: a re-collection from a better source wins over the first one.
-                extractions.add(extraction(mock, "cpc-2020-9-extraction-2", "https://cpc/better", 200L));
+                extractions.add(extraction(mock, "cpc-2020-9-extraction-2", "https://cpc/better", 200L, true));
                 return new MockResult[]{new MockResult(extractions.size(), extractions)};
             }
 
@@ -179,15 +180,18 @@ class GetCompetitionJooqAdapterTest {
         assertThat(competition.extraction().url()).isEqualTo("https://cpc/better");
         assertThat(competition.extraction().extractionTimestamp()).isEqualTo(200L);
         assertThat(competition.extraction().type()).isEqualTo("FEDERATION_PAGE,cpc");
+        assertThat(competition.extraction().restricted()).isTrue();
     }
 
-    private static Record extraction(DSLContext mock, String extractionId, String url, long timestamp) {
+    private static Record extraction(DSLContext mock, String extractionId, String url, long timestamp,
+                                     boolean restricted) {
         Record record = mock.newRecord(EXTRACTION_FIELDS);
         record.set(Tables.EXTRACTION_METADATA.COMPETITION_ID, "comp-1");
         record.set(Tables.EXTRACTION_METADATA.EXTRACTION_ID, extractionId);
         record.set(Tables.EXTRACTION_METADATA.SOURCE, url);
         record.set(Tables.EXTRACTION_METADATA.EXTRACTION_TIMESTAMP, timestamp);
         record.set(Tables.EXTRACTION_METADATA.TYPE, "FEDERATION_PAGE,cpc");
+        record.set(Tables.EXTRACTION_METADATA.RESTRICTED, restricted);
         return record;
     }
 

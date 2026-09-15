@@ -40,7 +40,8 @@ class ReferenceNameResolverTest {
         LocaleContextHolder.setLocale(Locale.of("es"));
 
         ExtractionResponseDTO dto = resolver().extraction(
-                new CompetitionExtraction("cpc-2020-9-extraction", "https://cpc/2020/9", 1000L, "FEDERATION_PAGE,cpc"));
+                new CompetitionExtraction("cpc-2020-9-extraction", "https://cpc/2020/9", 1000L, "FEDERATION_PAGE,cpc",
+                        false));
 
         assertThat(dto.getExtractionId()).isEqualTo("cpc-2020-9-extraction");
         assertThat(dto.getSource().getUrl()).isEqualTo("https://cpc/2020/9");
@@ -53,7 +54,7 @@ class ReferenceNameResolverTest {
         LocaleContextHolder.setLocale(Locale.of("es"));
 
         ExtractionResponseDTO dto = resolver().extraction(
-                new CompetitionExtraction("id", null, 1L, "PRIVATE_CONVERSATIONS,ORGANIZER"));
+                new CompetitionExtraction("id", null, 1L, "PRIVATE_CONVERSATIONS,ORGANIZER", false));
 
         assertThat(dto.getHint()).isEqualTo("Resultados facilitados por el organizador en conversaciones privadas");
     }
@@ -66,7 +67,7 @@ class ReferenceNameResolverTest {
 
         ExtractionResponseDTO dto = resolver().extraction(
                 new CompetitionExtraction("lkf-2024-wc-extraction", "https://www.obedience.ch/wm-2026/wm-2024/",
-                        1L, "EXTERNAL_RESOURCES,obedience.ch"));
+                        1L, "EXTERNAL_RESOURCES,obedience.ch", false));
 
         assertThat(dto.getHint()).isEqualTo("Resultados tomados de obedience.ch, una fuente ajena a la federación");
     }
@@ -79,7 +80,7 @@ class ReferenceNameResolverTest {
 
         for (String federation : new String[]{"cpc", "enci", "rsce", "dkk", "lkf", "nkn", "skk"}) {
             ExtractionResponseDTO dto = resolver().extraction(
-                    new CompetitionExtraction("id", null, 1L, "FEDERATION_PAGE," + federation));
+                    new CompetitionExtraction("id", null, 1L, "FEDERATION_PAGE," + federation, false));
             assertThat(dto.getHint())
                     .as("federación %s", federation)
                     .isNotEqualTo("Resultados publicados en la página de la federación " + federation);
@@ -90,7 +91,7 @@ class ReferenceNameResolverTest {
     void leaves_no_dangling_space_when_the_type_carries_no_parameters() {
         LocaleContextHolder.setLocale(Locale.of("es"));
 
-        ExtractionResponseDTO dto = resolver().extraction(new CompetitionExtraction("id", null, 1L, "FEDERATION_PAGE"));
+        ExtractionResponseDTO dto = resolver().extraction(new CompetitionExtraction("id", null, 1L, "FEDERATION_PAGE", false));
 
         assertThat(dto.getHint()).isEqualTo("Resultados publicados en la página de la federación");
     }
@@ -100,9 +101,25 @@ class ReferenceNameResolverTest {
         LocaleContextHolder.setLocale(Locale.of("es"));
         ReferenceNameResolver resolver = resolver();
 
-        assertThat(resolver.extraction(new CompetitionExtraction("id", null, 1L, "SOMETHING_ELSE")).getHint())
+        assertThat(resolver.extraction(new CompetitionExtraction("id", null, 1L, "SOMETHING_ELSE", false)).getHint())
                 .isEqualTo("Resultados recogidos fuera de k9x");
         assertThat(resolver.extraction(CompetitionExtraction.UNKNOWN).getHint())
                 .isEqualTo("Resultados recogidos fuera de k9x");
+    }
+
+    @Test
+    void a_restricted_extraction_says_so_and_withholds_where_it_came_from() {
+        // Naming the page — or the federation hidden in the type parameters — would republish exactly what the
+        // restriction forbids, so neither travels.
+        LocaleContextHolder.setLocale(Locale.of("es"));
+
+        ExtractionResponseDTO dto = resolver().extraction(new CompetitionExtraction(
+                "nkn-2025-13-14-09-extraction", "https://www.dogweb.no/lydighet/250284/resultater", 1000L,
+                "FEDERATION_PAGE,nkn", true));
+
+        assertThat(dto.getExtractionId()).isEqualTo("nkn-2025-13-14-09-extraction");
+        assertThat(dto.getRestricted()).isTrue();
+        assertThat(dto.getSource()).isNull();
+        assertThat(dto.getHint()).isEqualTo("Resultados restringidos: la fuente no permite publicarlos");
     }
 }

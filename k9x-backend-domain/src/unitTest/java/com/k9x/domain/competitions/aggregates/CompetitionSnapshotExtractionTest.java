@@ -10,7 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class CompetitionSnapshotExtractionTest {
 
     private static final CompetitionExtraction METADATA =
-            new CompetitionExtraction("cpc-2020-9-extraction", "https://cpc/2020/9", 1000L, "FEDERATION_PAGE,cpc");
+            new CompetitionExtraction("cpc-2020-9-extraction", "https://cpc/2020/9", 1000L, "FEDERATION_PAGE,cpc",
+                    false);
 
     private static CompetitionSnapshot competition(CompetitionSource source, CompetitionExtraction metadata) {
         return new CompetitionSnapshot("comp-1", "World Cup", "creator", "Org", "ES", "desc", "addr",

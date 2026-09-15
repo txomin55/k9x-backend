@@ -8,6 +8,7 @@ import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
 import com.k9x.application.events.use_case.dto.FetchEventDetailDTO;
 import com.k9x.domain.disciplines.valueobjects.Discipline;
 import com.k9x.domain.disciplines.obdx.ObdxConfigurationGrade;
+import com.k9x.infrastructure.in.rest.restricted.WithheldScores;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
@@ -48,7 +49,10 @@ public class ObdxEventProofRenderer implements EventProofRenderer {
 
     @Override
     public EventProofDocument render(String eventId, FetchEventDetailDTO event) {
-        FetchClassificationDTO classification = getEventClassificationServiceCase.getClassification(eventId);
+        // Same rule as the screen and the export: a restricted extraction prints its strips without score or
+        // qualification.
+        FetchClassificationDTO classification =
+                WithheldScores.apply(getEventClassificationServiceCase.getClassification(eventId));
         List<EventProofData> proofs = competitors(classification).stream()
                 .map(competitor -> toProofData(event, competitor))
                 .toList();
