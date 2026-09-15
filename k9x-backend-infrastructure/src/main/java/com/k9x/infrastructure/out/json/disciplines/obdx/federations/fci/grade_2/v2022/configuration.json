@@ -1,0 +1,83 @@
+{
+  "id": "OBDX.FCI_GRADE_2.V2022",
+  "description": "FCI grade 2 version 20/05/2026",
+  "break_tie": [
+    "OBDX.FCI_GRADE_2.2_V2022",
+    "OBDX.FCI_GRADE_2.4_V2022",
+    "OBDX.FCI_GRADE_2.5_V2022",
+    "OBDX.FCI_GRADE_2.10_V2022"
+  ],
+  "break_tie_tie": [
+    "OBDX.FCI_GRADE_2.10_V2022"
+  ],
+  "allowed_values": [
+    0,
+    5,
+    5.5,
+    6,
+    6.5,
+    7,
+    7.5,
+    8,
+    8.5,
+    9,
+    9.5,
+    10
+  ],
+  "qualifications": [
+    {
+      "id": "EXC",
+      "min_score": 256
+    },
+    {
+      "id": "MB",
+      "min_score": 224
+    },
+    {
+      "id": "B",
+      "min_score": 192
+    }
+  ],
+  "exercises": [
+    {
+      "id": "OBDX.FCI_GRADE_2.1_V2022",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_2.2_V2022",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.FCI_GRADE_2.3_V2022",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_2.4_V2022",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_2.5_V2022",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.FCI_GRADE_2.6_V2022",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_2.7_V2022",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_2.8_V2022",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.FCI_GRADE_2.9_V2022",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.FCI_GRADE_2.10_V2022",
+      "coef": 2
+    }
+  ]
+}

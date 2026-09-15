@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
  * whether it is settled (see {@code EventSnapshot}): only individual exercises drive the status.
  *
  * <p>Each constant holds the <em>version-agnostic</em> exercise id, i.e. the config id without its
- * trailing version suffix ({@code _V0}, {@code _V1}, …). {@link #isExcluded(String)} strips that suffix
- * before matching, so a config version bump ({@code _V0} → {@code _V1}) needs no change here.
+ * trailing version suffix ({@code _V2022}, {@code _V1}, …). {@link #isExcluded(String)} strips that suffix
+ * before matching, so a config version bump ({@code _V2022} → {@code _V1}) needs no change here.
  */
 public enum LiveExcludedExercise {
     // Group stays
@@ -55,7 +55,7 @@ public enum LiveExcludedExercise {
     SKK_KLASS_2_10("OBDX.SKK_KLASS_2.10");
 
     /**
-     * Trailing version token of an exercise id, e.g. the {@code _V0} in {@code OBDX.FCI_GRADE_2.1_V0}.
+     * Trailing version token of an exercise id, e.g. the {@code _V2022} in {@code OBDX.FCI_GRADE_2.1_V2022}.
      */
     private static final Pattern VERSION_SUFFIX = Pattern.compile("_V\\d+$");
     private static final Set<String> BASE_IDS = Arrays.stream(values())

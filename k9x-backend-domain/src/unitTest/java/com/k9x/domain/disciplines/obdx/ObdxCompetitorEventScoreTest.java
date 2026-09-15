@@ -91,20 +91,20 @@ class ObdxCompetitorEventScoreTest {
 
     @Test
     void a_disqualified_competitor_earns_nothing_even_with_recorded_scores() {
-        assertNull(ObdxCompetitorEventScore.ofEvent(EVENT_SCORE, "OBDX.FCI_GRADE_3.V0", FIRST_QUAL, TOP_QUAL,
+        assertNull(ObdxCompetitorEventScore.ofEvent(EVENT_SCORE, "OBDX.FCI_GRADE_3.V2022", FIRST_QUAL, TOP_QUAL,
                 new BigDecimal("300"), MAX, true, true));
     }
 
     @Test
     void of_event_resolves_the_band_floor_and_guards_the_uncomputable_cases() {
         assertEquals(0, new BigDecimal("773.14").compareTo(
-                ObdxCompetitorEventScore.ofEvent(EVENT_SCORE, "OBDX.FCI_GRADE_3.V0", FIRST_QUAL, TOP_QUAL,
+                ObdxCompetitorEventScore.ofEvent(EVENT_SCORE, "OBDX.FCI_GRADE_3.V2022", FIRST_QUAL, TOP_QUAL,
                         new BigDecimal("256"), MAX, true, false)));
-        assertNull(ObdxCompetitorEventScore.ofEvent(null, "OBDX.FCI_GRADE_3.V0", FIRST_QUAL, TOP_QUAL,
+        assertNull(ObdxCompetitorEventScore.ofEvent(null, "OBDX.FCI_GRADE_3.V2022", FIRST_QUAL, TOP_QUAL,
                 new BigDecimal("256"), MAX, true, false));
-        assertNull(ObdxCompetitorEventScore.ofEvent(EVENT_SCORE, "OBDX.FCI_GRADE_3.V0", FIRST_QUAL, TOP_QUAL,
+        assertNull(ObdxCompetitorEventScore.ofEvent(EVENT_SCORE, "OBDX.FCI_GRADE_3.V2022", FIRST_QUAL, TOP_QUAL,
                 new BigDecimal("256"), MAX, false, false));
-        assertNull(ObdxCompetitorEventScore.ofEvent(EVENT_SCORE, "UNKNOWN.V0", FIRST_QUAL, TOP_QUAL,
+        assertNull(ObdxCompetitorEventScore.ofEvent(EVENT_SCORE, "UNKNOWN.V2022", FIRST_QUAL, TOP_QUAL,
                 new BigDecimal("256"), MAX, true, false));
     }
 

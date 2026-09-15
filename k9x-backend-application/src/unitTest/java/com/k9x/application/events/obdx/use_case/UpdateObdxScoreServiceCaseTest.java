@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 class UpdateObdxScoreServiceCaseTest {
 
     private static final UpdateObdxScoreCommand COMMAND = new UpdateObdxScoreCommand(
-            "judge-1", "OBDX.FCI_GRADE_3.1_V0", "dog-1", new BigDecimal("7.5"));
+            "judge-1", "OBDX.FCI_GRADE_3.1_V2022", "dog-1", new BigDecimal("7.5"));
 
     @Mock
     private GetCompetitionPersistencePort getCompetitionPersistencePort;
@@ -55,7 +55,7 @@ class UpdateObdxScoreServiceCaseTest {
     }
 
     private static final List<EventExercise> EXERCISES = List.of(
-            new EventExercise("OBDX.FCI_GRADE_3.1_V0", (short) 1, List.of(), List.of("judge-1")));
+            new EventExercise("OBDX.FCI_GRADE_3.1_V2022", (short) 1, List.of(), List.of("judge-1")));
 
     private CompetitionSnapshot competition() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
@@ -80,7 +80,7 @@ class UpdateObdxScoreServiceCaseTest {
     private CompetitionSnapshot competitionWithExerciseJudgedByAnother() {
         EventSnapshot event = new EventSnapshot("event-1", null, null, "Event 1", "stage-1", "user-1", null, 0L, 0L, null,
                 ObdxAvgMethod.MID_AVG, List.of(),
-                List.of(new EventExercise("OBDX.FCI_GRADE_3.1_V0", (short) 1, List.of(), List.of("judge-2"))),
+                List.of(new EventExercise("OBDX.FCI_GRADE_3.1_V2022", (short) 1, List.of(), List.of("judge-2"))),
                 List.of(), List.of(), List.of(), null, null, null);
         StageSnapshot stage = new StageSnapshot("stage-1", "Stage 1", "comp-1", "user-1", 0L, Long.MAX_VALUE, 0L, 0L, null,
                 List.of(event));
@@ -115,7 +115,7 @@ class UpdateObdxScoreServiceCaseTest {
     void saves_aggregate_when_user_is_event_creator_even_though_not_collector() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
-        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX.FCI_GRADE_3.1_V0"))
+        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX.FCI_GRADE_3.1_V2022"))
                 .thenReturn(List.of(new BigDecimal("7.5")));
 
         serviceCase.updateScore("event-1", COMMAND, "user-1");
@@ -129,7 +129,7 @@ class UpdateObdxScoreServiceCaseTest {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
         when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("user@k9x.io");
-        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX.FCI_GRADE_3.1_V0"))
+        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX.FCI_GRADE_3.1_V2022"))
                 .thenReturn(List.of(new BigDecimal("5"), new BigDecimal("6")));
 
         assertThatThrownBy(() -> serviceCase.updateScore("event-1", COMMAND, "user@k9x.io"))
@@ -142,7 +142,7 @@ class UpdateObdxScoreServiceCaseTest {
     void throws_exception_when_competitor_is_disqualified() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("user@k9x.io");
-        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX.FCI_GRADE_3.1_V0"))
+        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX.FCI_GRADE_3.1_V2022"))
                 .thenReturn(List.of(new BigDecimal("7.5")));
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competitionWithDisqualifiedDog());
 
@@ -156,7 +156,7 @@ class UpdateObdxScoreServiceCaseTest {
     void throws_exception_when_judge_is_not_assigned_to_the_exercise() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("user@k9x.io");
-        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX.FCI_GRADE_3.1_V0"))
+        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX.FCI_GRADE_3.1_V2022"))
                 .thenReturn(List.of(new BigDecimal("7.5")));
         when(getCompetitionPersistencePort.getCompetition("comp-1"))
                 .thenReturn(competitionWithExerciseJudgedByAnother());
@@ -171,7 +171,7 @@ class UpdateObdxScoreServiceCaseTest {
     void saves_aggregate_when_all_validations_pass() {
         when(getCompetitionPersistencePort.competitionIdByEvent("event-1")).thenReturn("comp-1");
         when(getObdxEventCollectorPersistencePort.getCollectorId("event-1", "judge-1")).thenReturn("user@k9x.io");
-        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX.FCI_GRADE_3.1_V0"))
+        when(getObdxExerciseAllowedValuesPort.getAllowedValues("OBDX.FCI_GRADE_3.1_V2022"))
                 .thenReturn(List.of(new BigDecimal("7.5")));
         when(getCompetitionPersistencePort.getCompetition("comp-1")).thenReturn(competition());
 

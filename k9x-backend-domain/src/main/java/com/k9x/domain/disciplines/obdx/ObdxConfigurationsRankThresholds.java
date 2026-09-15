@@ -42,7 +42,7 @@ public enum ObdxConfigurationsRankThresholds {
     }
 
     /**
-     * Strips the trailing {@code .V<n>} version suffix, e.g. {@code OBDX.FCI_GRADE_3.V0 -> OBDX.FCI_GRADE_3}.
+     * Strips the trailing {@code .V<n>} version suffix, e.g. {@code OBDX.FCI_GRADE_3.V2022 -> OBDX.FCI_GRADE_3}.
      */
     private static final Pattern VERSION_SUFFIX = Pattern.compile("\\.V\\d+$");
 

@@ -79,7 +79,7 @@ class EventWorkbookWriterTest {
                 List.of("tag-a", "tag-b"), List.of(judge));
         FetchObdxEventCompetitorDTO competitor = new FetchObdxEventCompetitorDTO("dog-1", "Rex", "origin-999", "LIC-999", "breed-1",
                 "Owner", "Handler", "Team A", "ES", "MALE", (short) 3, (short) 7, true, "STARTED", true, "CART-999", false);
-        FetchEventConfigurationDTO configuration = new FetchEventConfigurationDTO("OBDX.FCI_GRADE_1.V0", "Grade 1",
+        FetchEventConfigurationDTO configuration = new FetchEventConfigurationDTO("OBDX.FCI_GRADE_1.V2022", "Grade 1",
                 new FederationInfoDTO("FCI", "FCI"));
 
         return new FetchEventDetailDTO(obdx, List.of(competitor), List.of(exercise), List.of(judge), configuration);
@@ -118,7 +118,7 @@ class EventWorkbookWriterTest {
             assertThat(text(sheet, 2, 2)).isEqualTo("Obedience");
             assertThat(text(sheet, 3, 0)).isEqualTo("Federation");
             assertThat(text(sheet, 3, 1)).isEqualTo("FCI");
-            assertThat(text(sheet, 4, 1)).isEqualTo("OBDX.FCI_GRADE_1.V0");
+            assertThat(text(sheet, 4, 1)).isEqualTo("OBDX.FCI_GRADE_1.V2022");
             assertThat(text(sheet, 4, 2)).isEqualTo("Grade 1");
             // the deadline is rendered as a UTC day, never as a timezone-sensitive date cell
             assertThat(text(sheet, 5, 2)).isEqualTo("2025-01-01");
@@ -152,10 +152,10 @@ class EventWorkbookWriterTest {
     @Test
     void writes_each_exercise_id_verbatim() throws IOException {
         List<String> ids = List.of(
-                "OBDX.FCI_GRADE_3.8_V0", "OBDX.FCI_GRADE_3.3_V0", "OBDX.FCI_GRADE_3.4_V0",
-                "OBDX.FCI_GRADE_3.7_V0", "OBDX.FCI_GRADE_3.5_V0", "OBDX.FCI_GRADE_3.10_V0",
-                "OBDX.FCI_GRADE_3.9_V0", "OBDX.FCI_GRADE_3.6_V0", "OBDX.FCI_GRADE_3.1_V0",
-                "OBDX.FCI_GRADE_3.2_V0");
+                "OBDX.FCI_GRADE_3.8_V2022", "OBDX.FCI_GRADE_3.3_V2022", "OBDX.FCI_GRADE_3.4_V2022",
+                "OBDX.FCI_GRADE_3.7_V2022", "OBDX.FCI_GRADE_3.5_V2022", "OBDX.FCI_GRADE_3.10_V2022",
+                "OBDX.FCI_GRADE_3.9_V2022", "OBDX.FCI_GRADE_3.6_V2022", "OBDX.FCI_GRADE_3.1_V2022",
+                "OBDX.FCI_GRADE_3.2_V2022");
 
         List<FetchEventExerciseDTO> exercises = new ArrayList<>();
         for (int i = 0; i < ids.size(); i++) {
@@ -210,7 +210,7 @@ class EventWorkbookWriterTest {
         FetchObdxClassificationDTO obdx = new FetchObdxClassificationDTO(0L, List.of(competitor), "MID_AVG", List.of());
 
         return new FetchClassificationDTO("event-1", "Spring Cup", "FINISHED", "stage-1", "Stage A", "Cup",
-                "OBDX", "OBDX.FCI_GRADE_1.V0", "Grade 1", 0L, obdx, "A", null);
+                "OBDX", "OBDX.FCI_GRADE_1.V2022", "Grade 1", 0L, obdx, "A", null);
     }
 
     @Test
@@ -307,7 +307,7 @@ class EventWorkbookWriterTest {
                 new BigDecimal("18.0"), new BigDecimal("90.00"), false, "SETTLED", true, false, false,
                 List.of(exercise), List.of(), "EXC", null);
         FetchClassificationDTO classification = new FetchClassificationDTO("event-1", "Spring Cup", "FINISHED",
-                "stage-1", "Stage A", "Cup", "OBDX", "OBDX.FCI_GRADE_1.V0", "Grade 1", 0L,
+                "stage-1", "Stage A", "Cup", "OBDX", "OBDX.FCI_GRADE_1.V2022", "Grade 1", 0L,
                 new FetchObdxClassificationDTO(0L, List.of(competitor), "MID_AVG", List.of()), "A",
                 null);
 

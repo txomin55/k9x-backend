@@ -24,8 +24,8 @@ La puntuación refleja lo "fuerte" que es la prueba y depende de dos factores:
 Las franjas son una **regla fija** (no cambian entre versiones de una configuración), así que viven en
 **código**, no en los `configuration.json`. Se definen en el enum de dominio
 [`ObdxConfigurationsRankThresholds`](../k9x-backend-domain/src/main/java/com/k9x/domain/disciplines/obdx/ObdxConfigurationsRankThresholds.java),
-que resuelve la franja a partir del `configuration_id` **ignorando el sufijo de versión** `.V0` (regex
-`\.V\d+$`), de modo que `OBDX_FCI_GRADE_3.V0`, `.V1`, … comparten franja.
+que resuelve la franja a partir del `configuration_id` **ignorando el sufijo de versión** `.V2022` (regex
+`\.V\d+$`), de modo que `OBDX_FCI_GRADE_3.V2022`, `.V1`, … comparten franja.
 
 | Configuración | Franja |
 |---|---|

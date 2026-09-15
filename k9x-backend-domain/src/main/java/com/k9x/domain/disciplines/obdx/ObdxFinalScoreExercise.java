@@ -48,7 +48,7 @@ public final class ObdxFinalScoreExercise {
      */
     private static final Pattern UNKNOWN_JUDGE = Pattern.compile("^UNKNOWN(?:_\\d+)?$");
 
-    /** Trailing version token of an exercise id, e.g. the {@code _V0} in {@code OBDX.FINAL_SCORE_V0}. */
+    /** Trailing version token of an exercise id, e.g. the {@code _V2022} in {@code OBDX.FINAL_SCORE_V2022}. */
     private static final Pattern VERSION_SUFFIX = Pattern.compile("_V\\d+$");
 
     private ObdxFinalScoreExercise() {
