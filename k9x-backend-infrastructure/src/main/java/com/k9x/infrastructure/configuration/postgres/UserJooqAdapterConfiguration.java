@@ -3,13 +3,17 @@ package com.k9x.infrastructure.configuration.postgres;
 import com.k9x.application.users.port.CreateUserPersistencePort;
 import com.k9x.application.users.port.DeletePushSubscriptionPersistencePort;
 import com.k9x.application.users.port.GetPushSubscriptionsPersistencePort;
+import com.k9x.application.users.port.GetUserNotificationsEnabledPersistencePort;
 import com.k9x.application.users.port.GetUserInfoPersistencePort;
 import com.k9x.application.users.port.RegisterPushSubscriptionPersistencePort;
+import com.k9x.application.users.port.SetUserNotificationsEnabledPersistencePort;
 import com.k9x.infrastructure.out.postgres.users.CreateUserJooqAdapter;
 import com.k9x.infrastructure.out.postgres.users.DeletePushSubscriptionJooqAdapter;
 import com.k9x.infrastructure.out.postgres.users.GetPushSubscriptionsJooqAdapter;
+import com.k9x.infrastructure.out.postgres.users.GetUserNotificationsEnabledJooqAdapter;
 import com.k9x.infrastructure.out.postgres.users.GetUserInfoJooqAdapter;
 import com.k9x.infrastructure.out.postgres.users.RegisterPushSubscriptionJooqAdapter;
+import com.k9x.infrastructure.out.postgres.users.SetUserNotificationsEnabledJooqAdapter;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +39,16 @@ public class UserJooqAdapterConfiguration {
     @Bean
     public GetPushSubscriptionsPersistencePort getPushSubscriptionsPersistencePort(DSLContext dsl) {
         return new GetPushSubscriptionsJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetUserNotificationsEnabledPersistencePort getUserNotificationsEnabledPersistencePort(DSLContext dsl) {
+        return new GetUserNotificationsEnabledJooqAdapter(dsl);
+    }
+
+    @Bean
+    public SetUserNotificationsEnabledPersistencePort setUserNotificationsEnabledPersistencePort(DSLContext dsl) {
+        return new SetUserNotificationsEnabledJooqAdapter(dsl);
     }
 
     @Bean

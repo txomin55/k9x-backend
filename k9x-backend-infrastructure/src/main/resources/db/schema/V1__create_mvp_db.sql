@@ -1,9 +1,10 @@
 CREATE SCHEMA k9x;
 CREATE TABLE k9x.users
 (
-    id    VARCHAR(255) NOT NULL,
-    email VARCHAR(50)  NOT NULL,
-    image VARCHAR(255) NOT NULL,
+    id                    VARCHAR(255) NOT NULL,
+    email                 VARCHAR(50)  NOT NULL,
+    image                 VARCHAR(255) NOT NULL,
+    notifications_enabled BOOLEAN      NOT NULL DEFAULT TRUE,
     CONSTRAINT users_pkey PRIMARY KEY (id)
 );
 

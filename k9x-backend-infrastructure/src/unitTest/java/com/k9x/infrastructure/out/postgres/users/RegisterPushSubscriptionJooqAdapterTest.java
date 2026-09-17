@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RegisterPushSubscriptionJooqAdapterTest {
 
     @Test
-    void generates_upsert_on_endpoint_conflict() {
+    void leaves_a_known_endpoint_untouched_on_conflict() {
         AtomicReference<String> capturedSql = new AtomicReference<>();
         AtomicReference<Object[]> capturedBindings = new AtomicReference<>();
 
@@ -36,7 +36,8 @@ class RegisterPushSubscriptionJooqAdapterTest {
         assertThat(capturedSql.get())
                 .contains("insert into \"k9x\".\"push_subscriptions\"")
                 .contains("on conflict")
-                .contains("\"endpoint\"");
+                .contains("\"endpoint\"")
+                .contains("do nothing");
         assertThat(capturedBindings.get()).contains("https://fcm/endpoint", "user@example.com", "auth-key", "p256dh-key");
     }
 }

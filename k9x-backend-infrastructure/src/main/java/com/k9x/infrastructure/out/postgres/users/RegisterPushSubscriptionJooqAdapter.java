@@ -22,12 +22,10 @@ public class RegisterPushSubscriptionJooqAdapter implements RegisterPushSubscrip
                 .set(Tables.PUSH_SUBSCRIPTIONS.P256DH, payload.p256dh())
                 .set(Tables.PUSH_SUBSCRIPTIONS.CREATED_AT, payload.lastUpdate())
                 .set(Tables.PUSH_SUBSCRIPTIONS.LAST_UPDATE, payload.lastUpdate())
+                // Un endpoint ya conocido se deja tal cual: el navegador lo reenvia en cada arranque y
+                // sus claves no cambian sin cambiar tambien el endpoint.
                 .onConflict(Tables.PUSH_SUBSCRIPTIONS.ENDPOINT)
-                .doUpdate()
-                .set(Tables.PUSH_SUBSCRIPTIONS.USER_ID, payload.userId())
-                .set(Tables.PUSH_SUBSCRIPTIONS.AUTH, payload.auth())
-                .set(Tables.PUSH_SUBSCRIPTIONS.P256DH, payload.p256dh())
-                .set(Tables.PUSH_SUBSCRIPTIONS.LAST_UPDATE, payload.lastUpdate())
+                .doNothing()
                 .execute();
     }
 }

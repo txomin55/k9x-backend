@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DeletePushSubscriptionJooqAdapterTest {
+class SetUserNotificationsEnabledJooqAdapterTest {
 
     private final AtomicReference<String> capturedSql = new AtomicReference<>();
     private final AtomicReference<Object[]> capturedBindings = new AtomicReference<>();
@@ -29,13 +29,13 @@ class DeletePushSubscriptionJooqAdapterTest {
     private final DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
 
     @Test
-    void deletes_by_endpoint_only_when_pruning_an_expired_subscription() {
-        new DeletePushSubscriptionJooqAdapter(dsl).deleteByEndpoint("https://fcm/endpoint");
+    void stores_the_preference_on_the_account_and_not_on_a_device() {
+        new SetUserNotificationsEnabledJooqAdapter(dsl).setNotificationsEnabled("user@example.com", false);
 
         assertThat(capturedSql.get())
-                .contains("delete from \"k9x\".\"push_subscriptions\"")
-                .contains("\"endpoint\"")
-                .doesNotContain("\"user_id\"");
-        assertThat(capturedBindings.get()).containsExactly("https://fcm/endpoint");
+                .contains("update \"k9x\".\"users\"")
+                .contains("\"notifications_enabled\"")
+                .doesNotContain("push_subscriptions");
+        assertThat(capturedBindings.get()).containsExactly(false, "user@example.com");
     }
 }
