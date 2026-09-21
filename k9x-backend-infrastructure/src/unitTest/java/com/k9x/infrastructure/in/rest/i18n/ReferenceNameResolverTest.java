@@ -78,7 +78,8 @@ class ReferenceNameResolverTest {
         // from the bundle turns up as a bare `dkk` in the middle of a Spanish sentence.
         LocaleContextHolder.setLocale(Locale.of("es"));
 
-        for (String federation : new String[]{"cpc", "enci", "rsce", "dkk", "lkf", "nkn", "skk"}) {
+        for (String federation : new String[]{"cpc", "enci", "rsce", "dkk", "lkf", "nkn", "skk", "scc", "spkl",
+                "vdh", "okv"}) {
             ExtractionResponseDTO dto = resolver().extraction(
                     new CompetitionExtraction("id", null, 1L, "FEDERATION_PAGE," + federation, false));
             assertThat(dto.getHint())
