@@ -1,19 +1,23 @@
 # Nothing here runs on its own: there is no push trigger, no schedule. Deploying is always someone
 # running this workflow and choosing an environment.
 #
-#   staging      builds the image from the chosen ref, publishes it, points Render at it and moves
-#                the `staging` tag onto it.
-#   production   deploys the image the `staging` tag currently holds — no rebuild, no choice of
-#                version. What production runs is what staging validated, by digest.
+#   staging      builds the image from the chosen ref, publishes it to GHCR, points Render at it
+#                and moves the `staging` tag onto it.
+#   production   takes the image the `staging` tag holds — no rebuild, no choice of version — copies
+#                it into Fly's registry and deploys it. What production runs is what staging ran.
 #
 # The image is built here and nowhere else: neither Render nor Fly builds from source. That is what
 # keeps the GitHub Packages token that resolves com.k9x:oas-definition-stubs inside this workflow.
 #
-# Repository secrets required:
-#   FLY_API_TOKEN           `fly tokens create deploy -a k9x-backend`
-#   RENDER_DEPLOY_HOOK_URL  Render dashboard → the staging service → Settings → Deploy Hook
-#                           (turn Auto-Deploy off there, or Render deploys on its own on push)
-#   GPR_KEY                 optional. Only needed if GITHUB_TOKEN cannot read the package; see below.
+# The job runs in the GitHub environment it deploys to, so each one holds only its own credentials
+# and production can be put behind a required reviewer (Settings → Environments → production).
+#
+#   environment `staging`      RENDER_DEPLOY_HOOK_URL  the staging service → Settings → Deploy Hook
+#                                                      (turn Auto-Deploy off there, or Render
+#                                                      deploys on its own on push)
+#   environment `production`   FLY_API_TOKEN           `fly tokens create deploy -a k9x-backend`
+#
+# GPR_KEY, at repository level, is optional: only needed if GITHUB_TOKEN cannot read the package.
 
 name: Deploy
 
@@ -34,30 +38,27 @@ jobs:
   deploy:
     name: Deploy ${{ inputs.target }}
     runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
     permissions:
       contents: read
       packages: write
     steps:
       # Fails in two seconds with a name, instead of ten lines into a tool that says only that it
       # has no credentials. A missing secret is by far the likeliest reason a deploy does not start.
-      - name: Check the secrets this target needs
+      - name: Check the secrets this environment needs
         run: |
-          missing=
-          [ -n "${{ secrets.FLY_API_TOKEN }}" ] || missing="$missing FLY_API_TOKEN"
           if [ "${{ inputs.target }}" = staging ]; then
-            [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ] || missing="$missing RENDER_DEPLOY_HOOK_URL"
+            [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ] || missing=RENDER_DEPLOY_HOOK_URL
+          else
+            [ -n "${{ secrets.FLY_API_TOKEN }}" ] || missing=FLY_API_TOKEN
           fi
           if [ -n "$missing" ]; then
-            echo "::error::Missing repository secret(s):$missing. Settings → Secrets and variables"\
-                 "→ Actions → Repository secrets. Environment secrets and variables are not visible here."
+            echo "::error::The ${{ inputs.target }} environment has no $missing."\
+                 "Settings → Environments → ${{ inputs.target }} → Environment secrets."
             exit 1
           fi
 
-      - uses: actions/checkout@v4
-        if: inputs.target == 'staging'
-
-      # Two registries for one image: Render pulls from GHCR, and Fly can only pull private images
-      # from its own registry. Both pushes carry the same digest, so it is a single artifact.
+      # Read for production, write for staging. GITHUB_TOKEN covers both.
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -65,15 +66,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-
-      # Only the build pushes to Fly's registry; `flyctl deploy` authenticates with the token alone.
-      - name: Log in to the Fly registry
+      #
+      # staging: build, publish, deploy
+      #
+      - uses: actions/checkout@v4
         if: inputs.target == 'staging'
-        run: flyctl auth docker
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
       - uses: docker/setup-buildx-action@v3
         if: inputs.target == 'staging'
 
@@ -87,48 +84,51 @@ jobs:
         with:
           context: .
           push: true
-          tags: |
-            ${{ env.GHCR_IMAGE }}:sha-${{ github.sha }}
-            ${{ env.FLY_IMAGE }}:sha-${{ github.sha }}
+          tags: ${{ env.GHCR_IMAGE }}:sha-${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
             GPR_USER=${{ github.actor }}
             GPR_KEY=${{ secrets.GPR_KEY || secrets.GITHUB_TOKEN }}
 
-      # Production deploys by digest, so a tag rewritten in the meantime cannot change what ships.
-      - name: Resolve the image
-        id: image
-        run: |
-          if [ "${{ inputs.target }}" = staging ]; then
-            tag="sha-$GITHUB_SHA"
-          else
-            tag=staging
-          fi
-          if ! digest=$(docker buildx imagetools inspect "$GHCR_IMAGE:$tag" \
-                          --format '{{.Manifest.Digest}}' 2>/dev/null); then
-            echo "::error::$GHCR_IMAGE:$tag does not exist. Deploy to staging first."
-            exit 1
-          fi
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
-          echo "Deploying $tag ($digest) to ${{ inputs.target }}."
-
       - name: Deploy to Render
         if: inputs.target == 'staging'
         run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
 
-      # Fly pulls from its own registry, where the image is tagged by commit, so the digest has to
-      # be resolved back to that tag.
+      #
+      # production: promote what staging is running
+      #
+      # Resolved by digest, so a tag rewritten in between cannot change what ships. Fly can only
+      # pull private images from its own registry, so the image is copied there — not rebuilt.
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+        if: inputs.target == 'production'
+      - name: Copy the staging image into Fly's registry
+        if: inputs.target == 'production'
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          if ! digest=$(docker buildx imagetools inspect "$GHCR_IMAGE:staging" \
+                          --format '{{.Manifest.Digest}}' 2>/dev/null); then
+            echo "::error::Nothing has been deployed to staging yet, so there is nothing to promote."
+            exit 1
+          fi
+          echo "Promoting $digest."
+          flyctl auth docker
+          docker buildx imagetools create --tag "$FLY_IMAGE:production" "$GHCR_IMAGE@$digest"
+
       - name: Deploy to Fly
         if: inputs.target == 'production'
-        run: |
-          flyctl deploy --app k9x-backend \
-            --image "$FLY_IMAGE@${{ steps.image.outputs.digest }}"
+        run: flyctl deploy --app k9x-backend --image "$FLY_IMAGE:production"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       # Last, so the tag only moves if the deploy succeeded.
       - name: Move the ${{ inputs.target }} tag
         run: |
-          docker buildx imagetools create \
-            --tag "$GHCR_IMAGE:${{ inputs.target }}" "$GHCR_IMAGE@${{ steps.image.outputs.digest }}"
+          if [ "${{ inputs.target }}" = staging ]; then
+            src="$GHCR_IMAGE:sha-$GITHUB_SHA"
+          else
+            src="$GHCR_IMAGE:staging"
+          fi
+          digest=$(docker buildx imagetools inspect "$src" --format '{{.Manifest.Digest}}')
+          docker buildx imagetools create --tag "$GHCR_IMAGE:${{ inputs.target }}" "$GHCR_IMAGE@$digest"
