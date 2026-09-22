@@ -1,9 +1,14 @@
-# One build, two deployments.
+# One build, promoted through the two environments.
 #
-# The image is built here and nowhere else: neither Render nor Fly builds from source any more.
-# That is what keeps the credential story simple — the GitHub Packages token that resolves
-# com.k9x:oas-definition-stubs only ever exists inside this workflow, and staging and production
-# run the very same image digest, so a promotion cannot introduce a rebuild difference.
+# The image is built here and nowhere else: neither Render nor Fly builds from source. That is what
+# keeps the GitHub Packages token that resolves com.k9x:oas-definition-stubs inside this workflow,
+# and what lets production run the exact image that staging validated — deploys never rebuild, they
+# point an environment at an image that already exists.
+#
+#   push to main            builds and publishes sha-<commit>. Deploys nothing.
+#   run "Deploy", staging   points Render at that image and moves the `staging` tag onto it.
+#   run "Deploy", prod      refuses unless the image is the one currently tagged `staging`,
+#                           then deploys it to Fly and moves the `production` tag onto it.
 #
 # Repository secrets required:
 #   FLY_API_TOKEN           `fly tokens create deploy -a k9x-backend`
@@ -13,19 +18,20 @@
 
 name: Deploy
 
-# Nothing deploys on its own. A push to main only builds and publishes the image, so the artifact
-# is ready and main is known to compile; taking it to staging or to production is always a manual
-# run of this workflow with the target picked below.
 on:
   push:
     branches: [main]
   workflow_dispatch:
     inputs:
       target:
-        description: Where to deploy the image built from this ref
+        description: Environment to deploy to
         required: true
         type: choice
         options: [staging, production]
+      tag:
+        description: Image tag to deploy. Defaults to the one built from this ref.
+        required: false
+        type: string
 
 env:
   GHCR_IMAGE: ghcr.io/${{ github.repository }}
@@ -33,23 +39,18 @@ env:
 
 jobs:
   build:
-    name: Build and push image
+    name: Build and publish image
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    outputs:
-      tag: ${{ steps.meta.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
-
-      - id: meta
-        run: echo "tag=sha-${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
-
       - uses: docker/setup-buildx-action@v3
 
       # Two registries for one image: Render pulls from GHCR, and Fly can only pull private images
-      # from its own registry. Both pushes carry the same digest, so they are the same artifact.
+      # from its own registry. Both pushes carry the same digest, so it is a single artifact.
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -63,42 +64,81 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
+      # GITHUB_TOKEN is ephemeral and expires with the job, so no long-lived PAT is involved. It can
+      # only read the package once k9x-oas-definition grants this repository access (package →
+      # Package settings → Manage Actions access). Until then, set a GPR_KEY repository secret with
+      # a PAT and it takes precedence.
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            ${{ env.GHCR_IMAGE }}:${{ steps.meta.outputs.tag }}
-            ${{ env.GHCR_IMAGE }}:latest
-            ${{ env.FLY_IMAGE }}:${{ steps.meta.outputs.tag }}
+            ${{ env.GHCR_IMAGE }}:sha-${{ github.sha }}
+            ${{ env.FLY_IMAGE }}:sha-${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # GITHUB_TOKEN is ephemeral and expires with the job, so no long-lived PAT is involved.
-          # It can only read the package once k9x-oas-definition grants this repository access
-          # (package → Package settings → Manage Actions access). Until then, set a GPR_KEY
-          # repository secret with a PAT and it takes precedence.
           build-args: |
             GPR_USER=${{ github.actor }}
             GPR_KEY=${{ secrets.GPR_KEY || secrets.GITHUB_TOKEN }}
 
-  staging:
-    name: Deploy staging (Render)
-    needs: build
-    if: inputs.target == 'staging'
+  deploy:
+    name: Deploy ${{ inputs.target }}
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
-      # Render is configured to pull ghcr.io/<repo>:latest; the hook makes it pull again.
-      - run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  production:
-    name: Deploy production (Fly)
-    needs: build
-    if: inputs.target == 'production'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+      - name: Resolve the image
+        id: image
+        run: |
+          tag="${{ inputs.tag }}"
+          tag="${tag:-sha-$GITHUB_SHA}"
+          if ! digest=$(docker buildx imagetools inspect "$GHCR_IMAGE:$tag" \
+                          --format '{{.Manifest.Digest}}' 2>/dev/null); then
+            echo "::error::$GHCR_IMAGE:$tag does not exist. Push to main to build it first."
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "Deploying $tag ($digest) to ${{ inputs.target }}."
+
+      # Staging first, always: production can only deploy what staging is running right now. This is
+      # a digest comparison, not a tag one, so a rebuilt tag does not sneak past it.
+      - name: Require the image to have gone through staging
+        if: inputs.target == 'production'
+        run: |
+          staged=$(docker buildx imagetools inspect "$GHCR_IMAGE:staging" \
+                     --format '{{.Manifest.Digest}}' 2>/dev/null) || {
+            echo "::error::Nothing has been deployed to staging yet."; exit 1; }
+          if [ "$staged" != "${{ steps.image.outputs.digest }}" ]; then
+            echo "::error::${{ steps.image.outputs.tag }} is not what staging is running ($staged)."
+            exit 1
+          fi
+
+      - name: Deploy to Render
+        if: inputs.target == 'staging'
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --app k9x-backend --image "$FLY_IMAGE:${{ needs.build.outputs.tag }}"
+        if: inputs.target == 'production'
+      - name: Deploy to Fly
+        if: inputs.target == 'production'
+        run: flyctl deploy --app k9x-backend --image "$FLY_IMAGE:${{ steps.image.outputs.tag }}"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      # The moving tag is what each platform pulls, and what the check above reads. Last, so it only
+      # moves if the deploy succeeded.
+      - name: Move the ${{ inputs.target }} tag
+        run: |
+          docker buildx imagetools create \
+            --tag "$GHCR_IMAGE:${{ inputs.target }}" "$GHCR_IMAGE@${{ steps.image.outputs.digest }}"
