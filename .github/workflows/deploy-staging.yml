@@ -1,0 +1,25 @@
+# Manual only, like production. Render builds staging from source itself — its service holds
+# GPR_USER and GPR_KEY as environment variables, which it forwards to the build — so this workflow
+# only tells it to go, keeping both deployments in the same place instead of one here and one in
+# Render's dashboard. Turn Auto-Deploy off in the service, or it also deploys on its own on push.
+#
+# The `staging` GitHub environment holds RENDER_DEPLOY_HOOK_URL (the service → Settings → Deploy Hook).
+
+name: Deploy staging
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Check the environment's secrets
+        run: |
+          [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ] || {
+            echo "::error::The staging environment has no RENDER_DEPLOY_HOOK_URL."; exit 1; }
+
+      # Render answers with the deploy it queued; it does not wait for the build to finish.
+      - name: Trigger the Render deploy
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
