@@ -17,6 +17,15 @@ name: Deploy production
 
 on:
   workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create a GitHub release after deploying?'
+        required: false
+        default: false
+        type: boolean
+      release_tag:
+        description: 'Custom tag name for the release (only used when creating a release)'
+        required: false
 
 env:
   GHCR_IMAGE: ghcr.io/${{ github.repository }}
@@ -26,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       - name: Check the environment's secrets
@@ -77,6 +86,27 @@ jobs:
           digest=$(docker buildx imagetools inspect "$GHCR_IMAGE:sha-$GITHUB_SHA" \
                      --format '{{.Manifest.Digest}}')
           docker buildx imagetools create --tag "$GHCR_IMAGE:production" "$GHCR_IMAGE@$digest"
+
+      - name: Set release tag
+        id: release_vars
+        if: ${{ github.event.inputs.create_release == 'true' }}
+        env:
+          CUSTOM_RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+        run: |
+          if [ -n "$CUSTOM_RELEASE_TAG" ]; then
+            echo "release_tag=$CUSTOM_RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_tag=release-$(date -u +%Y%m%d-%H%M)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: softprops/action-gh-release@v2
+        if: ${{ github.event.inputs.create_release == 'true' }}
+        with:
+          tag_name: ${{ steps.release_vars.outputs.release_tag }}
+          name: Release ${{ steps.release_vars.outputs.release_tag }}
+          body: "Image: `${{ env.GHCR_IMAGE }}:sha-${{ github.sha }}`"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # The sha- tags pile up one per deploy. Storage is free while the package is public, so this
       # is only to keep the version list readable — and it runs last, so a failed deploy leaves the
