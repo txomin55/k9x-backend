@@ -65,3 +65,14 @@ jobs:
 
       - name: Trigger the Render deploy
         run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+      # The sha- tags pile up one per deploy. Storage is free while the package is public, so this
+      # is only to keep the version list readable. Production publishes to this same package, so the
+      # count covers both environments: at 5 there is room for the two running images and a rollback.
+      - name: Prune old image versions
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: k9x-backend
+          package-type: container
+          min-versions-to-keep: 5
+          delete-only-untagged-versions: false
