@@ -50,4 +50,17 @@ COPY --from=build /home/k9x-backend/newrelic/newrelic.jar /usr/local/lib/newreli
 COPY --from=build /home/k9x-backend/newrelic/newrelic.yml /usr/local/lib/newrelic/newrelic.yml
 EXPOSE 4000
 
-ENTRYPOINT ["java", "-javaagent:/usr/local/lib/newrelic/newrelic.jar", "-jar", "/usr/local/lib/k9x-backend.jar"]
+# JVM flags tuned for a small, slow box (Render gives staging 0.1 CPU, Fly 1 shared CPU, 512MB both):
+#   -XX:TieredStopAtLevel=1  only the C1 JIT: compiles faster and cheaper, peak speed a bit lower.
+#                            The backend is I/O-bound, so startup time matters more than peak speed.
+#   -XX:+UseSerialGC         single-threaded GC: no GC worker threads competing for one CPU and less
+#                            memory overhead than G1, which is what the JVM would otherwise pick.
+#   -Xss512k                 half the default stack for platform threads (virtual threads are unaffected).
+# Overridable per environment by setting JAVA_OPTS on the platform.
+ENV JAVA_OPTS="-XX:TieredStopAtLevel=1 -XX:+UseSerialGC -Xss512k"
+
+# The New Relic agent is only attached where NEW_RELIC_ENABLED=true (production, see fly.toml).
+# Instrumenting every class as it loads is most of the startup cost on staging's 0.1 CPU, and it
+# disables the JVM's class data sharing (the "Sharing is only supported for boot loader classes"
+# warning). `exec` keeps java as PID 1 so it receives the platform's SIGTERM.
+ENTRYPOINT ["sh", "-c", "if [ \"$NEW_RELIC_ENABLED\" = true ]; then AGENT=-javaagent:/usr/local/lib/newrelic/newrelic.jar; fi; exec java $JAVA_OPTS $AGENT -jar /usr/local/lib/k9x-backend.jar"]

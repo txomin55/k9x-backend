@@ -24,6 +24,8 @@ primary_region = 'cdg'
   POSTGRES_PORT = '5432'
   POSTGRES_SSLMODE = 'require'
   HIKARI_MAX_POOL_SIZE = '7'
+  # Attaches the New Relic Java agent (see Dockerfile). Staging leaves it unset.
+  NEW_RELIC_ENABLED = 'true'
 
 [http_service]
   internal_port = 4000
