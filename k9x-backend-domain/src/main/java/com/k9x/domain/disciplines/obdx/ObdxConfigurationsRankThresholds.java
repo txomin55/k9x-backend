@@ -27,6 +27,13 @@ public enum ObdxConfigurationsRankThresholds {
     CPC_COBS("OBDX.CPC_COBS", 100, 200, false),
     SCC_BREVET("OBDX.SCC_BREVET", 100, 200, false),
     SKK_STARTKLASS("OBDX.SKK_STARTKLASS", 100, 200, false),
+    // The Danish LP1 is the entry rung of a four-step national ladder (LP1 -> LP2 -> LP3 -> Champion):
+    // heelwork is still on leash, it is capped at 200 points and every dog must start there, so it sits
+    // with the other beginner classes. Denmark has no band at [201, 400]: its extra rung is at the bottom
+    // and not in the middle, so LP2 and LP3 keep the levels their programmes match.
+    DKK_KLASSE_1("OBDX.DKK_KLASSE_1", 100, 200, false),
+    VDH_BEGINNER("OBDX.VDH_BEGINNER", 100, 200, false),
+    OKV_BEGINNER("OBDX.OKV_BEGINNER", 100, 200, false),
     FCI_GRADE_1("OBDX.FCI_GRADE_1", 201, 400, false),
     RSCE_GRADO_1("OBDX.RSCE_GRADO_1", 201, 400, false),
     NKN_KLASSE_1("OBDX.NKN_KLASSE_1", 201, 400, false),
@@ -34,7 +41,18 @@ public enum ObdxConfigurationsRankThresholds {
     FCI_GRADE_2("OBDX.FCI_GRADE_2", 401, 600, false),
     NKN_KLASSE_2("OBDX.NKN_KLASSE_2", 401, 600, false),
     SKK_KLASS_2("OBDX.SKK_KLASS_2", 401, 600, false),
+    DKK_KLASSE_2("OBDX.DKK_KLASSE_2", 401, 600, false),
+    // The veterans' classes sit with grade 2 and not with the beginner ones: a dog only enters them at
+    // eight years old and coming from a competition class, their programme carries scent discrimination,
+    // a 15 m send-away and a directed retrieve, and both rulebooks group them with classes 2 and 3 for
+    // penalties and ring size. Same criterion that puts the Norwegian klasse 3 at [601, 750].
+    VDH_SENIOR("OBDX.VDH_SENIOR", 401, 600, false),
+    OKV_SENIOR("OBDX.OKV_SENIOR", 401, 600, false),
     NKN_KLASSE_3("OBDX.NKN_KLASSE_3", 601, 750, false),
+    // The Danish LP3 is the top NATIONAL class — scent discrimination, directed retrieve and send-away are
+    // all in it — but the world championship is run in the elite class (FCI grade 3) and not here, so its
+    // band stops at 750 and never reaches the championship tiers. Same reading as the Norwegian klasse 3.
+    DKK_KLASSE_3("OBDX.DKK_KLASSE_3", 601, 750, false),
     FCI_GRADE_3("OBDX.FCI_GRADE_3", 601, 1000, true);
 
     /** A closed score range. The championship semi-final and final use a degenerate band where {@code min == max}. */

@@ -110,11 +110,17 @@ class ObdxConfigurationsRankThresholdsTest {
         // The Finnish beginner class scores exactly like COBS: same band, same event points.
         assertBaremo(ObdxConfigurationsRankThresholds.SPKL_ALO, CLUB, 125, 150, 175);
         assertBaremo(ObdxConfigurationsRankThresholds.SPKL_ALO, OPEN, 184, 192, 200);
+        // The German and Austrian beginner classes score like COBS: same band, same event points.
+        assertBaremo(ObdxConfigurationsRankThresholds.VDH_BEGINNER, CLUB, 125, 150, 175);
+        assertBaremo(ObdxConfigurationsRankThresholds.OKV_BEGINNER, OPEN, 184, 192, 200);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_1, CLUB, 251, 300, 350);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_1, OPEN, 367, 384, 400);
         assertBaremo(ObdxConfigurationsRankThresholds.RSCE_GRADO_1, CLUB, 251, 300, 350);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_2, CLUB, 451, 500, 550);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_2, OPEN, 567, 584, 600);
+        // The veterans' classes ride with grade 2, which is where their programme and their judging sit.
+        assertBaremo(ObdxConfigurationsRankThresholds.VDH_SENIOR, CLUB, 451, 500, 550);
+        assertBaremo(ObdxConfigurationsRankThresholds.OKV_SENIOR, OPEN, 567, 584, 600);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_3, CLUB, 634, 667, 700);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_3, OPEN, 717, 734, 750);
         assertBaremo(ObdxConfigurationsRankThresholds.FCI_GRADE_3, WC_Q, 800, 825, 850);

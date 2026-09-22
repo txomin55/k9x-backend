@@ -38,6 +38,10 @@ class ObdxConfigurationGradeTest {
         assertNull(ObdxConfigurationGrade.resolve("OBDX.ENCI_PRE_DEBUTANTI.V2022"));
         assertNull(ObdxConfigurationGrade.resolve("OBDX.CPC_COBS.V2016"));
         assertNull(ObdxConfigurationGrade.resolve("OBDX.SPKL_ALO.V2016"));
+        assertNull(ObdxConfigurationGrade.resolve("OBDX.VDH_BEGINNER.V2025"));
+        assertNull(ObdxConfigurationGrade.resolve("OBDX.VDH_SENIOR.V2022"));
+        assertNull(ObdxConfigurationGrade.resolve("OBDX.OKV_BEGINNER.V2025"));
+        assertNull(ObdxConfigurationGrade.resolve("OBDX.OKV_SENIOR.V2025"));
     }
 
     /** The version suffix is digits too; reading it as the grade would print "0" for every class. */

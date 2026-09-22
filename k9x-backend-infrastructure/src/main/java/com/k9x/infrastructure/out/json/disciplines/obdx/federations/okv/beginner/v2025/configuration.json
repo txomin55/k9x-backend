@@ -1,0 +1,76 @@
+{
+  "id": "OBDX.OKV_BEGINNER.V2025",
+  "description": "ÖKV ÖPO OB-Beginner, Österreichische Prüfungsordnung 2025. Tie-break as the ÖPO states: heelwork, recall and send to the square; if still tied the teams are placed ex aequo.",
+  "break_tie": [
+    "OBDX.OKV_BEGINNER.3_V2025",
+    "OBDX.OKV_BEGINNER.5_V2025",
+    "OBDX.OKV_BEGINNER.6_V2025"
+  ],
+  "break_tie_tie": [],
+  "allowed_values": [
+    0,
+    5,
+    5.5,
+    6,
+    6.5,
+    7,
+    7.5,
+    8,
+    8.5,
+    9,
+    9.5,
+    10
+  ],
+  "qualifications": [
+    {
+      "id": "EXC",
+      "min_score": 256
+    },
+    {
+      "id": "MB",
+      "min_score": 224
+    },
+    {
+      "id": "B",
+      "min_score": 192
+    }
+  ],
+  "exercises": [
+    {
+      "id": "OBDX.OKV_BEGINNER.1_V2025",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.OKV_BEGINNER.2_V2025",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.OKV_BEGINNER.3_V2025",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.OKV_BEGINNER.4_V2025",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.OKV_BEGINNER.5_V2025",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.OKV_BEGINNER.6_V2025",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.OKV_BEGINNER.7_V2025",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.OKV_BEGINNER.8_V2025",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.OKV_BEGINNER.9_V2025",
+      "coef": 2
+    }
+  ]
+}

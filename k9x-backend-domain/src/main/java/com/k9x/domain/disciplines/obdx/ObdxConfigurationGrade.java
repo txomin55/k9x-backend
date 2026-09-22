@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * <p>There is no class column anywhere — the class is encoded in the configuration id
  * ({@code OBDX.FCI_GRADE_3.V2022}, {@code OBDX.RSCE_GRADO_1.V2026}), which is why this lives here as a domain rule
  * instead of being pattern-matched at the edge. Configurations with no numeric grade
- * ({@code DEBUTANTE}, {@code PRE_DEBUTANTI}, {@code COBS}, {@code SPKL_ALO}, {@code SCC_BREVET}, {@code SKK_STARTKLASS}) legitimately have no number; callers fall back to
+ * ({@code DEBUTANTE}, {@code PRE_DEBUTANTI}, {@code COBS}, {@code SPKL_ALO}, {@code SCC_BREVET}, {@code SKK_STARTKLASS}, {@code VDH_BEGINNER}, {@code VDH_SENIOR}, {@code OKV_BEGINNER}, {@code OKV_SENIOR}) legitimately have no number; callers fall back to
  * the configuration's translated name for those.
  */
 public final class ObdxConfigurationGrade {

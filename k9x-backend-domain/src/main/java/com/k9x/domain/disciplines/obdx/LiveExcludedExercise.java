@@ -40,6 +40,23 @@ public enum LiveExcludedExercise {
     NKN_KLASSE_3_1("OBDX.NKN_KLASSE_3.1"),
     SKK_KLASS_1_8("OBDX.SKK_KLASS_1.8"),
     SKK_KLASS_2_9("OBDX.SKK_KLASS_2.9"),
+    VDH_BEGINNER_2("OBDX.VDH_BEGINNER.2"),
+    VDH_SENIOR_1("OBDX.VDH_SENIOR.1"),
+    OKV_BEGINNER_2("OBDX.OKV_BEGINNER.2"),
+    OKV_SENIOR_1("OBDX.OKV_SENIOR.1"),
+    // The Danish group stay moves slot between rulebook versions —8 in V2020, 9 in V2023, 1 from V2026,
+    // and split into a sit half and a down half from V2024— so every slot it has ever occupied is listed.
+    // These ids carry no version suffix, so a slot listed here is excluded in EVERY version: in klasse 1
+    // that also takes out .1 (heel on leash before V2026) and .8 (sit for 15 seconds from V2023). Both are
+    // individual exercises, so those two versions lose a little of what could drive LIVE; the alternative
+    // —letting the group stay flip the whole field to LIVE— is the failure this enum exists to prevent.
+    DKK_KLASSE_1_1("OBDX.DKK_KLASSE_1.1"),
+    DKK_KLASSE_1_8("OBDX.DKK_KLASSE_1.8"),
+    DKK_KLASSE_1_9("OBDX.DKK_KLASSE_1.9"),
+    DKK_KLASSE_2_1("OBDX.DKK_KLASSE_2.1"),
+    DKK_KLASSE_2_2("OBDX.DKK_KLASSE_2.2"),
+    DKK_KLASSE_3_1("OBDX.DKK_KLASSE_3.1"),
+    DKK_KLASSE_3_2("OBDX.DKK_KLASSE_3.2"),
     // General impression
     CPC_COBS_8("OBDX.CPC_COBS.8"),
     RSCE_DEBUTANTE_9("OBDX.RSCE_DEBUTANTE.9"),
@@ -52,7 +69,15 @@ public enum LiveExcludedExercise {
     NKN_KLASSE_3_10("OBDX.NKN_KLASSE_3.10"),
     SKK_STARTKLASS_7("OBDX.SKK_STARTKLASS.7"),
     SKK_KLASS_1_9("OBDX.SKK_KLASS_1.9"),
-    SKK_KLASS_2_10("OBDX.SKK_KLASS_2.10");
+    SKK_KLASS_2_10("OBDX.SKK_KLASS_2.10"),
+    VDH_BEGINNER_11("OBDX.VDH_BEGINNER.11"),
+    VDH_SENIOR_10("OBDX.VDH_SENIOR.10"),
+    OKV_BEGINNER_9("OBDX.OKV_BEGINNER.9"),
+    OKV_SENIOR_9("OBDX.OKV_SENIOR.9"),
+    DKK_KLASSE_1_10("OBDX.DKK_KLASSE_1.10"),
+    DKK_KLASSE_2_11("OBDX.DKK_KLASSE_2.11"),
+    DKK_KLASSE_2_12("OBDX.DKK_KLASSE_2.12"),
+    DKK_KLASSE_3_11("OBDX.DKK_KLASSE_3.11");
 
     /**
      * Trailing version token of an exercise id, e.g. the {@code _V2022} in {@code OBDX.FCI_GRADE_2.1_V2022}.

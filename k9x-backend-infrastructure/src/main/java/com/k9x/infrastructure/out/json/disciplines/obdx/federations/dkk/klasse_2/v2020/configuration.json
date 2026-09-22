@@ -1,0 +1,84 @@
+{
+  "id": "OBDX.DKK_KLASSE_2.V2020",
+  "description": "DKK Lydighed klasse 2, LP-reglement 2020",
+  "break_tie": [
+    "OBDX.DKK_KLASSE_2.2_V2020",
+    "OBDX.DKK_KLASSE_2.4_V2020",
+    "OBDX.DKK_KLASSE_2.6_V2020"
+  ],
+  "break_tie_tie": [],
+  "allowed_values": [
+    0,
+    5,
+    5.5,
+    6,
+    6.5,
+    7,
+    7.5,
+    8,
+    8.5,
+    9,
+    9.5,
+    10
+  ],
+  "qualifications": [
+    {
+      "id": "EXC",
+      "min_score": 224
+    },
+    {
+      "id": "MB",
+      "min_score": 196
+    },
+    {
+      "id": "B",
+      "min_score": 168
+    }
+  ],
+  "exercises": [
+    {
+      "id": "OBDX.DKK_KLASSE_2.1_V2020",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.DKK_KLASSE_2.2_V2020",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.DKK_KLASSE_2.3_V2020",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.DKK_KLASSE_2.4_V2020",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.DKK_KLASSE_2.5_V2020",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.DKK_KLASSE_2.6_V2020",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.DKK_KLASSE_2.7_V2020",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.DKK_KLASSE_2.8_V2020",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.DKK_KLASSE_2.9_V2020",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.DKK_KLASSE_2.10_V2020",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.DKK_KLASSE_2.11_V2020",
+      "coef": 1
+    }
+  ]
+}

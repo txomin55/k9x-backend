@@ -1,0 +1,83 @@
+{
+  "id": "OBDX.VDH_SENIOR.V2022",
+  "description": "VDH Senioren-Klasse (VDH O-S), Prüfungsordnung Obedience 01-2022, unchanged in the 01-2025 edition. The tie-break follows the rule the PO gives for classes 1 and 2: it does not define one for the national classes.",
+  "break_tie": [
+    "OBDX.VDH_SENIOR.2_V2022",
+    "OBDX.VDH_SENIOR.3_V2022",
+    "OBDX.VDH_SENIOR.4_V2022",
+    "OBDX.VDH_SENIOR.10_V2022"
+  ],
+  "break_tie_tie": [
+    "OBDX.VDH_SENIOR.10_V2022"
+  ],
+  "allowed_values": [
+    0,
+    5,
+    5.5,
+    6,
+    6.5,
+    7,
+    7.5,
+    8,
+    8.5,
+    9,
+    9.5,
+    10
+  ],
+  "qualifications": [
+    {
+      "id": "EXC",
+      "min_score": 256
+    },
+    {
+      "id": "MB",
+      "min_score": 224
+    },
+    {
+      "id": "B",
+      "min_score": 192
+    }
+  ],
+  "exercises": [
+    {
+      "id": "OBDX.VDH_SENIOR.1_V2022",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.VDH_SENIOR.2_V2022",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_SENIOR.3_V2022",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_SENIOR.4_V2022",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_SENIOR.5_V2022",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.VDH_SENIOR.6_V2022",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_SENIOR.7_V2022",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.VDH_SENIOR.8_V2022",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.VDH_SENIOR.9_V2022",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.VDH_SENIOR.10_V2022",
+      "coef": 2
+    }
+  ]
+}

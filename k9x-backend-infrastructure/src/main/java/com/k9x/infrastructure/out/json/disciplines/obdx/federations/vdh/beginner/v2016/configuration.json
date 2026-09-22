@@ -1,0 +1,87 @@
+{
+  "id": "OBDX.VDH_BEGINNER.V2016",
+  "description": "VDH Beginner-Klasse (VDH O-B), Prüfungsordnung Obedience 01-2016, unchanged in the 01-2022 edition. Superseded on 1/1/2025, when the PO dropped «Stehen und betasten» and added the hurdle jump. The tie-break follows the rule the PO gives for classes 1 and 2: it does not define one for the national classes.",
+  "break_tie": [
+    "OBDX.VDH_BEGINNER.4_V2016",
+    "OBDX.VDH_BEGINNER.7_V2016",
+    "OBDX.VDH_BEGINNER.6_V2016",
+    "OBDX.VDH_BEGINNER.11_V2016"
+  ],
+  "break_tie_tie": [
+    "OBDX.VDH_BEGINNER.11_V2016"
+  ],
+  "allowed_values": [
+    0,
+    5,
+    5.5,
+    6,
+    6.5,
+    7,
+    7.5,
+    8,
+    8.5,
+    9,
+    9.5,
+    10
+  ],
+  "qualifications": [
+    {
+      "id": "EXC",
+      "min_score": 256
+    },
+    {
+      "id": "MB",
+      "min_score": 224
+    },
+    {
+      "id": "B",
+      "min_score": 192
+    }
+  ],
+  "exercises": [
+    {
+      "id": "OBDX.VDH_BEGINNER.1_V2016",
+      "coef": 4
+    },
+    {
+      "id": "OBDX.VDH_BEGINNER.2_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_BEGINNER.3_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_BEGINNER.4_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_BEGINNER.5_V2016",
+      "coef": 2
+    },
+    {
+      "id": "OBDX.VDH_BEGINNER.6_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_BEGINNER.7_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_BEGINNER.8_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_BEGINNER.9_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_BEGINNER.10_V2016",
+      "coef": 3
+    },
+    {
+      "id": "OBDX.VDH_BEGINNER.11_V2016",
+      "coef": 2
+    }
+  ]
+}

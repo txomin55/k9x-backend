@@ -36,7 +36,7 @@ Sub-bandas: `CLUB [50, 88]`, `OPEN [89, 100]`. Toda la franja cae en el rango gl
 
 ---
 
-## OBDX_ENCI_DEBUTTANTI · CPC_COBS · OBDX_RSCE_DEBUTANTE · OBDX_SPKL_ALO · OBDX_SCC_BREVET · OBDX_SKK_STARTKLASS — franja `[100, 200]`
+## OBDX_ENCI_DEBUTTANTI · CPC_COBS · OBDX_RSCE_DEBUTANTE · OBDX_SPKL_ALO · OBDX_SCC_BREVET · OBDX_SKK_STARTKLASS · OBDX_VDH_BEGINNER · OBDX_OKV_BEGINNER · OBDX_DKK_KLASSE_1 — franja `[100, 200]`
 
 Sub-bandas: `CLUB [100, 175]`, `OPEN [176, 200]`. Toda la franja cae en el rango global **E**.
 
@@ -60,7 +60,7 @@ Sub-bandas: `CLUB [201, 350]`, `OPEN [351, 400]`. Toda la franja cae en el rango
 
 ---
 
-## OBDX_FCI_GRADE_2 · OBDX_NKN_KLASSE_2 · OBDX_SKK_KLASS_2 — franja `[401, 600]`
+## OBDX_FCI_GRADE_2 · OBDX_NKN_KLASSE_2 · OBDX_SKK_KLASS_2 · OBDX_VDH_SENIOR · OBDX_OKV_SENIOR · OBDX_DKK_KLASSE_2 — franja `[401, 600]`
 
 Sub-bandas: `CLUB [401, 550]`, `OPEN [551, 600]`. Toda la franja cae en el rango global **C**.
 
@@ -72,7 +72,7 @@ Sub-bandas: `CLUB [401, 550]`, `OPEN [551, 600]`. Toda la franja cae en el rango
 
 ---
 
-## OBDX_NKN_KLASSE_3 — franja `[601, 750]`
+## OBDX_NKN_KLASSE_3 · OBDX_DKK_KLASSE_3 — franja `[601, 750]`
 
 La clase alta **nacional** de la NKK. Es del nivel del grado 3 —mismos ejercicios de dificultad, prueba de
 olfato y dirigido incluidos—, así que arranca donde arranca el grado 3; pero el mundial no se corre en ella
@@ -115,8 +115,8 @@ la única categoría que cruza la frontera B/A: con menos de 10 competidores se 
 | Configuración | Franja | Categorías | Letra(s) posibles |
 |---|---|---|---|
 | OBDX_ENCI_PREDEBUTTANTI | 50–100 | CLUB, OPEN | E |
-| OBDX_ENCI_DEBUTTANTI, CPC_COBS, OBDX_RSCE_DEBUTANTE, OBDX_SPKL_ALO, OBDX_SCC_BREVET, OBDX_SKK_STARTKLASS | 100–200 | CLUB, OPEN | E |
+| OBDX_ENCI_DEBUTTANTI, CPC_COBS, OBDX_RSCE_DEBUTANTE, OBDX_SPKL_ALO, OBDX_SCC_BREVET, OBDX_SKK_STARTKLASS, OBDX_VDH_BEGINNER, OBDX_OKV_BEGINNER | 100–200 | CLUB, OPEN | E |
 | OBDX_FCI_GRADE_1, OBDX_RSCE_GRADO_1, OBDX_NKN_KLASSE_1, OBDX_SKK_KLASS_1 | 201–400 | CLUB, OPEN | D |
-| OBDX_FCI_GRADE_2, OBDX_NKN_KLASSE_2, OBDX_SKK_KLASS_2 | 401–600 | CLUB, OPEN | C |
-| OBDX_NKN_KLASSE_3 | 601–750 | CLUB, OPEN | B |
+| OBDX_FCI_GRADE_2, OBDX_NKN_KLASSE_2, OBDX_SKK_KLASS_2, OBDX_VDH_SENIOR, OBDX_OKV_SENIOR, OBDX_DKK_KLASSE_2 | 401–600 | CLUB, OPEN | C |
+| OBDX_NKN_KLASSE_3, OBDX_DKK_KLASSE_3 | 601–750 | CLUB, OPEN | B |
 | OBDX_FCI_GRADE_3 | 601–1000 | las cinco | B / A / S |
