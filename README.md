@@ -18,7 +18,7 @@ Three profiles, chosen at runtime with the `SPRING_PROFILES_ACTIVE` environment 
 |---|---|---|---|
 | `local` | your machine | local Postgres container | DEBUG logs, swagger enabled, crons every 2 min |
 | `local-remote` | your machine | remote Supabase | DEBUG logs, swagger enabled, real cron schedule |
-| `deployed` | Render (staging, production, …) | remote Supabase | WARN logs, swagger and api-docs disabled, only the `health` actuator endpoint exposed |
+| `deployed` | Render (staging) and Fly (production) | remote Supabase | WARN logs, swagger and api-docs disabled, only the `health` actuator endpoint exposed |
 
 Staging and production share the `deployed` profile: they differ in environment variables, not in configuration files.
 
@@ -30,11 +30,27 @@ environment files at the repository root — copy `.env.example` to get started:
 .env.local         read at startup by application-local.yml
 .env.local-remote  read at startup by application-local-remote.yml
 .env.staging       local record of what is configured in Render (staging)
-.env.production    local record of what is configured in Render (production)
+.env.production    local record of what is configured in Fly (production)
 ```
 
 The two local files are loaded through `spring.config.import` and parsed as `.properties`: no quotes, no `export`.
 Each environment has its own VAPID key pair, see `docs/vapid-keys.md`.
+
+## Deployment
+
+Staging runs on Render and production on Fly, both on the `deployed` profile and both on the very
+same image: `.github/workflows/deploy.yml` builds it once and pushes it to GHCR (Render pulls from
+there) and to `registry.fly.io` (Fly can only pull private images from its own registry). Neither
+platform builds from source, which is what keeps the GitHub Packages token confined to the workflow
+and guarantees that promoting to production deploys the digest staging already ran.
+
+| | Trigger | Deployed by |
+|---|---|---|
+| staging (Render) | every push to `main` | the workflow calls Render's deploy hook |
+| production (Fly) | manual: run the *Deploy* workflow | `flyctl deploy --image registry.fly.io/k9x-backend:<tag>` |
+
+Runtime configuration is not in the image: Render takes it from the service's environment variables
+and Fly from `fly.toml` plus `fly secrets`. See `.env.staging` / `.env.production` for the values.
 
 ## Logging
 

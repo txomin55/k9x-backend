@@ -12,19 +12,17 @@ COPY k9x-backend-application/ k9x-backend-application/
 COPY k9x-backend-infrastructure/ k9x-backend-infrastructure/
 COPY k9x-backend-loader/ k9x-backend-loader/
 
-# Build-time credentials to resolve dependencies from GitHub Packages (a GitHub PAT with the
-# `read:packages` scope). They are needed only here, never at runtime, and they are NOT the
-# platform's runtime secrets: `fly secrets` are injected into the machine at boot, and the builder
-# never sees them. GPR_USER is a plain arg either way — a GitHub username is not a secret.
+# Build-time credentials to resolve com.k9x:oas-definition-stubs from GitHub Packages. They are
+# needed here only, never at runtime, and they are NOT the platforms' runtime secrets: on Fly a
+# secret is injected into the machine at boot and a builder never sees it.
 #
-# The two deployment targets feed GPR_KEY in differently, so the RUN below accepts both:
+# Only .github/workflows/deploy.yml builds this image — Render and Fly deploy the artifact it
+# publishes — so the credentials come from that workflow, where GPR_KEY is the job's ephemeral
+# GITHUB_TOKEN. Nothing here has to be configured on either platform.
 #
-#   Fly (production)  a build secret, mounted as a file only for that RUN and recorded in no layer:
-#                     fly deploy --build-secret GPR_KEY=<PAT>
-#   Render (staging)  a build arg, because Render has no build-secret mechanism: it forwards the
-#                     service's environment variables to the build, so GPR_USER and GPR_KEY are
-#                     set in the Render dashboard. There the PAT does end up in the build layer's
-#                     metadata, which is the reason production does not use this path.
+# Building by hand needs them passed explicitly, taking the values from gradle.properties:
+#
+#   docker build --build-arg GPR_USER=<user> --build-arg GPR_KEY=<github PAT, read:packages> .
 #
 # gradle.properties is git-ignored and excluded by .dockerignore, so it never reaches the builder.
 ARG GPR_USER
@@ -33,10 +31,8 @@ ARG GPR_KEY
 # The image is profile-agnostic: the environment picks the profile at runtime through
 # SPRING_PROFILES_ACTIVE (set it to `deployed`), so the same jar serves staging and production.
 # Also downloads and unzips the New Relic Java agent into ./newrelic/.
-RUN --mount=type=secret,id=GPR_KEY,required=false \
-    ./gradlew :k9x-backend-loader:bootJar unzipNewrelic \
-    -Pgpr.user="$GPR_USER" \
-    -Pgpr.key="$(cat /run/secrets/GPR_KEY 2>/dev/null || echo "$GPR_KEY")" \
+RUN ./gradlew :k9x-backend-loader:bootJar unzipNewrelic \
+    -Pgpr.user="$GPR_USER" -Pgpr.key="$GPR_KEY" \
     -x test
 
 # Override the agent's bundled default config with the project's custom one.

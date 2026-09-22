@@ -1,0 +1,95 @@
+# One build, two deployments.
+#
+# The image is built here and nowhere else: neither Render nor Fly builds from source any more.
+# That is what keeps the credential story simple — the GitHub Packages token that resolves
+# com.k9x:oas-definition-stubs only ever exists inside this workflow, and staging and production
+# run the very same image digest, so a promotion cannot introduce a rebuild difference.
+#
+# Repository secrets required:
+#   FLY_API_TOKEN           `fly tokens create deploy -a k9x-backend`
+#   RENDER_DEPLOY_HOOK_URL  Render dashboard → the staging service → Settings → Deploy Hook
+#   GPR_KEY                 optional. Only needed if GITHUB_TOKEN cannot read the package; see below.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  GHCR_IMAGE: ghcr.io/${{ github.repository }}
+  FLY_IMAGE: registry.fly.io/k9x-backend
+
+jobs:
+  build:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: meta
+        run: echo "tag=sha-${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Two registries for one image: Render pulls from GHCR, and Fly can only pull private images
+      # from its own registry. Both pushes carry the same digest, so they are the same artifact.
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Log in to the Fly registry
+        run: flyctl auth docker
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.GHCR_IMAGE }}:${{ steps.meta.outputs.tag }}
+            ${{ env.GHCR_IMAGE }}:latest
+            ${{ env.FLY_IMAGE }}:${{ steps.meta.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # GITHUB_TOKEN is ephemeral and expires with the job, so no long-lived PAT is involved.
+          # It can only read the package once k9x-oas-definition grants this repository access
+          # (package → Package settings → Manage Actions access). Until then, set a GPR_KEY
+          # repository secret with a PAT and it takes precedence.
+          build-args: |
+            GPR_USER=${{ github.actor }}
+            GPR_KEY=${{ secrets.GPR_KEY || secrets.GITHUB_TOKEN }}
+
+  staging:
+    name: Deploy staging (Render)
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      # Render is configured to pull ghcr.io/<repo>:latest; the hook makes it pull again.
+      - run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+  production:
+    name: Deploy production (Fly)
+    needs: build
+    # Manual on purpose: staging goes out on every push to main, production when you say so.
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --app k9x-backend --image "$FLY_IMAGE:${{ needs.build.outputs.tag }}"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

@@ -2,12 +2,11 @@
 # is profile-agnostic, and the profile, the database and every secret come from the machine's
 # environment (see .env.production for the full list of what must be set here).
 #
-# GPR_KEY is a BUILD-time credential and must not live in this file, which is committed: it goes on
-# the deploy command as a build secret, which the Dockerfile mounts for the duration of the build.
-# `fly secrets` do NOT work for it — they are injected into the machine at boot, and the builder
-# never sees them. Every deploy therefore runs from the CLI:
+# Fly never builds this app: .github/workflows/deploy.yml builds the image once, pushes it to
+# registry.fly.io and deploys it by digest, so there is no [build] section and no build credential
+# to configure here. A deploy is the "Deploy production (Fly)" workflow, run manually; by hand it is
 #
-#   fly deploy --build-secret GPR_KEY=<github PAT with read:packages>
+#   flyctl deploy --image registry.fly.io/k9x-backend:<tag>
 #
 # Runtime secrets are set once with `fly secrets set` (they are encrypted and injected as env vars):
 #
@@ -18,12 +17,6 @@
 
 app = 'k9x-backend'
 primary_region = 'mad'
-
-[build]
-  dockerfile = 'Dockerfile'
-  # A GitHub username is not a secret, so it can live here; the matching token cannot (see above).
-  [build.args]
-    GPR_USER = 'txomin55'
 
 [env]
   SPRING_PROFILES_ACTIVE = 'deployed'
