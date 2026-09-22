@@ -16,7 +16,7 @@
 #                   VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=...
 
 app = 'k9x-backend'
-primary_region = 'mad'
+primary_region = 'cdg'
 
 [env]
   SPRING_PROFILES_ACTIVE = 'deployed'
