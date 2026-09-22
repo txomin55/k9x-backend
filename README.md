@@ -44,10 +44,13 @@ there) and to `registry.fly.io` (Fly can only pull private images from its own r
 platform builds from source, which is what keeps the GitHub Packages token confined to the workflow
 and guarantees that promoting to production deploys the digest staging already ran.
 
+Nothing deploys on its own: a push to `main` only builds and publishes the image. Both deployments
+are a manual run of the *Deploy* workflow, choosing the target.
+
 | | Trigger | Deployed by |
 |---|---|---|
-| staging (Render) | every push to `main` | the workflow calls Render's deploy hook |
-| production (Fly) | manual: run the *Deploy* workflow | `flyctl deploy --image registry.fly.io/k9x-backend:<tag>` |
+| staging (Render) | *Deploy* workflow, target `staging` | the workflow calls Render's deploy hook |
+| production (Fly) | *Deploy* workflow, target `production` | `flyctl deploy --image registry.fly.io/k9x-backend:<tag>` |
 
 Runtime configuration is not in the image: Render takes it from the service's environment variables
 and Fly from `fly.toml` plus `fly secrets`. See `.env.staging` / `.env.production` for the values.

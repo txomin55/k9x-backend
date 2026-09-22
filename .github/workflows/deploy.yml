@@ -8,14 +8,24 @@
 # Repository secrets required:
 #   FLY_API_TOKEN           `fly tokens create deploy -a k9x-backend`
 #   RENDER_DEPLOY_HOOK_URL  Render dashboard → the staging service → Settings → Deploy Hook
+#                           (turn Auto-Deploy off there, or Render deploys on its own on push)
 #   GPR_KEY                 optional. Only needed if GITHUB_TOKEN cannot read the package; see below.
 
 name: Deploy
 
+# Nothing deploys on its own. A push to main only builds and publishes the image, so the artifact
+# is ready and main is known to compile; taking it to staging or to production is always a manual
+# run of this workflow with the target picked below.
 on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      target:
+        description: Where to deploy the image built from this ref
+        required: true
+        type: choice
+        options: [staging, production]
 
 env:
   GHCR_IMAGE: ghcr.io/${{ github.repository }}
@@ -75,7 +85,7 @@ jobs:
   staging:
     name: Deploy staging (Render)
     needs: build
-    if: github.event_name == 'push'
+    if: inputs.target == 'staging'
     runs-on: ubuntu-latest
     steps:
       # Render is configured to pull ghcr.io/<repo>:latest; the hook makes it pull again.
@@ -84,8 +94,7 @@ jobs:
   production:
     name: Deploy production (Fly)
     needs: build
-    # Manual on purpose: staging goes out on every push to main, production when you say so.
-    if: github.event_name == 'workflow_dispatch'
+    if: inputs.target == 'production'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
