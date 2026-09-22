@@ -1,5 +1,6 @@
-# Fly.io deployment. The image is profile-agnostic: the profile, the database and every secret
-# come from the machine's environment, exactly as on Render (see .env.example / .env.production).
+# Fly.io deployment: production. Staging stays on Render, and the image is the same for both — it
+# is profile-agnostic, and the profile, the database and every secret come from the machine's
+# environment (see .env.production for the full list of what must be set here).
 #
 # GPR_KEY is a BUILD-time credential and must not live in this file, which is committed: it goes on
 # the deploy command as a build secret, which the Dockerfile mounts for the duration of the build.
