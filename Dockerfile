@@ -6,6 +6,11 @@ FROM eclipse-temurin:25-jdk AS build
 WORKDIR /home/k9x-backend
 COPY gradlew gradlew
 COPY gradle/ gradle/
+# Fetch the Gradle distribution in a layer of its own. It only depends on the wrapper files, so the
+# layer cache (exported to GitHub Actions) reuses it across builds and services.gradle.org is only
+# hit when the Gradle version changes. That host answers CI runners with an occasional 403, and a
+# download in the same step as the build meant one of those failed the whole deploy.
+RUN ./gradlew --version
 COPY settings.gradle.kts build.gradle.kts ./
 COPY k9x-backend-domain/ k9x-backend-domain/
 COPY k9x-backend-application/ k9x-backend-application/
