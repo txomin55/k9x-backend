@@ -1,134 +1,58 @@
-# Nothing here runs on its own: there is no push trigger, no schedule. Deploying is always someone
-# running this workflow and choosing an environment.
+# Manual only: deploying is someone running this workflow, never a push.
 #
-#   staging      builds the image from the chosen ref, publishes it to GHCR, points Render at it
-#                and moves the `staging` tag onto it.
-#   production   takes the image the `staging` tag holds — no rebuild, no choice of version — copies
-#                it into Fly's registry and deploys it. What production runs is what staging ran.
+# It builds the image from the chosen ref, pushes it to Fly's registry and deploys it. The image is
+# built here and nowhere else, which is what keeps the GitHub Packages token that resolves
+# com.k9x:oas-definition-stubs inside this workflow instead of on the platform.
 #
-# The image is built here and nowhere else: neither Render nor Fly builds from source. That is what
-# keeps the GitHub Packages token that resolves com.k9x:oas-definition-stubs inside this workflow.
+# The job runs in the `production` GitHub environment, which holds FLY_API_TOKEN
+# (`fly tokens create deploy -a k9x-backend`) and can be put behind a required reviewer.
 #
-# The job runs in the GitHub environment it deploys to, so each one holds only its own credentials
-# and production can be put behind a required reviewer (Settings → Environments → production).
-#
-#   environment `staging`      RENDER_DEPLOY_HOOK_URL  the staging service → Settings → Deploy Hook
-#                                                      (turn Auto-Deploy off there, or Render
-#                                                      deploys on its own on push)
-#   environment `production`   FLY_API_TOKEN           `fly tokens create deploy -a k9x-backend`
-#
-# GPR_KEY, at repository level, is optional: only needed if GITHUB_TOKEN cannot read the package.
+# Staging still deploys from Render on its own; when it moves here, this grows a second target.
 
-name: Deploy
+name: Deploy production
 
 on:
   workflow_dispatch:
-    inputs:
-      target:
-        description: Environment to deploy to
-        required: true
-        type: choice
-        options: [staging, production]
 
 env:
-  GHCR_IMAGE: ghcr.io/${{ github.repository }}
   FLY_IMAGE: registry.fly.io/k9x-backend
 
 jobs:
   deploy:
-    name: Deploy ${{ inputs.target }}
     runs-on: ubuntu-latest
-    environment: ${{ inputs.target }}
-    permissions:
-      contents: read
-      packages: write
+    environment: production
     steps:
-      # Fails in two seconds with a name, instead of ten lines into a tool that says only that it
-      # has no credentials. A missing secret is by far the likeliest reason a deploy does not start.
-      - name: Check the secrets this environment needs
+      - name: Check the environment's secrets
         run: |
-          if [ "${{ inputs.target }}" = staging ]; then
-            [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ] || missing=RENDER_DEPLOY_HOOK_URL
-          else
-            [ -n "${{ secrets.FLY_API_TOKEN }}" ] || missing=FLY_API_TOKEN
-          fi
-          if [ -n "$missing" ]; then
-            echo "::error::The ${{ inputs.target }} environment has no $missing."\
-                 "Settings → Environments → ${{ inputs.target }} → Environment secrets."
-            exit 1
-          fi
+          [ -n "${{ secrets.FLY_API_TOKEN }}" ] || {
+            echo "::error::The production environment has no FLY_API_TOKEN."; exit 1; }
 
-      # Read for production, write for staging. GITHUB_TOKEN covers both.
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      #
-      # staging: build, publish, deploy
-      #
       - uses: actions/checkout@v4
-        if: inputs.target == 'staging'
       - uses: docker/setup-buildx-action@v3
-        if: inputs.target == 'staging'
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Log in to the Fly registry
+        run: flyctl auth docker
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       # GITHUB_TOKEN is ephemeral and expires with the job, so no long-lived PAT is involved. It can
       # only read the package once k9x-oas-definition grants this repository access (package →
       # Package settings → Manage Actions access). Until then, set a GPR_KEY repository secret with
       # a PAT and it takes precedence.
       - name: Build and push
-        if: inputs.target == 'staging'
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ env.GHCR_IMAGE }}:sha-${{ github.sha }}
+          tags: ${{ env.FLY_IMAGE }}:sha-${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
             GPR_USER=${{ github.actor }}
             GPR_KEY=${{ secrets.GPR_KEY || secrets.GITHUB_TOKEN }}
 
-      - name: Deploy to Render
-        if: inputs.target == 'staging'
-        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
-
-      #
-      # production: promote what staging is running
-      #
-      # Resolved by digest, so a tag rewritten in between cannot change what ships. Fly can only
-      # pull private images from its own registry, so the image is copied there — not rebuilt.
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-        if: inputs.target == 'production'
-      - name: Copy the staging image into Fly's registry
-        if: inputs.target == 'production'
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: |
-          if ! digest=$(docker buildx imagetools inspect "$GHCR_IMAGE:staging" \
-                          --format '{{.Manifest.Digest}}' 2>/dev/null); then
-            echo "::error::Nothing has been deployed to staging yet, so there is nothing to promote."
-            exit 1
-          fi
-          echo "Promoting $digest."
-          flyctl auth docker
-          docker buildx imagetools create --tag "$FLY_IMAGE:production" "$GHCR_IMAGE@$digest"
-
       - name: Deploy to Fly
-        if: inputs.target == 'production'
-        run: flyctl deploy --app k9x-backend --image "$FLY_IMAGE:production"
+        run: flyctl deploy --app k9x-backend --image "$FLY_IMAGE:sha-$GITHUB_SHA"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      # Last, so the tag only moves if the deploy succeeded.
-      - name: Move the ${{ inputs.target }} tag
-        run: |
-          if [ "${{ inputs.target }}" = staging ]; then
-            src="$GHCR_IMAGE:sha-$GITHUB_SHA"
-          else
-            src="$GHCR_IMAGE:staging"
-          fi
-          digest=$(docker buildx imagetools inspect "$src" --format '{{.Manifest.Digest}}')
-          docker buildx imagetools create --tag "$GHCR_IMAGE:${{ inputs.target }}" "$GHCR_IMAGE@$digest"
