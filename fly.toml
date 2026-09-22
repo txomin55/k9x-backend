@@ -1,0 +1,53 @@
+# Fly.io deployment. The image is profile-agnostic: the profile, the database and every secret
+# come from the machine's environment, exactly as on Render (see .env.example / .env.production).
+#
+# GPR_KEY is a BUILD-time credential and must not live in this file, which is committed: it goes on
+# the deploy command as a build secret, which the Dockerfile mounts for the duration of the build.
+# `fly secrets` do NOT work for it — they are injected into the machine at boot, and the builder
+# never sees them. Every deploy therefore runs from the CLI:
+#
+#   fly deploy --build-secret GPR_KEY=<github PAT with read:packages>
+#
+# Runtime secrets are set once with `fly secrets set` (they are encrypted and injected as env vars):
+#
+#   fly secrets set POSTGRES_HOST=... POSTGRES_DATABASE=... POSTGRES_USERNAME=... \
+#                   POSTGRES_PASSWORD=... JWT_SECRET=... GOOGLE_CLIENT_ID=... \
+#                   GOOGLE_CLIENT_SECRET=... GOOGLE_REDIRECT_URL=... \
+#                   VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=...
+
+app = 'k9x-backend'
+primary_region = 'mad'
+
+[build]
+  dockerfile = 'Dockerfile'
+  # A GitHub username is not a secret, so it can live here; the matching token cannot (see above).
+  [build.args]
+    GPR_USER = 'txomin55'
+
+[env]
+  SPRING_PROFILES_ACTIVE = 'deployed'
+  PORT = '4000'
+  POSTGRES_PORT = '5432'
+  POSTGRES_SSLMODE = 'require'
+  HIKARI_MAX_POOL_SIZE = '7'
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  # The daily snapshot cron only runs if the machine is up, so it must never be stopped when idle.
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+  # `deployed` exposes only the health actuator endpoint (application-deployed.yml).
+  [[http_service.checks]]
+    grace_period = '60s'
+    interval = '30s'
+    timeout = '5s'
+    method = 'GET'
+    path = '/actuator/health/readiness'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '512mb'

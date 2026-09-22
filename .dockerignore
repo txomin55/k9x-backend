@@ -1,0 +1,18 @@
+# Keeps the build context small and secrets out of it. Without this file flyctl falls back to
+# .gitignore, which also excludes them, but `docker build` locally would not.
+.git
+.gitignore
+.idea
+.claude
+.claire
+build
+*/build
+.gradle
+*/.gradle
+gradle.properties
+.env
+.env.*
+!.env.example
+docs
+notes.md
+README.md
