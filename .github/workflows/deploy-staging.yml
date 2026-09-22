@@ -1,7 +1,11 @@
-# Manual only, like production. Render builds staging from source itself — its service holds
-# GPR_USER and GPR_KEY as environment variables, which it forwards to the build — so this workflow
-# only tells it to go, keeping both deployments in the same place instead of one here and one in
-# Render's dashboard. Turn Auto-Deploy off in the service, or it also deploys on its own on push.
+# Manual only, like production. Render no longer builds from source: this workflow builds the image,
+# publishes it to GHCR and tells Render to pull it — so the GitHub Packages token that resolves
+# com.k9x:oas-definition-stubs lives here, and staging runs the same artifact production will.
+#
+# Render must be configured as "Deploy an existing image" pointing at
+# ghcr.io/txomin55/k9x-backend:staging — a tag this workflow moves onto each new image — with
+# Auto-Deploy off and, unless the package is public, a registry credential (a PAT with
+# read:packages).
 #
 # The `staging` GitHub environment holds RENDER_DEPLOY_HOOK_URL (the service → Settings → Deploy Hook).
 
@@ -10,16 +14,54 @@ name: Deploy staging
 on:
   workflow_dispatch:
 
+env:
+  GHCR_IMAGE: ghcr.io/${{ github.repository }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: staging
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Check the environment's secrets
         run: |
           [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ] || {
             echo "::error::The staging environment has no RENDER_DEPLOY_HOOK_URL."; exit 1; }
 
-      # Render answers with the deploy it queued; it does not wait for the build to finish.
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # GITHUB_TOKEN is ephemeral and expires with the job, so no long-lived PAT is involved. It can
+      # only read the package once k9x-oas-definition grants this repository access (package →
+      # Package settings → Manage Actions access). Until then, set a GPR_KEY repository secret with
+      # a PAT and it takes precedence.
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.GHCR_IMAGE }}:sha-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GPR_USER=${{ github.actor }}
+            GPR_KEY=${{ secrets.GPR_KEY || secrets.GITHUB_TOKEN }}
+
+      # Render pulls a fixed tag, so the deploy is this tag moving to the image just built.
+      - name: Move the staging tag
+        run: |
+          digest=$(docker buildx imagetools inspect "$GHCR_IMAGE:sha-$GITHUB_SHA" \
+                     --format '{{.Manifest.Digest}}')
+          docker buildx imagetools create --tag "$GHCR_IMAGE:staging" "$GHCR_IMAGE@$digest"
+
       - name: Trigger the Render deploy
         run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
