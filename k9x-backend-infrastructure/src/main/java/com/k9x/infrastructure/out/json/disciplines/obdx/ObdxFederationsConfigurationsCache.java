@@ -8,6 +8,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class ObdxFederationsConfigurationsCache {
@@ -33,6 +34,20 @@ public class ObdxFederationsConfigurationsCache {
 
     public List<Entry> getAll() {
         return entries;
+    }
+
+    /**
+     * De cada clase de cada federación conviven varias versiones —una por reglamento publicado—, pero solo una
+     * está vigente: la del año más alto. Las anteriores siguen en {@link #getAll()} porque los eventos ya
+     * puntuados las referencian por id.
+     */
+    public List<Entry> getCurrent() {
+        LinkedHashMap<String, Entry> current = new LinkedHashMap<>();
+        for (Entry entry : entries) {
+            current.merge(entry.federationKey() + "/" + entry.classKey(), entry,
+                    (previous, candidate) -> candidate.version() > previous.version() ? candidate : previous);
+        }
+        return List.copyOf(current.values());
     }
 
     private static List<Entry> load(ObjectMapper objectMapper) {

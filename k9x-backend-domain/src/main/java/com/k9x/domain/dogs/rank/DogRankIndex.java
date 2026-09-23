@@ -74,7 +74,8 @@ public final class DogRankIndex {
     /** Level plateau: results younger than this many months carry no degradation at all. */
     public static final int LEVEL_PLATEAU_MONTHS_THRESHOLD = 8;
 
-    private static final double FLOOR = 0.01;
+    /** The weight both curves settle at, so no dog that ever competed disappears from the ranking. */
+    public static final double FLOOR = 0.01;
     private static final double DAYS_PER_MONTH = 30.4375;
     private static final double MILLIS_PER_DAY = 86_400_000.0;
     private static final int LEVEL_SCALE = 4;
@@ -91,6 +92,10 @@ public final class DogRankIndex {
     public record Result(BigDecimal score, long timestamp) {
     }
 
+    /** A corner of a decay curve: the weight a result {@code month} months old carries. */
+    public record Anchor(int month, double weight) {
+    }
+
     private DogRankIndex() {
     }
 
@@ -103,6 +108,21 @@ public final class DogRankIndex {
      * @param now     current epoch millis.
      */
     public static int of(List<Result> results, long now) {
+        int index = exactOf(results, now).setScale(0, RoundingMode.HALF_UP).intValue();
+
+        // No dog that has ever competed drops to 0: both curves floor at 0.01, so a decades-old history would
+        // otherwise round down to nothing and tie every retired dog together.
+        return Math.max(1, index);
+    }
+
+    /**
+     * The index of {@link #of(List, long)} before it is rounded to the integer {@code dogs.rank} scale and kept
+     * off 0: {@code level × freshness} as computed. What a chart explaining the formula plots.
+     *
+     * @param results the dog's rank history, at least one result.
+     * @param now     current epoch millis.
+     */
+    public static BigDecimal exactOf(List<Result> results, long now) {
         // Each result's contribution: age weight × score, best first.
         List<BigDecimal> contributions = results.stream()
                 .map(result -> BigDecimal.valueOf(levelWeight(monthsBetween(result.timestamp(), now)))
@@ -125,13 +145,7 @@ public final class DogRankIndex {
                 .min()
                 .orElseThrow();
 
-        int index = level.multiply(BigDecimal.valueOf(freshness(mostRecentMonths)))
-                .setScale(0, RoundingMode.HALF_UP)
-                .intValue();
-
-        // No dog that has ever competed drops to 0: both curves floor at 0.01, so a decades-old history would
-        // otherwise round down to nothing and tie every retired dog together.
-        return Math.max(1, index);
+        return level.multiply(BigDecimal.valueOf(freshness(mostRecentMonths)));
     }
 
     /** The level-curve weight (§3.1) for a result that is {@code months} old: plateau, anchored ramp, floor. */
@@ -142,6 +156,22 @@ public final class DogRankIndex {
     /** The freshness factor (§3.2) for a most-recent result that is {@code months} old. */
     public static double freshness(double months) {
         return interpolate(months, FRESHNESS_PLATEAU_MONTHS_THRESHOLD, FRESHNESS_ANCHORS);
+    }
+
+    /** The level curve's corners, from month 0 at full weight to the month it reaches {@link #FLOOR}. */
+    public static List<Anchor> levelAnchors() {
+        return anchors(LEVEL_ANCHORS);
+    }
+
+    /** The freshness curve's corners, from month 0 at full weight to the month it reaches {@link #FLOOR}. */
+    public static List<Anchor> freshnessAnchors() {
+        return anchors(FRESHNESS_ANCHORS);
+    }
+
+    private static List<Anchor> anchors(double[][] anchors) {
+        return Stream.concat(Stream.of(new Anchor(0, 1.0)),
+                        Stream.of(anchors).map(anchor -> new Anchor((int) anchor[0], anchor[1])))
+                .toList();
     }
 
     private static double interpolate(double months, double plateauMonths, double[][] anchors) {

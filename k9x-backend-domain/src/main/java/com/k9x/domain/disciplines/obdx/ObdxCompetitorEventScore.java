@@ -28,10 +28,11 @@ import java.math.RoundingMode;
  */
 public final class ObdxCompetitorEventScore {
 
-    private static final BigDecimal QUALIFICATION_UNLOCK_SHARE = new BigDecimal("0.10");
+    /** Share of the span a competitor unlocks by reaching the first qualification. */
+    public static final BigDecimal QUALIFICATION_UNLOCK_SHARE = new BigDecimal("0.10");
     private static final BigDecimal WINDOW_SHARE = new BigDecimal("0.90");
     /** Share of the 90% window earned by climbing from the first to the highest qualification (the rest is the polish above it). */
-    private static final BigDecimal KNEE_SHARE = new BigDecimal("0.85");
+    public static final BigDecimal KNEE_SHARE = new BigDecimal("0.85");
     private static final int PROGRESS_SCALE = 6;
 
     private ObdxCompetitorEventScore() {

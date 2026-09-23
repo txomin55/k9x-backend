@@ -1,0 +1,884 @@
+{
+  "schemaVersion" : 1,
+  "indexScale" : {
+    "min" : 0,
+    "max" : 1000
+  },
+  "decayCurves" : {
+    "series" : [ {
+      "id" : "level",
+      "plateauMonths" : 8,
+      "floor" : {
+        "fromMonth" : 56,
+        "value" : 0.01
+      },
+      "anchors" : [ {
+        "month" : 0,
+        "weight" : 1.0
+      }, {
+        "month" : 8,
+        "weight" : 1.0
+      }, {
+        "month" : 14,
+        "weight" : 0.85
+      }, {
+        "month" : 20,
+        "weight" : 0.65
+      }, {
+        "month" : 26,
+        "weight" : 0.45
+      }, {
+        "month" : 32,
+        "weight" : 0.25
+      }, {
+        "month" : 44,
+        "weight" : 0.05
+      }, {
+        "month" : 56,
+        "weight" : 0.01
+      } ]
+    }, {
+      "id" : "freshness",
+      "plateauMonths" : 6,
+      "floor" : {
+        "fromMonth" : 58,
+        "value" : 0.01
+      },
+      "anchors" : [ {
+        "month" : 0,
+        "weight" : 1.0
+      }, {
+        "month" : 6,
+        "weight" : 1.0
+      }, {
+        "month" : 10,
+        "weight" : 0.8
+      }, {
+        "month" : 16,
+        "weight" : 0.6
+      }, {
+        "month" : 22,
+        "weight" : 0.4
+      }, {
+        "month" : 28,
+        "weight" : 0.25
+      }, {
+        "month" : 34,
+        "weight" : 0.12
+      }, {
+        "month" : 46,
+        "weight" : 0.03
+      }, {
+        "month" : 58,
+        "weight" : 0.01
+      } ]
+    } ]
+  },
+  "indexExample" : {
+    "formula" : "index = level × freshness",
+    "parameters" : {
+      "cReference" : {
+        "es" : "Suelo de la franja FCI Grado 1",
+        "en" : "FCI Grade 1 band floor"
+      },
+      "filler" : "min(C, bestContribution)",
+      "provisionalIfResultsBelow" : 3,
+      "N" : 3,
+      "C" : 201
+    },
+    "slotFilling" : {
+      "cases" : [ {
+        "id" : "ramp-1",
+        "results" : [ 750 ],
+        "slots" : [ 750, 201, 201 ],
+        "level" : 384
+      }, {
+        "id" : "ramp-2",
+        "results" : [ 750, 750 ],
+        "slots" : [ 750, 750, 201 ],
+        "level" : 567
+      }, {
+        "id" : "ramp-3",
+        "results" : [ 750, 750, 750 ],
+        "slots" : [ 750, 750, 750 ],
+        "level" : 750
+      }, {
+        "id" : "weak-result",
+        "results" : [ 200 ],
+        "slots" : [ 200, 200, 200 ],
+        "level" : 200
+      } ]
+    },
+    "dogs" : [ {
+      "id" : "dogA",
+      "name" : {
+        "es" : "Perro A (se jubila)",
+        "en" : "Dog A (retires)"
+      },
+      "results" : [ {
+        "month" : 0,
+        "score" : 750
+      }, {
+        "month" : 0,
+        "score" : 700
+      }, {
+        "month" : 0,
+        "score" : 650
+      } ],
+      "series" : [ {
+        "month" : 0,
+        "index" : 700.0
+      }, {
+        "month" : 2,
+        "index" : 700.0
+      }, {
+        "month" : 4,
+        "index" : 700.0
+      }, {
+        "month" : 6,
+        "index" : 700.0
+      }, {
+        "month" : 8,
+        "index" : 630.0
+      }, {
+        "month" : 10,
+        "index" : 532.0
+      }, {
+        "month" : 12,
+        "index" : 462.0
+      }, {
+        "month" : 14,
+        "index" : 396.7
+      }, {
+        "month" : 16,
+        "index" : 329.0
+      }, {
+        "month" : 18,
+        "index" : 267.6
+      }, {
+        "month" : 20,
+        "index" : 212.3
+      }, {
+        "month" : 22,
+        "index" : 163.3
+      }, {
+        "month" : 24,
+        "index" : 126.6
+      }, {
+        "month" : 26,
+        "index" : 94.5
+      }, {
+        "month" : 28,
+        "index" : 67.1
+      }, {
+        "month" : 30,
+        "index" : 45.8
+      }, {
+        "month" : 32,
+        "index" : 30.6
+      }, {
+        "month" : 34,
+        "index" : 19.5
+      }, {
+        "month" : 36,
+        "index" : 14.4
+      }, {
+        "month" : 38,
+        "index" : 10.1
+      }, {
+        "month" : 40,
+        "index" : 6.6
+      }, {
+        "month" : 42,
+        "index" : 3.8
+      }, {
+        "month" : 44,
+        "index" : 1.7
+      }, {
+        "month" : 46,
+        "index" : 1.0
+      }, {
+        "month" : 48,
+        "index" : 0.7
+      }, {
+        "month" : 50,
+        "index" : 0.5
+      }, {
+        "month" : 52,
+        "index" : 0.4
+      }, {
+        "month" : 54,
+        "index" : 0.2
+      }, {
+        "month" : 56,
+        "index" : 0.1
+      }, {
+        "month" : 58,
+        "index" : 0.1
+      }, {
+        "month" : 60,
+        "index" : 0.1
+      } ],
+      "events" : [ {
+        "month" : 0,
+        "index" : 700.0,
+        "score" : 700.0,
+        "label" : "3 × G3 · scores 750/700/650"
+      } ]
+    }, {
+      "id" : "dogB",
+      "name" : {
+        "es" : "Perro B (progresión)",
+        "en" : "Dog B (progression)"
+      },
+      "results" : [ {
+        "month" : 0,
+        "score" : 146.63
+      }, {
+        "month" : 10,
+        "score" : 226.33
+      }, {
+        "month" : 20,
+        "score" : 478.04
+      }, {
+        "month" : 30,
+        "score" : 534.29
+      }, {
+        "month" : 37,
+        "score" : 719.2
+      }, {
+        "month" : 40,
+        "score" : 736.63
+      } ],
+      "series" : [ {
+        "month" : 0,
+        "index" : 146.6
+      }, {
+        "month" : 2,
+        "index" : 146.6
+      }, {
+        "month" : 4,
+        "index" : 146.6
+      }, {
+        "month" : 6,
+        "index" : 146.6
+      }, {
+        "month" : 8,
+        "index" : 132.0
+      }, {
+        "month" : 10,
+        "index" : 111.4
+      }, {
+        "month" : 10,
+        "index" : 209.4
+      }, {
+        "month" : 12,
+        "index" : 209.4
+      }, {
+        "month" : 14,
+        "index" : 209.4
+      }, {
+        "month" : 16,
+        "index" : 209.4
+      }, {
+        "month" : 18,
+        "index" : 188.5
+      }, {
+        "month" : 20,
+        "index" : 164.5
+      }, {
+        "month" : 20,
+        "index" : 298.0
+      }, {
+        "month" : 22,
+        "index" : 294.2
+      }, {
+        "month" : 24,
+        "index" : 293.3
+      }, {
+        "month" : 26,
+        "index" : 293.3
+      }, {
+        "month" : 28,
+        "index" : 264.0
+      }, {
+        "month" : 30,
+        "index" : 228.3
+      }, {
+        "month" : 30,
+        "index" : 396.5
+      }, {
+        "month" : 32,
+        "index" : 388.5
+      }, {
+        "month" : 34,
+        "index" : 380.5
+      }, {
+        "month" : 36,
+        "index" : 369.9
+      }, {
+        "month" : 37,
+        "index" : 346.4
+      }, {
+        "month" : 37,
+        "index" : 537.3
+      }, {
+        "month" : 38,
+        "index" : 532.0
+      }, {
+        "month" : 40,
+        "index" : 512.5
+      }, {
+        "month" : 40,
+        "index" : 654.5
+      }, {
+        "month" : 42,
+        "index" : 645.6
+      }, {
+        "month" : 43,
+        "index" : 641.1
+      }, {
+        "month" : 44,
+        "index" : 636.7
+      }, {
+        "month" : 45,
+        "index" : 630.7
+      }, {
+        "month" : 46,
+        "index" : 618.8
+      }, {
+        "month" : 48,
+        "index" : 535.4
+      }, {
+        "month" : 50,
+        "index" : 447.0
+      }, {
+        "month" : 52,
+        "index" : 381.8
+      }, {
+        "month" : 54,
+        "index" : 320.4
+      }, {
+        "month" : 56,
+        "index" : 261.8
+      }, {
+        "month" : 58,
+        "index" : 209.1
+      }, {
+        "month" : 60,
+        "index" : 167.3
+      } ],
+      "events" : [ {
+        "month" : 0,
+        "index" : 146.6,
+        "score" : 146.6,
+        "label" : "COBS 180/200 · ev.150"
+      }, {
+        "month" : 10,
+        "index" : 209.4,
+        "score" : 226.3,
+        "label" : "G1 260/320 · ev.230"
+      }, {
+        "month" : 20,
+        "index" : 298.0,
+        "score" : 478.0,
+        "label" : "G2 230/320 · ev.540"
+      }, {
+        "month" : 30,
+        "index" : 396.5,
+        "score" : 534.3,
+        "label" : "G2 270/320 · ev.550"
+      }, {
+        "month" : 37,
+        "index" : 537.3,
+        "score" : 719.2,
+        "label" : "G3 250/320 · ev.750"
+      }, {
+        "month" : 40,
+        "index" : 654.5,
+        "score" : 736.6,
+        "label" : "G3 255/320 · ev.760"
+      } ]
+    }, {
+      "id" : "dogC",
+      "name" : {
+        "es" : "Perro C (estable top)",
+        "en" : "Dog C (steady top)"
+      },
+      "results" : [ {
+        "month" : 0,
+        "score" : 678.9
+      }, {
+        "month" : 0,
+        "score" : 660
+      }, {
+        "month" : 0,
+        "score" : 761.12
+      }, {
+        "month" : 5,
+        "score" : 732.71
+      }, {
+        "month" : 10,
+        "score" : 783.21
+      }, {
+        "month" : 15,
+        "score" : 702.51
+      }, {
+        "month" : 20,
+        "score" : 752.18
+      }, {
+        "month" : 25,
+        "score" : 761.12
+      }, {
+        "month" : 30,
+        "score" : 732.71
+      }, {
+        "month" : 35,
+        "score" : 783.21
+      }, {
+        "month" : 40,
+        "score" : 702.51
+      } ],
+      "series" : [ {
+        "month" : 0,
+        "index" : 700.0
+      }, {
+        "month" : 2,
+        "index" : 700.0
+      }, {
+        "month" : 4,
+        "index" : 700.0
+      }, {
+        "month" : 5,
+        "index" : 700.0
+      }, {
+        "month" : 5,
+        "index" : 724.2
+      }, {
+        "month" : 6,
+        "index" : 724.2
+      }, {
+        "month" : 8,
+        "index" : 724.2
+      }, {
+        "month" : 10,
+        "index" : 700.2
+      }, {
+        "month" : 10,
+        "index" : 746.3
+      }, {
+        "month" : 11,
+        "index" : 740.0
+      }, {
+        "month" : 12,
+        "index" : 733.6
+      }, {
+        "month" : 13,
+        "index" : 727.3
+      }, {
+        "month" : 14,
+        "index" : 714.9
+      }, {
+        "month" : 15,
+        "index" : 700.3
+      }, {
+        "month" : 15,
+        "index" : 727.3
+      }, {
+        "month" : 16,
+        "index" : 721.2
+      }, {
+        "month" : 18,
+        "index" : 708.9
+      }, {
+        "month" : 20,
+        "index" : 681.6
+      }, {
+        "month" : 20,
+        "index" : 732.9
+      }, {
+        "month" : 21,
+        "index" : 726.4
+      }, {
+        "month" : 22,
+        "index" : 719.9
+      }, {
+        "month" : 23,
+        "index" : 713.3
+      }, {
+        "month" : 24,
+        "index" : 701.0
+      }, {
+        "month" : 25,
+        "index" : 686.4
+      }, {
+        "month" : 25,
+        "index" : 726.9
+      }, {
+        "month" : 26,
+        "index" : 721.0
+      }, {
+        "month" : 28,
+        "index" : 709.3
+      }, {
+        "month" : 30,
+        "index" : 683.1
+      }, {
+        "month" : 30,
+        "index" : 736.1
+      }, {
+        "month" : 31,
+        "index" : 729.9
+      }, {
+        "month" : 32,
+        "index" : 723.6
+      }, {
+        "month" : 33,
+        "index" : 717.3
+      }, {
+        "month" : 34,
+        "index" : 704.7
+      }, {
+        "month" : 35,
+        "index" : 690.0
+      }, {
+        "month" : 35,
+        "index" : 746.3
+      }, {
+        "month" : 36,
+        "index" : 740.0
+      }, {
+        "month" : 38,
+        "index" : 727.3
+      }, {
+        "month" : 40,
+        "index" : 700.3
+      }, {
+        "month" : 40,
+        "index" : 727.3
+      }, {
+        "month" : 41,
+        "index" : 721.2
+      }, {
+        "month" : 42,
+        "index" : 715.1
+      }, {
+        "month" : 43,
+        "index" : 708.9
+      }, {
+        "month" : 44,
+        "index" : 696.3
+      }, {
+        "month" : 46,
+        "index" : 667.0
+      }, {
+        "month" : 48,
+        "index" : 573.9
+      }, {
+        "month" : 50,
+        "index" : 475.5
+      }, {
+        "month" : 52,
+        "index" : 402.6
+      }, {
+        "month" : 54,
+        "index" : 335.8
+      }, {
+        "month" : 56,
+        "index" : 272.6
+      }, {
+        "month" : 58,
+        "index" : 216.0
+      }, {
+        "month" : 60,
+        "index" : 166.0
+      } ],
+      "events" : [ {
+        "month" : 0,
+        "index" : 700.0,
+        "score" : 761.1,
+        "label" : "G3 270/320 · ev.780 (+2 earlier G3)"
+      }, {
+        "month" : 5,
+        "index" : 724.2,
+        "score" : 732.7,
+        "label" : "G3 265/320 · ev.750"
+      }, {
+        "month" : 10,
+        "index" : 746.3,
+        "score" : 783.2,
+        "label" : "G3 280/320 · ev.800"
+      }, {
+        "month" : 15,
+        "index" : 727.3,
+        "score" : 702.5,
+        "label" : "G3 255/320 · ev.720"
+      }, {
+        "month" : 20,
+        "index" : 732.9,
+        "score" : 752.2,
+        "label" : "G3 270/320 · ev.770"
+      }, {
+        "month" : 25,
+        "index" : 726.9,
+        "score" : 761.1,
+        "label" : "G3 270/320 · ev.780"
+      }, {
+        "month" : 30,
+        "index" : 736.1,
+        "score" : 732.7,
+        "label" : "G3 265/320 · ev.750"
+      }, {
+        "month" : 35,
+        "index" : 746.3,
+        "score" : 783.2,
+        "label" : "G3 280/320 · ev.800"
+      }, {
+        "month" : 40,
+        "index" : 727.3,
+        "score" : 702.5,
+        "label" : "G3 255/320 · ev.720"
+      } ]
+    }, {
+      "id" : "dogD",
+      "name" : {
+        "es" : "Perro D (estable estándar)",
+        "en" : "Dog D (steady standard)"
+      },
+      "results" : [ {
+        "month" : 0,
+        "score" : 620
+      }, {
+        "month" : 0,
+        "score" : 606
+      }, {
+        "month" : 0,
+        "score" : 634.01
+      }, {
+        "month" : 5,
+        "score" : 663.67
+      }, {
+        "month" : 10,
+        "score" : 611.53
+      }, {
+        "month" : 15,
+        "score" : 687.47
+      }, {
+        "month" : 20,
+        "score" : 644.28
+      }, {
+        "month" : 25,
+        "score" : 634.01
+      }, {
+        "month" : 30,
+        "score" : 663.67
+      }, {
+        "month" : 35,
+        "score" : 611.53
+      }, {
+        "month" : 40,
+        "score" : 687.47
+      } ],
+      "series" : [ {
+        "month" : 0,
+        "index" : 620.0
+      }, {
+        "month" : 2,
+        "index" : 620.0
+      }, {
+        "month" : 4,
+        "index" : 620.0
+      }, {
+        "month" : 5,
+        "index" : 620.0
+      }, {
+        "month" : 5,
+        "index" : 639.2
+      }, {
+        "month" : 6,
+        "index" : 639.2
+      }, {
+        "month" : 8,
+        "index" : 639.2
+      }, {
+        "month" : 10,
+        "index" : 618.3
+      }, {
+        "month" : 10,
+        "index" : 625.8
+      }, {
+        "month" : 11,
+        "index" : 620.6
+      }, {
+        "month" : 12,
+        "index" : 615.3
+      }, {
+        "month" : 13,
+        "index" : 610.0
+      }, {
+        "month" : 14,
+        "index" : 599.2
+      }, {
+        "month" : 15,
+        "index" : 586.6
+      }, {
+        "month" : 15,
+        "index" : 643.2
+      }, {
+        "month" : 16,
+        "index" : 637.6
+      }, {
+        "month" : 18,
+        "index" : 626.6
+      }, {
+        "month" : 20,
+        "index" : 603.5
+      }, {
+        "month" : 20,
+        "index" : 637.6
+      }, {
+        "month" : 21,
+        "index" : 632.5
+      }, {
+        "month" : 22,
+        "index" : 627.4
+      }, {
+        "month" : 23,
+        "index" : 622.3
+      }, {
+        "month" : 24,
+        "index" : 611.5
+      }, {
+        "month" : 25,
+        "index" : 598.9
+      }, {
+        "month" : 25,
+        "index" : 643.8
+      }, {
+        "month" : 26,
+        "index" : 638.1
+      }, {
+        "month" : 28,
+        "index" : 626.6
+      }, {
+        "month" : 30,
+        "index" : 602.5
+      }, {
+        "month" : 30,
+        "index" : 636.6
+      }, {
+        "month" : 31,
+        "index" : 631.2
+      }, {
+        "month" : 32,
+        "index" : 625.8
+      }, {
+        "month" : 33,
+        "index" : 620.5
+      }, {
+        "month" : 34,
+        "index" : 609.8
+      }, {
+        "month" : 35,
+        "index" : 597.4
+      }, {
+        "month" : 35,
+        "index" : 625.8
+      }, {
+        "month" : 36,
+        "index" : 620.6
+      }, {
+        "month" : 38,
+        "index" : 610.0
+      }, {
+        "month" : 40,
+        "index" : 586.6
+      }, {
+        "month" : 40,
+        "index" : 643.2
+      }, {
+        "month" : 41,
+        "index" : 637.6
+      }, {
+        "month" : 42,
+        "index" : 632.1
+      }, {
+        "month" : 43,
+        "index" : 626.6
+      }, {
+        "month" : 44,
+        "index" : 615.9
+      }, {
+        "month" : 46,
+        "index" : 591.0
+      }, {
+        "month" : 48,
+        "index" : 509.5
+      }, {
+        "month" : 50,
+        "index" : 422.4
+      }, {
+        "month" : 52,
+        "index" : 358.0
+      }, {
+        "month" : 54,
+        "index" : 298.9
+      }, {
+        "month" : 56,
+        "index" : 242.9
+      }, {
+        "month" : 58,
+        "index" : 192.6
+      }, {
+        "month" : 60,
+        "index" : 148.2
+      } ],
+      "events" : [ {
+        "month" : 0,
+        "index" : 620.0,
+        "score" : 634.0,
+        "label" : "G3 240/320 · ev.650 (+2 earlier G3)"
+      }, {
+        "month" : 5,
+        "index" : 639.2,
+        "score" : 663.7,
+        "label" : "G3 250/320 · ev.680"
+      }, {
+        "month" : 10,
+        "index" : 625.8,
+        "score" : 611.5,
+        "label" : "G3 230/320 · ev.620"
+      }, {
+        "month" : 15,
+        "index" : 643.2,
+        "score" : 687.5,
+        "label" : "G3 260/320 · ev.700"
+      }, {
+        "month" : 20,
+        "index" : 637.6,
+        "score" : 644.3,
+        "label" : "G3 245/320 · ev.660"
+      }, {
+        "month" : 25,
+        "index" : 643.8,
+        "score" : 634.0,
+        "label" : "G3 240/320 · ev.650"
+      }, {
+        "month" : 30,
+        "index" : 636.6,
+        "score" : 663.7,
+        "label" : "G3 250/320 · ev.680"
+      }, {
+        "month" : 35,
+        "index" : 625.8,
+        "score" : 611.5,
+        "label" : "G3 230/320 · ev.620"
+      }, {
+        "month" : 40,
+        "index" : 643.2,
+        "score" : 687.5,
+        "label" : "G3 260/320 · ev.700"
+      } ]
+    } ]
+  }
+}

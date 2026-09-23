@@ -5,11 +5,13 @@ import com.k9x.application.disciplines.obdx.port.GetObdxConfigurationAllowedValu
 import com.k9x.application.disciplines.obdx.port.GetObdxExerciseAllowedValuesPort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
+import com.k9x.application.methodology.port.GetMethodologyCatalogPort;
 import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxFederationsConfigurationsCache;
 import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxJsonClassificationConfigAdapter;
 import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxJsonConfigurationAllowedValuesAdapter;
 import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxJsonExerciseAllowedValuesAdapter;
 import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxJsonFederationsConfigurationsAdapter;
+import com.k9x.infrastructure.out.json.disciplines.obdx.ObdxJsonMethodologyCatalogAdapter;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,5 +51,11 @@ public class DisciplineJsonAdapterConfiguration {
     public GetObdxClassificationConfigPort getObdxClassificationConfigPort(
             ObdxFederationsConfigurationsCache cache) {
         return new ObdxJsonClassificationConfigAdapter(cache);
+    }
+
+    @Bean
+    public GetMethodologyCatalogPort getMethodologyCatalogPort(
+            ObdxFederationsConfigurationsCache cache, MessageSource messageSource) {
+        return new ObdxJsonMethodologyCatalogAdapter(cache, messageSource);
     }
 }

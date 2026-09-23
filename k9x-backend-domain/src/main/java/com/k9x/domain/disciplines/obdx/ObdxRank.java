@@ -18,35 +18,46 @@ package com.k9x.domain.disciplines.obdx;
  * rather than being seeded by hand.
  */
 public enum ObdxRank {
-    E, D, C, B, A, S;
+    E(0, 200),
+    D(201, 400),
+    C(401, 600),
+    B(601, 800),
+    A(801, 900),
+    S(901, 1000);
 
-    // Global rank-score letter bands over the 0–1000 scale: E ≤ 200, D 201–400, C 401–600, B 601–800,
-    // A 801–900, S 901–1000.
-    private static final int S_MIN_SCORE = 901;
-    private static final int A_MIN_SCORE = 801;
-    private static final int B_MIN_SCORE = 601;
-    private static final int C_MIN_SCORE = 401;
-    private static final int D_MIN_SCORE = 201;
+    /** Floor of the global rank scale. */
+    public static final int SCALE_MIN = 0;
+    /** Ceiling of the global rank scale. */
+    public static final int SCALE_MAX = 1000;
+
+    private final int minScore;
+    private final int maxScore;
+
+    ObdxRank(int minScore, int maxScore) {
+        this.minScore = minScore;
+        this.maxScore = maxScore;
+    }
+
+    /** Inclusive lower bound of the letter on the global scale. */
+    public int minScore() {
+        return minScore;
+    }
+
+    /** Inclusive upper bound of the letter on the global scale. */
+    public int maxScore() {
+        return maxScore;
+    }
 
     /**
      * The rank letter for a score, read off the global 0–1000 bands (independent of any configuration):
      * {@code E ≤ 200, D 201–400, C 401–600, B 601–800, A 801–900, S ≥ 901}.
      */
     public static ObdxRank fromScore(int rankScore) {
-        if (rankScore >= S_MIN_SCORE) {
-            return S;
-        }
-        if (rankScore >= A_MIN_SCORE) {
-            return A;
-        }
-        if (rankScore >= B_MIN_SCORE) {
-            return B;
-        }
-        if (rankScore >= C_MIN_SCORE) {
-            return C;
-        }
-        if (rankScore >= D_MIN_SCORE) {
-            return D;
+        ObdxRank[] letters = values();
+        for (int i = letters.length - 1; i > 0; i--) {
+            if (rankScore >= letters[i].minScore) {
+                return letters[i];
+            }
         }
         return E;
     }

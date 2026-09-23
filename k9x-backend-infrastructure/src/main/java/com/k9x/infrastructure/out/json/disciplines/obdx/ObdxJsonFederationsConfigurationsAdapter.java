@@ -9,7 +9,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -27,7 +26,8 @@ public class ObdxJsonFederationsConfigurationsAdapter implements GetObdxFederati
     public List<ConfigurationsDTO> getConfigurations() {
         LinkedHashMap<String, List<ConfigurationDTO>> byFederation = new LinkedHashMap<>();
 
-        for (ObdxFederationsConfigurationsCache.Entry entry : currentVersions(cache.getAll())) {
+        // Al organizador solo se le ofrece la versión vigente de cada clase.
+        for (ObdxFederationsConfigurationsCache.Entry entry : cache.getCurrent()) {
             String federationKey = entry.federationKey();
             var config = entry.configuration();
             List<ExerciseDTO> exercises = config.exercises().stream()
@@ -42,21 +42,6 @@ public class ObdxJsonFederationsConfigurationsAdapter implements GetObdxFederati
                         federationInfo(entry.getKey()),
                         entry.getValue()))
                 .toList();
-    }
-
-    /**
-     * De cada clase de cada federación conviven varias versiones —una por reglamento publicado—, pero al
-     * organizador solo se le ofrece la vigente: la del año más alto. Las anteriores siguen en el cache
-     * porque los eventos ya puntuados las referencian por id.
-     */
-    private static Collection<ObdxFederationsConfigurationsCache.Entry> currentVersions(
-            List<ObdxFederationsConfigurationsCache.Entry> entries) {
-        LinkedHashMap<String, ObdxFederationsConfigurationsCache.Entry> current = new LinkedHashMap<>();
-        for (ObdxFederationsConfigurationsCache.Entry entry : entries) {
-            current.merge(entry.federationKey() + "/" + entry.classKey(), entry,
-                    (previous, candidate) -> candidate.version() > previous.version() ? candidate : previous);
-        }
-        return current.values();
     }
 
     private FederationInfoDTO federationInfo(String key) {

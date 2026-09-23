@@ -1,5 +1,6 @@
 package com.k9x.domain.disciplines.obdx;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -60,11 +61,24 @@ public enum ObdxConfigurationsRankThresholds {
     }
 
     /**
+     * A competitor-count tier: {@code maxCompetitors} is {@code null} on the last one, which has no upper bound.
+     */
+    public record Tier(int tier, int minCompetitors, Integer maxCompetitors) {
+    }
+
+    /**
      * Strips the trailing {@code .V<n>} version suffix, e.g. {@code OBDX.FCI_GRADE_3.V2022 -> OBDX.FCI_GRADE_3}.
      */
     private static final Pattern VERSION_SUFFIX = Pattern.compile("\\.V\\d+$");
 
     private static final int TIER_COUNT = 3;
+    private static final int TIER_2_MIN_COMPETITORS = 10;
+    private static final int TIER_3_MIN_COMPETITORS = 25;
+
+    private static final List<Tier> TIERS = List.of(
+            new Tier(1, 1, TIER_2_MIN_COMPETITORS - 1),
+            new Tier(2, TIER_2_MIN_COMPETITORS, TIER_3_MIN_COMPETITORS - 1),
+            new Tier(3, TIER_3_MIN_COMPETITORS, null));
 
     /** Share of a non-championship band that belongs to {@code CLUB}; {@code OPEN} takes the rest. */
     private static final double CLUB_SHARE = 0.75;
@@ -97,13 +111,18 @@ public enum ObdxConfigurationsRankThresholds {
      * [10,25) → 2, ≥25 → 3}. Higher counts push the event higher inside its sub-band.
      */
     public static int tierFromCompetitorCount(int competitorCount) {
-        if (competitorCount >= 25) {
+        if (competitorCount >= TIER_3_MIN_COMPETITORS) {
             return 3;
         }
-        if (competitorCount >= 10) {
+        if (competitorCount >= TIER_2_MIN_COMPETITORS) {
             return 2;
         }
         return 1;
+    }
+
+    /** The {@value #TIER_COUNT} tiers of {@link #tierFromCompetitorCount(int)}, lowest first. */
+    public static List<Tier> tiers() {
+        return TIERS;
     }
 
     /**
@@ -121,6 +140,11 @@ public enum ObdxConfigurationsRankThresholds {
             }
         }
         return null;
+    }
+
+    /** The version-independent configuration id, e.g. {@code OBDX.FCI_GRADE_3}. */
+    public String configurationKey() {
+        return configurationKey;
     }
 
     public int min() {
