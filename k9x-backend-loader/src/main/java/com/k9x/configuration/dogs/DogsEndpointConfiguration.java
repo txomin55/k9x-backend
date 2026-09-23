@@ -3,11 +3,14 @@ package com.k9x.configuration.dogs;
 import com.k9x.application.dogs.port.GetDogParticipationsPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.GetPublicDogListPersistencePort;
+import com.k9x.application.dogs.rank.port.GetDogIndexEventsPersistencePort;
+import com.k9x.application.dogs.rank.use_case.GetDogIndexTimelineServiceCase;
 import com.k9x.application.dogs.use_case.GetDogParticipationsServiceCase;
 import com.k9x.application.dogs.use_case.GetPublicDogListServiceCase;
 import com.k9x.application.dogs.use_case.GetPublicDogServiceCase;
 import com.k9x.infrastructure.in.rest.endpoints.dogs.FetchAllDogs;
 import com.k9x.infrastructure.in.rest.endpoints.dogs.FetchDog;
+import com.k9x.infrastructure.in.rest.endpoints.dogs.FetchDogIndex;
 import com.k9x.infrastructure.in.rest.endpoints.dogs.FetchDogParticipations;
 import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import org.springframework.context.annotation.Bean;
@@ -55,5 +58,18 @@ public class DogsEndpointConfiguration {
             GetDogParticipationsServiceCase getDogParticipationsServiceCase,
             ReferenceNameResolver referenceNameResolver) {
         return new FetchDogParticipations(getDogParticipationsServiceCase, referenceNameResolver);
+    }
+
+    @Bean
+    public GetDogIndexTimelineServiceCase getDogIndexTimelineServiceCase(
+            GetDogPersistencePort getDogPersistencePort,
+            GetDogIndexEventsPersistencePort getDogIndexEventsPersistencePort) {
+        return new GetDogIndexTimelineServiceCase(getDogPersistencePort, getDogIndexEventsPersistencePort);
+    }
+
+    @Bean
+    public FetchDogIndex fetchDogIndex(GetDogIndexTimelineServiceCase getDogIndexTimelineServiceCase,
+                                       ReferenceNameResolver referenceNameResolver) {
+        return new FetchDogIndex(getDogIndexTimelineServiceCase, referenceNameResolver);
     }
 }

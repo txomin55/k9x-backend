@@ -72,7 +72,7 @@ public final class DogRankIndex {
     public static final BigDecimal PRIOR = BigDecimal.valueOf(ObdxConfigurationsRankThresholds.FCI_GRADE_1.min());
 
     /** Level plateau: results younger than this many months carry no degradation at all. */
-    private static final int LEVEL_PLATEAU_MONTHS = 8;
+    public static final int LEVEL_PLATEAU_MONTHS_THRESHOLD = 8;
 
     private static final double FLOOR = 0.01;
     private static final double DAYS_PER_MONTH = 30.4375;
@@ -136,7 +136,7 @@ public final class DogRankIndex {
 
     /** The level-curve weight (§3.1) for a result that is {@code months} old: plateau, anchored ramp, floor. */
     public static double levelWeight(double months) {
-        return interpolate(months, LEVEL_PLATEAU_MONTHS, LEVEL_ANCHORS);
+        return interpolate(months, LEVEL_PLATEAU_MONTHS_THRESHOLD, LEVEL_ANCHORS);
     }
 
     /** The freshness factor (§3.2) for a most-recent result that is {@code months} old. */
@@ -160,6 +160,32 @@ public final class DogRankIndex {
             }
         }
         return FLOOR;
+    }
+
+    /**
+     * The instant the whole index starts fading when the most recent result was earned at {@code timestamp} and
+     * the dog does not compete again: the end of the {@value #FRESHNESS_PLATEAU_MONTHS_THRESHOLD}-month
+     * freshness plateau.
+     */
+    public static long freshnessDegradationFrom(long timestamp) {
+        return plusMonths(timestamp, FRESHNESS_PLATEAU_MONTHS_THRESHOLD);
+    }
+
+    /** {@code timestamp} moved forward by {@code months} of the same month length the curves are measured in. */
+    public static long plusMonths(long timestamp, double months) {
+        return timestamp + Math.round(months * DAYS_PER_MONTH * MILLIS_PER_DAY);
+    }
+
+    /**
+     * Every age, in months, where one of the two curves changes slope (plateau end, anchors, floor). Between two
+     * of them each weight is linear in time, so they are the instants a sampled curve must not skip.
+     */
+    static double[] slopeChangeMonths() {
+        return Stream.concat(Stream.of(LEVEL_ANCHORS), Stream.of(FRESHNESS_ANCHORS))
+                .mapToDouble(anchor -> anchor[0])
+                .distinct()
+                .sorted()
+                .toArray();
     }
 
     /** Whole months elapsed between two instants (floor of the fractional month count, never negative). */

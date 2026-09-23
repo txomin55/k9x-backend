@@ -9,11 +9,13 @@ import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.GetPublicDogListPersistencePort;
 import com.k9x.application.dogs.port.UpdateDogPersistencePort;
 import com.k9x.application.dogs.rank.port.CreateDogRankHistoryPersistencePort;
+import com.k9x.application.dogs.rank.port.GetDogIndexEventsPersistencePort;
 import com.k9x.application.dogs.rank.port.GetDogRankEventResultsPersistencePort;
 import com.k9x.application.dogs.rank.port.GetLatestDogRankHistoryPersistencePort;
 import com.k9x.infrastructure.out.postgres.dogs.CreateDogJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.CreateDogRankHistoryJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.DeleteDogJooqAdapter;
+import com.k9x.infrastructure.out.postgres.dogs.GetDogIndexEventsJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.GetDogJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.GetDogListJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.GetDogParticipationsJooqAdapter;
@@ -57,6 +59,11 @@ public class DogJooqAdapterConfiguration {
     @Bean
     public GetDogParticipationsPersistencePort getDogParticipationsPersistencePort() {
         return new GetDogParticipationsJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetDogIndexEventsPersistencePort getDogIndexEventsPersistencePort() {
+        return new GetDogIndexEventsJooqAdapter(dsl);
     }
 
     @Bean
