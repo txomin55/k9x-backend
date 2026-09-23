@@ -1,11 +1,14 @@
 package com.k9x.configuration.dogs;
 
+import com.k9x.application.dogs.port.GetDogParticipationsPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.GetPublicDogListPersistencePort;
+import com.k9x.application.dogs.use_case.GetDogParticipationsServiceCase;
 import com.k9x.application.dogs.use_case.GetPublicDogListServiceCase;
 import com.k9x.application.dogs.use_case.GetPublicDogServiceCase;
 import com.k9x.infrastructure.in.rest.endpoints.dogs.FetchAllDogs;
 import com.k9x.infrastructure.in.rest.endpoints.dogs.FetchDog;
+import com.k9x.infrastructure.in.rest.endpoints.dogs.FetchDogParticipations;
 import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,5 +41,19 @@ public class DogsEndpointConfiguration {
     public FetchDog fetchDog(GetPublicDogServiceCase getPublicDogServiceCase,
                              ReferenceNameResolver referenceNameResolver) {
         return new FetchDog(getPublicDogServiceCase, referenceNameResolver);
+    }
+
+    @Bean
+    public GetDogParticipationsServiceCase getDogParticipationsServiceCase(
+            GetDogPersistencePort getDogPersistencePort,
+            GetDogParticipationsPersistencePort getDogParticipationsPersistencePort) {
+        return new GetDogParticipationsServiceCase(getDogPersistencePort, getDogParticipationsPersistencePort);
+    }
+
+    @Bean
+    public FetchDogParticipations fetchDogParticipations(
+            GetDogParticipationsServiceCase getDogParticipationsServiceCase,
+            ReferenceNameResolver referenceNameResolver) {
+        return new FetchDogParticipations(getDogParticipationsServiceCase, referenceNameResolver);
     }
 }
