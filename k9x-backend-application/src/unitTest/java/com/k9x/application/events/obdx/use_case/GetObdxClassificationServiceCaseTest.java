@@ -197,7 +197,8 @@ class GetObdxClassificationServiceCaseTest {
     }
 
     @Test
-    void applies_excludes_the_single_score_under_mid_avg_with_only_one_judge_scored() {
+    void applies_keeps_the_single_score_under_mid_avg_with_only_one_judge_scored() {
+        // Fewer than four scores are not trimmed: the exercise averages to that score, so it applied.
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V2026", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
                 List.of(new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
@@ -215,11 +216,12 @@ class GetObdxClassificationServiceCaseTest {
 
         assertThat(judgeScores(result))
                 .extracting(FetchClassificationJudgeScoreDTO::judgeId, FetchClassificationJudgeScoreDTO::applies)
-                .containsExactly(tuple("j-1", false));
+                .containsExactly(tuple("j-1", true));
     }
 
     @Test
-    void applies_excludes_both_scores_under_mid_avg_with_only_two_judges_scored() {
+    void applies_keeps_both_scores_under_mid_avg_with_only_two_judges_scored() {
+        // The exercise of a ring in a four-judge trial: both scores make the mean, neither is trimmed.
         EventSnapshot event = new EventSnapshot("evt-1", "OBDX.RSCE_GRADO_1.V2026", "obdx", "Open Grade 1",
                 "stage-1", "creator@test.com", null, 1000L, 1000L, null, ObdxAvgMethod.MID_AVG,
                 List.of(new EventCompetitor("dog-1", "Rex", "owner@test.com", "Handler", "Team A", "ES",
@@ -238,7 +240,7 @@ class GetObdxClassificationServiceCaseTest {
 
         assertThat(judgeScores(result))
                 .extracting(FetchClassificationJudgeScoreDTO::judgeId, FetchClassificationJudgeScoreDTO::applies)
-                .containsExactlyInAnyOrder(tuple("j-1", false), tuple("j-2", false));
+                .containsExactlyInAnyOrder(tuple("j-1", true), tuple("j-2", true));
     }
 
     private List<FetchClassificationJudgeScoreDTO> judgeScores(FetchObdxClassificationDTO result) {

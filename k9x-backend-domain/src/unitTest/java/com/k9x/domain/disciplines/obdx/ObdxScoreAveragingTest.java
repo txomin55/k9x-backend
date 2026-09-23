@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -71,5 +72,22 @@ class ObdxScoreAveragingTest {
         assertTrue(ObdxScoreAveraging.hasEnoughJudges(ObdxAvgMethod.MID_AVG, 4));
         assertFalse(ObdxScoreAveraging.hasEnoughJudges(ObdxAvgMethod.MID_AVG, 3));
         assertTrue(ObdxScoreAveraging.hasEnoughJudges(ObdxAvgMethod.AVG, 1));
+    }
+
+    @Test
+    void excludes_the_high_and_the_low_when_four_judges_scored() {
+        assertEquals(Set.of(1, 2), ObdxScoreAveraging.excludedIndexes(scores("9.5", "10.0", "9.0", "9.5"), ObdxAvgMethod.MID_AVG));
+    }
+
+    @Test
+    void excludes_nothing_when_only_two_judges_scored_that_exercise() {
+        // Same threshold as average(): the two scores of a ring are both in the mean, so neither is excluded.
+        assertEquals(Set.of(), ObdxScoreAveraging.excludedIndexes(scores("7.5", "7.5"), ObdxAvgMethod.MID_AVG));
+        assertEquals(Set.of(), ObdxScoreAveraging.excludedIndexes(scores("5.0", "0"), ObdxAvgMethod.MID_AVG));
+    }
+
+    @Test
+    void avg_excludes_nothing() {
+        assertEquals(Set.of(), ObdxScoreAveraging.excludedIndexes(scores("10.0", "10.0", "9.0", "9.5"), ObdxAvgMethod.AVG));
     }
 }

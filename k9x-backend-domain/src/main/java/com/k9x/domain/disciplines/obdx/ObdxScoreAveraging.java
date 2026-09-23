@@ -74,11 +74,13 @@ public final class ObdxScoreAveraging {
 
     /**
      * Indexes of the scores that {@link #average} excludes: under MID_AVG the single highest and single lowest
-     * (a tie at an extreme excludes only one occurrence, matching {@link #average}'s removal). Everything else —
-     * including every score under AVG — is kept, so the returned set is empty.
+     * (a tie at an extreme excludes only one occurrence, matching {@link #average}'s removal), and only once there
+     * are at least {@value #MIN_JUDGES_FOR_MID_AVG} scores — the same threshold {@link #average} trims at, so the
+     * exercise of a ring, scored by its two judges, excludes nothing. Everything else — including every score
+     * under AVG — is kept, so the returned set is empty.
      */
     public static Set<Integer> excludedIndexes(List<BigDecimal> scores, ObdxAvgMethod method) {
-        if (method != ObdxAvgMethod.MID_AVG || scores.isEmpty()) {
+        if (method != ObdxAvgMethod.MID_AVG || scores.size() < MIN_JUDGES_FOR_MID_AVG) {
             return Set.of();
         }
         List<BigDecimal> working = new ArrayList<>(scores);
@@ -90,10 +92,6 @@ public final class ObdxScoreAveraging {
         int minPos = working.indexOf(Collections.min(working));
         int minOriginalIndex = indices.remove(minPos);
         working.remove(minPos);
-
-        if (working.isEmpty()) {
-            return Set.of(minOriginalIndex);
-        }
 
         int maxPos = working.indexOf(Collections.max(working));
         int maxOriginalIndex = indices.remove(maxPos);
