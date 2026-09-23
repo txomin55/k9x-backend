@@ -121,13 +121,13 @@ public class CompetitionHydrator {
         var em = Tables.EXTRACTION_METADATA;
         Map<String, CompetitionExtraction> result = new LinkedHashMap<>();
         dsl.select(em.COMPETITION_ID, em.EXTRACTION_ID, em.SOURCE, em.EXTRACTION_TIMESTAMP, em.TYPE,
-                        em.RESTRICTED)
+                        em.RESTRICTED, em.CREATED_AT)
                 .from(em)
                 .where(em.COMPETITION_ID.in(toList(competitionIds)))
                 .orderBy(em.EXTRACTION_TIMESTAMP.asc())
                 .forEach(r -> result.put(r.get(em.COMPETITION_ID), new CompetitionExtraction(
                         r.get(em.EXTRACTION_ID), r.get(em.SOURCE), r.get(em.EXTRACTION_TIMESTAMP),
-                        r.get(em.TYPE), Boolean.TRUE.equals(r.get(em.RESTRICTED)))));
+                        r.get(em.TYPE), Boolean.TRUE.equals(r.get(em.RESTRICTED)), r.get(em.CREATED_AT))));
         return result;
     }
 

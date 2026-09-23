@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CompetitionExtractionTest {
 
     private static CompetitionExtraction ofType(String type) {
-        return new CompetitionExtraction("id", "https://source", 1L, type, false);
+        return new CompetitionExtraction("id", "https://source", 1L, type, false, null);
     }
 
     @Test

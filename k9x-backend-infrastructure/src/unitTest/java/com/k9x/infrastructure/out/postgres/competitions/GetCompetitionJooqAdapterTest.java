@@ -82,7 +82,8 @@ class GetCompetitionJooqAdapterTest {
             Tables.EXTRACTION_METADATA.SOURCE,
             Tables.EXTRACTION_METADATA.EXTRACTION_TIMESTAMP,
             Tables.EXTRACTION_METADATA.TYPE,
-            Tables.EXTRACTION_METADATA.RESTRICTED
+            Tables.EXTRACTION_METADATA.RESTRICTED,
+            Tables.EXTRACTION_METADATA.CREATED_AT
     };
 
     private static final Field<?>[] COMPETITOR_FIELDS = {
@@ -192,6 +193,7 @@ class GetCompetitionJooqAdapterTest {
         record.set(Tables.EXTRACTION_METADATA.EXTRACTION_TIMESTAMP, timestamp);
         record.set(Tables.EXTRACTION_METADATA.TYPE, "FEDERATION_PAGE,cpc");
         record.set(Tables.EXTRACTION_METADATA.RESTRICTED, restricted);
+        record.set(Tables.EXTRACTION_METADATA.CREATED_AT, timestamp);
         return record;
     }
 

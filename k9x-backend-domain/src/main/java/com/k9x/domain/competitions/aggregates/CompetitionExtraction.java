@@ -14,15 +14,18 @@ import java.util.List;
  * <p>{@code restricted} says the source forbids republishing these results. It changes nothing here: the scores
  * are stored, snapshotted and ranked exactly like any others, and it is the REST boundary that withholds them —
  * a restricted competition answers with null scores and without saying where the evidence came from.
+ *
+ * <p>{@code loadedAt} is when the ETL loaded the extraction into k9x, epoch millis. It is not
+ * {@code extractionTimestamp}: the evidence can be collected months before it is loaded.
  */
 public record CompetitionExtraction(String extractionId, String url, Long extractionTimestamp, String type,
-                                    boolean restricted) {
+                                    boolean restricted, Long loadedAt) {
 
     /**
      * A competition whose {@code source} says EXTRACTION but has no metadata row yet: the reader still has to be
      * told the results were not collected by k9x, even when nobody wrote down where they came from.
      */
-    public static final CompetitionExtraction UNKNOWN = new CompetitionExtraction(null, null, null, null, false);
+    public static final CompetitionExtraction UNKNOWN = new CompetitionExtraction(null, null, null, null, false, null);
 
     /** First token of {@code type}, or {@code null} when there is no type at all. */
     public String typeToken() {

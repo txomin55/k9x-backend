@@ -41,7 +41,7 @@ class ReferenceNameResolverTest {
 
         ExtractionResponseDTO dto = resolver().extraction(
                 new CompetitionExtraction("cpc-2020-9-extraction", "https://cpc/2020/9", 1000L, "FEDERATION_PAGE,cpc",
-                        false));
+                        false, null));
 
         assertThat(dto.getExtractionId()).isEqualTo("cpc-2020-9-extraction");
         assertThat(dto.getSource().getUrl()).isEqualTo("https://cpc/2020/9");
@@ -54,7 +54,7 @@ class ReferenceNameResolverTest {
         LocaleContextHolder.setLocale(Locale.of("es"));
 
         ExtractionResponseDTO dto = resolver().extraction(
-                new CompetitionExtraction("id", null, 1L, "PRIVATE_CONVERSATIONS,ORGANIZER", false));
+                new CompetitionExtraction("id", null, 1L, "PRIVATE_CONVERSATIONS,ORGANIZER", false, null));
 
         assertThat(dto.getHint()).isEqualTo("Resultados facilitados por el organizador en conversaciones privadas");
     }
@@ -67,7 +67,7 @@ class ReferenceNameResolverTest {
 
         ExtractionResponseDTO dto = resolver().extraction(
                 new CompetitionExtraction("lkf-2024-wc-extraction", "https://www.obedience.ch/wm-2026/wm-2024/",
-                        1L, "EXTERNAL_RESOURCES,obedience.ch", false));
+                        1L, "EXTERNAL_RESOURCES,obedience.ch", false, null));
 
         assertThat(dto.getHint()).isEqualTo("Resultados tomados de obedience.ch, una fuente ajena a la federación");
     }
@@ -81,7 +81,7 @@ class ReferenceNameResolverTest {
         for (String federation : new String[]{"cpc", "enci", "rsce", "dkk", "lkf", "nkn", "skk", "scc", "spkl",
                 "vdh", "okv"}) {
             ExtractionResponseDTO dto = resolver().extraction(
-                    new CompetitionExtraction("id", null, 1L, "FEDERATION_PAGE," + federation, false));
+                    new CompetitionExtraction("id", null, 1L, "FEDERATION_PAGE," + federation, false, null));
             assertThat(dto.getHint())
                     .as("federación %s", federation)
                     .isNotEqualTo("Resultados publicados en la página de la federación " + federation);
@@ -92,7 +92,7 @@ class ReferenceNameResolverTest {
     void leaves_no_dangling_space_when_the_type_carries_no_parameters() {
         LocaleContextHolder.setLocale(Locale.of("es"));
 
-        ExtractionResponseDTO dto = resolver().extraction(new CompetitionExtraction("id", null, 1L, "FEDERATION_PAGE", false));
+        ExtractionResponseDTO dto = resolver().extraction(new CompetitionExtraction("id", null, 1L, "FEDERATION_PAGE", false, null));
 
         assertThat(dto.getHint()).isEqualTo("Resultados publicados en la página de la federación");
     }
@@ -102,7 +102,7 @@ class ReferenceNameResolverTest {
         LocaleContextHolder.setLocale(Locale.of("es"));
         ReferenceNameResolver resolver = resolver();
 
-        assertThat(resolver.extraction(new CompetitionExtraction("id", null, 1L, "SOMETHING_ELSE", false)).getHint())
+        assertThat(resolver.extraction(new CompetitionExtraction("id", null, 1L, "SOMETHING_ELSE", false, null)).getHint())
                 .isEqualTo("Resultados recogidos fuera de k9x");
         assertThat(resolver.extraction(CompetitionExtraction.UNKNOWN).getHint())
                 .isEqualTo("Resultados recogidos fuera de k9x");
@@ -116,7 +116,7 @@ class ReferenceNameResolverTest {
 
         ExtractionResponseDTO dto = resolver().extraction(new CompetitionExtraction(
                 "nkn-2025-13-14-09-extraction", "https://www.dogweb.no/lydighet/250284/resultater", 1000L,
-                "FEDERATION_PAGE,nkn", true));
+                "FEDERATION_PAGE,nkn", true, null));
 
         assertThat(dto.getExtractionId()).isEqualTo("nkn-2025-13-14-09-extraction");
         assertThat(dto.getRestricted()).isTrue();
