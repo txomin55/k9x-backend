@@ -10,8 +10,8 @@ val k9xStubsVersion = "0.0.1-SNAPSHOT"
 val jooqVersion = "3.19.23"
 val postgresqlVersion = "42.7.11"
 val flywayDatabasePostgresqlVersion = "12.4.0"
+val fastexcelVersion = "0.20.2"
 val poiVersion = "5.4.1"
-val commonsIoVersion = "2.18.0"
 val openPdfVersion = "3.0.5"
 
 dependencies {
@@ -27,11 +27,9 @@ dependencies {
     implementation("com.google.http-client:google-http-client-gson:1.44.2")
     implementation("nl.martijndwars:web-push:5.1.1")
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
-    implementation("org.apache.poi:poi-ooxml:$poiVersion")
-    // POI needs commons-io at runtime (SXSSFWorkbook -> UnsynchronizedByteArrayOutputStream). It comes in
-    // transitively through poi, but the IDE's Gradle import drops it and the app then dies with a
-    // NoClassDefFoundError on the first export. Declared explicitly so no toolchain can lose it.
-    implementation("commons-io:commons-io:$commonsIoVersion")
+    // fastexcel writes the event export workbook. It replaced Apache POI, whose ~16 MB of classes stayed in the
+    // metaspace of the 512 MB box after the first export; POI is kept for the tests only, to read it back.
+    implementation("org.dhatim:fastexcel:$fastexcelVersion")
     // OpenPDF renders the printable event proof. Note the coordinate changed meaning in 3.0.0: 3.x lives in
     // org.openpdf.* while everything under the old com.lowagie.* 2.x package is deprecated.
     implementation("com.github.librepdf:openpdf:$openPdfVersion")
@@ -47,6 +45,7 @@ dependencies {
 
     unitTestImplementation("org.springframework.boot:spring-boot-starter-test")
     unitTestImplementation("io.rest-assured:rest-assured:$restAssuredVersion")
+    unitTestImplementation("org.apache.poi:poi-ooxml:$poiVersion")
     unitTestRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     jooqCodegen("org.jooq:jooq-meta-extensions:$jooqVersion")

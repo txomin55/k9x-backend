@@ -183,18 +183,35 @@ class EventWorkbookWriterTest {
      */
     @Test
     void packages_strings_in_the_shared_string_table() throws IOException {
-        try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(writer.write(event())))) {
-            String sharedStrings = null;
-            for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
-                if (entry.getName().equals("xl/sharedStrings.xml")) {
-                    sharedStrings = new String(zip.readAllBytes(), StandardCharsets.UTF_8);
-                }
-            }
+        String sharedStrings = entries(writer.write(event())).get("xl/sharedStrings.xml");
 
-            assertThat(sharedStrings).isNotNull();
-            assertThat(sharedStrings).doesNotContain("count=\"0\"");
-            assertThat(sharedStrings).contains("Spring Cup");
+        assertThat(sharedStrings).isNotNull();
+        assertThat(sharedStrings).doesNotContain("count=\"0\"");
+        assertThat(sharedStrings).contains("Spring Cup");
+    }
+
+    /**
+     * Streamed entry by entry, the way LibreOffice reads a workbook: a ZIP64 data descriptor (what fastexcel
+     * writes on its own) makes {@link ZipInputStream} fail with "invalid entry size" and LibreOffice refuse
+     * the file, so every entry must read back whole.
+     */
+    @Test
+    void every_entry_of_the_zip_reads_back_as_a_plain_stream() throws IOException {
+        Map<String, String> entries = entries(writer.write(event(), classification(), COEFFICIENTS));
+
+        assertThat(entries).containsKeys("[Content_Types].xml", "xl/workbook.xml", "xl/sharedStrings.xml",
+                "xl/worksheets/sheet1.xml");
+        assertThat(entries.values()).allMatch(content -> !content.isEmpty());
+    }
+
+    private Map<String, String> entries(byte[] workbook) throws IOException {
+        Map<String, String> entries = new java.util.LinkedHashMap<>();
+        try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(workbook))) {
+            for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+                entries.put(entry.getName(), new String(zip.readAllBytes(), StandardCharsets.UTF_8));
+            }
         }
+        return entries;
     }
 
     private FetchClassificationDTO classification() {
