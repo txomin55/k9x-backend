@@ -1,81 +1,82 @@
 package com.k9x.application.stages.use_case;
 
-import com.k9x.application.competitions.CompetitionNavigator;
-import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.disciplines.use_case.dto.ConfigurationDTO;
 import com.k9x.application.notifications.port.GetStageNotificationsPersistencePort;
-import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
-import com.k9x.domain.stages.exceptions.StageNotFoundException;
-import com.k9x.application.stages.use_case.dto.FetchStageDetailCompetitorDTO;
+import com.k9x.application.stages.port.GetStageDetailPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailEventDTO;
+import com.k9x.application.stages.use_case.dto.FetchStageDetailRowDTO;
+import com.k9x.application.stages.use_case.dto.FetchStageDetailRowEventDTO;
 import com.k9x.application.utils.date.DateUtils;
-import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
-import com.k9x.domain.events.aggregates.EventSnapshot;
-import com.k9x.domain.stages.aggregates.StageSnapshot;
 import com.k9x.domain.disciplines.exceptions.DisciplineConfigurationMalformedException;
+import com.k9x.domain.disciplines.obdx.ObdxRank;
+import com.k9x.domain.events.status.EventLifecycle;
+import com.k9x.domain.events.status.EventStatus;
+import com.k9x.domain.shared.UtcDates;
+import com.k9x.domain.stages.exceptions.StageAlreadyDeletedException;
+import com.k9x.domain.stages.exceptions.StageNotFoundException;
+import com.k9x.domain.stages.status.StageLifecycle;
+import com.k9x.domain.stages.status.StageStatus;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * The public stage detail, read through its own query projection ({@link FetchStageDetailRowDTO}) rather than the
+ * competition aggregate; {@link EventLifecycle} and {@link StageLifecycle} resolve the statuses from the facts it
+ * carries.
+ */
 public class GetStageServiceCase {
 
-    private final GetCompetitionPersistencePort getCompetitionPersistencePort;
+    private final GetStageDetailPersistencePort getStageDetailPersistencePort;
     private final GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort;
     private final GetStageNotificationsPersistencePort getStageNotificationsPersistencePort;
 
-    public GetStageServiceCase(GetCompetitionPersistencePort getCompetitionPersistencePort,
+    public GetStageServiceCase(GetStageDetailPersistencePort getStageDetailPersistencePort,
                                GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort,
                                GetStageNotificationsPersistencePort getStageNotificationsPersistencePort) {
-        this.getCompetitionPersistencePort = getCompetitionPersistencePort;
+        this.getStageDetailPersistencePort = getStageDetailPersistencePort;
         this.getObdxFederationsConfigurationsPort = getObdxFederationsConfigurationsPort;
         this.getStageNotificationsPersistencePort = getStageNotificationsPersistencePort;
     }
 
     public FetchStageDetailDTO getStage(String id) {
-        String competitionId = getCompetitionPersistencePort.competitionIdByStage(id);
-        if (competitionId == null) {
-            throw new StageNotFoundException();
-        }
-        CompetitionSnapshot competition = getCompetitionPersistencePort.getCompetition(competitionId);
-        StageSnapshot stage = CompetitionNavigator.findStage(competition, id);
-
-        if (stage == null) {
-            throw new StageNotFoundException();
-        }
+        long now = DateUtils.nowUtcMillis();
+        FetchStageDetailRowDTO stage = getStageDetailPersistencePort.getStage(id, UtcDates.startOfUtcDay(now))
+                .orElseThrow(StageNotFoundException::new);
         if (stage.deletedAt() != null) {
             throw new StageAlreadyDeletedException();
         }
 
-        var events = stage.events() == null ? java.util.List.<EventSnapshot>of()
-                : stage.events().stream().filter(e -> e.deletedAt() == null).toList();
-
+        StageStatus stageStatus = StageLifecycle.status(null, now, stage.dateFrom(), stage.dateTo(),
+                () -> stage.events().stream().map(event -> eventStatus(event, stage, now)).toList(),
+                () -> stage.events().stream().anyMatch(FetchStageDetailRowEventDTO::hasAnyScore));
         Map<String, String> configNameById = buildConfigNameMap();
-        long now = DateUtils.nowUtcMillis();
         return new FetchStageDetailDTO(
-                stage.id(), stage.name(), competition.name(), stage.dateFrom(), stage.dateTo(),
-                competition.address(), competition.organizerName(), stage.status(now).name(), null,
-                events.stream()
+                stage.id(), stage.name(), stage.competitionName(), stage.dateFrom(), stage.dateTo(),
+                stage.address(), stage.organizer(), stageStatus.name(), null,
+                stage.events().stream()
+                        .filter(e -> e.deletedAt() == null)
                         .map(e -> new FetchStageDetailEventDTO(
-                                e.id(), e.name(), e.discipline(), e.configurationId(),
+                                e.id(), e.name(), e.disciplineId(), e.configurationId(),
                                 configNameById.getOrDefault(e.configurationId(), e.configurationId()),
-                                e.competitors() == null ? java.util.List.of()
-                                        : e.competitors().stream()
-                                        .map(c -> new FetchStageDetailCompetitorDTO(
-                                                c.dogIdentification(), c.dogName(), c.owner(), c.handler(),
-                                                c.country(), c.team(), c.breed(),
-                                                c.verified() != null && c.verified()))
-                                        .toList(),
-                                e.status(now, stage.dateTo()).name(),
-                                stage.enrollmentOpened(e, now),
-                                e.enrollmentDeadline(), e.awards(), e.rank()))
+                                e.competitors(),
+                                eventStatus(e, stage, now).name(),
+                                StageLifecycle.enrollmentOpened(stageStatus, e.enrollmentDeadline(), now),
+                                e.enrollmentDeadline(), e.awards(),
+                                e.rankScore() == null ? null : ObdxRank.labelFromScore(e.rankScore())))
                         .toList(),
-                // Announcements live outside the competition aggregate, so they are read through their own port.
-                getStageNotificationsPersistencePort.getByStageIds(java.util.List.of(id))
-                        .getOrDefault(id, java.util.List.of()),
-                competition.extraction());
+                // Announcements are written outside the stage, so they are read through their own port.
+                getStageNotificationsPersistencePort.getByStageIds(List.of(id)).getOrDefault(id, List.of()),
+                stage.extraction());
+    }
+
+    private static EventStatus eventStatus(FetchStageDetailRowEventDTO event, FetchStageDetailRowDTO stage, long now) {
+        return EventLifecycle.status(event.deletedAt(), now, stage.dateTo(),
+                event::allCompetitorsSettled, event::hasAnyScore);
     }
 
     private Map<String, String> buildConfigNameMap() {
