@@ -17,11 +17,12 @@ public class GetLatestDogRankHistoryJooqAdapter implements GetLatestDogRankHisto
     }
 
     @Override
-    public List<FetchLatestDogRankHistoryDTO> getLatestHistory() {
+    public List<FetchLatestDogRankHistoryDTO> getLatestHistory(List<String> dogIdentifications) {
         SnapDogIndexHistory h = Tables.SNAP_DOG_INDEX_HISTORY;
         return dsl.select(h.DOG_IDENTIFICATION, h.RANK, h.APPLYING_TIMESTAMP)
                 .distinctOn(h.DOG_IDENTIFICATION)
                 .from(h)
+                .where(h.DOG_IDENTIFICATION.in(dogIdentifications))
                 .orderBy(h.DOG_IDENTIFICATION, h.APPLYING_TIMESTAMP.desc())
                 .fetch(r -> new FetchLatestDogRankHistoryDTO(
                         r.get(h.DOG_IDENTIFICATION), r.get(h.RANK), r.get(h.APPLYING_TIMESTAMP)));

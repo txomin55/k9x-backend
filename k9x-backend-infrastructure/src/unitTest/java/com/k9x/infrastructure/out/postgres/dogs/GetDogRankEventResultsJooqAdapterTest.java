@@ -44,13 +44,14 @@ class GetDogRankEventResultsJooqAdapterTest {
         DSLContext dsl = dslReturning(new Object[]{"dog-1", "evt-1", new BigDecimal("773.14"), 1700000000000L});
 
         List<FetchDogRankEventResultDTO> results =
-                new GetDogRankEventResultsJooqAdapter(dsl).getEventResults();
+                new GetDogRankEventResultsJooqAdapter(dsl).getEventResults(List.of("dog-1", "dog-2"));
 
         assertThat(results).containsExactly(
                 new FetchDogRankEventResultDTO("dog-1", "evt-1", new BigDecimal("773.14"), 1700000000000L));
         assertThat(sqls).hasSize(1);
         assertThat(sqls.get(0))
                 .contains("\"k9x\".\"snap_dog_rank\"")
+                .contains("\"k9x\".\"snap_dog_rank\".\"dog_identification\" in (?, ?)")
                 .contains("order by");
     }
 }

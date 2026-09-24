@@ -22,20 +22,27 @@ public class ReplaceDogRankingSnapshotJooqAdapter implements ReplaceDogRankingSn
         this.dsl = dsl;
     }
 
+    /**
+     * In its own transaction, so readers never see the snapshot empty: the history is appended block by block
+     * outside any use-case transaction, and this rewrite is the run's last, separate step.
+     */
     @Override
     public void replace(long computedAt) {
-        SnapDogRanking ranking = Tables.SNAP_DOG_RANKING;
-        SnapDogIndexHistory history = Tables.SNAP_DOG_INDEX_HISTORY;
+        dsl.transaction(cfg -> {
+            DSLContext ctx = DSL.using(cfg);
+            SnapDogRanking ranking = Tables.SNAP_DOG_RANKING;
+            SnapDogIndexHistory history = Tables.SNAP_DOG_INDEX_HISTORY;
 
-        dsl.deleteFrom(ranking).execute();
-        dsl.insertInto(ranking, ranking.DOG_IDENTIFICATION, ranking.RANK, ranking.COUNTRY, ranking.COMPUTED_AT)
-                .select(dsl.select(history.DOG_IDENTIFICATION, history.RANK, Tables.DOGS.COUNTRY, DSL.val(computedAt))
-                        .distinctOn(history.DOG_IDENTIFICATION)
-                        .from(history)
-                        .join(Tables.DOGS)
-                        .on(Tables.DOGS.IDENTIFICATION.eq(history.DOG_IDENTIFICATION)
-                                .and(Tables.DOGS.DELETED_AT.isNull()))
-                        .orderBy(history.DOG_IDENTIFICATION, history.APPLYING_TIMESTAMP.desc()))
-                .execute();
+            ctx.deleteFrom(ranking).execute();
+            ctx.insertInto(ranking, ranking.DOG_IDENTIFICATION, ranking.RANK, ranking.COUNTRY, ranking.COMPUTED_AT)
+                    .select(ctx.select(history.DOG_IDENTIFICATION, history.RANK, Tables.DOGS.COUNTRY, DSL.val(computedAt))
+                            .distinctOn(history.DOG_IDENTIFICATION)
+                            .from(history)
+                            .join(Tables.DOGS)
+                            .on(Tables.DOGS.IDENTIFICATION.eq(history.DOG_IDENTIFICATION)
+                                    .and(Tables.DOGS.DELETED_AT.isNull()))
+                            .orderBy(history.DOG_IDENTIFICATION, history.APPLYING_TIMESTAMP.desc()))
+                    .execute();
+        });
     }
 }

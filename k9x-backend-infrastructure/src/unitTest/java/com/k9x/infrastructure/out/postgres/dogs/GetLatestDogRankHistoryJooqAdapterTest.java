@@ -42,12 +42,13 @@ class GetLatestDogRankHistoryJooqAdapterTest {
     void fetches_the_latest_history_record_per_dog() {
         DSLContext dsl = dslReturning(new Object[]{"dog-1", 760, 1700000000000L});
 
-        List<FetchLatestDogRankHistoryDTO> latest = new GetLatestDogRankHistoryJooqAdapter(dsl).getLatestHistory();
+        List<FetchLatestDogRankHistoryDTO> latest = new GetLatestDogRankHistoryJooqAdapter(dsl).getLatestHistory(List.of("dog-1"));
 
         assertThat(latest).containsExactly(new FetchLatestDogRankHistoryDTO("dog-1", 760, 1700000000000L));
         assertThat(sqls).hasSize(1);
         assertThat(sqls.get(0))
                 .contains("distinct on")
+                .contains("\"k9x\".\"snap_dog_index_history\".\"dog_identification\" in (?)")
                 .contains("\"k9x\".\"snap_dog_index_history\"")
                 .contains("\"applying_timestamp\"")
                 .contains("desc");

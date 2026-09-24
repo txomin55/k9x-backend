@@ -49,6 +49,11 @@ k9x-backend:
       client_id: ${GOOGLE_CLIENT_ID}
       client_secret: ${GOOGLE_CLIENT_SECRET}
       redirect_url: ${GOOGLE_REDIRECT_URL}
+  crons:
+    dog-rank:
+      # Dogs per block of the index history cron: each block is read, computed and committed on its own, so
+      # the heap holds one block at a time instead of every dog's timeline (the first run rebuilds them all).
+      block-size: 200
   push:
     vapid:
       public-key: ${VAPID_PUBLIC_KEY}

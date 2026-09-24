@@ -1,13 +1,13 @@
 package com.k9x.application.dogs.rank.use_case;
 
 import com.k9x.application.dogs.rank.port.CreateDogRankHistoryPersistencePort;
+import com.k9x.application.dogs.rank.port.GetDogRankDogIdentificationsPersistencePort;
 import com.k9x.application.dogs.rank.port.GetDogRankEventResultsPersistencePort;
 import com.k9x.application.dogs.rank.port.GetLatestDogRankHistoryPersistencePort;
 import com.k9x.application.dogs.rank.port.ReplaceDogRankingSnapshotPersistencePort;
 import com.k9x.application.dogs.rank.port.payload.DogRankHistoryPayload;
 import com.k9x.application.dogs.rank.use_case.dto.FetchDogRankEventResultDTO;
 import com.k9x.application.dogs.rank.use_case.dto.FetchLatestDogRankHistoryDTO;
-import com.k9x.application.shared.TransactionalUseCase;
 import com.k9x.application.utils.date.DateUtils;
 import com.k9x.domain.dogs.rank.DogRankIndex;
 
@@ -41,27 +41,43 @@ import java.util.stream.Collectors;
  * </ul>
  *
  * The history is append-only and never rewritten; a quiet run appends nothing. Every run then rewrites the
- * ranking snapshot ({@code k9x.snap_dog_ranking}) from the history's latest record per dog, in the same
- * transaction, so the public ranking always reflects the history as of the last run.
+ * ranking snapshot ({@code k9x.snap_dog_ranking}) from the history's latest record per dog, so the public ranking
+ * always reflects the history as of the last run.
+ *
+ * <p>Dogs are processed in blocks of {@code blockSize}, each read, computed and committed on its own, so the
+ * heap holds one block at a time: the first run over an empty history rebuilds every dog's timeline, and doing
+ * it at once needed tens of MB on a box with ~40 MB to spare. That is why this batch is not a
+ * {@code TransactionalUseCase}: like the snapshot cron, its adapters open their own transaction, one per block
+ * and one for the ranking rewrite. A run that dies half-way is resumed by the next one — each dog only appends
+ * what is newer than its latest record — and the ranking stays as the previous run left it.
  */
-public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
+public class GenerateDogRankHistoryServiceCase {
 
     private static final Logger log = System.getLogger(GenerateDogRankHistoryServiceCase.class.getName());
 
+    private final GetDogRankDogIdentificationsPersistencePort getDogRankDogIdentificationsPersistencePort;
     private final GetDogRankEventResultsPersistencePort getDogRankEventResultsPersistencePort;
     private final GetLatestDogRankHistoryPersistencePort getLatestDogRankHistoryPersistencePort;
     private final CreateDogRankHistoryPersistencePort createDogRankHistoryPersistencePort;
     private final ReplaceDogRankingSnapshotPersistencePort replaceDogRankingSnapshotPersistencePort;
+    private final int blockSize;
 
     public GenerateDogRankHistoryServiceCase(
+            GetDogRankDogIdentificationsPersistencePort getDogRankDogIdentificationsPersistencePort,
             GetDogRankEventResultsPersistencePort getDogRankEventResultsPersistencePort,
             GetLatestDogRankHistoryPersistencePort getLatestDogRankHistoryPersistencePort,
             CreateDogRankHistoryPersistencePort createDogRankHistoryPersistencePort,
-            ReplaceDogRankingSnapshotPersistencePort replaceDogRankingSnapshotPersistencePort) {
+            ReplaceDogRankingSnapshotPersistencePort replaceDogRankingSnapshotPersistencePort,
+            int blockSize) {
+        if (blockSize < 1) {
+            throw new IllegalArgumentException("The dog block size must be positive, was " + blockSize);
+        }
+        this.getDogRankDogIdentificationsPersistencePort = getDogRankDogIdentificationsPersistencePort;
         this.getDogRankEventResultsPersistencePort = getDogRankEventResultsPersistencePort;
         this.getLatestDogRankHistoryPersistencePort = getLatestDogRankHistoryPersistencePort;
         this.createDogRankHistoryPersistencePort = createDogRankHistoryPersistencePort;
         this.replaceDogRankingSnapshotPersistencePort = replaceDogRankingSnapshotPersistencePort;
+        this.blockSize = blockSize;
     }
 
     /**
@@ -69,14 +85,37 @@ public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
      */
     public int generateDogRankHistory() {
         long now = DateUtils.nowUtcMillis();
+        int appended = 0;
+        int blocks = 0;
+        String after = null;
+        List<String> dogs;
+        do {
+            dogs = getDogRankDogIdentificationsPersistencePort.getDogIdentifications(after, blockSize);
+            if (dogs.isEmpty()) {
+                break;
+            }
+            int block = appendBlock(dogs, now);
+            appended += block;
+            blocks++;
+            log.log(Level.DEBUG, "Dog index block {0}: {1} dog(s), {2} record(s) ({3})", blocks, dogs.size(), block, heap());
+            after = dogs.getLast();
+        } while (dogs.size() == blockSize);
 
+        log.log(Level.INFO, "Appended {0} dog index history record(s) in {1} block(s) of up to {2} dogs ({3})",
+                appended, blocks, blockSize, heap());
+        replaceDogRankingSnapshotPersistencePort.replace(now);
+        return appended;
+    }
+
+    /** One block: its dogs' results and latest records in, their new records out, committed by the port. */
+    private int appendBlock(List<String> dogs, long now) {
         Map<String, List<FetchDogRankEventResultDTO>> resultsByDog = new LinkedHashMap<>();
-        getDogRankEventResultsPersistencePort.getEventResults().forEach(result -> resultsByDog
+        getDogRankEventResultsPersistencePort.getEventResults(dogs).forEach(result -> resultsByDog
                 .computeIfAbsent(result.dogIdentification(), dog -> new ArrayList<>())
                 .add(result));
 
         Map<String, FetchLatestDogRankHistoryDTO> latestByDog =
-                getLatestDogRankHistoryPersistencePort.getLatestHistory().stream()
+                getLatestDogRankHistoryPersistencePort.getLatestHistory(dogs).stream()
                         .collect(Collectors.toMap(FetchLatestDogRankHistoryDTO::dogIdentification, latest -> latest));
 
         List<DogRankHistoryPayload> records = new ArrayList<>();
@@ -85,9 +124,13 @@ public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
         if (!records.isEmpty()) {
             createDogRankHistoryPersistencePort.create(records);
         }
-        log.log(Level.INFO, "Appended {0} dog index history record(s)", records.size());
-        replaceDogRankingSnapshotPersistencePort.replace(now);
         return records.size();
+    }
+
+    private static String heap() {
+        Runtime runtime = Runtime.getRuntime();
+        long usedMb = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
+        return "heap " + usedMb + "/" + runtime.maxMemory() / (1024 * 1024) + " MB";
     }
 
     private List<DogRankHistoryPayload> recordsFor(List<FetchDogRankEventResultDTO> results,

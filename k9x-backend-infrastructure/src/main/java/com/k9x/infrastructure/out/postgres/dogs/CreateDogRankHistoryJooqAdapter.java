@@ -8,6 +8,7 @@ import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.SnapDogIndexHistory;
 import org.jooq.DSLContext;
 import org.jooq.Query;
+import org.jooq.impl.DSL;
 
 import java.util.List;
 
@@ -26,22 +27,30 @@ public class CreateDogRankHistoryJooqAdapter implements CreateDogRankHistoryPers
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * One transaction per call: its use case is a batch that commits block by block (it is deliberately not a
+     * {@code TransactionalUseCase}), so a block is appended whole or not at all.
+     */
     @Override
     public void create(List<DogRankHistoryPayload> records) {
-        SnapDogIndexHistory h = Tables.SNAP_DOG_INDEX_HISTORY;
-        List<? extends Query> batch = records.stream()
-                .map(r -> dsl.insertInto(h)
-                        .set(h.DOG_IDENTIFICATION, r.dogIdentification())
-                        .set(h.RANK, r.rank())
-                        .set(h.TIMESTAMP, r.timestamp())
-                        .set(h.APPLYING_TIMESTAMP, r.applyingTimestamp())
-                        .set(h.METADATA, serialize(r))
-                        .onConflict(h.DOG_IDENTIFICATION, h.APPLYING_TIMESTAMP)
-                        .doNothing())
-                .toList();
-        if (!batch.isEmpty()) {
-            dsl.batch(batch).execute();
+        if (records.isEmpty()) {
+            return;
         }
+        dsl.transaction(cfg -> {
+            DSLContext ctx = DSL.using(cfg);
+            SnapDogIndexHistory h = Tables.SNAP_DOG_INDEX_HISTORY;
+            List<? extends Query> batch = records.stream()
+                    .map(r -> ctx.insertInto(h)
+                            .set(h.DOG_IDENTIFICATION, r.dogIdentification())
+                            .set(h.RANK, r.rank())
+                            .set(h.TIMESTAMP, r.timestamp())
+                            .set(h.APPLYING_TIMESTAMP, r.applyingTimestamp())
+                            .set(h.METADATA, serialize(r))
+                            .onConflict(h.DOG_IDENTIFICATION, h.APPLYING_TIMESTAMP)
+                            .doNothing())
+                    .toList();
+            ctx.batch(batch).execute();
+        });
     }
 
     private String serialize(DogRankHistoryPayload record) {

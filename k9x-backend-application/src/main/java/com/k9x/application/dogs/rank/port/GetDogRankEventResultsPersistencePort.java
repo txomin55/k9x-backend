@@ -7,8 +7,8 @@ import java.util.List;
 public interface GetDogRankEventResultsPersistencePort {
 
     /**
-     * Every {@code k9x.snap_dog_rank} row across all disciplines (the dog's raw per-event rank scores, as
-     * written by the snapshot cron), oldest first per dog.
+     * The {@code k9x.snap_dog_rank} rows of the given dogs across all disciplines (their raw per-event rank
+     * scores, as written by the snapshot cron), oldest first per dog.
      */
-    List<FetchDogRankEventResultDTO> getEventResults();
+    List<FetchDogRankEventResultDTO> getEventResults(List<String> dogIdentifications);
 }
