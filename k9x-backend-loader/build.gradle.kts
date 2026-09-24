@@ -10,6 +10,9 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation(project(":k9x-backend-application"))
     implementation(project(":k9x-backend-infrastructure"))
+    // Swagger UI for local runs (bootRun and the IDE); developmentOnly never reaches the bootJar, so staging
+    // and production do not carry it. Same version as the one the OAS stubs are generated against.
+    developmentOnly("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
 }
 
 springBoot {

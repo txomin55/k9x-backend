@@ -13,11 +13,21 @@ val flywayDatabasePostgresqlVersion = "12.4.0"
 val fastexcelVersion = "0.20.2"
 val poiVersion = "5.4.1"
 val openPdfVersion = "3.0.5"
+val springdocVersion = "3.0.1"
 
 dependencies {
     implementation(project(":k9x-backend-application"))
     implementation(project(":k9x-backend-domain"))
-    implementation("com.k9x:oas-definition-stubs:$k9xStubsVersion")
+    // The stubs publish springdoc (Swagger UI, swagger-core) as a runtime dependency. It only serves the API
+    // docs, which the deployed profile never exposed, yet ~1,500 of its classes loaded at every start of the
+    // 512 MB box. It is kept out of the jar and only reaches local runs, see the loader's developmentOnly.
+    implementation("com.k9x:oas-definition-stubs:$k9xStubsVersion") {
+        exclude(group = "org.springdoc")
+    }
+    // Bean Validation used to come through springdoc; the stubs' @Valid / @NotNull still need it to be enforced.
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    // Only for OpenApiConfiguration to compile; it is skipped wherever springdoc is not on the classpath.
+    compileOnly("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
     implementation("org.springframework.boot:spring-boot-starter-jooq")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
