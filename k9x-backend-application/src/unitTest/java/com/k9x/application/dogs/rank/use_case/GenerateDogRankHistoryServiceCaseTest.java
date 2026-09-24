@@ -3,6 +3,7 @@ package com.k9x.application.dogs.rank.use_case;
 import com.k9x.application.dogs.rank.port.CreateDogRankHistoryPersistencePort;
 import com.k9x.application.dogs.rank.port.GetDogRankEventResultsPersistencePort;
 import com.k9x.application.dogs.rank.port.GetLatestDogRankHistoryPersistencePort;
+import com.k9x.application.dogs.rank.port.ReplaceDogRankingSnapshotPersistencePort;
 import com.k9x.application.dogs.rank.port.payload.DogRankHistoryPayload;
 import com.k9x.application.dogs.rank.use_case.dto.FetchDogRankEventResultDTO;
 import com.k9x.application.dogs.rank.use_case.dto.FetchLatestDogRankHistoryDTO;
@@ -36,13 +37,16 @@ class GenerateDogRankHistoryServiceCaseTest {
     GetLatestDogRankHistoryPersistencePort getLatestDogRankHistoryPersistencePort;
     @Mock
     CreateDogRankHistoryPersistencePort createDogRankHistoryPersistencePort;
+    @Mock
+    ReplaceDogRankingSnapshotPersistencePort replaceDogRankingSnapshotPersistencePort;
 
     private GenerateDogRankHistoryServiceCase serviceCase;
 
     @BeforeEach
     void setUp() {
         serviceCase = new GenerateDogRankHistoryServiceCase(getDogRankEventResultsPersistencePort,
-                getLatestDogRankHistoryPersistencePort, createDogRankHistoryPersistencePort);
+                getLatestDogRankHistoryPersistencePort, createDogRankHistoryPersistencePort,
+                replaceDogRankingSnapshotPersistencePort);
     }
 
     private List<DogRankHistoryPayload> generatedRecords() {
@@ -202,6 +206,20 @@ class GenerateDogRankHistoryServiceCaseTest {
 
         serviceCase.generateDogRankHistory();
 
+        verify(createDogRankHistoryPersistencePort, never()).create(anyList());
+    }
+
+    @Test
+    void rewrites_the_ranking_snapshot_on_every_run_even_a_quiet_one() {
+        long before = DateUtils.nowUtcMillis();
+        when(getDogRankEventResultsPersistencePort.getEventResults()).thenReturn(List.of());
+        when(getLatestDogRankHistoryPersistencePort.getLatestHistory()).thenReturn(List.of());
+
+        serviceCase.generateDogRankHistory();
+
+        ArgumentCaptor<Long> computedAt = ArgumentCaptor.forClass(Long.class);
+        verify(replaceDogRankingSnapshotPersistencePort).replace(computedAt.capture());
+        assertThat(computedAt.getValue()).isGreaterThanOrEqualTo(before);
         verify(createDogRankHistoryPersistencePort, never()).create(anyList());
     }
 }

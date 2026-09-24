@@ -11,7 +11,10 @@ import com.k9x.application.dogs.port.UpdateDogPersistencePort;
 import com.k9x.application.dogs.rank.port.CreateDogRankHistoryPersistencePort;
 import com.k9x.application.dogs.rank.port.GetDogIndexEventsPersistencePort;
 import com.k9x.application.dogs.rank.port.GetDogRankEventResultsPersistencePort;
+import com.k9x.application.dogs.rank.port.GetDogRankingDistributionPersistencePort;
+import com.k9x.application.dogs.rank.port.GetDogRankingEntryPersistencePort;
 import com.k9x.application.dogs.rank.port.GetLatestDogRankHistoryPersistencePort;
+import com.k9x.application.dogs.rank.port.ReplaceDogRankingSnapshotPersistencePort;
 import com.k9x.infrastructure.out.postgres.dogs.CreateDogJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.CreateDogRankHistoryJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.DeleteDogJooqAdapter;
@@ -20,8 +23,11 @@ import com.k9x.infrastructure.out.postgres.dogs.GetDogJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.GetDogListJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.GetDogParticipationsJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.GetDogRankEventResultsJooqAdapter;
-import com.k9x.infrastructure.out.postgres.dogs.GetPublicDogListJooqAdapter;
+import com.k9x.infrastructure.out.postgres.dogs.GetDogRankingDistributionJooqAdapter;
+import com.k9x.infrastructure.out.postgres.dogs.GetDogRankingEntryJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.GetLatestDogRankHistoryJooqAdapter;
+import com.k9x.infrastructure.out.postgres.dogs.GetPublicDogListJooqAdapter;
+import com.k9x.infrastructure.out.postgres.dogs.ReplaceDogRankingSnapshotJooqAdapter;
 import com.k9x.infrastructure.out.postgres.dogs.UpdateDogJooqAdapter;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
@@ -89,5 +95,20 @@ public class DogJooqAdapterConfiguration {
     @Bean
     public CreateDogRankHistoryPersistencePort createDogRankHistoryPersistencePort(ObjectMapper objectMapper) {
         return new CreateDogRankHistoryJooqAdapter(dsl, objectMapper);
+    }
+
+    @Bean
+    public ReplaceDogRankingSnapshotPersistencePort replaceDogRankingSnapshotPersistencePort() {
+        return new ReplaceDogRankingSnapshotJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetDogRankingDistributionPersistencePort getDogRankingDistributionPersistencePort() {
+        return new GetDogRankingDistributionJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetDogRankingEntryPersistencePort getDogRankingEntryPersistencePort() {
+        return new GetDogRankingEntryJooqAdapter(dsl);
     }
 }

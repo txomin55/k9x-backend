@@ -3,6 +3,7 @@ package com.k9x.application.dogs.rank.use_case;
 import com.k9x.application.dogs.rank.port.CreateDogRankHistoryPersistencePort;
 import com.k9x.application.dogs.rank.port.GetDogRankEventResultsPersistencePort;
 import com.k9x.application.dogs.rank.port.GetLatestDogRankHistoryPersistencePort;
+import com.k9x.application.dogs.rank.port.ReplaceDogRankingSnapshotPersistencePort;
 import com.k9x.application.dogs.rank.port.payload.DogRankHistoryPayload;
 import com.k9x.application.dogs.rank.use_case.dto.FetchDogRankEventResultDTO;
 import com.k9x.application.dogs.rank.use_case.dto.FetchLatestDogRankHistoryDTO;
@@ -39,7 +40,9 @@ import java.util.stream.Collectors;
  *       so no more records are appended.</li>
  * </ul>
  *
- * The history is append-only and never rewritten; a quiet run appends nothing.
+ * The history is append-only and never rewritten; a quiet run appends nothing. Every run then rewrites the
+ * ranking snapshot ({@code k9x.snap_dog_ranking}) from the history's latest record per dog, in the same
+ * transaction, so the public ranking always reflects the history as of the last run.
  */
 public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
 
@@ -48,14 +51,17 @@ public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
     private final GetDogRankEventResultsPersistencePort getDogRankEventResultsPersistencePort;
     private final GetLatestDogRankHistoryPersistencePort getLatestDogRankHistoryPersistencePort;
     private final CreateDogRankHistoryPersistencePort createDogRankHistoryPersistencePort;
+    private final ReplaceDogRankingSnapshotPersistencePort replaceDogRankingSnapshotPersistencePort;
 
     public GenerateDogRankHistoryServiceCase(
             GetDogRankEventResultsPersistencePort getDogRankEventResultsPersistencePort,
             GetLatestDogRankHistoryPersistencePort getLatestDogRankHistoryPersistencePort,
-            CreateDogRankHistoryPersistencePort createDogRankHistoryPersistencePort) {
+            CreateDogRankHistoryPersistencePort createDogRankHistoryPersistencePort,
+            ReplaceDogRankingSnapshotPersistencePort replaceDogRankingSnapshotPersistencePort) {
         this.getDogRankEventResultsPersistencePort = getDogRankEventResultsPersistencePort;
         this.getLatestDogRankHistoryPersistencePort = getLatestDogRankHistoryPersistencePort;
         this.createDogRankHistoryPersistencePort = createDogRankHistoryPersistencePort;
+        this.replaceDogRankingSnapshotPersistencePort = replaceDogRankingSnapshotPersistencePort;
     }
 
     /**
@@ -80,6 +86,7 @@ public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
             createDogRankHistoryPersistencePort.create(records);
         }
         log.log(Level.INFO, "Appended {0} dog index history record(s)", records.size());
+        replaceDogRankingSnapshotPersistencePort.replace(now);
         return records.size();
     }
 

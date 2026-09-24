@@ -173,6 +173,17 @@ CREATE TABLE k9x.snap_dog_index_history
         CHECK (rank BETWEEN 0 AND 1000)
 );
 
+CREATE TABLE k9x.snap_dog_ranking
+(
+    dog_identification VARCHAR(255) NOT NULL,
+    rank               INTEGER      NOT NULL,
+    country            VARCHAR(50)  NOT NULL,
+    computed_at        BIGINT       NOT NULL,
+    CONSTRAINT snap_dog_ranking_pkey PRIMARY KEY (dog_identification),
+    CONSTRAINT snap_dog_ranking_dog_fk FOREIGN KEY (dog_identification) REFERENCES k9x.dogs (identification)
+);
+CREATE INDEX snap_dog_ranking_country_idx ON k9x.snap_dog_ranking (country);
+
 CREATE SCHEMA obdx;
 CREATE TABLE obdx.event_competitors
 (

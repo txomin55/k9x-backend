@@ -4,7 +4,10 @@ import com.k9x.application.dogs.port.GetDogParticipationsPersistencePort;
 import com.k9x.application.dogs.port.GetDogPersistencePort;
 import com.k9x.application.dogs.port.GetPublicDogListPersistencePort;
 import com.k9x.application.dogs.rank.port.GetDogIndexEventsPersistencePort;
+import com.k9x.application.dogs.rank.port.GetDogRankingDistributionPersistencePort;
+import com.k9x.application.dogs.rank.port.GetDogRankingEntryPersistencePort;
 import com.k9x.application.dogs.rank.use_case.GetDogIndexTimelineServiceCase;
+import com.k9x.application.dogs.rank.use_case.GetDogRankingServiceCase;
 import com.k9x.application.dogs.use_case.GetDogParticipationsServiceCase;
 import com.k9x.application.dogs.use_case.GetPublicDogListServiceCase;
 import com.k9x.application.dogs.use_case.GetPublicDogServiceCase;
@@ -12,6 +15,7 @@ import com.k9x.infrastructure.in.rest.endpoints.dogs.FetchAllDogs;
 import com.k9x.infrastructure.in.rest.endpoints.dogs.FetchDog;
 import com.k9x.infrastructure.in.rest.endpoints.dogs.FetchDogIndex;
 import com.k9x.infrastructure.in.rest.endpoints.dogs.FetchDogParticipations;
+import com.k9x.infrastructure.in.rest.endpoints.rankings.FetchK9xRanking;
 import com.k9x.infrastructure.in.rest.i18n.ReferenceNameResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,5 +75,18 @@ public class DogsEndpointConfiguration {
     public FetchDogIndex fetchDogIndex(GetDogIndexTimelineServiceCase getDogIndexTimelineServiceCase,
                                        ReferenceNameResolver referenceNameResolver) {
         return new FetchDogIndex(getDogIndexTimelineServiceCase, referenceNameResolver);
+    }
+
+    @Bean
+    public GetDogRankingServiceCase getDogRankingServiceCase(
+            GetDogRankingDistributionPersistencePort getDogRankingDistributionPersistencePort,
+            GetDogRankingEntryPersistencePort getDogRankingEntryPersistencePort) {
+        return new GetDogRankingServiceCase(getDogRankingDistributionPersistencePort,
+                getDogRankingEntryPersistencePort);
+    }
+
+    @Bean
+    public FetchK9xRanking fetchK9xRanking(GetDogRankingServiceCase getDogRankingServiceCase) {
+        return new FetchK9xRanking(getDogRankingServiceCase);
     }
 }
