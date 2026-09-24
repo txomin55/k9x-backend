@@ -68,7 +68,7 @@ EXPOSE 4000
 #                            Fly does not restart a machine whose process is still running. Dying instead
 #                            lets the platform restart it.
 # Overridable per environment by setting JAVA_OPTS on the platform.
-ENV JAVA_OPTS="-XX:TieredStopAtLevel=1 -XX:+UseSerialGC -Xss512k -XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError"
+ENV JAVA_OPTS="-XX:TieredStopAtLevel=1 -XX:+UseSerialGC -Xss512k -XX:MaxRAMPercentage=90 -XX:+ExitOnOutOfMemoryError"
 
 # The New Relic agent is only attached where NEW_RELIC_ENABLED=true (production, see fly.toml).
 # Instrumenting every class as it loads is most of the startup cost on staging's 0.1 CPU, and it
