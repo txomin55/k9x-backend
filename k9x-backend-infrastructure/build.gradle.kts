@@ -25,8 +25,6 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine")
     implementation("com.google.api-client:google-api-client:2.7.2")
     implementation("com.google.http-client:google-http-client-gson:1.44.2")
-    implementation("nl.martijndwars:web-push:5.1.1")
-    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
     // fastexcel writes the event export workbook. It replaced Apache POI, whose ~16 MB of classes stayed in the
     // metaspace of the 512 MB box after the first export; POI is kept for the tests only, to read it back.
     implementation("org.dhatim:fastexcel:$fastexcelVersion")
