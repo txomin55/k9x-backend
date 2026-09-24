@@ -18,13 +18,9 @@ val springdocVersion = "3.0.1"
 dependencies {
     implementation(project(":k9x-backend-application"))
     implementation(project(":k9x-backend-domain"))
-    // The stubs publish springdoc (Swagger UI, swagger-core) as a runtime dependency. It only serves the API
-    // docs, which the deployed profile never exposed, yet ~1,500 of its classes loaded at every start of the
-    // 512 MB box. It is kept out of the jar and only reaches local runs, see the loader's developmentOnly.
-    implementation("com.k9x:oas-definition-stubs:$k9xStubsVersion") {
-        exclude(group = "org.springdoc")
-    }
-    // Bean Validation used to come through springdoc; the stubs' @Valid / @NotNull still need it to be enforced.
+    implementation("com.k9x:oas-definition-stubs:$k9xStubsVersion")
+    // The stubs only carry the jakarta.validation API; their @Valid / @NotNull need an implementation to be
+    // enforced. It used to arrive through springdoc, which the stubs no longer publish as a runtime dependency.
     implementation("org.springframework.boot:spring-boot-starter-validation")
     // Only for OpenApiConfiguration to compile; it is skipped wherever springdoc is not on the classpath.
     compileOnly("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
