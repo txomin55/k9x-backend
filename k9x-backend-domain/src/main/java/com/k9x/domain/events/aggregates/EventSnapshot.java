@@ -1,11 +1,11 @@
 package com.k9x.domain.events.aggregates;
 
+import com.k9x.domain.events.status.EventLifecycle;
 import com.k9x.domain.events.status.EventStatus;
 import com.k9x.domain.events.valueobjects.EventCompetitor;
 import com.k9x.domain.events.valueobjects.EventExercise;
 import com.k9x.domain.events.valueobjects.EventJudge;
 import com.k9x.domain.events.valueobjects.Score;
-import com.k9x.domain.shared.UtcDates;
 
 import com.k9x.domain.disciplines.obdx.LiveExcludedExercise;
 import com.k9x.domain.disciplines.obdx.ObdxCards;
@@ -52,33 +52,16 @@ public record EventSnapshot(
     }
 
     /**
-     * Lifecycle status. "Pooling" is only a front-end label, so the backend derives the status from the
-     * recorded scores: an event is FINISHED once every competitor is settled or once its stage's
-     * {@code dateTo} day has passed, STARTED once any score has been taken, otherwise CREATED.
+     * Lifecycle status, resolved by {@link EventLifecycle#status}: FINISHED once the stage's {@code dateTo} day
+     * has passed or every competitor is settled, STARTED once any score has been taken, otherwise CREATED.
      */
     public EventStatus status(long now, long stageDateTo) {
-        if (deletedAt != null) {
-            return EventStatus.DELETED;
-        }
-        if (UtcDates.isAfterUtcDay(now, stageDateTo)) {
-            return EventStatus.FINISHED;
-        }
-        if (allCompetitorsSettled()) {
-            return EventStatus.FINISHED;
-        }
-        if (hasAnyScore()) {
-            return EventStatus.STARTED;
-        }
-        return EventStatus.CREATED;
+        return EventLifecycle.status(deletedAt, now, stageDateTo, this::allCompetitorsSettled, this::hasAnyScore);
     }
 
-    /**
-     * Whether enrollment is still open: an event with no deadline set never accepts enrollments (a
-     * deadline must be configured first), otherwise enrollment stays open until the deadline is reached
-     * (compared against the supplied current timestamp).
-     */
+    /** Whether the event's own deadline still accepts enrollments, see {@link EventLifecycle#enrollmentOpened}. */
     public boolean enrollmentOpened(long now) {
-        return enrollmentDeadline != null && !UtcDates.isAfterUtcDay(now, enrollmentDeadline);
+        return EventLifecycle.enrollmentOpened(enrollmentDeadline, now);
     }
 
     /**
@@ -107,7 +90,7 @@ public record EventSnapshot(
      * group stays and general impression — so the event stays STARTED until those collective scores are
      * also in, even when every competitor has already left LIVE.
      */
-    private boolean allCompetitorsSettled() {
+    public boolean allCompetitorsSettled() {
         if (competitors == null || competitors.isEmpty()) {
             return false;
         }

@@ -1,10 +1,8 @@
 package com.k9x.domain.stages.aggregates;
 
-import com.k9x.domain.stages.status.StageStatus;
-
 import com.k9x.domain.events.aggregates.EventSnapshot;
-import com.k9x.domain.events.status.EventStatus;
-import com.k9x.domain.shared.UtcDates;
+import com.k9x.domain.stages.status.StageLifecycle;
+import com.k9x.domain.stages.status.StageStatus;
 
 import java.util.List;
 
@@ -21,50 +19,19 @@ public record StageSnapshot(
         List<EventSnapshot> events
 ) {
 
-    /**
-     * Lifecycle status based on the UTC calendar day and the scores recorded on its events:
-     * FINISHED once the day after {@code dateTo} has arrived, or once every event is itself
-     * FINISHED; STARTED once any competitor has a score; TO_START while {@code now} falls within
-     * [{@code dateFrom}, {@code dateTo}] and no score has been recorded yet, otherwise CREATED.
-     */
+    /** Lifecycle status, resolved by {@link StageLifecycle#status} over this stage's events. */
     public StageStatus status(long now) {
-        if (deletedAt != null) {
-            return StageStatus.DELETED;
-        }
-        if (UtcDates.isAfterUtcDay(now, dateTo)) {
-            return StageStatus.FINISHED;
-        }
-        if (allEventsFinished(now)) {
-            return StageStatus.FINISHED;
-        }
-        if (hasAnyScore()) {
-            return StageStatus.STARTED;
-        }
-        if (!UtcDates.isBeforeUtcDay(now, dateFrom)) {
-            return StageStatus.TO_START;
-        }
-        return StageStatus.CREATED;
+        return StageLifecycle.status(deletedAt, now, dateFrom, dateTo,
+                () -> events == null ? List.of() : events.stream().map(event -> event.status(now, dateTo)).toList(),
+                this::hasAnyScore);
     }
 
-    /**
-     * Whether enrollment is open for the given event within this stage. Enrollment closes once the stage
-     * is under way: a TO_START or STARTED stage never accepts enrollments regardless of the event's own
-     * deadline. Otherwise the event's deadline decides.
-     */
+    /** Whether the given event of this stage accepts enrollments, see {@link StageLifecycle#enrollmentOpened}. */
     public boolean enrollmentOpened(EventSnapshot event, long now) {
-        StageStatus status = status(now);
-        if (status == StageStatus.TO_START || status == StageStatus.STARTED) {
-            return false;
-        }
-        return event.enrollmentOpened(now);
+        return StageLifecycle.enrollmentOpened(status(now), event.enrollmentDeadline(), now);
     }
 
     private boolean hasAnyScore() {
         return events != null && events.stream().anyMatch(EventSnapshot::hasAnyScore);
-    }
-
-    private boolean allEventsFinished(long now) {
-        return events != null && !events.isEmpty()
-                && events.stream().allMatch(event -> event.status(now, dateTo) == EventStatus.FINISHED);
     }
 }
