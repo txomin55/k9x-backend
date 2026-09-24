@@ -1,6 +1,7 @@
 package com.k9x.infrastructure.out.postgres.stages;
 
-import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.application.stages.use_case.dto.FetchStageListRowDTO;
+import com.k9x.application.stages.use_case.dto.FetchStageListRowEventDTO;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -13,60 +14,140 @@ import org.jooq.tools.jdbc.MockDataProvider;
 import org.jooq.tools.jdbc.MockResult;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * The adapter delegates to {@link com.k9x.infrastructure.out.postgres.competitions.CompetitionHydrator}, which
- * issues several sequential SELECTs (competitions, stages, events, competitors, exercises, judges, scores).
- * The {@link MockDataProvider} routes by the FROM table, returning one competition and empty results for the
- * rest — enough to assert the adapter hydrates the whole tree with no competition filter (every competition).
- */
 class GetStagesJooqAdapterTest {
 
-    private static final Field<String> ORGANIZER_NAME = Tables.ORGANIZERS.NAME.as("organizer_name");
+    private static final long TODAY = 1_800_000_000_000L;
 
-    private static final Field<?>[] COMPETITION_FIELDS = {
-            Tables.COMPETITIONS.ID, Tables.COMPETITIONS.NAME, Tables.COMPETITIONS.CREATOR, ORGANIZER_NAME,
-            Tables.COMPETITIONS.COUNTRY, Tables.COMPETITIONS.DESCRIPTION, Tables.COMPETITIONS.ADDRESS,
-            Tables.COMPETITIONS.COORD_ALT, Tables.COMPETITIONS.COORD_LONG,
-            Tables.COMPETITIONS.SOURCE, Tables.COMPETITIONS.LAST_UPDATE,
-            Tables.COMPETITIONS.CREATED_AT, Tables.COMPETITIONS.DELETED_AT
+    private static final Field<?>[] STAGE_FIELDS = {
+            Tables.STAGES.ID, Tables.STAGES.NAME, Tables.STAGES.DATE_FROM, Tables.STAGES.DATE_TO,
+            Tables.COMPETITIONS.ID, Tables.COMPETITIONS.NAME, Tables.COMPETITIONS.COUNTRY,
+            Tables.COMPETITIONS.ADDRESS, Tables.COMPETITIONS.COORD_ALT, Tables.COMPETITIONS.COORD_LONG,
+            GetStagesJooqAdapter.ORGANIZER_NAME
     };
 
-    @Test
-    void hydrates_every_competition_without_id_filter() {
-        AtomicReference<String> competitionsSql = new AtomicReference<>();
+    private static final Field<?>[] EVENT_FIELDS = {
+            Tables.EVENTS.ID, Tables.EVENTS.NAME, Tables.EVENTS.DISCIPLINE, Tables.EVENTS.STAGE_ID,
+            Tables.EVENTS.DELETED_AT, Tables.EVENTS.ENROLLMENT_DEADLINE, Tables.EVENTS.AWARDS,
+            Tables.EVENTS.RANK_SCORE, GetStagesJooqAdapter.COMPETITOR_COUNT, GetStagesJooqAdapter.HAS_ANY_SCORE
+    };
 
+    private final List<String> sqls = new ArrayList<>();
+    private final List<List<Object>> bindings = new ArrayList<>();
+
+    /** Two stages: "past" finished before today, "running" ends after today; each with one event. */
+    private DSLContext dsl() {
         MockDataProvider provider = ctx -> {
             String sql = ctx.sql().toLowerCase();
-            DSLContext mockDsl = DSL.using(SQLDialect.POSTGRES);
-            if (sql.contains("from \"k9x\".\"competitions\"")) {
-                competitionsSql.set(ctx.sql());
-                Result<Record> result = mockDsl.newResult(COMPETITION_FIELDS);
-                Record r = mockDsl.newRecord(COMPETITION_FIELDS);
-                r.set(Tables.COMPETITIONS.ID, "comp-1");
-                r.set(Tables.COMPETITIONS.NAME, "Comp A");
-                r.set(ORGANIZER_NAME, "Organizer");
-                r.set(Tables.COMPETITIONS.LAST_UPDATE, 0L);
-                r.set(Tables.COMPETITIONS.CREATED_AT, 0L);
-                result.add(r);
-                return new MockResult[]{new MockResult(1, result)};
+            sqls.add(sql);
+            bindings.add(List.of(ctx.bindings()));
+            DSLContext mock = DSL.using(SQLDialect.POSTGRES);
+            if (sql.startsWith("select \"k9x\".\"stages\".\"id\"")) {
+                Result<Record> result = mock.newResult(STAGE_FIELDS);
+                result.add(stage(mock, "past", TODAY - 10, TODAY - 5));
+                result.add(stage(mock, "running", TODAY - 1, TODAY + 5));
+                return new MockResult[]{new MockResult(2, result)};
             }
-            return new MockResult[]{new MockResult(0, mockDsl.newResult())};
+            if (sql.startsWith("select \"k9x\".\"events\".\"id\", \"k9x\".\"events\".\"name\"")) {
+                Result<Record> result = mock.newResult(EVENT_FIELDS);
+                result.add(event(mock, "evt-past", "past", 12, true));
+                result.add(event(mock, "evt-running", "running", 3, true));
+                return new MockResult[]{new MockResult(2, result)};
+            }
+            return new MockResult[]{new MockResult(0, mock.newResult())};
+        };
+        return DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+    }
+
+    private static Record stage(DSLContext mock, String id, long from, long to) {
+        Record r = mock.newRecord(STAGE_FIELDS);
+        r.set(Tables.STAGES.ID, id);
+        r.set(Tables.STAGES.NAME, "Stage " + id);
+        r.set(Tables.STAGES.DATE_FROM, from);
+        r.set(Tables.STAGES.DATE_TO, to);
+        r.set(Tables.COMPETITIONS.ID, "comp-1");
+        r.set(Tables.COMPETITIONS.NAME, "Comp");
+        r.set(GetStagesJooqAdapter.ORGANIZER_NAME, "Organizer");
+        return r;
+    }
+
+    private static Record event(DSLContext mock, String id, String stageId, int competitors, boolean scored) {
+        Record r = mock.newRecord(EVENT_FIELDS);
+        r.set(Tables.EVENTS.ID, id);
+        r.set(Tables.EVENTS.NAME, "Event " + id);
+        r.set(Tables.EVENTS.DISCIPLINE, "obdx");
+        r.set(Tables.EVENTS.STAGE_ID, stageId);
+        r.set(GetStagesJooqAdapter.COMPETITOR_COUNT, competitors);
+        r.set(GetStagesJooqAdapter.HAS_ANY_SCORE, scored);
+        return r;
+    }
+
+    @Test
+    void filters_the_date_range_and_deleted_rows_in_sql() {
+        new GetStagesJooqAdapter(dsl()).getStages(100L, 200L, TODAY);
+
+        assertThat(sqls.getFirst())
+                .contains("join \"k9x\".\"competitions\"")
+                .contains("\"k9x\".\"stages\".\"deleted_at\" is null")
+                .contains("\"k9x\".\"competitions\".\"deleted_at\" is null")
+                .contains("\"k9x\".\"stages\".\"date_from\" >= ?")
+                .contains("\"k9x\".\"stages\".\"date_from\" <= ?");
+    }
+
+    @Test
+    void leaves_an_open_range_bound_out_of_the_query() {
+        new GetStagesJooqAdapter(dsl()).getStages(null, null, TODAY);
+
+        assertThat(sqls.getFirst()).doesNotContain("\"date_from\" >=").doesNotContain("\"date_from\" <=");
+    }
+
+    @Test
+    void aggregates_competitor_count_and_any_score_in_sql_instead_of_loading_them() {
+        List<FetchStageListRowDTO> stages = new GetStagesJooqAdapter(dsl()).getStages(null, null, TODAY);
+
+        String eventsSql = sqls.stream().filter(s -> s.startsWith("select \"k9x\".\"events\".\"id\", \"k9x\".\"events\".\"name\""))
+                .findFirst().orElseThrow();
+        assertThat(eventsSql)
+                .contains("count(*)")
+                .contains("exists")
+                .contains("\"obdx\".\"event_scores\".\"score\" is not null");
+        FetchStageListRowEventDTO past = stages.stream().filter(s -> s.id().equals("past")).findFirst().orElseThrow()
+                .events().getFirst();
+        assertThat(past.competitorCount()).isEqualTo(12);
+        assertThat(past.hasAnyScore()).isTrue();
+    }
+
+    @Test
+    void only_hydrates_the_events_whose_stage_has_not_finished_by_date() {
+        new GetStagesJooqAdapter(dsl()).getStages(null, null, TODAY);
+
+        // The hydrator's event query (it joins obdx.event_info) is the only one that can lead to score rows,
+        // and it is scoped to the running event alone: the finished one is FINISHED by date.
+        List<Integer> hydrations = new ArrayList<>();
+        for (int i = 0; i < sqls.size(); i++) {
+            if (sqls.get(i).contains("\"obdx\".\"event_info\"")) {
+                hydrations.add(i);
+            }
+        }
+        assertThat(hydrations).hasSize(1);
+        assertThat(bindings.get(hydrations.getFirst())).contains("evt-running").doesNotContain("evt-past");
+    }
+
+    @Test
+    void returns_nothing_without_touching_events_when_no_stage_matches() {
+        MockDataProvider empty = ctx -> {
+            sqls.add(ctx.sql());
+            return new MockResult[]{new MockResult(0, DSL.using(SQLDialect.POSTGRES).newResult(STAGE_FIELDS))};
         };
 
-        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
-        List<CompetitionSnapshot> competitions = new GetStagesJooqAdapter(dsl).getCompetitions();
+        List<FetchStageListRowDTO> stages = new GetStagesJooqAdapter(
+                DSL.using(new MockConnection(empty), SQLDialect.POSTGRES)).getStages(1L, 2L, TODAY);
 
-        assertThat(competitions).hasSize(1);
-        assertThat(competitions.getFirst().id()).isEqualTo("comp-1");
-        assertThat(competitions.getFirst().stages()).isEmpty();
-        // trueCondition() => the WHERE has no real predicate ("where true"): every competition is hydrated.
-        assertThat(competitionsSql.get().toLowerCase())
-                .contains("from \"k9x\".\"competitions\"")
-                .contains("where true");
+        assertThat(stages).isEmpty();
+        assertThat(sqls).hasSize(1);
     }
 }

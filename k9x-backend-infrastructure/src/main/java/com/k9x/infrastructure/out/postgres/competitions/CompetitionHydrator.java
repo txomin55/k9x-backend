@@ -64,7 +64,8 @@ public class CompetitionHydrator {
 
         Map<String, CompetitionExtraction> extractions = fetchExtractions(competitions.keySet());
         Map<String, List<StageSnapshot>> stagesByCompetition = new LinkedHashMap<>();
-        Map<String, List<EventSnapshot>> eventsByStage = fetchEvents(competitions.keySet());
+        Map<String, List<EventSnapshot>> eventsByStage =
+                fetchEvents(Tables.STAGES.COMPETITION_ID.in(toList(competitions.keySet())));
 
         fetchStages(competitions.keySet()).forEach(shell -> {
             StageSnapshot stage = new StageSnapshot(shell.id, shell.name, shell.competitionId, shell.creator,
@@ -153,7 +154,19 @@ public class CompetitionHydrator {
                 });
     }
 
-    private Map<String, List<EventSnapshot>> fetchEvents(Iterable<String> competitionIds) {
+    /**
+     * Just the given events, each fully hydrated (competitors, exercises, judges, scores) but outside its
+     * competition. For the rare read that needs a domain rule over an event's scores — e.g. whether every
+     * competitor of a running event is settled — without paying for the whole tree.
+     */
+    public List<EventSnapshot> hydrateEvents(Collection<String> eventIds) {
+        if (eventIds.isEmpty()) {
+            return List.of();
+        }
+        return fetchEvents(Tables.EVENTS.ID.in(eventIds)).values().stream().flatMap(List::stream).toList();
+    }
+
+    private Map<String, List<EventSnapshot>> fetchEvents(Condition eventCondition) {
         var ev = Tables.EVENTS;
         var st = Tables.STAGES;
         EventInfo ei = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_INFO;
@@ -167,8 +180,8 @@ public class CompetitionHydrator {
                 .from(ev)
                 .join(st).on(st.ID.eq(ev.STAGE_ID))
                 .leftJoin(ei).on(ei.EVENT_ID.eq(ev.ID))
-                .where(st.COMPETITION_ID.in(toList(competitionIds)))
-                .orderBy(ev.CREATED_AT.asc())
+                .where(eventCondition)
+                .orderBy(ev.CREATED_AT.asc(), ev.ID.asc())
                 .fetch(r -> {
                     EventShell shell = new EventShell();
                     shell.id = r.get(ev.ID);

@@ -5,25 +5,27 @@ import com.k9x.application.rankings.port.GetRankedEventIdsPersistencePort;
 import com.k9x.application.stages.port.GetStageListPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageListDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListEventDTO;
-import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
-import com.k9x.domain.competitions.aggregates.CompetitionSource;
-import com.k9x.domain.disciplines.obdx.ObdxAvgMethod;
-import com.k9x.domain.events.aggregates.EventSnapshot;
-import com.k9x.domain.events.valueobjects.EventCompetitor;
-import com.k9x.domain.events.valueobjects.EventExercise;
-import com.k9x.domain.events.valueobjects.EventJudge;
-import com.k9x.domain.events.valueobjects.Score;
-import com.k9x.domain.stages.aggregates.StageSnapshot;
+import com.k9x.application.stages.use_case.dto.FetchStageListRowDTO;
+import com.k9x.application.stages.use_case.dto.FetchStageListRowEventDTO;
+import com.k9x.application.utils.date.DateUtils;
+import com.k9x.domain.disciplines.obdx.ObdxRank;
+import com.k9x.domain.shared.UtcDates;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,36 +45,19 @@ class GetStageListServiceCaseTest {
 
     private GetStageListServiceCase serviceCase;
 
-    private static CompetitionSnapshot competition(StageSnapshot stage) {
-        return competition(List.of(stage));
+    private static FetchStageListRowDTO stage(String id, long from, long to, List<FetchStageListRowEventDTO> events) {
+        return new FetchStageListRowDTO(id, "Stage " + id, from, to, "Comp", "ES", "Calle Mayor 1", 40.4, -3.7,
+                "Organizer Name", null, events);
     }
 
-    private static CompetitionSnapshot competition(List<StageSnapshot> stages) {
-        return new CompetitionSnapshot("comp", "Comp", "creator", "Organizer Name", "ES",
-                "desc", "Calle Mayor 1", 40.4, -3.7, CompetitionSource.API, null, 0L, 0L, null, stages);
+    private static FetchStageListRowEventDTO event(String id, Long deletedAt, int competitors, boolean hasAnyScore,
+                                                   boolean allSettled) {
+        return new FetchStageListRowEventDTO(id, "Event " + id, "OBDX", deletedAt, null, List.of(), null,
+                competitors, hasAnyScore, allSettled);
     }
 
-    private static StageSnapshot stage(String id, long from, long to, List<EventSnapshot> events) {
-        return new StageSnapshot(id, "Stage " + id, "comp", "creator", from, to, 0L, 0L, null, events);
-    }
-
-    private static EventSnapshot event(String id, String configId, Long deletedAt, List<EventCompetitor> competitors,
-                                       List<EventExercise> exercises, List<EventJudge> judges, List<Score> scores) {
-        return new EventSnapshot(id, configId, "OBDX", "Event " + id, "s-1", "creator",
-                null, 0L, 0L, deletedAt, ObdxAvgMethod.AVG, competitors, exercises, judges, scores, List.of(), null, null, null);
-    }
-
-    private static EventCompetitor competitor(String dogIdentification, boolean notCompeting) {
-        return new EventCompetitor(dogIdentification, "Rex", "owner", "Handler", "Team A", "ES", "Border Collie", "ID-001", null, null,
-                (short) 1, null, true, notCompeting, null, null, null, null, null);
-    }
-
-    private static EventExercise exercise(String id) {
-        return new EventExercise(id, (short) 1, List.of(), List.of("j-1"));
-    }
-
-    private static EventJudge judge(String id) {
-        return new EventJudge(id, "Judge " + id, "collector@test.com", false);
+    private void listReturns(FetchStageListRowDTO... stages) {
+        when(getStageListPersistencePort.getStages(any(), any(), anyLong())).thenReturn(List.of(stages));
     }
 
     @BeforeEach
@@ -82,12 +67,21 @@ class GetStageListServiceCaseTest {
     }
 
     @Test
-    void surfaces_discipline_id_and_computes_finished_stage_and_event_when_unscored() {
-        EventSnapshot event = event("evt-1", "obdx-1", null, List.of(competitor("dog-1", false)),
-                List.of(exercise("ex-1")), List.of(judge("j-1")), List.of());
-        CompetitionSnapshot competition = competition(stage("s-1", FAR_PAST, FAR_PAST, List.of(event)));
+    void pushes_the_date_range_and_the_start_of_today_down_to_the_query() {
+        long before = UtcDates.startOfUtcDay(DateUtils.nowUtcMillis());
+        when(getStageListPersistencePort.getStages(eq(10L), isNull(), anyLong())).thenReturn(List.of());
 
-        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
+        serviceCase.getStages(10L, null);
+
+        ArgumentCaptor<Long> startOfToday = ArgumentCaptor.forClass(Long.class);
+        verify(getStageListPersistencePort).getStages(eq(10L), isNull(), startOfToday.capture());
+        assertThat(startOfToday.getValue()).isEqualTo(UtcDates.startOfUtcDay(startOfToday.getValue()))
+                .isGreaterThanOrEqualTo(before);
+    }
+
+    @Test
+    void surfaces_discipline_id_and_computes_finished_stage_and_event_when_unscored() {
+        listReturns(stage("s-1", FAR_PAST, FAR_PAST, List.of(event("evt-1", null, 1, false, false))));
 
         List<FetchStageListDTO> result = serviceCase.getStages(null, null);
 
@@ -102,14 +96,9 @@ class GetStageListServiceCaseTest {
 
     @Test
     void surfaces_started_status_when_an_event_holds_a_score() {
-        // 2 exercises x 1 judge = 2 required scores, only 1 recorded -> competitor not settled (not FINISHED),
-        // but a score exists -> event STARTED. dateTo in the far future rules out the date-driven FINISHED.
-        EventSnapshot event = event("evt-1", "obdx-1", null, List.of(competitor("dog-1", false)),
-                List.of(exercise("ex-1"), exercise("ex-2")), List.of(judge("j-1")),
-                List.of(new Score("ex-1", "j-1", "dog-1", new BigDecimal("7.0"), 0L)));
-        CompetitionSnapshot competition = competition(stage("s-1", FAR_PAST, FAR_FUTURE, List.of(event)));
-
-        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
+        // A score exists but not every competitor is settled -> event STARTED. dateTo in the far future rules
+        // out the date-driven FINISHED.
+        listReturns(stage("s-1", FAR_PAST, FAR_FUTURE, List.of(event("evt-1", null, 1, true, false))));
 
         List<FetchStageListDTO> result = serviceCase.getStages(null, null);
 
@@ -118,11 +107,18 @@ class GetStageListServiceCaseTest {
     }
 
     @Test
-    void enrollment_is_closed_when_event_has_no_deadline() {
-        EventSnapshot event = event("evt-1", "obdx-1", null, List.of(), List.of(), List.of(), List.of());
-        CompetitionSnapshot competition = competition(stage("s-1", FAR_FUTURE, FAR_FUTURE, List.of(event)));
+    void a_running_event_with_every_competitor_settled_is_finished_before_its_date() {
+        listReturns(stage("s-1", FAR_PAST, FAR_FUTURE, List.of(event("evt-1", null, 1, true, true))));
 
-        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
+
+        assertThat(result.getFirst().events().getFirst().status()).isEqualTo("FINISHED");
+        assertThat(result.getFirst().status()).isEqualTo("FINISHED");
+    }
+
+    @Test
+    void enrollment_is_closed_when_event_has_no_deadline() {
+        listReturns(stage("s-1", FAR_FUTURE, FAR_FUTURE, List.of(event("evt-1", null, 0, false, false))));
 
         List<FetchStageListDTO> result = serviceCase.getStages(null, null);
 
@@ -131,20 +127,38 @@ class GetStageListServiceCaseTest {
     }
 
     @Test
+    void enrollment_follows_the_deadline_while_the_stage_is_not_under_way() {
+        FetchStageListRowEventDTO open = new FetchStageListRowEventDTO("evt-1", "Event", "OBDX", null, FAR_FUTURE,
+                List.of(), null, 0, false, false);
+        listReturns(stage("s-1", FAR_FUTURE, FAR_FUTURE, List.of(open)));
+
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
+
+        assertThat(result.getFirst().status()).isEqualTo("CREATED");
+        assertThat(result.getFirst().events().getFirst().enrollmentOpened()).isTrue();
+    }
+
+    @Test
+    void derives_the_rank_label_from_the_rank_score() {
+        FetchStageListRowEventDTO ranked = new FetchStageListRowEventDTO("evt-1", "Event", "OBDX", null, null,
+                List.of(), 900, 0, false, false);
+        listReturns(stage("s-1", FAR_PAST, FAR_PAST, List.of(ranked)));
+
+        FetchStageListEventDTO event = serviceCase.getStages(null, null).getFirst().events().getFirst();
+
+        assertThat(event.rank()).isEqualTo(ObdxRank.labelFromScore(900));
+    }
+
+    @Test
     void orders_upcoming_ascending_then_past_descending() {
         long pastOld = FAR_PAST;                    // 1970
         long pastRecent = 1_500_000_000_000L;       // 2017
         long upcomingSoon = 3_000_000_000_000L;     // 2065
         long upcomingFar = FAR_FUTURE;              // 2096
-
-        StageSnapshot sPastOld = stage("past-old", pastOld, pastOld, List.of());
-        StageSnapshot sPastRecent = stage("past-recent", pastRecent, pastRecent, List.of());
-        StageSnapshot sUpcomingSoon = stage("upcoming-soon", upcomingSoon, upcomingSoon, List.of());
-        StageSnapshot sUpcomingFar = stage("upcoming-far", upcomingFar, upcomingFar, List.of());
-        CompetitionSnapshot competition = competition(
-                List.of(sPastOld, sUpcomingFar, sPastRecent, sUpcomingSoon));
-
-        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
+        listReturns(stage("past-old", pastOld, pastOld, List.of()),
+                stage("upcoming-far", upcomingFar, upcomingFar, List.of()),
+                stage("past-recent", pastRecent, pastRecent, List.of()),
+                stage("upcoming-soon", upcomingSoon, upcomingSoon, List.of()));
 
         List<FetchStageListDTO> result = serviceCase.getStages(null, null);
 
@@ -154,53 +168,30 @@ class GetStageListServiceCaseTest {
     }
 
     @Test
-    void filters_stages_by_date_from_within_range() {
-        long before = 1_000_000_000_000L; // 2001
-        long inside = 2_000_000_000_000L;  // 2033
-        long after = 3_000_000_000_000L;   // 2065
-        CompetitionSnapshot competition = competition(List.of(
-                stage("before", before, before, List.of()),
-                stage("inside", inside, inside, List.of()),
-                stage("after", after, after, List.of())));
+    void lists_only_active_events_but_a_deleted_one_still_keeps_the_stage_from_finishing() {
+        // The active event is settled, the deleted one is DELETED: not every event is FINISHED, so the stage
+        // stays STARTED until its date passes, while the list only shows the active event.
+        listReturns(stage("s-1", FAR_PAST, FAR_FUTURE, List.of(
+                event("evt-1", null, 1, true, true),
+                event("evt-2", 999L, 0, false, false))));
 
-        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
+        FetchStageListDTO result = serviceCase.getStages(null, null).getFirst();
 
-        List<FetchStageListDTO> result = serviceCase.getStages(before + 1, after - 1);
-
-        assertThat(result).extracting(FetchStageListDTO::id).containsExactly("inside");
+        assertThat(result.events()).extracting(FetchStageListEventDTO::id).containsExactly("evt-1");
+        assertThat(result.status()).isEqualTo("STARTED");
     }
 
     @Test
-    void treats_null_range_bounds_as_open_ended() {
-        long early = 1_000_000_000_000L; // 2001
-        long late = 3_000_000_000_000L;  // 2065
-        CompetitionSnapshot competition = competition(List.of(
-                stage("early", early, early, List.of()),
-                stage("late", late, late, List.of())));
-
-        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
-
-        assertThat(serviceCase.getStages(null, early).stream().map(FetchStageListDTO::id).toList())
-                .containsExactly("early");
-        assertThat(serviceCase.getStages(late, null).stream().map(FetchStageListDTO::id).toList())
-                .containsExactly("late");
-    }
-
-    @Test
-    void skips_deleted_stages_and_deleted_events() {
-        EventSnapshot liveEvent = event("evt-1", "obdx-1", null, List.of(), List.of(), List.of(), List.of());
-        EventSnapshot deletedEvent = event("evt-2", "obdx-1", 999L, List.of(), List.of(), List.of(), List.of());
-        StageSnapshot liveStage = stage("s-1", FAR_PAST, FAR_PAST, List.of(liveEvent, deletedEvent));
-        StageSnapshot deletedStage = new StageSnapshot("s-2", "Stage s-2", "comp", "creator",
-                FAR_PAST, FAR_PAST, 0L, 0L, 888L, List.of(liveEvent));
-        CompetitionSnapshot competition = competition(List.of(liveStage, deletedStage));
-
-        when(getStageListPersistencePort.getCompetitions()).thenReturn(List.of(competition));
+    void flags_stages_with_a_ranked_active_event() {
+        listReturns(stage("s-1", FAR_PAST, FAR_PAST, List.of(event("evt-1", null, 0, false, false))),
+                stage("s-2", FAR_PAST, FAR_PAST, List.of(event("evt-2", null, 0, false, false))));
+        when(getRankedEventIdsPersistencePort.getRankedEventIds()).thenReturn(Set.of("evt-2"));
 
         List<FetchStageListDTO> result = serviceCase.getStages(null, null);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.getFirst().id()).isEqualTo("s-1");
-        assertThat(result.getFirst().events()).extracting(FetchStageListEventDTO::id).containsExactly("evt-1");
+        assertThat(result).filteredOn(s -> s.id().equals("s-2")).singleElement()
+                .extracting(FetchStageListDTO::includesRankings).isEqualTo(true);
+        assertThat(result).filteredOn(s -> s.id().equals("s-1")).singleElement()
+                .extracting(FetchStageListDTO::includesRankings).isEqualTo(false);
     }
 }
