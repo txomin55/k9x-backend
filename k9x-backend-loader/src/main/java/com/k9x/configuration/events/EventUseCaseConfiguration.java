@@ -1,10 +1,11 @@
 package com.k9x.configuration.events;
 
-import com.k9x.application.competitions.port.GetCompetitionPersistencePort;
 import com.k9x.application.disciplines.obdx.port.GetObdxFederationsConfigurationsPort;
 import com.k9x.application.events.obdx.port.GetObdxClassificationConfigPort;
 import com.k9x.application.events.obdx.use_case.GetObdxClassificationServiceCase;
 import com.k9x.application.events.obdx.use_case.port.ClassificationCacheManagerPort;
+import com.k9x.application.events.port.GetClassificationEventPersistencePort;
+import com.k9x.application.events.port.GetEventClassificationHeaderPersistencePort;
 import com.k9x.application.events.snapshot.use_case.GetEventSnapshotServiceCase;
 import com.k9x.application.events.use_case.GetEventClassificationServiceCase;
 import com.k9x.application.events.use_case.port.EventClassificationCacheManagerPort;
@@ -25,13 +26,15 @@ public class EventUseCaseConfiguration {
 
     @Bean
     public GetEventClassificationServiceCase getClassificationServiceCase(
-            GetCompetitionPersistencePort getCompetitionPersistencePort,
+            GetEventClassificationHeaderPersistencePort getEventClassificationHeaderPersistencePort,
+            GetClassificationEventPersistencePort getClassificationEventPersistencePort,
             EventClassificationCacheManagerPort eventClassificationCacheManagerPort,
             GetObdxClassificationServiceCase getObdxClassificationServiceCase,
             GetObdxFederationsConfigurationsPort getObdxFederationsConfigurationsPort,
             GetEventSnapshotServiceCase getEventSnapshotServiceCase) {
         return new GetEventClassificationServiceCase(
-                getCompetitionPersistencePort,
+                getEventClassificationHeaderPersistencePort,
+                getClassificationEventPersistencePort,
                 eventClassificationCacheManagerPort,
                 getObdxClassificationServiceCase,
                 getObdxFederationsConfigurationsPort,

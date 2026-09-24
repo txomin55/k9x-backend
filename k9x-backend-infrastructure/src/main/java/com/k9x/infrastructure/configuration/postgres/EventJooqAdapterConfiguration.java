@@ -1,6 +1,10 @@
 package com.k9x.infrastructure.configuration.postgres;
 
 import com.k9x.application.events.obdx.port.*;
+import com.k9x.application.events.port.GetClassificationEventPersistencePort;
+import com.k9x.application.events.port.GetEventClassificationHeaderPersistencePort;
+import com.k9x.infrastructure.out.postgres.events.GetClassificationEventJooqAdapter;
+import com.k9x.infrastructure.out.postgres.events.GetEventClassificationHeaderJooqAdapter;
 import com.k9x.infrastructure.out.postgres.events.obdx.*;
 import org.jooq.DSLContext;
 import org.springframework.context.annotation.Bean;
@@ -18,5 +22,15 @@ public class EventJooqAdapterConfiguration {
     @Bean
     public GetObdxEventCollectorPersistencePort getEventCollectorPersistencePort() {
         return new GetObdxEventCollectorJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetEventClassificationHeaderPersistencePort getEventClassificationHeaderPersistencePort() {
+        return new GetEventClassificationHeaderJooqAdapter(dsl);
+    }
+
+    @Bean
+    public GetClassificationEventPersistencePort getClassificationEventPersistencePort() {
+        return new GetClassificationEventJooqAdapter(dsl);
     }
 }

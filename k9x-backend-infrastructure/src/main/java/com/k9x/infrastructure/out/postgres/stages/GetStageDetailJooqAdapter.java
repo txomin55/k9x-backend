@@ -4,15 +4,14 @@ import com.k9x.application.stages.port.GetStageDetailPersistencePort;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailCompetitorDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailRowDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageDetailRowEventDTO;
-import com.k9x.domain.competitions.aggregates.CompetitionExtraction;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.infrastructure.out.postgres.competitions.CompetitionHydrator;
+import com.k9x.infrastructure.out.postgres.competitions.LatestExtractionQuery;
 import com.k9x.infrastructure.out.postgres.events.EventProjectionFields;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Competitions;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Dogs;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Events;
-import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.ExtractionMetadata;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Organizers;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Stages;
 import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventCompetitors;
@@ -90,7 +89,7 @@ public class GetStageDetailJooqAdapter implements GetStageDetailPersistencePort 
 
         return Optional.of(new FetchStageDetailRowDTO(stage.get(ST.ID), stage.get(ST.NAME), stage.get(ST.DATE_FROM),
                 stage.get(ST.DATE_TO), stage.get(ST.DELETED_AT), stage.get(CO.NAME), stage.get(CO.ADDRESS),
-                stage.get(ORGANIZER_NAME), fetchLatestExtraction(stage.get(CO.ID)),
+                stage.get(ORGANIZER_NAME), LatestExtractionQuery.of(dsl, stage.get(CO.ID)),
                 events.stream()
                         .map(r -> new FetchStageDetailRowEventDTO(r.get(EV.ID), r.get(EV.NAME), r.get(EV.DISCIPLINE),
                                 r.get(EI.CONFIGURATION_ID), r.get(EV.DELETED_AT), r.get(EV.ENROLLMENT_DEADLINE),
@@ -127,20 +126,6 @@ public class GetStageDetailJooqAdapter implements GetStageDetailPersistencePort 
 
     private static String firstNonBlank(String snapshot, String current) {
         return snapshot == null || snapshot.isBlank() ? current : snapshot;
-    }
-
-    /** The most recent extraction describes the data currently loaded; an app-created competition has none. */
-    private CompetitionExtraction fetchLatestExtraction(String competitionId) {
-        ExtractionMetadata em = Tables.EXTRACTION_METADATA;
-        return dsl.select(em.EXTRACTION_ID, em.SOURCE, em.EXTRACTION_TIMESTAMP, em.TYPE, em.RESTRICTED, em.CREATED_AT)
-                .from(em)
-                .where(em.COMPETITION_ID.eq(competitionId))
-                .orderBy(em.EXTRACTION_TIMESTAMP.desc())
-                .limit(1)
-                .fetchOptional(r -> new CompetitionExtraction(r.get(em.EXTRACTION_ID), r.get(em.SOURCE),
-                        r.get(em.EXTRACTION_TIMESTAMP), r.get(em.TYPE), Boolean.TRUE.equals(r.get(em.RESTRICTED)),
-                        r.get(em.CREATED_AT)))
-                .orElse(null);
     }
 
     private Set<String> fetchSettledEventIds(List<String> eventIdsWithCompetitors) {
