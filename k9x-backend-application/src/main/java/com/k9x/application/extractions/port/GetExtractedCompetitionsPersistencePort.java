@@ -1,14 +1,14 @@
 package com.k9x.application.extractions.port;
 
-import com.k9x.domain.competitions.aggregates.CompetitionSnapshot;
+import com.k9x.application.extractions.use_case.dto.FetchExtractionLogStageDTO;
 
 import java.util.List;
 
 public interface GetExtractedCompetitionsPersistencePort {
 
     /**
-     * Hydrates every active competition loaded by an external ETL (source EXTRACTION), with its latest
-     * extraction and its stages → events → competitors. Competitions created through the app are left out.
+     * Every active stage of an active competition loaded by an external ETL (source EXTRACTION) whose latest
+     * extraction has a load instant, with its active events. Competitions created through the app are left out.
      */
-    List<CompetitionSnapshot> getExtractedCompetitions();
+    List<FetchExtractionLogStageDTO> getExtractedStages();
 }

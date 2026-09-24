@@ -2,6 +2,7 @@ package com.k9x.infrastructure.out.postgres.stages;
 
 import com.k9x.application.stages.use_case.dto.FetchStageListRowDTO;
 import com.k9x.application.stages.use_case.dto.FetchStageListRowEventDTO;
+import com.k9x.infrastructure.out.postgres.events.EventProjectionFields;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -33,7 +34,7 @@ class GetStagesJooqAdapterTest {
     private static final Field<?>[] EVENT_FIELDS = {
             Tables.EVENTS.ID, Tables.EVENTS.NAME, Tables.EVENTS.DISCIPLINE, Tables.EVENTS.STAGE_ID,
             Tables.EVENTS.DELETED_AT, Tables.EVENTS.ENROLLMENT_DEADLINE, Tables.EVENTS.AWARDS,
-            Tables.EVENTS.RANK_SCORE, GetStagesJooqAdapter.COMPETITOR_COUNT, GetStagesJooqAdapter.HAS_ANY_SCORE
+            Tables.EVENTS.RANK_SCORE, EventProjectionFields.COMPETITOR_COUNT, EventProjectionFields.HAS_ANY_SCORE
     };
 
     private final List<String> sqls = new ArrayList<>();
@@ -81,8 +82,8 @@ class GetStagesJooqAdapterTest {
         r.set(Tables.EVENTS.NAME, "Event " + id);
         r.set(Tables.EVENTS.DISCIPLINE, "obdx");
         r.set(Tables.EVENTS.STAGE_ID, stageId);
-        r.set(GetStagesJooqAdapter.COMPETITOR_COUNT, competitors);
-        r.set(GetStagesJooqAdapter.HAS_ANY_SCORE, scored);
+        r.set(EventProjectionFields.COMPETITOR_COUNT, competitors);
+        r.set(EventProjectionFields.HAS_ANY_SCORE, scored);
         return r;
     }
 

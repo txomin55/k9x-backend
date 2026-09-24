@@ -6,18 +6,16 @@ import com.k9x.application.stages.use_case.dto.FetchStageListRowEventDTO;
 import com.k9x.domain.competitions.aggregates.CompetitionExtraction;
 import com.k9x.domain.events.aggregates.EventSnapshot;
 import com.k9x.infrastructure.out.postgres.competitions.CompetitionHydrator;
+import com.k9x.infrastructure.out.postgres.events.EventProjectionFields;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.Tables;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Competitions;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Events;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.ExtractionMetadata;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Organizers;
 import com.k9x.infrastructure.out.postgres.jooq.generated.k9x.tables.Stages;
-import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventCompetitors;
-import com.k9x.infrastructure.out.postgres.jooq.generated.obdx.tables.EventScores;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.impl.DSL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,16 +41,8 @@ public class GetStagesJooqAdapter implements GetStageListPersistencePort {
     private static final Competitions CO = Tables.COMPETITIONS;
     private static final Organizers OR = Tables.ORGANIZERS;
     private static final Events EV = Tables.EVENTS;
-    private static final EventCompetitors EC =
-            com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_COMPETITORS;
-    private static final EventScores ES = com.k9x.infrastructure.out.postgres.jooq.generated.obdx.Tables.EVENT_SCORES;
 
     static final Field<String> ORGANIZER_NAME = OR.NAME.as("organizer_name");
-    static final Field<Integer> COMPETITOR_COUNT =
-            DSL.selectCount().from(EC).where(EC.EVENT_ID.eq(EV.ID)).asField("competitor_count");
-    static final Field<Boolean> HAS_ANY_SCORE =
-            DSL.field(DSL.exists(DSL.selectOne().from(ES).where(ES.EVENT_ID.eq(EV.ID)).and(ES.SCORE.isNotNull())))
-                    .as("has_any_score");
 
     private final DSLContext dsl;
     private final CompetitionHydrator hydrator;
@@ -130,14 +120,15 @@ public class GetStagesJooqAdapter implements GetStageListPersistencePort {
     /** Every event of the stages, deleted ones included: the stage status accounts for them. */
     private List<EventRow> fetchEvents(Set<String> stageIds) {
         return dsl.select(EV.ID, EV.NAME, EV.DISCIPLINE, EV.STAGE_ID, EV.DELETED_AT, EV.ENROLLMENT_DEADLINE,
-                        EV.AWARDS, EV.RANK_SCORE, COMPETITOR_COUNT, HAS_ANY_SCORE)
+                        EV.AWARDS, EV.RANK_SCORE, EventProjectionFields.COMPETITOR_COUNT, EventProjectionFields.HAS_ANY_SCORE)
                 .from(EV)
                 .where(EV.STAGE_ID.in(stageIds))
                 .orderBy(EV.CREATED_AT.asc(), EV.ID.asc())
                 .fetch(r -> new EventRow(r.get(EV.ID), r.get(EV.NAME), r.get(EV.DISCIPLINE), r.get(EV.STAGE_ID),
                         r.get(EV.DELETED_AT), r.get(EV.ENROLLMENT_DEADLINE),
                         r.get(EV.AWARDS) == null ? List.of() : Arrays.asList(r.get(EV.AWARDS)),
-                        r.get(EV.RANK_SCORE), r.get(COMPETITOR_COUNT), Boolean.TRUE.equals(r.get(HAS_ANY_SCORE))));
+                        r.get(EV.RANK_SCORE), r.get(EventProjectionFields.COMPETITOR_COUNT),
+                        Boolean.TRUE.equals(r.get(EventProjectionFields.HAS_ANY_SCORE))));
     }
 
     private Set<String> fetchSettledEventIds(List<String> runningEventIds) {
