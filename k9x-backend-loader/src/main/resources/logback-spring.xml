@@ -22,6 +22,10 @@
 
     <springProfile name="deployed">
         <logger name="org.springframework" level="ERROR"/>
+        <!-- The crons' INFO lines (how many events, how many records, the heap) are what tells a run that
+             finished from one that died; under the WARN root they never reached the logs. -->
+        <logger name="com.k9x.application.events.snapshot" level="INFO"/>
+        <logger name="com.k9x.application.dogs.rank" level="INFO"/>
         <root level="WARN">
             <appender-ref ref="STDOUT"/>
         </root>

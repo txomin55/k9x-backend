@@ -58,7 +58,10 @@ public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
         this.createDogRankHistoryPersistencePort = createDogRankHistoryPersistencePort;
     }
 
-    public void generateDogRankHistory() {
+    /**
+     * @return how many history records were appended, so a manual run can report it.
+     */
+    public int generateDogRankHistory() {
         long now = DateUtils.nowUtcMillis();
 
         Map<String, List<FetchDogRankEventResultDTO>> resultsByDog = new LinkedHashMap<>();
@@ -77,6 +80,7 @@ public class GenerateDogRankHistoryServiceCase implements TransactionalUseCase {
             createDogRankHistoryPersistencePort.create(records);
         }
         log.log(Level.INFO, "Appended {0} dog index history record(s)", records.size());
+        return records.size();
     }
 
     private List<DogRankHistoryPayload> recordsFor(List<FetchDogRankEventResultDTO> results,

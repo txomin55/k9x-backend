@@ -38,21 +38,44 @@ public class GenerateEventSnapshotsServiceCase {
         this.saveObdxSnapshotPersistencePort = saveObdxSnapshotPersistencePort;
     }
 
-    public void generateSnapshots() {
+    /**
+     * @return how many snapshots were written, so a manual run can report it.
+     */
+    public int generateSnapshots() {
         long now = DateUtils.nowUtcMillis();
         long startOfToday = UtcDates.startOfUtcDay(now);
 
         List<PendingSnapshotEventDTO> pendingEvents =
                 getPendingSnapshotEventsPersistencePort.getFinishedEventsWithoutSnapshot(startOfToday);
-        log.log(Level.INFO, "Generating classification snapshots for {0} finished event(s)", pendingEvents.size());
+        log.log(Level.INFO, "Generating classification snapshots for {0} finished event(s) ({1})",
+                pendingEvents.size(), heap());
 
-        for (PendingSnapshotEventDTO pending : pendingEvents) {
+        int generated = 0;
+        int failed = 0;
+        for (int i = 0; i < pendingEvents.size(); i++) {
+            PendingSnapshotEventDTO pending = pendingEvents.get(i);
             try {
                 snapshot(pending, now);
+                generated++;
             } catch (RuntimeException e) {
+                failed++;
                 log.log(Level.ERROR, "Failed to generate classification snapshot for event " + pending.eventId(), e);
+            } catch (Error e) {
+                // An OutOfMemoryError is not a RuntimeException, so it ends the batch; say where it happened
+                // before it propagates. On 2026-09-24 it died after 587 events and the log never said which one.
+                log.log(Level.ERROR, "Classification snapshots aborted at event " + pending.eventId() + " ("
+                        + (i + 1) + "/" + pendingEvents.size() + ", " + heap() + ")", e);
+                throw e;
             }
         }
+        log.log(Level.INFO, "Generated {0} classification snapshot(s), {1} failed ({2})", generated, failed, heap());
+        return generated;
+    }
+
+    private static String heap() {
+        Runtime runtime = Runtime.getRuntime();
+        long usedMb = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
+        return "heap " + usedMb + "/" + runtime.maxMemory() / (1024 * 1024) + " MB";
     }
 
     private void snapshot(PendingSnapshotEventDTO pending, long now) {

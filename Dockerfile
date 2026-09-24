@@ -61,8 +61,14 @@ EXPOSE 4000
 #   -XX:+UseSerialGC         single-threaded GC: no GC worker threads competing for one CPU and less
 #                            memory overhead than G1, which is what the JVM would otherwise pick.
 #   -Xss512k                 half the default stack for platform threads (virtual threads are unaffected).
+#   -XX:MaxRAMPercentage=70  without it the heap tops out at 25% of the box, ~128MB of the 512MB, and a
+#                            single heavy request threw OutOfMemoryError in production (2026-09-24 04:44 UTC).
+#                            The other 30% is left for metaspace, thread stacks and the New Relic agent.
+#   -XX:+ExitOnOutOfMemoryError  after that OutOfMemoryError the JVM stayed alive but answered nothing, and
+#                            Fly does not restart a machine whose process is still running. Dying instead
+#                            lets the platform restart it.
 # Overridable per environment by setting JAVA_OPTS on the platform.
-ENV JAVA_OPTS="-XX:TieredStopAtLevel=1 -XX:+UseSerialGC -Xss512k"
+ENV JAVA_OPTS="-XX:TieredStopAtLevel=1 -XX:+UseSerialGC -Xss512k -XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError"
 
 # The New Relic agent is only attached where NEW_RELIC_ENABLED=true (production, see fly.toml).
 # Instrumenting every class as it loads is most of the startup cost on staging's 0.1 CPU, and it
