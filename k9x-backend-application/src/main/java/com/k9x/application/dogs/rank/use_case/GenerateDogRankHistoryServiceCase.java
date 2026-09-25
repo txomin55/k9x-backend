@@ -151,22 +151,21 @@ public class GenerateDogRankHistoryServiceCase {
                         result.eventId()));
             }
         }
-        if (!records.isEmpty()) {
-            return records;
-        }
-
-        // No new event: degrade only when the dog's inactivity crosses a whole month beyond the freshness
-        // plateau that the history has not recorded yet — freshness is the curve that keeps moving an inactive
-        // dog's index. The recorded month is derived from the latest record's applying timestamp (an EVENT
-        // record applies at the event itself -> month 0), and the floor month is recorded at most once.
+        // Then degrade only when the dog's inactivity crosses a whole month beyond the freshness plateau that the
+        // history has not recorded yet — freshness is the curve that keeps moving an inactive dog's index. The
+        // recorded month is derived from the latest record's applying timestamp (an EVENT record applies at the
+        // event itself -> month 0), and the floor month is recorded at most once. The events just appended count
+        // as recorded: a rebuild over an empty history, or an old event imported late, must still land on the
+        // index as of now instead of leaving the last event's value in place until the next run.
         long lastEventAt = results.get(results.size() - 1).applyingTimestamp();
+        long recordedAt = records.isEmpty() ? latestRecordedAt : lastEventAt;
         int monthsInactive = Math.min(DogRankIndex.wholeMonthsBetween(lastEventAt, now),
                 DogRankIndex.FRESHNESS_FLOOR_MONTHS_THRESHOLD);
-        int monthsRecorded = DogRankIndex.wholeMonthsBetween(lastEventAt, latestRecordedAt);
+        int monthsRecorded = DogRankIndex.wholeMonthsBetween(lastEventAt, recordedAt);
         if (monthsInactive >= DogRankIndex.FRESHNESS_PLATEAU_MONTHS_THRESHOLD && monthsInactive > monthsRecorded) {
             int rank = DogRankIndex.of(accumulated, now);
-            return List.of(DogRankHistoryPayload.fromTimeDegradation(dogIdentification, rank, now, monthsInactive));
+            records.add(DogRankHistoryPayload.fromTimeDegradation(dogIdentification, rank, now, monthsInactive));
         }
-        return List.of();
+        return records;
     }
 }

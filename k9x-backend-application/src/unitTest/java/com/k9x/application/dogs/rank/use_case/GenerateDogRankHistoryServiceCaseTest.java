@@ -175,6 +175,26 @@ class GenerateDogRankHistoryServiceCaseTest {
     }
 
     @Test
+    void a_rebuild_over_an_inactive_dog_ends_on_the_degraded_index_of_today() {
+        long now = DateUtils.nowUtcMillis();
+        long eventAt = now - 26 * MILLIS_PER_MONTH;
+        dogsAre("dog-1");
+        when(getDogRankEventResultsPersistencePort.getEventResults(List.of("dog-1"))).thenReturn(List.of(
+                new FetchDogRankEventResultDTO("dog-1", "evt-1", new BigDecimal("900.00"), eventAt)));
+        when(getLatestDogRankHistoryPersistencePort.getLatestHistory(List.of("dog-1"))).thenReturn(List.of());
+
+        serviceCase.generateDogRankHistory();
+
+        List<DogRankHistoryPayload> records = generatedRecords();
+        assertThat(records).hasSize(2);
+        assertThat(records.get(0).metadata()).isEqualTo(Map.of("type", "EVENT", "eventId", "evt-1"));
+        // 26 months inactive: level weight 0.45, freshness 0.30 -> ((405 + 201 + 201) / 3) × 0.30
+        assertThat(records.get(1).rank()).isEqualTo(81);
+        assertThat(records.get(1).applyingTimestamp()).isGreaterThanOrEqualTo(now);
+        assertThat(records.get(1).metadata()).isEqualTo(Map.of("type", "TIME_DEGRADATION", "month", "26"));
+    }
+
+    @Test
     void every_discipline_feeds_the_same_single_timeline() {
         long now = DateUtils.nowUtcMillis();
         long agilityAt = now - 3 * MILLIS_PER_MONTH;
