@@ -1,12 +1,19 @@
 package com.k9x.configuration.observability;
 
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.metrics.MeterProvider;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
 import io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure.otlp.OtlpTracingProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Locale;
 
 /**
  * Switches trace and log export on and off at runtime with {@code k9x-backend.observability.otlp-export-enabled}
@@ -28,6 +35,29 @@ public class OpenTelemetryExportConfiguration {
     @Bean
     public Sampler otelSampler(@Value("${k9x-backend.observability.otlp-export-enabled}") boolean exportEnabled) {
         return exportEnabled ? Sampler.parentBased(Sampler.alwaysOn()) : Sampler.alwaysOff();
+    }
+
+    /**
+     * The span exporter, declared here instead of left to Spring Boot, which picks HTTP or gRPC with a
+     * {@code @ConditionalOnProperty} on the transport. The staging image built by CI on 2026-09-25 came out with the
+     * gRPC exporter although nothing sets the transport, while the same build done locally chose HTTP, and the gRPC
+     * one refuses to start against the HTTP transport it then reads. With this bean both of Boot's exporters back
+     * off, and the choice no longer depends on how the AOT build evaluates that condition. It is built exactly as
+     * Boot's HTTP one, from the same {@code management.opentelemetry.tracing.export.otlp} properties.
+     */
+    @Bean
+    public OtlpHttpSpanExporter otlpHttpSpanExporter(OtlpTracingProperties properties,
+            ObjectProvider<MeterProvider> meterProvider) {
+        OtlpHttpSpanExporterBuilder builder = OtlpHttpSpanExporter.builder()
+                .setTimeout(properties.getTimeout())
+                .setConnectTimeout(properties.getConnectTimeout())
+                .setCompression(properties.getCompression().name().toLowerCase(Locale.ROOT));
+        if (properties.getEndpoint() != null) {
+            builder.setEndpoint(properties.getEndpoint());
+        }
+        properties.getHeaders().forEach(builder::addHeader);
+        meterProvider.ifAvailable(builder::setMeterProvider);
+        return builder.build();
     }
 
     /**

@@ -15,6 +15,10 @@ dependencies {
         exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
     }
     implementation("io.opentelemetry:opentelemetry-exporter-sender-jdk")
+    // The span exporter is declared in OpenTelemetryExportConfiguration, so its class is needed to compile.
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp") {
+        exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
+    }
     // Pinned to the release built on the same OpenTelemetry SDK (1.62) as the one Spring Boot manages.
     implementation("io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0:2.28.0-alpha")
     implementation(project(":k9x-backend-application"))
