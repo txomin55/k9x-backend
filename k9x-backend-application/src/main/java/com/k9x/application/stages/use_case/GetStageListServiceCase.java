@@ -23,7 +23,7 @@ import java.util.Set;
 
 /**
  * The public stage list, read through its own query projection ({@link FetchStageListRowDTO}) rather than the
- * competition aggregate: the date range is filtered in the database and the events arrive with the facts the
+ * competition aggregate: the date range and the country are filtered in the database and the events arrive with the facts the
  * lifecycle rules need, so {@link EventLifecycle} and {@link StageLifecycle} resolve the statuses without a
  * single score in memory.
  */
@@ -42,10 +42,11 @@ public class GetStageListServiceCase {
         this.getRankedEventIdsPersistencePort = getRankedEventIdsPersistencePort;
     }
 
-    public List<FetchStageListDTO> getStages(Long from, Long to) {
+    public List<FetchStageListDTO> getStages(Long from, Long to, String country) {
         long now = DateUtils.nowUtcMillis();
         List<FetchStageListRowDTO> stages = getStageListPersistencePort
-                .getStages(from, to, UtcDates.startOfUtcDay(now)).stream()
+                .getStages(from, to, country == null || country.isBlank() ? null : country,
+                        UtcDates.startOfUtcDay(now)).stream()
                 .sorted((a, b) -> StageProximity.compareByProximity(a.dateFrom(), b.dateFrom(), now))
                 .toList();
         // One query for every stage in the response: announcements are read outside the aggregate, and doing

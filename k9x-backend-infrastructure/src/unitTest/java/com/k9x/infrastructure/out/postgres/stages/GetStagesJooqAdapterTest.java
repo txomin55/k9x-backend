@@ -89,7 +89,7 @@ class GetStagesJooqAdapterTest {
 
     @Test
     void filters_the_date_range_and_deleted_rows_in_sql() {
-        new GetStagesJooqAdapter(dsl()).getStages(100L, 200L, TODAY);
+        new GetStagesJooqAdapter(dsl()).getStages(100L, 200L, null, TODAY);
 
         assertThat(sqls.getFirst())
                 .contains("join \"k9x\".\"competitions\"")
@@ -101,14 +101,29 @@ class GetStagesJooqAdapterTest {
 
     @Test
     void leaves_an_open_range_bound_out_of_the_query() {
-        new GetStagesJooqAdapter(dsl()).getStages(null, null, TODAY);
+        new GetStagesJooqAdapter(dsl()).getStages(null, null, null, TODAY);
 
         assertThat(sqls.getFirst()).doesNotContain("\"date_from\" >=").doesNotContain("\"date_from\" <=");
     }
 
     @Test
+    void filters_the_competition_country_in_sql_when_one_is_given() {
+        new GetStagesJooqAdapter(dsl()).getStages(null, null, "ES", TODAY);
+
+        assertThat(sqls.getFirst()).contains("\"k9x\".\"competitions\".\"country\" = ?");
+        assertThat(bindings.getFirst()).contains("ES");
+    }
+
+    @Test
+    void leaves_the_country_out_of_the_query_when_none_is_given() {
+        new GetStagesJooqAdapter(dsl()).getStages(null, null, null, TODAY);
+
+        assertThat(sqls.getFirst()).doesNotContain("\"country\" =");
+    }
+
+    @Test
     void aggregates_competitor_count_and_any_score_in_sql_instead_of_loading_them() {
-        List<FetchStageListRowDTO> stages = new GetStagesJooqAdapter(dsl()).getStages(null, null, TODAY);
+        List<FetchStageListRowDTO> stages = new GetStagesJooqAdapter(dsl()).getStages(null, null, null, TODAY);
 
         String eventsSql = sqls.stream().filter(s -> s.startsWith("select \"k9x\".\"events\".\"id\", \"k9x\".\"events\".\"name\""))
                 .findFirst().orElseThrow();
@@ -124,7 +139,7 @@ class GetStagesJooqAdapterTest {
 
     @Test
     void only_hydrates_the_events_whose_stage_has_not_finished_by_date() {
-        new GetStagesJooqAdapter(dsl()).getStages(null, null, TODAY);
+        new GetStagesJooqAdapter(dsl()).getStages(null, null, null, TODAY);
 
         // The hydrator's event query (it joins obdx.event_info) is the only one that can lead to score rows,
         // and it is scoped to the running event alone: the finished one is FINISHED by date.
@@ -146,7 +161,7 @@ class GetStagesJooqAdapterTest {
         };
 
         List<FetchStageListRowDTO> stages = new GetStagesJooqAdapter(
-                DSL.using(new MockConnection(empty), SQLDialect.POSTGRES)).getStages(1L, 2L, TODAY);
+                DSL.using(new MockConnection(empty), SQLDialect.POSTGRES)).getStages(1L, 2L, null, TODAY);
 
         assertThat(stages).isEmpty();
         assertThat(sqls).hasSize(1);

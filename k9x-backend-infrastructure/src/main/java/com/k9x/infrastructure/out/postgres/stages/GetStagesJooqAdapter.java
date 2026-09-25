@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 /**
  * Query projection of the public stage list, read from the tables instead of the competition aggregate. The date
- * range is filtered in SQL, and each event's competitor count and whether it holds any score are aggregated in
+ * range and the country are filtered in SQL, and each event's competitor count and whether it holds any score are aggregated in
  * SQL too, so no competitor or score row reaches the heap for the list itself.
  *
  * <p>The one fact SQL cannot give cheaply is whether every competitor is settled: it is the domain's
@@ -53,8 +53,8 @@ public class GetStagesJooqAdapter implements GetStageListPersistencePort {
     }
 
     @Override
-    public List<FetchStageListRowDTO> getStages(Long from, Long to, long startOfTodayUtcMillis) {
-        List<StageRow> stages = fetchStages(from, to);
+    public List<FetchStageListRowDTO> getStages(Long from, Long to, String country, long startOfTodayUtcMillis) {
+        List<StageRow> stages = fetchStages(from, to, country);
         if (stages.isEmpty()) {
             return List.of();
         }
@@ -80,13 +80,16 @@ public class GetStagesJooqAdapter implements GetStageListPersistencePort {
                 .toList();
     }
 
-    private List<StageRow> fetchStages(Long from, Long to) {
+    private List<StageRow> fetchStages(Long from, Long to, String country) {
         Condition condition = ST.DELETED_AT.isNull().and(CO.DELETED_AT.isNull());
         if (from != null) {
             condition = condition.and(ST.DATE_FROM.ge(from));
         }
         if (to != null) {
             condition = condition.and(ST.DATE_FROM.le(to));
+        }
+        if (country != null) {
+            condition = condition.and(CO.COUNTRY.eq(country));
         }
         return dsl.select(ST.ID, ST.NAME, ST.DATE_FROM, ST.DATE_TO, CO.ID, CO.NAME, CO.COUNTRY, CO.ADDRESS,
                         CO.COORD_ALT, CO.COORD_LONG, ORGANIZER_NAME)

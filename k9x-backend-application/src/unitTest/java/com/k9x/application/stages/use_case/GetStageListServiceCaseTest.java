@@ -57,7 +57,7 @@ class GetStageListServiceCaseTest {
     }
 
     private void listReturns(FetchStageListRowDTO... stages) {
-        when(getStageListPersistencePort.getStages(any(), any(), anyLong())).thenReturn(List.of(stages));
+        when(getStageListPersistencePort.getStages(any(), any(), any(), anyLong())).thenReturn(List.of(stages));
     }
 
     @BeforeEach
@@ -69,21 +69,39 @@ class GetStageListServiceCaseTest {
     @Test
     void pushes_the_date_range_and_the_start_of_today_down_to_the_query() {
         long before = UtcDates.startOfUtcDay(DateUtils.nowUtcMillis());
-        when(getStageListPersistencePort.getStages(eq(10L), isNull(), anyLong())).thenReturn(List.of());
+        when(getStageListPersistencePort.getStages(eq(10L), isNull(), isNull(), anyLong())).thenReturn(List.of());
 
-        serviceCase.getStages(10L, null);
+        serviceCase.getStages(10L, null, null);
 
         ArgumentCaptor<Long> startOfToday = ArgumentCaptor.forClass(Long.class);
-        verify(getStageListPersistencePort).getStages(eq(10L), isNull(), startOfToday.capture());
+        verify(getStageListPersistencePort).getStages(eq(10L), isNull(), isNull(), startOfToday.capture());
         assertThat(startOfToday.getValue()).isEqualTo(UtcDates.startOfUtcDay(startOfToday.getValue()))
                 .isGreaterThanOrEqualTo(before);
+    }
+
+    @Test
+    void pushes_the_country_down_to_the_query() {
+        when(getStageListPersistencePort.getStages(any(), any(), eq("ES"), anyLong())).thenReturn(List.of());
+
+        serviceCase.getStages(null, null, "ES");
+
+        verify(getStageListPersistencePort).getStages(isNull(), isNull(), eq("ES"), anyLong());
+    }
+
+    @Test
+    void treats_a_blank_country_as_no_country() {
+        when(getStageListPersistencePort.getStages(any(), any(), any(), anyLong())).thenReturn(List.of());
+
+        serviceCase.getStages(null, null, " ");
+
+        verify(getStageListPersistencePort).getStages(isNull(), isNull(), isNull(), anyLong());
     }
 
     @Test
     void surfaces_discipline_id_and_computes_finished_stage_and_event_when_unscored() {
         listReturns(stage("s-1", FAR_PAST, FAR_PAST, List.of(event("evt-1", null, 1, false, false))));
 
-        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null, null);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().events()).hasSize(1);
@@ -100,7 +118,7 @@ class GetStageListServiceCaseTest {
         // out the date-driven FINISHED.
         listReturns(stage("s-1", FAR_PAST, FAR_FUTURE, List.of(event("evt-1", null, 1, true, false))));
 
-        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null, null);
 
         assertThat(result.getFirst().events().getFirst().status()).isEqualTo("STARTED");
         assertThat(result.getFirst().status()).isEqualTo("STARTED");
@@ -110,7 +128,7 @@ class GetStageListServiceCaseTest {
     void a_running_event_with_every_competitor_settled_is_finished_before_its_date() {
         listReturns(stage("s-1", FAR_PAST, FAR_FUTURE, List.of(event("evt-1", null, 1, true, true))));
 
-        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null, null);
 
         assertThat(result.getFirst().events().getFirst().status()).isEqualTo("FINISHED");
         assertThat(result.getFirst().status()).isEqualTo("FINISHED");
@@ -120,7 +138,7 @@ class GetStageListServiceCaseTest {
     void enrollment_is_closed_when_event_has_no_deadline() {
         listReturns(stage("s-1", FAR_FUTURE, FAR_FUTURE, List.of(event("evt-1", null, 0, false, false))));
 
-        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null, null);
 
         assertThat(result.getFirst().events().getFirst().enrollmentOpened()).isFalse();
         assertThat(result.getFirst().events().getFirst().enrollmentDeadline()).isNull();
@@ -132,7 +150,7 @@ class GetStageListServiceCaseTest {
                 List.of(), null, 0, false, false);
         listReturns(stage("s-1", FAR_FUTURE, FAR_FUTURE, List.of(open)));
 
-        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null, null);
 
         assertThat(result.getFirst().status()).isEqualTo("CREATED");
         assertThat(result.getFirst().events().getFirst().enrollmentOpened()).isTrue();
@@ -144,7 +162,7 @@ class GetStageListServiceCaseTest {
                 List.of(), 900, 0, false, false);
         listReturns(stage("s-1", FAR_PAST, FAR_PAST, List.of(ranked)));
 
-        FetchStageListEventDTO event = serviceCase.getStages(null, null).getFirst().events().getFirst();
+        FetchStageListEventDTO event = serviceCase.getStages(null, null, null).getFirst().events().getFirst();
 
         assertThat(event.rank()).isEqualTo(ObdxRank.labelFromScore(900));
     }
@@ -160,7 +178,7 @@ class GetStageListServiceCaseTest {
                 stage("past-recent", pastRecent, pastRecent, List.of()),
                 stage("upcoming-soon", upcomingSoon, upcomingSoon, List.of()));
 
-        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null, null);
 
         // Upcoming/ongoing first (soonest first), then past (most recent first).
         assertThat(result).extracting(FetchStageListDTO::id)
@@ -175,7 +193,7 @@ class GetStageListServiceCaseTest {
                 event("evt-1", null, 1, true, true),
                 event("evt-2", 999L, 0, false, false))));
 
-        FetchStageListDTO result = serviceCase.getStages(null, null).getFirst();
+        FetchStageListDTO result = serviceCase.getStages(null, null, null).getFirst();
 
         assertThat(result.events()).extracting(FetchStageListEventDTO::id).containsExactly("evt-1");
         assertThat(result.status()).isEqualTo("STARTED");
@@ -187,7 +205,7 @@ class GetStageListServiceCaseTest {
                 stage("s-2", FAR_PAST, FAR_PAST, List.of(event("evt-2", null, 0, false, false))));
         when(getRankedEventIdsPersistencePort.getRankedEventIds()).thenReturn(Set.of("evt-2"));
 
-        List<FetchStageListDTO> result = serviceCase.getStages(null, null);
+        List<FetchStageListDTO> result = serviceCase.getStages(null, null, null);
 
         assertThat(result).filteredOn(s -> s.id().equals("s-2")).singleElement()
                 .extracting(FetchStageListDTO::includesRankings).isEqualTo(true);
