@@ -14,22 +14,22 @@ public class FlywayConfiguration {
     @Primary
     @Bean(initMethod = "migrate")
     public Flyway schemaFlyway(DataSource dataSource) {
-        return Flyway.configure()
+        return NativeImageMigrationsProvider.applyTo(Flyway.configure()
                 .dataSource(dataSource)
                 .locations("classpath:db/schema")
-                .table("flyway_schema_history")
+                .table("flyway_schema_history"))
                 .load();
     }
 
     @Bean(initMethod = "migrate")
     @DependsOn("schemaFlyway")
     public Flyway dataFlyway(DataSource dataSource) {
-        return Flyway.configure()
+        return NativeImageMigrationsProvider.applyTo(Flyway.configure()
                 .dataSource(dataSource)
                 .locations("classpath:db/data")
                 .table("flyway_data_history")
                 .baselineOnMigrate(true)
-                .baselineVersion("0")
+                .baselineVersion("0"))
                 .load();
     }
 }

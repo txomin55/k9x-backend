@@ -54,8 +54,55 @@ k9x-backend:
       # Dogs per block of the index history cron: each block is read, computed and committed on its own, so
       # the heap holds one block at a time instead of every dog's timeline (the first run rebuilds them all).
       block-size: 200
+  observability:
+    otlp-export-enabled: ${OTLP_EXPORT_ENABLED:false}
   push:
     vapid:
       public-key: ${VAPID_PUBLIC_KEY}
       private-key: ${VAPID_PRIVATE_KEY}
       subject: ${VAPID_SUBJECT}
+
+# Observability over OTLP: metrics (Micrometer), traces (Micrometer Tracing) and logs (the OpenTelemetry
+# Logback appender, see logback-spring.xml). It replaces the New Relic Java agent, which a native image cannot
+# load, and sends to New Relic's OTLP endpoint. Off unless OTLP_EXPORT_ENABLED=true, which only production sets
+# (fly.toml); NEW_RELIC_LICENSE_KEY is then a platform secret. In the native image the `enabled` switches below
+# only gate metrics; traces and logs are gated by OpenTelemetryExportConfiguration, which reads the flag here.
+management:
+  tracing:
+    # Sampling is all or nothing, see OpenTelemetryExportConfiguration.
+    export:
+      enabled: ${OTLP_EXPORT_ENABLED:false}
+  otlp:
+    metrics:
+      export:
+        enabled: ${OTLP_EXPORT_ENABLED:false}
+        url: ${OTLP_ENDPOINT:https://otlp.eu01.nr-data.net:4318}/v1/metrics
+        headers:
+          api-key: ${NEW_RELIC_LICENSE_KEY:}
+        # New Relic stores metrics as deltas; cumulative ones would be converted on ingest.
+        aggregation-temporality: delta
+        compression-mode: gzip
+  logging:
+    export:
+      otlp:
+        enabled: ${OTLP_EXPORT_ENABLED:false}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTLP_ENDPOINT:https://otlp.eu01.nr-data.net:4318}/v1/traces
+          headers:
+            api-key: ${NEW_RELIC_LICENSE_KEY:}
+          compression: gzip
+      # New Relic drops attribute values longer than 4095 characters.
+      limits:
+        max-attribute-value-length: 4095
+    logging:
+      export:
+        otlp:
+          endpoint: ${OTLP_ENDPOINT:https://otlp.eu01.nr-data.net:4318}/v1/logs
+          headers:
+            api-key: ${NEW_RELIC_LICENSE_KEY:}
+          compression: gzip
+      limits:
+        max-attribute-value-length: 4095

@@ -1,8 +1,10 @@
 # syntax=docker/dockerfile:1.4
 #
-# Build stage
+# Build stage: a GraalVM native image of the loader.
 #
-FROM eclipse-temurin:25-jdk AS build
+FROM ghcr.io/graalvm/native-image-community:25 AS build
+# The Gradle wrapper script needs xargs, which the Oracle Linux base leaves out.
+RUN microdnf install -y findutils && microdnf clean all
 WORKDIR /home/k9x-backend
 COPY gradlew gradlew
 COPY gradle/ gradle/
@@ -21,8 +23,8 @@ COPY k9x-backend-loader/ k9x-backend-loader/
 # needed here only, never at runtime, and they are NOT the platforms' runtime secrets: on Fly a
 # secret is injected into the machine at boot and a builder never sees it.
 #
-# Only .github/workflows/deploy.yml builds this image — Render and Fly deploy the artifact it
-# publishes — so the credentials come from that workflow, where GPR_KEY is the job's ephemeral
+# Only the deploy workflows (.github/workflows/deploy*.yml) build this image — Render and Fly deploy
+# the artifact they publish — so the credentials come from there, where GPR_KEY is the job's ephemeral
 # GITHUB_TOKEN. Nothing here has to be configured on either platform.
 #
 # Building by hand needs them passed explicitly, taking the values from gradle.properties:
@@ -34,46 +36,32 @@ ARG GPR_USER
 ARG GPR_KEY
 
 # The image is profile-agnostic: the environment picks the profile at runtime through
-# SPRING_PROFILES_ACTIVE (set it to `deployed`), so the same jar serves staging and production.
-# Also downloads and unzips the New Relic Java agent into ./newrelic/.
-RUN ./gradlew :k9x-backend-loader:bootJar unzipNewrelic \
+# SPRING_PROFILES_ACTIVE (set it to `deployed`), so the same binary serves staging and production.
+# nativeCompile runs Spring's AOT processing and then native-image, which takes several minutes and
+# a few GB of memory; a GitHub runner has enough of both.
+RUN ./gradlew :k9x-backend-loader:nativeCompile \
     -Pgpr.user="$GPR_USER" -Pgpr.key="$GPR_KEY" \
     -x test
 
-# Override the agent's bundled default config with the project's custom one.
-COPY newrelic/newrelic.yml newrelic/newrelic.yml
-
 #
-# Package stage
+# Package stage: only the executable, no JVM. Debian slim rather than distroless keeps a shell for
+# `fly ssh console`; its glibc is newer than the build stage's, which is what the binary links against.
 #
-FROM eclipse-temurin:25-jre
+FROM debian:bookworm-slim
 LABEL maintainer="txomin.sirera@gmail.com"
 LABEL version="1.0"
 VOLUME /tmp/k9x-backend
-COPY --from=build /home/k9x-backend/k9x-backend-loader/build/libs/*.jar /usr/local/lib/k9x-backend.jar
-COPY --from=build /home/k9x-backend/newrelic/newrelic.jar /usr/local/lib/newrelic/newrelic.jar
-COPY --from=build /home/k9x-backend/newrelic/newrelic.yml /usr/local/lib/newrelic/newrelic.yml
+COPY --from=build /home/k9x-backend/k9x-backend-loader/build/native/nativeCompile/ /usr/local/lib/k9x-backend/
 EXPOSE 4000
 
-# JVM flags tuned for a small, slow box (Render gives staging 0.1 CPU, Fly 1 shared CPU, 512MB both):
-#   -XX:TieredStopAtLevel=1  only the C1 JIT: compiles faster and cheaper, peak speed a bit lower.
-#                            The backend is I/O-bound, so startup time matters more than peak speed.
-#   -XX:+UseSerialGC         single-threaded GC: no GC worker threads competing for one CPU and less
-#                            memory overhead than G1, which is what the JVM would otherwise pick.
-#   -Xss512k                 half the default stack for platform threads (virtual threads are unaffected).
-#   (no MaxRAMPercentage)    the heap keeps the JVM default of 25% of the box, ~115MB. At 70% the heap plus
-#                            metaspace, code cache and the New Relic agent filled the 512MB box right after
-#                            boot, and the kernel spent the CPU paging (2026-09-24 14:50). The OutOfMemoryError
-#                            that raised it came from the classification caches never expiring during the
-#                            snapshot cron, fixed since. For more heap, give the machine more memory in fly.toml.
-#   -XX:+ExitOnOutOfMemoryError  after that OutOfMemoryError the JVM stayed alive but answered nothing, and
-#                            Fly does not restart a machine whose process is still running. Dying instead
-#                            lets the platform restart it.
-# Overridable per environment by setting JAVA_OPTS on the platform.
-ENV JAVA_OPTS="-XX:TieredStopAtLevel=1 -XX:+UseSerialGC -Xss512k -XX:+ExitOnOutOfMemoryError"
-
-# The New Relic agent is only attached where NEW_RELIC_ENABLED=true (production, see fly.toml).
-# Instrumenting every class as it loads is most of the startup cost on staging's 0.1 CPU, and it
-# disables the JVM's class data sharing (the "Sharing is only supported for boot loader classes"
-# warning). `exec` keeps java as PID 1 so it receives the platform's SIGTERM.
-ENTRYPOINT ["sh", "-c", "if [ \"$NEW_RELIC_ENABLED\" = true ]; then AGENT=-javaagent:/usr/local/lib/newrelic/newrelic.jar; fi; exec java $JAVA_OPTS $AGENT -jar /usr/local/lib/k9x-backend.jar"]
+# Runtime options of the native image (overridable by setting the platform's start command):
+#   -Xmx300m                    the whole box is 512MB, and without a JIT, metaspace or code cache the
+#                               process outside the heap is only a few tens of MB. Capping the heap keeps
+#                               a leak from pushing the box into swap, which is what took it down on the
+#                               JVM (2026-09-24 14:50).
+#   -XX:+ExitOnOutOfMemoryError after an OutOfMemoryError the process stayed alive but answered nothing,
+#                               and Fly does not restart a machine whose process is still running.
+#                               Dying instead lets the platform restart it.
+# Exec form, so the binary is PID 1 and receives the platform's SIGTERM.
+ENTRYPOINT ["/usr/local/lib/k9x-backend/k9x-backend"]
+CMD ["-Xmx300m", "-XX:+ExitOnOutOfMemoryError"]

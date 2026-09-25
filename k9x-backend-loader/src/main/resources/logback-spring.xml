@@ -21,13 +21,23 @@
     </springProfile>
 
     <springProfile name="deployed">
+        <!-- Exports every event it receives over OTLP once OpenTelemetryExportConfiguration installs the SDK
+             into it, which it only does where OTLP_EXPORT_ENABLED is on; until then it drops them. -->
+        <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+            <captureExperimentalAttributes>true</captureExperimentalAttributes>
+        </appender>
         <logger name="org.springframework" level="ERROR"/>
         <!-- The crons' INFO lines (how many events, how many records, the heap) are what tells a run that
              finished from one that died; under the WARN root they never reached the logs. -->
         <logger name="com.k9x.application.events.snapshot" level="INFO"/>
         <logger name="com.k9x.application.dogs.rank" level="INFO"/>
+        <!-- Native image noise on every boot: Flyway's scanner cannot list the image's resources (the migrations
+             come from NativeImageMigrationsProvider instead), and there are no JVM GC MXBeans to report. -->
+        <logger name="org.flywaydb.core.internal.scanner.classpath.ClassPathScanner" level="ERROR"/>
+        <logger name="io.micrometer.core.instrument.binder.jvm.JvmGcMetrics" level="ERROR"/>
         <root level="WARN">
             <appender-ref ref="STDOUT"/>
+            <appender-ref ref="OTEL"/>
         </root>
     </springProfile>
 

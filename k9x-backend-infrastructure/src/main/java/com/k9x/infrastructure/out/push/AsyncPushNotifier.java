@@ -53,8 +53,8 @@ public class AsyncPushNotifier implements PushNotifier {
         this.sendPushNotificationPort = sendPushNotificationPort;
         this.saveNotificationPersistencePort = saveNotificationPersistencePort;
         // Un virtual thread por entrega, igual que el resto de la aplicacion
-        // (spring.threads.virtual.enabled). La fabrica solo aporta el nombre, util en logs y en el
-        // agente de New Relic; los virtual threads ya son daemon, asi que no frenan el apagado.
+        // (spring.threads.virtual.enabled). La fabrica solo aporta el nombre, util en logs; los
+        // virtual threads ya son daemon, asi que no frenan el apagado.
         this.executor = Executors.newThreadPerTaskExecutor(
                 Thread.ofVirtual().name("push-notifier-", 0).factory());
     }

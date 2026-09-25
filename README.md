@@ -55,6 +55,22 @@ are a manual run of the *Deploy* workflow, choosing the target.
 Runtime configuration is not in the image: Render takes it from the service's environment variables
 and Fly from `fly.toml` plus `fly secrets`. See `.env.staging` / `.env.production` for the values.
 
+### Native image
+
+The image carries a GraalVM native executable instead of a jar and a JRE (`./gradlew :k9x-backend-loader:nativeCompile`,
+run by the Dockerfile). It boots in well under a second and uses a fraction of the JVM's memory, which is what the
+512MB boxes needed. Local runs (`bootRun`, the IDE) stay on the JVM.
+
+What the native image cannot discover by itself has to be declared: resources read by path and types that Jackson or
+Google's client fill by reflection outside an endpoint go in `NativeImageHintsConfiguration`. A new JSON resource or a
+new type serialized by hand with `ObjectMapper` needs an entry there, or it works on the JVM and fails only once deployed.
+
+### Observability
+
+Production sends metrics, traces and logs over OTLP to New Relic (the `management` block in `application.yml`): a native
+image cannot load the New Relic Java agent. Export is off unless `OTLP_EXPORT_ENABLED=true` (set in `fly.toml`), and it
+authenticates with the `NEW_RELIC_LICENSE_KEY` Fly secret. Staging exports nothing.
+
 ## Logging
 
 Springboot by default brings a logging configuration that can be overwritten, that is

@@ -4,11 +4,11 @@ import com.k9x.application.shared.TransactionalUseCase;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
-import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.interceptor.MatchAlwaysTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
@@ -34,21 +34,27 @@ import java.lang.reflect.Method;
  * <p>The advisor is marked {@link BeanDefinition#ROLE_INFRASTRUCTURE} so it is picked up by the
  * {@code InfrastructureAdvisorAutoProxyCreator} that Spring's transaction management already registers
  * — no AspectJ weaver or extra AOP starter is required.
+ *
+ * <p>The interceptor looks the {@code TransactionManager} up in the bean factory on its first call instead of
+ * taking it as a parameter, like the one behind {@code @Transactional}. Advisors are created before any other
+ * bean, and asking for the manager here dragged the whole {@code DataSource} along with it, which fails the
+ * build-time AOT processing of the native image, where no database is configured.
  */
 @Configuration
 public class UseCaseTransactionConfiguration {
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    public Advisor useCaseTransactionAdvisor(TransactionManager transactionManager) {
+    public Advisor useCaseTransactionAdvisor(BeanFactory beanFactory) {
         StaticMethodMatcherPointcut pointcut = new StaticMethodMatcherPointcut() {
             @Override
             public boolean matches(Method method, Class<?> targetClass) {
                 return TransactionalUseCase.class.isAssignableFrom(targetClass);
             }
         };
-        TransactionInterceptor interceptor =
-                new TransactionInterceptor(transactionManager, new MatchAlwaysTransactionAttributeSource());
+        TransactionInterceptor interceptor = new TransactionInterceptor();
+        interceptor.setTransactionAttributeSource(new MatchAlwaysTransactionAttributeSource());
+        interceptor.setBeanFactory(beanFactory);
         return new DefaultPointcutAdvisor(pointcut, interceptor);
     }
 }
