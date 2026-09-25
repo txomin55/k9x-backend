@@ -43,4 +43,21 @@ class UpdateJudgeJooqAdapterTest {
                 .contains("where \"k9x\".\"judges\".\"id\" = ?");
         assertThat(capturedBindings.get()).contains("NewName", "ES", lastUpdate, "judge-123");
     }
+
+    @Test
+    void stores_an_empty_country_when_none_is_given() {
+        AtomicReference<Object[]> capturedBindings = new AtomicReference<>();
+
+        MockDataProvider provider = ctx -> {
+            capturedBindings.set(ctx.bindings());
+            Result<Record> result = DSL.using(SQLDialect.POSTGRES).newResult(Tables.JUDGES.fields());
+            return new MockResult[]{new MockResult(1, result)};
+        };
+
+        DSLContext dsl = DSL.using(new MockConnection(provider), SQLDialect.POSTGRES);
+        new UpdateJudgeJooqAdapter(dsl).updateJudge("judge-123",
+                new UpdateJudgePersistencePayload("NewName", null, 1700000000000L));
+
+        assertThat(capturedBindings.get()).contains("").doesNotContainNull();
+    }
 }

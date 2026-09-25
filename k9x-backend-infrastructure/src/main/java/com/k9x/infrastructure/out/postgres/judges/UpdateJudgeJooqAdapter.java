@@ -17,7 +17,8 @@ public class UpdateJudgeJooqAdapter implements UpdateJudgePersistencePort {
     public void updateJudge(String id, UpdateJudgePersistencePayload payload) {
         dsl.update(Tables.JUDGES)
                 .set(Tables.JUDGES.NAME, payload.name())
-                .set(Tables.JUDGES.COUNTRY, payload.country())
+                // Optional: the column's own default, since an explicit NULL would violate its NOT NULL.
+                .set(Tables.JUDGES.COUNTRY, payload.country() == null ? "" : payload.country())
                 .set(Tables.JUDGES.LAST_UPDATE, payload.lastUpdate())
                 .where(Tables.JUDGES.ID.eq(id))
                 .execute();

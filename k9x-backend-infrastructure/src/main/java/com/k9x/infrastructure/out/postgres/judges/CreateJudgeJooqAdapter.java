@@ -17,7 +17,8 @@ public class CreateJudgeJooqAdapter implements CreateJudgePersistencePort {
         dsl.insertInto(Tables.JUDGES)
                 .set(Tables.JUDGES.ID, id)
                 .set(Tables.JUDGES.NAME, name)
-                .set(Tables.JUDGES.COUNTRY, country)
+                // Optional: the column's own default, since an explicit NULL would violate its NOT NULL.
+                .set(Tables.JUDGES.COUNTRY, country == null ? "" : country)
                 .set(Tables.JUDGES.CREATOR, creator)
                 .set(Tables.JUDGES.CREATED_AT, createdAt)
                 .set(Tables.JUDGES.LAST_UPDATE, createdAt)

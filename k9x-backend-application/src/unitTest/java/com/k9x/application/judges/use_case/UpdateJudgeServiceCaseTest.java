@@ -1,6 +1,7 @@
 package com.k9x.application.judges.use_case;
 
 import com.k9x.application.judges.exceptions.JudgeAlreadyDeletedException;
+import com.k9x.application.judges.exceptions.JudgeNameRequiredException;
 import com.k9x.application.judges.exceptions.JudgeNotFoundException;
 import com.k9x.application.judges.port.GetJudgePersistencePort;
 import com.k9x.application.judges.port.UpdateJudgePersistencePort;
@@ -10,6 +11,9 @@ import com.k9x.domain.exceptions.UnauthorizedResourceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -37,6 +41,16 @@ class UpdateJudgeServiceCaseTest {
     void throws_exception_when_user_is_not_organizer() {
         assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", new UpdateJudgeCommand("Rex", "ES"), "user-1", false))
                 .isInstanceOf(UnauthorizedResourceException.class);
+
+        verifyNoInteractions(getJudgePersistencePort, updateJudgePersistencePort);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", "  "})
+    void throws_exception_when_name_is_missing(String name) {
+        assertThatThrownBy(() -> serviceCase.updateJudge("judge-1", new UpdateJudgeCommand(name, "ES"), "user-1", true))
+                .isInstanceOf(JudgeNameRequiredException.class);
 
         verifyNoInteractions(getJudgePersistencePort, updateJudgePersistencePort);
     }

@@ -15,6 +15,8 @@ public class CreateJudgeServiceCase implements TransactionalUseCase {
 
     public void createJudge(String id, String name, String country, String userId, boolean organizer) {
         AuthAssertions.assertOrganizer(organizer, userId);
+        JudgeGuards.assertIdProvided(id);
+        JudgeGuards.assertNameProvided(name);
         createJudgePersistencePort.createJudge(id, name, country, userId, DateUtils.nowUtcMillis());
     }
 }

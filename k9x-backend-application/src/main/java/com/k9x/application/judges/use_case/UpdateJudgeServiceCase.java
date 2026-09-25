@@ -21,6 +21,7 @@ public class UpdateJudgeServiceCase implements TransactionalUseCase {
 
     public void updateJudge(String judgeId, UpdateJudgeCommand command, String userId, boolean organizer) {
         AuthAssertions.assertOrganizer(organizer, userId);
+        JudgeGuards.assertNameProvided(command.name());
         Judge judge = getJudgePersistencePort.getJudge(judgeId);
         JudgeGuards.assertMutableBy(judge, userId);
         updateJudgePersistencePort.updateJudge(judgeId, UpdateJudgePersistencePayload.from(command));

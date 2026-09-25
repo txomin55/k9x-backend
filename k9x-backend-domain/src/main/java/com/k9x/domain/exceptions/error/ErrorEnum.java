@@ -6,6 +6,8 @@ public enum ErrorEnum {
     NO_OWNER_WHEN_NO_ORGANIZER("error.no_owner_when_no_organizer"),
     JUDGE_NOT_FOUND("error.judge_not_found"),
     JUDGE_ALREADY_DELETED("error.judge_already_deleted"),
+    JUDGE_ID_REQUIRED("error.judge_id_required"),
+    JUDGE_NAME_REQUIRED("error.judge_name_required"),
     DOG_NOT_FOUND("error.dog_not_found"),
     DOG_ALREADY_DELETED("error.dog_already_deleted"),
     COMPETITION_NOT_FOUND("error.competition_not_found"),
